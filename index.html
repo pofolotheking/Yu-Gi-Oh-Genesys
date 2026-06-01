@@ -847,10 +847,19 @@ function eliminaPartita(idx) {
   if (!confirm(`Eliminare la partita ${p.g1} vs ${p.g2} (${p.risultato}) del ${formatData(p.data)}?`)) return;
   dati.partite.splice(idx, 1);
   popolaTutto();
-  // mostra anche output nella scheda partita
+  // genera output e porta l'utente alla scheda dove può scaricarlo
   const json = JSON.stringify(dati, null, 2);
   document.getElementById('json-preview').textContent = json;
-  document.getElementById('output').classList.add('show');
+  const out = document.getElementById('output');
+  out.querySelector('.title').innerHTML = '<span class="check">✓</span>Partita eliminata';
+  out.querySelector('p').innerHTML = 'Scarica o copia il nuovo <code>dati.json</code> e caricalo su GitHub per applicare la modifica.';
+  out.classList.add('show');
+  // switch alla scheda "+ Partita"
+  document.querySelectorAll('.tab-btn').forEach(x => x.classList.remove('active'));
+  document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
+  document.querySelector('.tab-btn[data-tab="nuova"]').classList.add('active');
+  document.getElementById('nuova').classList.add('active');
+  setTimeout(() => out.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
   mostraPreviewConfig();
 }
 
