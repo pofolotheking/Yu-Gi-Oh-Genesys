@@ -15,5 +15,14 @@
     "Mimighoul": "Tia",
     "Sacred Beast Yubel": "Tia"
   },
-  "partite": []
+  "partite": [
+    {
+      "data": "2026-05-23",
+      "g1": "Richi",
+      "m1": "Magidolce",
+      "g2": "Gio",
+      "m2": "Dragon Ruler",
+      "risultato": "2-1"
+    }
+  ]
 }
