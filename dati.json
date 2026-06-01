@@ -1,19 +1,19 @@
 {
   "giocatori": [
-    "Mattia",
-    "Giorgio",
-    "Riccardo"
+    "Tia",
+    "Gio",
+    "Richi"
   ],
   "mazzi": {
-    "Drago Bianco Occhi Blu": "Mattia",
-    "Dragon Ruler": "Giorgio"
+    "Drago Bianco Occhi Blu": "Tia",
+    "Dragon Ruler": "Gio"
   },
   "partite": [
     {
       "data": "2026-06-01",
-      "g1": "Mattia",
+      "g1": "Tia",
       "m1": "Drago Bianco Occhi Blu",
-      "g2": "Giorgio",
+      "g2": "Gio",
       "m2": "Dragon Ruler",
       "risultato": "2-0"
     }
