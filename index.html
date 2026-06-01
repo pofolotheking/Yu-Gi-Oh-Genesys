@@ -281,6 +281,91 @@
     vertical-align: middle;
   }
 
+  .medal {
+    display: inline-block;
+    font-size: 1.05rem;
+    margin-right: 2px;
+    vertical-align: middle;
+  }
+
+  #riepilogo-card { padding: 18px 20px; }
+  .riep-section-title {
+    font-size: 0.72rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
+  .totali-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 18px;
+  }
+  .totale-pill {
+    flex: 1;
+    min-width: 90px;
+    background: var(--bg-soft);
+    border-radius: 10px;
+    padding: 10px 14px;
+    text-align: center;
+  }
+  .totale-pill .nome {
+    font-size: 0.82rem;
+    color: var(--text-dim);
+    font-weight: 500;
+  }
+  .totale-pill .num {
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+    margin-top: 2px;
+    display: block;
+  }
+  .totale-pill .num-label {
+    font-size: 0.7rem;
+    color: var(--text-faint);
+    display: block;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .h2h-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .h2h-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    background: var(--bg-soft);
+    border-radius: 10px;
+  }
+  .h2h-row .pair {
+    font-size: 0.95rem;
+    font-weight: 500;
+  }
+  .h2h-row .pair .vs-small {
+    color: var(--text-faint);
+    font-weight: 400;
+    margin: 0 6px;
+  }
+  .h2h-row .count {
+    font-size: 0.9rem;
+    color: var(--text-dim);
+    font-variant-numeric: tabular-nums;
+  }
+  .h2h-row .count strong {
+    color: var(--text);
+    font-weight: 600;
+    margin-right: 4px;
+  }
+  .h2h-row.few { background: #fff7ed; }
+  .h2h-row.few .count strong { color: var(--orange); }
+
   /* Configurazione */
   .config-row {
     display: grid;
@@ -346,7 +431,7 @@
 </header>
 
 <nav>
-  <button class="tab-btn active" data-tab="giocatori">Giocatori</button>
+  <button class="tab-btn active" data-tab="giocatori">Classifica</button>
   <button class="tab-btn" data-tab="mazzi">Mazzi</button>
   <button class="tab-btn" data-tab="storico">Storico</button>
   <button class="tab-btn" data-tab="matchup">Match-up</button>
@@ -356,7 +441,12 @@
 
 <main>
   <section id="giocatori" class="active">
-    <h2>Classifica Giocatori</h2>
+    <h2>Classifica</h2>
+    <div class="card padded" id="riepilogo-card">
+      <div id="riepilogo-totali"></div>
+      <div id="riepilogo-h2h"></div>
+    </div>
+    <h3 style="margin-top:24px">Classifica Giocatori</h3>
     <div class="card"><table id="tabella-giocatori"></table></div>
     <div class="info"><strong>Punteggio:</strong> 2-0 → 3 punti / 0. 2-1 → 2 punti / 1.</div>
   </section>
@@ -524,6 +614,7 @@ function calcolaStatMazzi() {
 // ============ RENDER ============
 function popolaTutto() {
   renderGiocatori();
+  renderRiepilogo();
   renderMazzi();
   renderStorico();
   renderMatchup();
@@ -544,17 +635,77 @@ function renderGiocatori() {
     t.innerHTML = '<tr><td class="empty">Ancora nessuna partita registrata.</td></tr>';
     return;
   }
+  const medals = ['🥇', '🥈', '🥉'];
   let html = '<tr><th>#</th><th>Duellante</th><th>Punti</th><th>V</th><th>P</th><th>WR</th></tr>';
   arr.forEach(([nome, s], i) => {
     const wr = s.partite > 0 ? Math.round(100 * s.v / s.partite) : 0;
+    const hasMedal = i < 3 && s.partite > 0;
+    const rankCell = hasMedal
+      ? `<td class="rank"><span class="medal">${medals[i]}</span></td>`
+      : `<td class="rank">${i + 1}</td>`;
     html += `<tr class="${i === 0 && s.partite > 0 ? 'top-1' : ''}">
-      <td class="rank">${i + 1}</td><td>${nome}</td>
+      ${rankCell}<td>${nome}</td>
       <td class="pts">${s.punti}</td>
       <td class="num">${s.v}</td><td class="num">${s.p}</td>
       <td><div class="wr-cell"><span class="wr-text">${wr}%</span><span class="wr-bar"><span style="width:${wr}%"></span></span></div></td>
     </tr>`;
   });
   t.innerHTML = html;
+}
+
+function renderRiepilogo() {
+  const stat = calcolaStatGiocatori();
+  const giocatori = dati.giocatori;
+  // Totali
+  const totDiv = document.getElementById('riepilogo-totali');
+  if (dati.partite.length === 0) {
+    totDiv.innerHTML = '';
+    document.getElementById('riepilogo-h2h').innerHTML = '<div class="empty" style="padding:20px 0">Nessuna partita ancora registrata.</div>';
+    return;
+  }
+  totDiv.innerHTML = `
+    <div class="riep-section-title">Partite giocate</div>
+    <div class="totali-row">
+      ${giocatori.map(g => `
+        <div class="totale-pill">
+          <div class="nome">${g}</div>
+          <span class="num">${(stat[g] || {partite: 0}).partite}</span>
+          <span class="num-label">partite</span>
+        </div>
+      `).join('')}
+    </div>
+  `;
+  // Head-to-head
+  const h2h = {};
+  for (let i = 0; i < giocatori.length; i++) {
+    for (let j = i + 1; j < giocatori.length; j++) {
+      const key = [giocatori[i], giocatori[j]].sort().join('|');
+      h2h[key] = { a: giocatori[i], b: giocatori[j], n: 0 };
+    }
+  }
+  dati.partite.forEach(p => {
+    const key = [p.g1, p.g2].sort().join('|');
+    if (h2h[key]) h2h[key].n++;
+  });
+  const arr = Object.values(h2h).sort((x, y) => x.n - y.n);
+  if (arr.length === 0) {
+    document.getElementById('riepilogo-h2h').innerHTML = '';
+    return;
+  }
+  const minN = arr[0].n;
+  const html = `
+    <div class="riep-section-title">Scontri diretti</div>
+    <div class="h2h-list">
+      ${arr.map(r => {
+        const few = r.n === minN && arr.some(x => x.n > minN);
+        return `<div class="h2h-row ${few ? 'few' : ''}">
+          <div class="pair">${r.a}<span class="vs-small">vs</span>${r.b}</div>
+          <div class="count"><strong>${r.n}</strong> partit${r.n === 1 ? 'a' : 'e'}</div>
+        </div>`;
+      }).join('')}
+    </div>
+  `;
+  document.getElementById('riepilogo-h2h').innerHTML = html;
 }
 
 function renderMazzi() {
@@ -571,13 +722,20 @@ function renderMazzi() {
     t.innerHTML = '<tr><td class="empty">Ancora nessun mazzo registrato.</td></tr>';
     return;
   }
+  const medals = ['🥇', '🥈', '🥉'];
+  // conto quanti mazzi sono "ufficiali" (>= soglia) per le medaglie
+  const ufficiali = arr.filter(([_, s]) => s.partite >= SOGLIA_MAZZO).length;
   let html = '<tr><th>#</th><th>Mazzo</th><th>Prop.</th><th>V</th><th>P</th><th>WR</th></tr>';
   arr.forEach(([nome, s], i) => {
     const wr = Math.round(100 * s.wr);
     const provv = s.partite < SOGLIA_MAZZO;
+    const hasMedal = i < 3 && !provv && i < ufficiali;
+    const rankCell = hasMedal
+      ? `<td class="rank"><span class="medal">${medals[i]}</span></td>`
+      : `<td class="rank">${i + 1}</td>`;
     html += `<tr class="${i === 0 && !provv ? 'top-1' : ''}">
-      <td class="rank">${i + 1}</td>
-      <td>${nome}${provv ? '<span class="pill">prov</span>' : ''}</td>
+      ${rankCell}
+      <td>${nome}${provv ? '<span class="pill">In prova</span>' : ''}</td>
       <td style="color:var(--text-dim)">${s.proprietario}</td>
       <td class="num">${s.v}</td><td class="num">${s.p}</td>
       <td><div class="wr-cell"><span class="wr-text">${wr}%</span><span class="wr-bar"><span style="width:${wr}%"></span></span></div></td>
