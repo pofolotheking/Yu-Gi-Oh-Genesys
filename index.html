@@ -427,7 +427,7 @@
 
 <header>
   <h1>Yu-Gi-Oh! Genesys</h1>
-  <div class="subtitle">Il gioco che chi parte primo vince!</div>
+  <div class="subtitle">Lega tra Duellanti</div>
 </header>
 
 <nav>
@@ -441,15 +441,14 @@
 
 <main>
   <section id="giocatori" class="active">
-        <h2 style="margin-top:24px">Classifica Giocatori</h2>
-    <div class="card"><table id="tabella-giocatori"></table></div>
-    <div class="info"><strong>Punteggio:</strong> 2-0 → 3 punti / 0. 2-1 → 2 punti / 1.</div>
-    </div>
-    <h2>Scontri</h2>
+    <h2>Classifica</h2>
     <div class="card padded" id="riepilogo-card">
       <div id="riepilogo-totali"></div>
       <div id="riepilogo-h2h"></div>
-    
+    </div>
+    <h3 style="margin-top:24px">Classifica Giocatori</h3>
+    <div class="card"><table id="tabella-giocatori"></table></div>
+    <div class="info"><strong>Punteggio:</strong> 2-0 → 3 punti / 0. 2-1 → 2 punti / 1.</div>
   </section>
 
   <section id="mazzi">
@@ -478,12 +477,24 @@
         <div><label>Data</label><input type="date" id="data" required></div>
         <div class="row">
           <div><label>Giocatore 1</label><select id="g1" required></select></div>
-          <div><label>Mazzo Giocatore 1</label><input type="text" id="m1" placeholder="es. Blue-Eyes" required></div>
+          <div>
+            <label>Mazzo Giocatore 1</label>
+            <select id="m1" required></select>
+            <div id="m1-nuovo" style="display:none;margin-top:8px">
+              <input type="text" id="m1-custom" placeholder="Nome del nuovo mazzo">
+            </div>
+          </div>
         </div>
         <div class="vs">VS</div>
         <div class="row">
           <div><label>Giocatore 2</label><select id="g2" required></select></div>
-          <div><label>Mazzo Giocatore 2</label><input type="text" id="m2" placeholder="es. Dark Magician" required></div>
+          <div>
+            <label>Mazzo Giocatore 2</label>
+            <select id="m2" required></select>
+            <div id="m2-nuovo" style="display:none;margin-top:8px">
+              <input type="text" id="m2-custom" placeholder="Nome del nuovo mazzo">
+            </div>
+          </div>
         </div>
         <div>
           <label>Risultato</label>
@@ -817,6 +828,39 @@ function popolaSelectGiocatori() {
       && dati.giocatori.length > 1) {
     document.getElementById('g2').selectedIndex = 1;
   }
+  aggiornaSelectMazzi('m1', document.getElementById('g1').value);
+  aggiornaSelectMazzi('m2', document.getElementById('g2').value);
+}
+
+function aggiornaSelectMazzi(selId, giocatore) {
+  const sel = document.getElementById(selId);
+  const nuovoDiv = document.getElementById(selId + '-nuovo');
+  const customInp = document.getElementById(selId + '-custom');
+
+  // raccogli mazzi del giocatore: quelli dichiarati + quelli usati nelle partite
+  const mazziGiocatore = new Set();
+  Object.entries(dati.mazzi).forEach(([nome, prop]) => {
+    if (prop === giocatore) mazziGiocatore.add(nome);
+  });
+  dati.partite.forEach(p => {
+    if (p.g1 === giocatore) mazziGiocatore.add(p.m1);
+    if (p.g2 === giocatore) mazziGiocatore.add(p.m2);
+  });
+
+  const lista = [...mazziGiocatore].sort();
+  sel.innerHTML = lista.map(m => `<option value="${m}">${m}</option>`).join('');
+  sel.innerHTML += `<option value="__nuovo__">+ Nuovo mazzo…</option>`;
+
+  // gestisci visibilità campo testo per nuovo mazzo
+  sel.onchange = () => {
+    const isNuovo = sel.value === '__nuovo__';
+    nuovoDiv.style.display = isNuovo ? 'block' : 'none';
+    if (customInp) customInp.required = isNuovo;
+    if (isNuovo && customInp) customInp.focus();
+  };
+  // nascondi il campo testo se già non è "nuovo"
+  nuovoDiv.style.display = 'none';
+  if (customInp) customInp.required = false;
 }
 
 function aggiornaOpzioniRisultato() {
@@ -1040,17 +1084,34 @@ document.querySelectorAll('.tab-btn').forEach(b => {
 });
 
 // ============ FORM PARTITA ============
-document.getElementById('g1').addEventListener('change', aggiornaOpzioniRisultato);
-document.getElementById('g2').addEventListener('change', aggiornaOpzioniRisultato);
+document.getElementById('g1').addEventListener('change', () => {
+  aggiornaSelectMazzi('m1', document.getElementById('g1').value);
+  aggiornaOpzioniRisultato();
+});
+document.getElementById('g2').addEventListener('change', () => {
+  aggiornaSelectMazzi('m2', document.getElementById('g2').value);
+  aggiornaOpzioniRisultato();
+});
 
 document.getElementById('form-partita').addEventListener('submit', e => {
   e.preventDefault();
   const g1 = document.getElementById('g1').value;
   const g2 = document.getElementById('g2').value;
-  const m1 = document.getElementById('m1').value.trim();
-  const m2 = document.getElementById('m2').value.trim();
   const ris = document.getElementById('risultato').value;
   const data = document.getElementById('data').value;
+
+  // leggi mazzo 1
+  let m1 = document.getElementById('m1').value;
+  if (m1 === '__nuovo__') {
+    m1 = document.getElementById('m1-custom').value.trim();
+    if (!m1) { alert('Scrivi il nome del nuovo mazzo per il Giocatore 1.'); return; }
+  }
+  // leggi mazzo 2
+  let m2 = document.getElementById('m2').value;
+  if (m2 === '__nuovo__') {
+    m2 = document.getElementById('m2-custom').value.trim();
+    if (!m2) { alert('Scrivi il nome del nuovo mazzo per il Giocatore 2.'); return; }
+  }
 
   if (g1 === g2) { alert('I due giocatori devono essere diversi.'); return; }
   if (m1.toLowerCase() === m2.toLowerCase()) { alert('I due mazzi devono essere diversi.'); return; }
@@ -1069,10 +1130,16 @@ document.getElementById('form-partita').addEventListener('submit', e => {
 
   const json = JSON.stringify(dati, null, 2);
   document.getElementById('json-preview').textContent = json;
-  document.getElementById('output').classList.add('show');
-  document.getElementById('output').scrollIntoView({ behavior: 'smooth', block: 'start' });
-  document.getElementById('m1').value = '';
-  document.getElementById('m2').value = '';
+  const out = document.getElementById('output');
+  out.querySelector('.title').innerHTML = '<span class="check">✓</span>Partita registrata';
+  out.querySelector('p').innerHTML = 'Scarica o copia il nuovo <code>dati.json</code> e caricalo su GitHub.';
+  out.classList.add('show');
+  out.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  // reset campi custom
+  document.getElementById('m1-custom').value = '';
+  document.getElementById('m2-custom').value = '';
+  document.getElementById('m1-nuovo').style.display = 'none';
+  document.getElementById('m2-nuovo').style.display = 'none';
 });
 
 function scaricaJSON() {
