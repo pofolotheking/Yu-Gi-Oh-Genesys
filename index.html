@@ -412,6 +412,156 @@
   }
   .add-form button:hover { background: var(--green-dark); }
 
+  /* ── MODALE PROFILO ── */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .modal-overlay.open { display: flex; animation: fade 0.2s ease; }
+  .modal {
+    background: var(--bg);
+    border-radius: 20px;
+    width: 100%;
+    max-width: 480px;
+    max-height: 88vh;
+    overflow-y: auto;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.18);
+    position: relative;
+    animation: modalIn 0.25s ease;
+  }
+  @keyframes modalIn {
+    from { opacity: 0; transform: translateY(20px) scale(0.97); }
+    to   { opacity: 1; transform: none; }
+  }
+  .modal-close {
+    position: absolute;
+    top: 16px; right: 16px;
+    width: 30px; height: 30px;
+    background: var(--bg-soft);
+    border: none;
+    border-radius: 50%;
+    font-size: 1rem;
+    cursor: pointer;
+    color: var(--text-dim);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 2;
+    transition: background 0.15s;
+  }
+  .modal-close:hover { background: var(--border); }
+  .modal-header {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding: 28px 24px 20px;
+    border-bottom: 1px solid var(--border);
+  }
+  .modal-avatar {
+    width: 72px; height: 72px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--border);
+    flex-shrink: 0;
+    background: var(--bg-soft);
+  }
+  .modal-avatar-placeholder {
+    width: 72px; height: 72px;
+    border-radius: 50%;
+    background: var(--bg-soft);
+    border: 2px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.8rem;
+    flex-shrink: 0;
+  }
+  .modal-header-info { flex: 1; }
+  .modal-name {
+    font-size: 1.4rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+  .modal-rank {
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    margin-top: 2px;
+  }
+  .modal-body { padding: 20px 24px 28px; }
+  .modal-desc {
+    font-size: 0.97rem;
+    color: var(--text-dim);
+    line-height: 1.6;
+    margin-bottom: 20px;
+    font-style: italic;
+  }
+  .modal-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+  .modal-stat {
+    background: var(--bg-soft);
+    border-radius: 12px;
+    padding: 12px 10px;
+    text-align: center;
+  }
+  .modal-stat .val {
+    font-size: 1.3rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    display: block;
+  }
+  .modal-stat .lbl {
+    font-size: 0.7rem;
+    color: var(--text-faint);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-top: 2px;
+    display: block;
+  }
+  .modal-section-title {
+    font-size: 0.72rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+  .modal-cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+  .modal-cards img {
+    width: 100%;
+    border-radius: 8px;
+    aspect-ratio: 59/86;
+    object-fit: cover;
+    border: 1px solid var(--border);
+    background: var(--bg-soft);
+    transition: transform 0.15s;
+  }
+  .modal-cards img:hover { transform: scale(1.04); }
+  .name-btn {
+    background: none;
+    border: none;
+    font: inherit;
+    color: inherit;
+    cursor: pointer;
+    padding: 0;
+    text-decoration: underline;
+    text-decoration-color: var(--border-strong);
+    text-underline-offset: 3px;
+    transition: text-decoration-color 0.15s;
+  }
+  .name-btn:hover { text-decoration-color: var(--text); }
+
   footer { text-align: center; padding: 30px 20px 10px; color: var(--text-faint); font-size: 0.8rem; margin-top: 40px; }
 
   @media (max-width: 600px) {
@@ -520,6 +670,9 @@
       <strong>Attenzione:</strong> ogni modifica qui aggiorna anche lo storico e le classifiche. Dopo aver finito, ricordati di <strong>scaricare il nuovo dati.json</strong> in fondo alla pagina e caricarlo su GitHub.
     </div>
 
+    <h3>Profili Giocatori</h3>
+    <div class="card padded" id="profili-config"></div>
+
     <h3>Giocatori</h3>
     <div class="card" id="lista-giocatori-config"></div>
     <div class="card">
@@ -563,6 +716,26 @@
 </main>
 
 <footer>Tia · Gio · Richi</footer>
+
+<!-- MODALE PROFILO -->
+<div class="modal-overlay" id="modal-overlay" onclick="chiudiModale(event)">
+  <div class="modal" id="modal">
+    <button class="modal-close" onclick="chiudiModaleForce()">✕</button>
+    <div class="modal-header">
+      <div id="modal-avatar-wrap"></div>
+      <div class="modal-header-info">
+        <div class="modal-name" id="modal-name"></div>
+        <div class="modal-rank" id="modal-rank"></div>
+      </div>
+    </div>
+    <div class="modal-body">
+      <div class="modal-desc" id="modal-desc"></div>
+      <div class="modal-stats" id="modal-stats"></div>
+      <div class="modal-section-title">Carte caratteristiche</div>
+      <div class="modal-cards" id="modal-cards"></div>
+    </div>
+  </div>
+</div>
 
 <script>
 // ============ STATO ============
@@ -634,6 +807,7 @@ function popolaTutto() {
   aggiornaOpzioniRisultato();
   renderConfigGiocatori();
   renderConfigMazzi();
+  renderProfiliConfig();
   popolaSelectOwnerNuovoMazzo();
   if (!document.getElementById('data').value)
     document.getElementById('data').value = new Date().toISOString().slice(0, 10);
@@ -657,7 +831,7 @@ function renderGiocatori() {
       ? `<td class="rank"><span class="medal">${medals[i]}</span></td>`
       : `<td class="rank">${i + 1}</td>`;
     html += `<tr class="${i === 0 && s.partite > 0 ? 'top-1' : ''}">
-      ${rankCell}<td>${nome}</td>
+      ${rankCell}<td><button class="name-btn" onclick="apriProfilo('${nome}')">${nome}</button></td>
       <td class="pts">${s.punti}</td>
       <td class="num">${s.partite}</td>
       <td class="num">${s.v}</td><td class="num">${s.p}</td>
@@ -886,7 +1060,58 @@ function formatData(iso) {
 }
 
 // ============ CONFIGURAZIONE ============
-function renderConfigGiocatori() {
+function renderProfiliConfig() {
+  const c = document.getElementById('profili-config');
+  if (!c) return;
+  if (!dati.profili) dati.profili = {};
+  c.innerHTML = dati.giocatori.map(g => {
+    const p = dati.profili[g] || {};
+    const carte = p.carte || ['', '', ''];
+    return `<div style="margin-bottom:24px;padding-bottom:24px;border-bottom:1px solid var(--border)">
+      <div style="font-weight:600;margin-bottom:12px">${g}</div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div>
+          <label>Foto (percorso o URL)</label>
+          <input type="text" id="prof-foto-${g}" value="${p.foto || ''}" placeholder="img/${g.toLowerCase()}.jpg">
+        </div>
+        <div>
+          <label>Descrizione</label>
+          <input type="text" id="prof-desc-${g}" value="${p.descrizione || ''}" placeholder="Una breve descrizione del giocatore...">
+        </div>
+        <div>
+          <label>Carta 1 (URL immagine)</label>
+          <input type="text" id="prof-c1-${g}" value="${carte[0] || ''}" placeholder="https://images.ygoprodeck.com/...">
+        </div>
+        <div>
+          <label>Carta 2 (URL immagine)</label>
+          <input type="text" id="prof-c2-${g}" value="${carte[1] || ''}" placeholder="https://images.ygoprodeck.com/...">
+        </div>
+        <div>
+          <label>Carta 3 (URL immagine)</label>
+          <input type="text" id="prof-c3-${g}" value="${carte[2] || ''}" placeholder="https://images.ygoprodeck.com/...">
+        </div>
+        <button class="primary" style="margin-top:4px" onclick="salvaProfilo('${g}')">Salva profilo ${g}</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function salvaProfilo(g) {
+  if (!dati.profili) dati.profili = {};
+  dati.profili[g] = {
+    foto: document.getElementById(`prof-foto-${g}`).value.trim(),
+    descrizione: document.getElementById(`prof-desc-${g}`).value.trim(),
+    carte: [
+      document.getElementById(`prof-c1-${g}`).value.trim(),
+      document.getElementById(`prof-c2-${g}`).value.trim(),
+      document.getElementById(`prof-c3-${g}`).value.trim()
+    ].filter(Boolean)
+  };
+  mostraPreviewConfig();
+  alert(`Profilo di ${g} salvato! Ricordati di scaricare il nuovo dati.json.`);
+}
+
+
   const c = document.getElementById('lista-giocatori-config');
   if (dati.giocatori.length === 0) {
     c.innerHTML = '<div class="empty">Nessun giocatore.</div>';
@@ -1160,6 +1385,76 @@ function copiaJSON() {
     alert('Copiato! Incolla in dati.json su GitHub.');
   }).catch(() => alert('Copia non riuscita, usa Scarica.'));
 }
+
+// ============ MODALE PROFILO ============
+function apriProfilo(nome) {
+  const profilo = (dati.profili || {})[nome] || {};
+  const stat = calcolaStatGiocatori();
+  const s = stat[nome] || { punti: 0, v: 0, p: 0, partite: 0 };
+  const wr = s.partite > 0 ? Math.round(100 * s.v / s.partite) : 0;
+
+  // classifica attuale
+  const arr = Object.entries(stat).sort((a, b) => b[1].punti - a[1].punti || b[1].v - a[1].v);
+  const pos = arr.findIndex(([n]) => n === nome) + 1;
+  const medals = ['🥇', '🥈', '🥉'];
+  const posLabel = pos <= 3 ? medals[pos - 1] + ' ' + pos + '° posto' : pos + '° posto';
+
+  // avatar
+  const avatarWrap = document.getElementById('modal-avatar-wrap');
+  if (profilo.foto) {
+    avatarWrap.innerHTML = `<img class="modal-avatar" src="${profilo.foto}" alt="${nome}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="modal-avatar-placeholder" style="display:none">👤</div>`;
+  } else {
+    avatarWrap.innerHTML = `<div class="modal-avatar-placeholder">👤</div>`;
+  }
+
+  document.getElementById('modal-name').textContent = nome;
+  document.getElementById('modal-rank').textContent = posLabel + ' · ' + s.punti + ' punti';
+  document.getElementById('modal-desc').textContent = profilo.descrizione || 'Nessuna descrizione ancora.';
+
+  // statistiche
+  const media = s.partite > 0 ? (s.punti / s.partite).toFixed(1) : '—';
+  document.getElementById('modal-stats').innerHTML = `
+    <div class="modal-stat"><span class="val">${s.partite}</span><span class="lbl">Partite</span></div>
+    <div class="modal-stat"><span class="val">${s.v}V / ${s.p}P</span><span class="lbl">Record</span></div>
+    <div class="modal-stat"><span class="val">${wr}%</span><span class="lbl">Win Rate</span></div>
+    <div class="modal-stat"><span class="val">${s.punti}</span><span class="lbl">Punti Totali</span></div>
+    <div class="modal-stat"><span class="val">${media}</span><span class="lbl">Media Punti</span></div>
+    <div class="modal-stat"><span class="val">${contaMazziGiocatore(nome)}</span><span class="lbl">Mazzi</span></div>
+  `;
+
+  // carte caratteristiche
+  const carte = profilo.carte || [];
+  const cardsEl = document.getElementById('modal-cards');
+  if (carte.length > 0) {
+    cardsEl.innerHTML = carte.map(url =>
+      `<img src="${url}" alt="carta" onerror="this.style.opacity='0.2'">`
+    ).join('');
+  } else {
+    cardsEl.innerHTML = `<div style="grid-column:1/-1;text-align:center;color:var(--text-faint);padding:20px;font-size:0.9rem">Nessuna carta impostata.</div>`;
+  }
+
+  document.getElementById('modal-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function contaMazziGiocatore(nome) {
+  const set = new Set();
+  Object.entries(dati.mazzi || {}).forEach(([m, p]) => { if (p === nome) set.add(m); });
+  dati.partite.forEach(p => {
+    if (p.g1 === nome) set.add(p.m1);
+    if (p.g2 === nome) set.add(p.m2);
+  });
+  return set.size;
+}
+
+function chiudiModale(e) {
+  if (e.target === document.getElementById('modal-overlay')) chiudiModaleForce();
+}
+function chiudiModaleForce() {
+  document.getElementById('modal-overlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') chiudiModaleForce(); });
 
 caricaDati();
 </script>
