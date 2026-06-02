@@ -697,6 +697,23 @@
     color: white;
     font-weight: 700;
   }
+  /* badge punti sull'anteprima */
+  .genesys-thumb-badge {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: #1d1d1f;
+    color: white;
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 6px;
+    line-height: 1.4;
+    pointer-events: none;
+  }
+  .genesys-thumb-badge.high { background: var(--red); }
+  .genesys-thumb-badge.mid  { background: var(--orange); }
+  .genesys-thumb-badge.low  { background: var(--green); }
 
   /* ── FILTRI AVANZATI ── */
   .filtri-toggle {
@@ -1943,7 +1960,11 @@ function resetFiltri() {
   });
 }
 
-async function cercaCarta() {
+let searchOffset = 0;
+let lastParams = null;
+let lastGenesysFilter = false;
+
+async function cercaCarta(append = false) {
   const q       = document.getElementById('carte-search')?.value.trim() || '';
   const tipo    = document.getElementById('f-type')?.value || '';
   const attr    = document.getElementById('f-attribute')?.value || '';
@@ -1960,11 +1981,19 @@ async function cercaCarta() {
     return;
   }
 
+  // Se usa solo filtro punti Genesys senza altri parametri → usa cache
+  if (usaGenesys && !q && !tipo && !attr && !race && !level && !atk && !def) {
+    await cercaDaCache(gMin, gMax);
+    return;
+  }
+
+  if (!append) searchOffset = 0;
+
   const res = document.getElementById('carte-results');
   const det = document.getElementById('carte-detail');
   det.style.display = 'none';
   res.style.display = 'block';
-  res.innerHTML = '<div class="carte-loading">Ricerca in corso…</div>';
+  if (!append) res.innerHTML = '<div class="carte-loading">Ricerca in corso…</div>';
 
   const params = new URLSearchParams();
   if (q)     params.append('fname', q);
@@ -1974,15 +2003,12 @@ async function cercaCarta() {
   if (level) params.append('level', level);
   if (atk)   params.append('atk', atk);
   if (def)   params.append('def', def);
-  // se usiamo filtro genesys: chiediamo solo carte legali in Genesys
-  if (usaGenesys) {
-    params.append('format', 'genesys');
-    params.append('misc', 'yes');
-  } else {
-    params.append('misc', 'yes'); // per avere comunque genesys_points nelle chip
-  }
-  params.append('num', usaGenesys ? '60' : '24');
-  params.append('offset', '0');
+  params.append('misc', 'yes');
+  params.append('num', '100');
+  params.append('offset', searchOffset);
+
+  lastParams = params;
+  lastGenesysFilter = usaGenesys;
 
   try {
     const r = await fetch(`https://db.ygoprodeck.com/api/v7/cardinfo.php?${params.toString()}`);
@@ -1990,8 +2016,8 @@ async function cercaCarta() {
     const data = await r.json();
     let cards = data.data || [];
 
-    // filtro lato client sui punti genesys (l'API non supporta range, solo formato)
-    if (gMin !== '' || gMax !== '') {
+    // filtro lato client sui punti genesys se specificato
+    if (usaGenesys) {
       const minV = gMin !== '' ? parseInt(gMin) : -1;
       const maxV = gMax !== '' ? parseInt(gMax) : 999;
       cards = cards.filter(c => {
@@ -2000,26 +2026,110 @@ async function cercaCarta() {
       });
     }
 
-    if (cards.length === 0) {
+    if (!append && cards.length === 0) {
       res.innerHTML = '<div class="carte-empty">Nessuna carta trovata con questi filtri.</div>';
       return;
     }
-    res.innerHTML = `
-      <div class="card padded" style="margin-bottom:0">
-        <div style="font-size:0.8rem;color:var(--text-faint);margin-bottom:12px">${cards.length} risultati</div>
-        <div class="carte-grid">
-          ${cards.map(c => {
-            const img = c.card_images?.[0]?.image_url_small || c.card_images?.[0]?.image_url || '';
-            return `<div class="carta-thumb" onclick="mostraDettaglioCarta(${c.id})">
-              <img src="${img}" alt="${escapeHtml(c.name)}" loading="lazy" onerror="this.style.opacity='0.2'">
-              <div class="carta-nome">${escapeHtml(c.name)}</div>
-            </div>`;
-          }).join('')}
-        </div>
-      </div>`;
+
+    const hasMore = data.meta?.total_rows > searchOffset + 100;
+    searchOffset += 100;
+
+    const grid = buildGrid(cards);
+    const loadMoreBtn = hasMore
+      ? `<div style="text-align:center;padding:20px">
+           <button class="secondary" style="padding:14px 32px;font-size:1rem;border-radius:12px" onclick="cercaCarta(true)">
+             Carica altri risultati
+           </button>
+         </div>`
+      : '';
+
+    if (append) {
+      // rimuovi vecchio bottone "carica altri" e aggiungi nuove carte
+      const existing = res.querySelector('.carte-grid');
+      if (existing) {
+        cards.forEach(c => {
+          const div = document.createElement('div');
+          div.innerHTML = buildThumb(c);
+          existing.appendChild(div.firstElementChild);
+        });
+        const oldBtn = res.querySelector('.load-more-wrap');
+        if (oldBtn) oldBtn.remove();
+      }
+      if (hasMore) {
+        const wrap = document.createElement('div');
+        wrap.className = 'load-more-wrap';
+        wrap.innerHTML = loadMoreBtn;
+        res.querySelector('.card').appendChild(wrap);
+      }
+    } else {
+      res.innerHTML = `
+        <div class="card padded" style="margin-bottom:0">
+          <div style="font-size:0.8rem;color:var(--text-faint);margin-bottom:12px">${cards.length} risultati${hasMore ? ' (scorri per altri)' : ''}</div>
+          <div class="carte-grid">${cards.map(buildThumb).join('')}</div>
+          <div class="load-more-wrap">${loadMoreBtn}</div>
+        </div>`;
+    }
   } catch(e) {
-    res.innerHTML = '<div class="carte-empty">Nessuna carta trovata. Prova a modificare i filtri.</div>';
+    if (!append) res.innerHTML = '<div class="carte-empty">Nessuna carta trovata. Prova a modificare i filtri.</div>';
   }
+}
+
+function buildThumb(c) {
+  const img = c.card_images?.[0]?.image_url_small || c.card_images?.[0]?.image_url || '';
+  const pts = c.misc_info?.[0]?.genesys_points ?? 0;
+  const badge = pts > 0
+    ? `<div class="genesys-thumb-badge ${pts >= 30 ? 'high' : pts >= 10 ? 'mid' : 'low'}">${pts}</div>`
+    : '';
+  return `<div class="carta-thumb" onclick="mostraDettaglioCarta(${c.id})">
+    <div style="position:relative">
+      <img src="${img}" alt="${escapeHtml(c.name)}" loading="lazy" onerror="this.style.opacity='0.2'">
+      ${badge}
+    </div>
+    <div class="carta-nome">${escapeHtml(c.name)}</div>
+  </div>`;
+}
+
+async function cercaDaCache(gMin, gMax) {
+  const res = document.getElementById('carte-results');
+  const det = document.getElementById('carte-detail');
+  det.style.display = 'none';
+  res.style.display = 'block';
+
+  // assicurati che la cache sia caricata
+  if (!genesysCache) {
+    res.innerHTML = '<div class="carte-loading">Caricamento lista Genesys…</div>';
+    await apriListaGenesys(true); // true = silent, non cambia vista
+    if (!genesysCache) {
+      res.innerHTML = '<div class="carte-empty">Errore nel caricamento. Riprova.</div>';
+      return;
+    }
+  }
+
+  const minV = gMin !== '' ? parseInt(gMin) : -1;
+  const maxV = gMax !== '' ? parseInt(gMax) : 999;
+  const filtered = genesysCache.filter(c => c.points >= minV && c.points <= maxV);
+
+  if (filtered.length === 0) {
+    res.innerHTML = '<div class="carte-empty">Nessuna carta trovata con questi punti.</div>';
+    return;
+  }
+
+  res.innerHTML = `
+    <div class="card padded" style="margin-bottom:0">
+      <div style="font-size:0.8rem;color:var(--text-faint);margin-bottom:12px">${filtered.length} carte Genesys${gMin ? ' da '+gMin : ''} a ${gMax || '100'} punti</div>
+      <div class="carte-grid">
+        ${filtered.map(c => {
+          const cls = c.points >= 30 ? 'high' : c.points >= 10 ? 'mid' : 'low';
+          return `<div class="carta-thumb" onclick="mostraDettaglioCarta(${c.id})">
+            <div style="position:relative">
+              <img src="${c.img}" alt="${escapeHtml(c.name)}" loading="lazy">
+              <div class="genesys-thumb-badge ${cls}">${c.points}</div>
+            </div>
+            <div class="carta-nome">${escapeHtml(c.name)}</div>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>`;
 }
 
 async function mostraDettaglioCarta(id) {
@@ -2095,16 +2205,18 @@ function escapeHtml(s) {
 }
 
 // ── LISTA GENESYS COMPLETA ──
-async function apriListaGenesys() {
-  document.getElementById('database-view').style.display = 'none';
-  document.getElementById('genesys-view').style.display = 'block';
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+async function apriListaGenesys(silent = false) {
+  if (!silent) {
+    document.getElementById('database-view').style.display = 'none';
+    document.getElementById('genesys-view').style.display = 'block';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
   const cont = document.getElementById('genesys-list');
   if (genesysCache) {
-    renderListaGenesys(genesysCache);
+    if (!silent) renderListaGenesys(genesysCache);
     return;
   }
-  cont.innerHTML = '<div class="carte-loading">Caricamento lista Genesys…</div>';
+  if (!silent) cont.innerHTML = '<div class="carte-loading">Caricamento lista Genesys…</div>';
   try {
     const r = await fetch('https://db.ygoprodeck.com/api/v7/cardinfo.php?format=genesys&misc=yes');
     if (!r.ok) throw new Error();
@@ -2117,12 +2229,12 @@ async function apriListaGenesys() {
         img: c.card_images?.[0]?.image_url_small || '',
         points: c.misc_info?.[0]?.genesys_points ?? 0
       }))
-      .filter(c => c.points > 0) // solo con punti > 0
+      .filter(c => c.points > 0)
       .sort((a, b) => b.points - a.points);
     genesysCache = cards;
-    renderListaGenesys(cards);
+    if (!silent) renderListaGenesys(cards);
   } catch(e) {
-    cont.innerHTML = '<div class="carte-empty">Errore nel caricamento. Riprova più tardi.</div>';
+    if (!silent) cont.innerHTML = '<div class="carte-empty">Errore nel caricamento. Riprova più tardi.</div>';
   }
 }
 
