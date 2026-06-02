@@ -11,14 +11,14 @@
     },
     "Gio": {
       "foto": "img/gio.jpg",
-      "descrizione": "Scrivi qui una descrizione di Gio.",
+      "descrizione": "Giocatore di razza, specializzato in mazzi con follow-up infinito e la straordinaria capacità di brickare senza mai averlo fatto davvero. Capace di ribaltare partite che sembravano perse — per bravura, per furbizia, o per entrambe: il mondo potrebbe non saperlo mai. Contro: dice sempre che è il suo ultimo ordine su CardMarket.",
       "carte": ["https://images.ygoprodeck.com/images/cards/10443957.jpg",
         "https://images.ygoprodeck.com/images/cards/66431519.jpg", 
         "https://images.ygoprodeck.com/images/cards/90241276.jpg"]
     },
     "Richi": {
       "foto": "img/richi.jpg",
-      "descrizione": "Scrivi qui una descrizione di Richi.",
+      "descrizione": "Se il mazzo non nega, non è un mazzo. Se non è Synchro, non vale la pena giocarci. Filosofia semplice, risultati devastanti. Poker face quando tira Nibiru, meno poker face quando lo prende lui. Contro: dice sempre che è il suo ultimo ordine su CardMarket.",
       "carte": ["https://images.ygoprodeck.com/images/cards/29981921.jpg",
       "https://images.ygoprodeck.com/images/cards/33198837.jpg",
       "https://images.ygoprodeck.com/images/cards/34680482.jpg"]
