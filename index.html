@@ -37,7 +37,46 @@
     -webkit-font-smoothing: antialiased;
   }
   body { padding-bottom: 60px; }
-  header { text-align: center; padding: 48px 20px 32px; }
+  header { text-align: center; padding: 40px 20px 24px; }
+  .header-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    margin-top: 20px;
+  }
+  .header-btn-primary {
+    width: 100%;
+    max-width: 320px;
+    background: var(--green);
+    color: white;
+    border: none;
+    padding: 14px 20px;
+    font-family: inherit;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.05s;
+  }
+  .header-btn-primary:hover { background: var(--green-dark); }
+  .header-btn-primary:active { transform: scale(0.98); }
+  .header-btn-secondary {
+    width: 100%;
+    max-width: 320px;
+    background: var(--bg-soft);
+    color: var(--text);
+    border: 1px solid var(--border-strong);
+    padding: 13px 20px;
+    font-family: inherit;
+    font-size: 1rem;
+    font-weight: 500;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.05s;
+  }
+  .header-btn-secondary:hover { background: var(--border); }
+  .header-btn-secondary:active { transform: scale(0.98); }
   h1 {
     font-weight: 700;
     font-size: clamp(1.8rem, 5vw, 2.4rem);
@@ -576,6 +615,109 @@
     .modal-name { font-size: 1.25rem; }
   }
 
+  /* ── DATABASE CARTE ── */
+  .carte-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 12px;
+  }
+  .carta-thumb {
+    cursor: pointer;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    background: var(--bg-soft);
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .carta-thumb:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.1);
+  }
+  .carta-thumb img {
+    width: 100%;
+    aspect-ratio: 59/86;
+    object-fit: cover;
+    display: block;
+  }
+  .carta-thumb .carta-nome {
+    font-size: 0.7rem;
+    padding: 5px 6px;
+    color: var(--text-dim);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    border-top: 1px solid var(--border);
+  }
+  .carta-detail-wrap {
+    display: grid;
+    grid-template-columns: 160px 1fr;
+    gap: 20px;
+    align-items: start;
+  }
+  .carta-detail-img {
+    width: 160px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+  }
+  .carta-detail-info { display: flex; flex-direction: column; gap: 8px; }
+  .carta-detail-name {
+    font-size: 1.2rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+  .carta-detail-type {
+    font-size: 0.82rem;
+    color: var(--text-dim);
+    font-weight: 500;
+  }
+  .carta-detail-text {
+    font-size: 0.88rem;
+    color: var(--text-dim);
+    line-height: 1.6;
+    margin-top: 4px;
+  }
+  .carta-stat-chips {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 4px;
+  }
+  .carta-chip {
+    background: var(--bg-soft);
+    border-radius: 8px;
+    padding: 5px 10px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .back-btn {
+    background: none;
+    border: none;
+    color: var(--blue);
+    font-family: inherit;
+    font-size: 0.9rem;
+    cursor: pointer;
+    padding: 0 0 16px 0;
+    display: block;
+    font-weight: 500;
+  }
+  .carte-loading {
+    text-align: center;
+    padding: 40px;
+    color: var(--text-faint);
+    font-size: 0.95rem;
+  }
+  .carte-empty {
+    text-align: center;
+    padding: 40px;
+    color: var(--text-faint);
+    font-size: 0.95rem;
+  }
+  @media (max-width: 500px) {
+    .carta-detail-wrap { grid-template-columns: 120px 1fr; gap: 14px; }
+    .carta-detail-img { width: 120px; }
+  }
+
   footer { text-align: center; padding: 30px 20px 10px; color: var(--text-faint); font-size: 0.8rem; margin-top: 40px; }
 
   @media (max-width: 600px) {
@@ -592,15 +734,17 @@
 <header>
   <h1>Yu-Gi-Oh! Genesys</h1>
   <div class="subtitle">Il gioco che se vai primo vinci</div>
+  <div class="header-actions">
+    <button class="header-btn-primary" onclick="switchTab('nuova')">+ Registra Partita</button>
+    <button class="header-btn-secondary" onclick="switchTab('config')">⚙ Configurazione</button>
+  </div>
 </header>
 
 <nav>
   <button class="tab-btn active" data-tab="giocatori">Classifica</button>
   <button class="tab-btn" data-tab="mazzi">Mazzi</button>
   <button class="tab-btn" data-tab="storico">Storico</button>
-  <button class="tab-btn" data-tab="matchup">Match-up</button>
-  <button class="tab-btn" data-tab="nuova">+ Partita</button>
-  <button class="tab-btn" data-tab="config">⚙ Config</button>
+  <button class="tab-btn" data-tab="carte">Carte</button>
 </nav>
 
 <main>
@@ -617,20 +761,17 @@
 
   <section id="mazzi">
     <h2>Classifica Mazzi</h2>
-    <div class="info">Ordinati per <strong>win rate</strong>. I mazzi con meno di 3 partite sono <strong>provvisori</strong>.</div>
+    <div class="info">Ordinati per <strong>win rate</strong>. I mazzi con meno di 3 partite sono <strong>In prova</strong>.</div>
     <div class="card"><table id="tabella-mazzi"></table></div>
+    <h3 style="margin-top:24px">Match-up tra Mazzi</h3>
+    <div class="info">Ogni cella mostra le vittorie del mazzo in <strong>riga</strong> contro quello in <strong>colonna</strong>.</div>
+    <div class="card matchup-wrap" id="grid-matchup"></div>
   </section>
 
   <section id="storico">
     <h2>Storico Partite</h2>
     <div class="info">Tocca l'icona 🗑 accanto a una partita per eliminarla (utile per correggere errori).</div>
     <div class="card" id="lista-partite"></div>
-  </section>
-
-  <section id="matchup">
-    <h2>Match-up tra Mazzi</h2>
-    <div class="info">Ogni cella mostra le vittorie del mazzo in <strong>riga</strong> contro quello in <strong>colonna</strong>.</div>
-    <div class="card matchup-wrap" id="grid-matchup"></div>
   </section>
 
   <section id="nuova">
@@ -676,6 +817,19 @@
         <pre class="json-preview" id="json-preview"></pre>
       </div>
     </div>
+  </section>
+
+  <section id="carte">
+    <h2>Database Carte</h2>
+    <div class="info">Cerca qualsiasi carta di Yu-Gi-Oh!. I dati arrivano in tempo reale da <strong>YGOProDeck</strong>. Le carte vanno cercate in <strong>inglese</strong> (es. Blue-Eyes White Dragon, Ash Blossom).</div>
+    <div class="card padded" style="margin-bottom:16px">
+      <div style="display:flex;gap:10px">
+        <input type="text" id="carte-search" placeholder="es. Blue-Eyes White Dragon, Ash Blossom…" style="flex:1">
+        <button class="primary" style="margin-top:0;width:auto;padding:12px 20px" onclick="cercaCarta()">Cerca</button>
+      </div>
+    </div>
+    <div id="carte-results"></div>
+    <div id="carte-detail" style="display:none"></div>
   </section>
 
   <section id="config">
@@ -1300,10 +1454,7 @@ function eliminaPartita(idx) {
   out.querySelector('p').innerHTML = 'Scarica o copia il nuovo <code>dati.json</code> e caricalo su GitHub per applicare la modifica.';
   out.classList.add('show');
   // switch alla scheda "+ Partita"
-  document.querySelectorAll('.tab-btn').forEach(x => x.classList.remove('active'));
-  document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
-  document.querySelector('.tab-btn[data-tab="nuova"]').classList.add('active');
-  document.getElementById('nuova').classList.add('active');
+  switchTab('nuova');
   setTimeout(() => out.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
   mostraPreviewConfig();
 }
@@ -1315,6 +1466,17 @@ function mostraPreviewConfig() {
 }
 
 // ============ NAVIGAZIONE ============
+// ============ NAVIGAZIONE ============
+function switchTab(id) {
+  document.querySelectorAll('.tab-btn').forEach(x => x.classList.remove('active'));
+  document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
+  const btn = document.querySelector(`.tab-btn[data-tab="${id}"]`);
+  if (btn) btn.classList.add('active');
+  const sec = document.getElementById(id);
+  if (sec) sec.classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
 document.querySelectorAll('.tab-btn').forEach(b => {
   b.addEventListener('click', () => {
     document.querySelectorAll('.tab-btn').forEach(x => x.classList.remove('active'));
@@ -1482,6 +1644,102 @@ function chiudiModaleForce() {
 document.addEventListener('keydown', e => { if (e.key === 'Escape') chiudiModaleForce(); });
 
 caricaDati();
+let carteSearchTimeout = null;
+
+document.addEventListener('DOMContentLoaded', () => {
+  const inp = document.getElementById('carte-search');
+  if (inp) {
+    inp.addEventListener('keydown', e => { if (e.key === 'Enter') cercaCarta(); });
+    inp.addEventListener('input', () => {
+      clearTimeout(carteSearchTimeout);
+      if (inp.value.trim().length >= 3) {
+        carteSearchTimeout = setTimeout(cercaCarta, 500);
+      }
+    });
+  }
+});
+
+async function cercaCarta() {
+  const q = document.getElementById('carte-search').value.trim();
+  if (!q) return;
+  const res = document.getElementById('carte-results');
+  const det = document.getElementById('carte-detail');
+  det.style.display = 'none';
+  res.innerHTML = '<div class="carte-loading">Ricerca in corso…</div>';
+  try {
+    const url = `https://db.ygoprodeck.com/api/v7/cardinfo.php?fname=${encodeURIComponent(q)}&num=24&offset=0`;
+    const r = await fetch(url);
+    if (!r.ok) throw new Error('not found');
+    const data = await r.json();
+    const cards = data.data || [];
+    if (cards.length === 0) {
+      res.innerHTML = '<div class="carte-empty">Nessuna carta trovata.</div>';
+      return;
+    }
+    res.innerHTML = `
+      <div class="card padded" style="margin-bottom:0">
+        <div style="font-size:0.8rem;color:var(--text-faint);margin-bottom:12px">${cards.length} risultati per "${q}"</div>
+        <div class="carte-grid">
+          ${cards.map(c => {
+            const img = c.card_images?.[0]?.image_url_small || c.card_images?.[0]?.image_url || '';
+            return `<div class="carta-thumb" onclick="mostraDettaglioCarta(${c.id})">
+              <img src="${img}" alt="${c.name}" loading="lazy" onerror="this.style.opacity='0.2'">
+              <div class="carta-nome">${c.name}</div>
+            </div>`;
+          }).join('')}
+        </div>
+      </div>`;
+  } catch(e) {
+    res.innerHTML = '<div class="carte-empty">Nessuna carta trovata. Prova con un altro nome.</div>';
+  }
+}
+
+async function mostraDettaglioCarta(id) {
+  const res = document.getElementById('carte-results');
+  const det = document.getElementById('carte-detail');
+  det.style.display = 'block';
+  det.innerHTML = '<div class="carte-loading">Caricamento…</div>';
+  res.style.display = 'none';
+  det.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  try {
+    const r = await fetch(`https://db.ygoprodeck.com/api/v7/cardinfo.php?id=${id}`);
+    const data = await r.json();
+    const c = data.data?.[0];
+    if (!c) throw new Error();
+    const img = c.card_images?.[0]?.image_url || '';
+    const chips = [];
+    if (c.type) chips.push(c.type);
+    if (c.attribute) chips.push(c.attribute);
+    if (c.level) chips.push('Livello ' + c.level);
+    if (c.atk !== undefined) chips.push('ATK ' + c.atk);
+    if (c.def !== undefined) chips.push('DEF ' + c.def);
+    if (c.race) chips.push(c.race);
+    det.innerHTML = `
+      <button class="back-btn" onclick="tornaRisultati()">← Torna ai risultati</button>
+      <div class="card padded">
+        <div class="carta-detail-wrap">
+          <img class="carta-detail-img" src="${img}" alt="${c.name}">
+          <div class="carta-detail-info">
+            <div class="carta-detail-name">${c.name}</div>
+            <div class="carta-detail-type">${c.type || ''}</div>
+            <div class="carta-stat-chips">
+              ${chips.map(ch => `<span class="carta-chip">${ch}</span>`).join('')}
+            </div>
+            <div class="carta-detail-text">${c.desc || ''}</div>
+          </div>
+        </div>
+      </div>`;
+  } catch(e) {
+    det.innerHTML = '<button class="back-btn" onclick="tornaRisultati()">← Torna ai risultati</button><div class="carte-empty">Errore nel caricamento della carta.</div>';
+  }
+}
+
+function tornaRisultati() {
+  document.getElementById('carte-detail').style.display = 'none';
+  document.getElementById('carte-results').style.display = 'block';
+}
+
+
 </script>
 </body>
 </html>
