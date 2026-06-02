@@ -239,21 +239,8 @@
   .output-box.show { display: block; animation: fade 0.3s ease; }
   .output-box .check { display: inline-block; width: 20px; height: 20px; background: var(--green); color: white; border-radius: 50%; text-align: center; font-size: 0.75rem; line-height: 20px; margin-right: 8px; vertical-align: middle; }
   .output-box .title { font-weight: 600; color: #14532d; margin-bottom: 6px; }
-  .output-box p { color: #166534; font-size: 0.92rem; margin-bottom: 14px; }
-  .output-box .actions { display: flex; gap: 8px; flex-wrap: wrap; }
-  .output-box .actions button { flex: 1; min-width: 140px; }
-  pre.json-preview {
-    margin-top: 12px;
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    padding: 12px;
-    font-family: 'SF Mono', ui-monospace, Menlo, monospace;
-    font-size: 0.78rem;
-    color: var(--text-dim);
-    max-height: 180px;
-    overflow: auto;
-    border-radius: 8px;
-  }
+  .output-box p { color: #166534; font-size: 0.92rem; margin-bottom: 0; }
+  
   .match-card {
     display: grid;
     grid-template-columns: 1fr auto 1fr auto;
@@ -305,8 +292,6 @@
     margin-bottom: 16px;
   }
   .info strong { color: var(--text); font-weight: 600; }
-  .info.warn { background: #fff7ed; color: #9a3412; }
-  .info.warn strong { color: #7c2d12; }
 
   .pill {
     display: inline-block;
@@ -335,40 +320,6 @@
     color: var(--text-faint);
     font-weight: 600;
     margin-bottom: 10px;
-  }
-  .totali-row {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-    margin-bottom: 18px;
-  }
-  .totale-pill {
-    flex: 1;
-    min-width: 90px;
-    background: var(--bg-soft);
-    border-radius: 10px;
-    padding: 10px 14px;
-    text-align: center;
-  }
-  .totale-pill .nome {
-    font-size: 0.82rem;
-    color: var(--text-dim);
-    font-weight: 500;
-  }
-  .totale-pill .num {
-    font-size: 1.4rem;
-    font-weight: 600;
-    color: var(--text);
-    font-variant-numeric: tabular-nums;
-    margin-top: 2px;
-    display: block;
-  }
-  .totale-pill .num-label {
-    font-size: 0.7rem;
-    color: var(--text-faint);
-    display: block;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
   }
   .h2h-list {
     display: flex;
@@ -496,7 +447,6 @@
   }
   .modal-close:hover { background: var(--border); }
 
-  /* layout interno modale */
   .modal-body { padding: 24px; }
   .modal-top {
     display: grid;
@@ -555,7 +505,6 @@
     letter-spacing: 0.04em;
     min-width: 90px;
   }
-  /* la descrizione scorre a destra della foto e poi continua sotto */
   .modal-desc-wrap {
     margin-top: 14px;
   }
@@ -565,7 +514,6 @@
     line-height: 1.65;
     font-style: italic;
   }
-  /* separatore e carte */
   .modal-divider {
     border: none;
     border-top: 1px solid var(--border);
@@ -691,13 +639,11 @@
   .genesys-points-badge.mid { background: var(--orange); }
   .genesys-points-badge.low { background: var(--green); }
 
-  /* chip Genesys speciale nel dettaglio */
   .carta-chip.genesys-chip {
     background: var(--text);
     color: white;
     font-weight: 700;
   }
-  /* badge punti sull'anteprima */
   .genesys-thumb-badge {
     position: absolute;
     top: 5px;
@@ -936,13 +882,13 @@
 
   <section id="storico">
     <h2>Storico Partite</h2>
-    <div class="info">Tocca l'icona 🗑 accanto a una partita per eliminarla (utile per correggere errori).</div>
+    <div class="info">Tocca l'icona 🗑 accanto a una partita per eliminarla.</div>
     <div class="card" id="lista-partite"></div>
   </section>
 
   <section id="nuova">
     <h2>Registra una Partita</h2>
-    <div class="info">Compila e premi <strong>Registra</strong>. Il sito genera il nuovo <code>dati.json</code> da caricare su GitHub.</div>
+    <div class="info">Compila e premi <strong>Registra</strong>. I dati verranno salvati in automatico nel Cloud.</div>
     <div class="card padded">
       <form id="form-partita">
         <div><label>Data</label><input type="date" id="data" required></div>
@@ -974,13 +920,8 @@
         <button type="submit" class="primary">Registra Partita</button>
       </form>
       <div class="output-box" id="output">
-        <div class="title"><span class="check">✓</span>Partita registrata</div>
-        <p>Scarica o copia il nuovo <code>dati.json</code> e caricalo su GitHub.</p>
-        <div class="actions">
-          <button class="secondary" onclick="scaricaJSON()">⬇ Scarica dati.json</button>
-          <button class="secondary" onclick="copiaJSON()">⧉ Copia</button>
-        </div>
-        <pre class="json-preview" id="json-preview"></pre>
+        <div class="title"><span class="check">✓</span>Partita registrata con successo!</div>
+        <p>I dati sono stati sincronizzati nel Cloud per tutti i giocatori.</p>
       </div>
     </div>
   </section>
@@ -988,13 +929,11 @@
   <section id="carte">
     <h2>Carte</h2>
 
-    <!-- Bottone enorme Lista Genesys -->
     <button class="genesys-mega-btn" onclick="apriListaGenesys()">
       <div class="genesys-mega-title">📋 Lista aggiornata punti Genesys</div>
       <div class="genesys-mega-sub">Consulta tutte le carte con punti nel formato Genesys ufficiale</div>
     </button>
 
-    <!-- Vista lista Genesys (nascosta di default) -->
     <div id="genesys-view" style="display:none">
       <button class="back-btn" onclick="chiudiListaGenesys()">← Torna al database</button>
       <h3 style="margin-top:0">Lista punti Genesys</h3>
@@ -1007,7 +946,6 @@
       <div id="genesys-list"></div>
     </div>
 
-    <!-- Vista database (default) -->
     <div id="database-view">
       <h3 style="margin-top:0">Database Carte</h3>
       <div class="info">Cerca qualsiasi carta di Yu-Gi-Oh! in tempo reale da <strong>YGOProDeck</strong>. I nomi vanno inseriti in <strong>inglese</strong> (es. Blue-Eyes White Dragon, Ash Blossom).</div>
@@ -1126,9 +1064,6 @@
 
   <section id="config">
     <h2>Configurazione</h2>
-    <div class="info warn">
-      <strong>Attenzione:</strong> ogni modifica qui aggiorna anche lo storico e le classifiche. Dopo aver finito, ricordati di <strong>scaricare il nuovo dati.json</strong> in fondo alla pagina e caricarlo su GitHub.
-    </div>
 
     <h3>Profili Giocatori</h3>
     <div class="card padded" id="profili-config"></div>
@@ -1160,29 +1095,15 @@
         <button onclick="aggiungiMazzo()">Aggiungi</button>
       </div>
     </div>
-
-    <h3>Salva le modifiche</h3>
-    <div class="card padded">
-      <p style="color:var(--text-dim);font-size:0.92rem;margin-bottom:14px">
-        Una volta finite tutte le modifiche, scarica o copia il nuovo <code>dati.json</code> e caricalo su GitHub.
-      </p>
-      <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <button class="secondary" onclick="scaricaJSON()" style="flex:1;min-width:140px">⬇ Scarica dati.json</button>
-        <button class="secondary" onclick="copiaJSON()" style="flex:1;min-width:140px">⧉ Copia negli appunti</button>
-      </div>
-      <pre class="json-preview" id="config-json-preview" style="display:none"></pre>
-    </div>
   </section>
 </main>
 
 <footer>Tia · Gio · Richi</footer>
 
-<!-- MODALE PROFILO -->
 <div class="modal-overlay" id="modal-overlay" onclick="chiudiModale(event)">
   <div class="modal" id="modal">
     <button class="modal-close" onclick="chiudiModaleForce()">✕</button>
     <div class="modal-body">
-      <!-- foto + info affiancate -->
       <div class="modal-top">
         <div id="modal-photo-wrap"></div>
         <div class="modal-info">
@@ -1190,11 +1111,9 @@
           <div class="modal-stat-row" id="modal-stat-row"></div>
         </div>
       </div>
-      <!-- descrizione: scorre a destra della foto, poi continua sotto -->
       <div class="modal-desc-wrap">
         <div class="modal-desc" id="modal-desc"></div>
       </div>
-      <!-- carte caratteristiche in fondo -->
       <hr class="modal-divider">
       <div class="modal-section-title">Carte caratteristiche</div>
       <div class="modal-cards" id="modal-cards"></div>
@@ -1202,27 +1121,57 @@
   </div>
 </div>
 
-<script>
+<script type="module">
+// ============ INIZIALIZZAZIONE FIREBASE ============
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
+import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDwDhaoUOpNPKO-0RMfVjvf4S-h_sI0qx0",
+  authDomain: "yu-gi-oh--genesys.firebaseapp.com",
+  projectId: "yu-gi-oh--genesys",
+  storageBucket: "yu-gi-oh--genesys.firebasestorage.app",
+  messagingSenderId: "706385915066",
+  appId: "1:706385915066:web:9e29e0dda71305d475e683"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
 // ============ STATO ============
 let dati = { giocatori: ["Tia", "Gio", "Richi"], mazzi: {}, partite: [] };
 const PUNTI = { "2-0": [3, 0], "2-1": [2, 1], "1-2": [1, 2], "0-2": [0, 3] };
 const SOGLIA_MAZZO = 3;
 
-// ============ CARICAMENTO ============
+// ============ REPERIMENTO E SINCRONIZZAZIONE CLOUD ============
 async function caricaDati() {
   try {
-    const res = await fetch('dati.json?t=' + Date.now());
-    if (res.ok) {
-      const j = await res.json();
+    const docRef = doc(db, "lega", "dati_principali");
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      const j = docSnap.data();
       dati = {
         giocatori: j.giocatori || ["Tia", "Gio", "Richi"],
         profili: j.profili || {},
         mazzi: j.mazzi || {},
         partite: j.partite || []
       };
+    } else {
+      await setDoc(docRef, dati);
     }
-  } catch (e) { console.warn("dati.json non trovato"); }
+  } catch (e) { console.error("Errore di caricamento dal Cloud:", e); }
   popolaTutto();
+}
+
+async function salvaDatiCloud() {
+  try {
+    const docRef = doc(db, "lega", "dati_principali");
+    await setDoc(docRef, dati);
+    console.log("Dati sincronizzati con il Cloud!");
+  } catch (e) {
+    console.error("Errore durante il salvataggio:", e);
+    alert("Errore di salvataggio nel Cloud. Controlla di aver avviato il database in Modalità Test.");
+  }
 }
 
 // ============ STATISTICHE ============
@@ -1310,16 +1259,12 @@ function renderGiocatori() {
 
 function renderRiepilogo() {
   const giocatori = dati.giocatori;
-  const totDiv = document.getElementById('riepilogo-totali');
-  totDiv.innerHTML = '';
-
   const h2hDiv = document.getElementById('riepilogo-h2h');
   if (dati.partite.length === 0) {
     h2hDiv.innerHTML = '<div class="empty" style="padding:20px 0">Nessuna partita ancora registrata.</div>';
     return;
   }
 
-  // costruisci h2h con parziale vittorie
   const h2h = {};
   for (let i = 0; i < giocatori.length; i++) {
     for (let j = i + 1; j < giocatori.length; j++) {
@@ -1341,950 +1286,4 @@ function renderRiepilogo() {
 
   const arr = Object.values(h2h);
   const minN = Math.min(...arr.map(r => r.va + r.vb));
-  const html = `
-    <div class="riep-section-title">Scontri diretti</div>
-    <div class="h2h-list">
-      ${arr.map(r => {
-        const tot = r.va + r.vb;
-        const few = tot === minN && arr.some(x => (x.va + x.vb) > minN);
-        return `<div class="h2h-row ${few ? 'few' : ''}">
-          <div class="pair">${r.a}<span class="vs-small">vs</span>${r.b}</div>
-          <div class="count"><strong>${r.va} - ${r.vb}</strong></div>
-        </div>`;
-      }).join('')}
-    </div>
-  `;
-  h2hDiv.innerHTML = html;
-}
-
-function renderMazzi() {
-  const stat = calcolaStatMazzi();
-  const arr = Object.entries(stat).sort((a, b) => {
-    const ua = a[1].partite >= SOGLIA_MAZZO ? 1 : 0;
-    const ub = b[1].partite >= SOGLIA_MAZZO ? 1 : 0;
-    if (ua !== ub) return ub - ua;
-    if (b[1].wr !== a[1].wr) return b[1].wr - a[1].wr;
-    return b[1].partite - a[1].partite;
-  });
-  const t = document.getElementById('tabella-mazzi');
-  if (arr.length === 0) {
-    t.innerHTML = '<tr><td class="empty">Ancora nessun mazzo registrato.</td></tr>';
-    return;
-  }
-  const medals = ['🥇', '🥈', '🥉'];
-  // conto quanti mazzi sono "ufficiali" (>= soglia) per le medaglie
-  const ufficiali = arr.filter(([_, s]) => s.partite >= SOGLIA_MAZZO).length;
-  let html = '<tr><th>#</th><th>Mazzo</th><th>Prop.</th><th>V</th><th>P</th><th>Win Rate</th></tr>';
-  arr.forEach(([nome, s], i) => {
-    const wr = Math.round(100 * s.wr);
-    const provv = s.partite < SOGLIA_MAZZO;
-    const hasMedal = i < 3 && !provv && i < ufficiali;
-    const rankCell = hasMedal
-      ? `<td class="rank"><span class="medal">${medals[i]}</span></td>`
-      : `<td class="rank">${i + 1}</td>`;
-    html += `<tr class="${i === 0 && !provv ? 'top-1' : ''}">
-      ${rankCell}
-      <td>${nome}${provv ? '<span class="pill">In prova</span>' : ''}</td>
-      <td style="color:var(--text-dim)">${s.proprietario}</td>
-      <td class="num">${s.v}</td><td class="num">${s.p}</td>
-      <td><div class="wr-cell"><span class="wr-text">${wr}%</span><span class="wr-bar"><span style="width:${wr}%"></span></span></div></td>
-    </tr>`;
-  });
-  t.innerHTML = html;
-}
-
-function renderStorico() {
-  const c = document.getElementById('lista-partite');
-  if (dati.partite.length === 0) {
-    c.innerHTML = '<div class="empty">Lo storico è vuoto.</div>';
-    return;
-  }
-  // mostra in ordine inverso (più recenti prima) ma conservando l'indice originale per eliminare
-  const arr = dati.partite.map((p, idx) => ({ p, idx })).reverse();
-  c.innerHTML = arr.map(({p, idx}) => {
-    const [p1, p2] = PUNTI[p.risultato];
-    const g1win = p1 > p2;
-    return `<div class="match-card">
-      <div class="date">${formatData(p.data)}</div>
-      <div>
-        <span class="player ${g1win ? 'win' : ''}">${p.g1}</span>
-        <span class="deck">${p.m1}</span>
-      </div>
-      <div class="score">${p.risultato}</div>
-      <div>
-        <span class="player ${!g1win ? 'win' : ''}">${p.g2}</span>
-        <span class="deck">${p.m2}</span>
-      </div>
-      <button class="del-btn" onclick="eliminaPartita(${idx})" title="Elimina questa partita">🗑</button>
-    </div>`;
-  }).join('');
-}
-
-function renderMatchup() {
-  const c = document.getElementById('grid-matchup');
-  const mazzi = new Set();
-  dati.partite.forEach(p => { mazzi.add(p.m1); mazzi.add(p.m2); });
-  const lista = [...mazzi].sort();
-  if (lista.length === 0) {
-    c.innerHTML = '<div class="empty">Nessun match-up ancora.</div>';
-    return;
-  }
-  const mat = {};
-  lista.forEach(a => { mat[a] = {}; lista.forEach(b => mat[a][b] = { v: 0, p: 0 }); });
-  dati.partite.forEach(par => {
-    const [p1, p2] = PUNTI[par.risultato];
-    if (p1 > p2) { mat[par.m1][par.m2].v++; mat[par.m2][par.m1].p++; }
-    else        { mat[par.m2][par.m1].v++; mat[par.m1][par.m2].p++; }
-  });
-  let html = '<table><tr><th></th>' + lista.map(m => `<th>${m}</th>`).join('') + '</tr>';
-  lista.forEach(a => {
-    html += `<tr><th>${a}</th>`;
-    lista.forEach(b => {
-      if (a === b) html += '<td class="diag">—</td>';
-      else {
-        const m = mat[a][b];
-        const tot = m.v + m.p;
-        if (tot === 0) html += '<td style="color:var(--text-faint)">·</td>';
-        else html += `<td class="num">${m.v}-${m.p}</td>`;
-      }
-    });
-    html += '</tr>';
-  });
-  html += '</table>';
-  c.innerHTML = html;
-}
-
-function popolaSelectGiocatori() {
-  ['g1', 'g2'].forEach(id => {
-    const sel = document.getElementById(id);
-    const prev = sel.value;
-    sel.innerHTML = dati.giocatori.map(g => `<option>${g}</option>`).join('');
-    if (dati.giocatori.includes(prev)) sel.value = prev;
-  });
-  if (document.getElementById('g1').value === document.getElementById('g2').value
-      && dati.giocatori.length > 1) {
-    document.getElementById('g2').selectedIndex = 1;
-  }
-  aggiornaSelectMazzi('m1', document.getElementById('g1').value);
-  aggiornaSelectMazzi('m2', document.getElementById('g2').value);
-}
-
-function aggiornaSelectMazzi(selId, giocatore) {
-  const sel = document.getElementById(selId);
-  const nuovoDiv = document.getElementById(selId + '-nuovo');
-  const customInp = document.getElementById(selId + '-custom');
-
-  // raccogli mazzi del giocatore: quelli dichiarati + quelli usati nelle partite
-  const mazziGiocatore = new Set();
-  Object.entries(dati.mazzi).forEach(([nome, prop]) => {
-    if (prop === giocatore) mazziGiocatore.add(nome);
-  });
-  dati.partite.forEach(p => {
-    if (p.g1 === giocatore) mazziGiocatore.add(p.m1);
-    if (p.g2 === giocatore) mazziGiocatore.add(p.m2);
-  });
-
-  const lista = [...mazziGiocatore].sort();
-  sel.innerHTML = lista.map(m => `<option value="${m}">${m}</option>`).join('');
-  sel.innerHTML += `<option value="__nuovo__">+ Nuovo mazzo…</option>`;
-
-  // gestisci visibilità campo testo per nuovo mazzo
-  sel.onchange = () => {
-    const isNuovo = sel.value === '__nuovo__';
-    nuovoDiv.style.display = isNuovo ? 'block' : 'none';
-    if (customInp) customInp.required = isNuovo;
-    if (isNuovo && customInp) customInp.focus();
-  };
-  // nascondi il campo testo se già non è "nuovo"
-  nuovoDiv.style.display = 'none';
-  if (customInp) customInp.required = false;
-}
-
-function aggiornaOpzioniRisultato() {
-  const g1 = document.getElementById('g1').value || 'G1';
-  const g2 = document.getElementById('g2').value || 'G2';
-  const sel = document.getElementById('risultato');
-  const prev = sel.value;
-  sel.innerHTML = `
-    <option value="2-0">2 - 0  (${g1} stravince)</option>
-    <option value="2-1">2 - 1  (${g1} vince)</option>
-    <option value="1-2">1 - 2  (${g2} vince)</option>
-    <option value="0-2">0 - 2  (${g2} stravince)</option>
-  `;
-  if (prev) sel.value = prev;
-}
-
-function formatData(iso) {
-  const d = new Date(iso);
-  return d.toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit', year: '2-digit' });
-}
-
-// ============ CONFIGURAZIONE ============
-function renderProfiliConfig() {
-  const c = document.getElementById('profili-config');
-  if (!c) return;
-  if (!dati.profili) dati.profili = {};
-  c.innerHTML = dati.giocatori.map(g => {
-    const p = dati.profili[g] || {};
-    const carte = p.carte || ['', '', ''];
-    return `<div style="margin-bottom:24px;padding-bottom:24px;border-bottom:1px solid var(--border)">
-      <div style="font-weight:600;margin-bottom:12px">${g}</div>
-      <div style="display:flex;flex-direction:column;gap:10px">
-        <div>
-          <label>Foto (percorso o URL)</label>
-          <input type="text" id="prof-foto-${g}" value="${p.foto || ''}" placeholder="img/${g.toLowerCase()}.jpg">
-        </div>
-        <div>
-          <label>Descrizione</label>
-          <input type="text" id="prof-desc-${g}" value="${p.descrizione || ''}" placeholder="Una breve descrizione del giocatore...">
-        </div>
-        <div>
-          <label>Carta 1 (URL immagine)</label>
-          <input type="text" id="prof-c1-${g}" value="${carte[0] || ''}" placeholder="https://images.ygoprodeck.com/...">
-        </div>
-        <div>
-          <label>Carta 2 (URL immagine)</label>
-          <input type="text" id="prof-c2-${g}" value="${carte[1] || ''}" placeholder="https://images.ygoprodeck.com/...">
-        </div>
-        <div>
-          <label>Carta 3 (URL immagine)</label>
-          <input type="text" id="prof-c3-${g}" value="${carte[2] || ''}" placeholder="https://images.ygoprodeck.com/...">
-        </div>
-        <button class="primary" style="margin-top:4px" onclick="salvaProfilo('${g}')">Salva profilo ${g}</button>
-      </div>
-    </div>`;
-  }).join('');
-}
-
-function salvaProfilo(g) {
-  if (!dati.profili) dati.profili = {};
-  dati.profili[g] = {
-    foto: document.getElementById(`prof-foto-${g}`).value.trim(),
-    descrizione: document.getElementById(`prof-desc-${g}`).value.trim(),
-    carte: [
-      document.getElementById(`prof-c1-${g}`).value.trim(),
-      document.getElementById(`prof-c2-${g}`).value.trim(),
-      document.getElementById(`prof-c3-${g}`).value.trim()
-    ].filter(Boolean)
-  };
-  mostraPreviewConfig();
-  alert(`Profilo di ${g} salvato! Ricordati di scaricare il nuovo dati.json.`);
-}
-
-function renderConfigGiocatori() {
-  const c = document.getElementById('lista-giocatori-config');
-  if (dati.giocatori.length === 0) {
-    c.innerHTML = '<div class="empty">Nessun giocatore.</div>';
-    return;
-  }
-  const stat = calcolaStatGiocatori();
-  c.innerHTML = dati.giocatori.map((g, i) => {
-    const s = stat[g] || { partite: 0 };
-    return `<div class="config-row">
-      <div>
-        <span class="name">${g}</span>
-        <span class="meta">${s.partite} partite giocate</span>
-      </div>
-      <div class="actions">
-        <button class="secondary" onclick="rinominaGiocatore(${i})">Rinomina</button>
-        <button class="danger" onclick="eliminaGiocatore(${i})">Elimina</button>
-      </div>
-    </div>`;
-  }).join('');
-}
-
-function renderConfigMazzi() {
-  const c = document.getElementById('lista-mazzi-config');
-  // raccogli tutti i mazzi (dichiarati + da partite)
-  const tuttiMazzi = { ...dati.mazzi };
-  dati.partite.forEach(par => {
-    if (!tuttiMazzi[par.m1]) tuttiMazzi[par.m1] = par.g1;
-    if (!tuttiMazzi[par.m2]) tuttiMazzi[par.m2] = par.g2;
-  });
-  const lista = Object.entries(tuttiMazzi).sort((a, b) => a[0].localeCompare(b[0]));
-  if (lista.length === 0) {
-    c.innerHTML = '<div class="empty">Nessun mazzo registrato.</div>';
-    return;
-  }
-  const stat = calcolaStatMazzi();
-  c.innerHTML = lista.map(([nome, prop]) => {
-    const partite = (stat[nome] || { partite: 0 }).partite;
-    return `<div class="config-row">
-      <div>
-        <span class="name">${nome}</span>
-        <span class="meta">di ${prop} · ${partite} partite</span>
-      </div>
-      <div class="actions">
-        <button class="secondary" onclick="rinominaMazzo('${nome.replace(/'/g, "\\'")}')">Rinomina</button>
-        <button class="secondary" onclick="cambiaProprietario('${nome.replace(/'/g, "\\'")}')">Cambia prop.</button>
-        <button class="danger" onclick="eliminaMazzo('${nome.replace(/'/g, "\\'")}')">Elimina</button>
-      </div>
-    </div>`;
-  }).join('');
-}
-
-function popolaSelectOwnerNuovoMazzo() {
-  const sel = document.getElementById('new-deck-owner');
-  sel.innerHTML = dati.giocatori.map(g => `<option>${g}</option>`).join('');
-}
-
-function aggiungiGiocatore() {
-  const inp = document.getElementById('new-player');
-  const nome = inp.value.trim();
-  if (!nome) { alert('Scrivi un nome.'); return; }
-  if (dati.giocatori.includes(nome)) { alert('Questo giocatore esiste già.'); return; }
-  dati.giocatori.push(nome);
-  inp.value = '';
-  popolaTutto();
-  mostraPreviewConfig();
-}
-
-function rinominaGiocatore(i) {
-  const vecchio = dati.giocatori[i];
-  const nuovo = prompt(`Rinomina "${vecchio}" in:`, vecchio);
-  if (!nuovo || nuovo.trim() === '' || nuovo === vecchio) return;
-  const nuovoT = nuovo.trim();
-  if (dati.giocatori.includes(nuovoT)) { alert('Esiste già un giocatore con questo nome.'); return; }
-  dati.giocatori[i] = nuovoT;
-  // aggiorna mazzi
-  Object.keys(dati.mazzi).forEach(m => {
-    if (dati.mazzi[m] === vecchio) dati.mazzi[m] = nuovoT;
-  });
-  // aggiorna partite
-  dati.partite.forEach(p => {
-    if (p.g1 === vecchio) p.g1 = nuovoT;
-    if (p.g2 === vecchio) p.g2 = nuovoT;
-  });
-  popolaTutto();
-  mostraPreviewConfig();
-}
-
-function eliminaGiocatore(i) {
-  const nome = dati.giocatori[i];
-  const partiteCoinvolte = dati.partite.filter(p => p.g1 === nome || p.g2 === nome).length;
-  const mazziCoinvolti = Object.entries(dati.mazzi).filter(([_, p]) => p === nome).length;
-  let msg = `Eliminare il giocatore "${nome}"?`;
-  if (partiteCoinvolte > 0 || mazziCoinvolti > 0) {
-    msg += `\n\nVerranno eliminate anche ${partiteCoinvolte} partite e ${mazziCoinvolti} mazzi associati.`;
-  }
-  if (!confirm(msg)) return;
-  dati.giocatori.splice(i, 1);
-  dati.partite = dati.partite.filter(p => p.g1 !== nome && p.g2 !== nome);
-  Object.keys(dati.mazzi).forEach(m => {
-    if (dati.mazzi[m] === nome) delete dati.mazzi[m];
-  });
-  popolaTutto();
-  mostraPreviewConfig();
-}
-
-function aggiungiMazzo() {
-  const inp = document.getElementById('new-deck');
-  const owner = document.getElementById('new-deck-owner').value;
-  const nome = inp.value.trim();
-  if (!nome) { alert('Scrivi il nome del mazzo.'); return; }
-  if (!owner) { alert('Seleziona un proprietario.'); return; }
-  if (dati.mazzi[nome]) { alert('Questo mazzo esiste già.'); return; }
-  dati.mazzi[nome] = owner;
-  inp.value = '';
-  popolaTutto();
-  mostraPreviewConfig();
-}
-
-function rinominaMazzo(vecchio) {
-  const nuovo = prompt(`Rinomina "${vecchio}" in:`, vecchio);
-  if (!nuovo || nuovo.trim() === '' || nuovo === vecchio) return;
-  const nuovoT = nuovo.trim();
-  if (dati.mazzi[nuovoT]) { alert('Esiste già un mazzo con questo nome.'); return; }
-  const owner = dati.mazzi[vecchio] || dati.partite.find(p => p.m1 === vecchio)?.g1
-              || dati.partite.find(p => p.m2 === vecchio)?.g2;
-  delete dati.mazzi[vecchio];
-  if (owner) dati.mazzi[nuovoT] = owner;
-  dati.partite.forEach(p => {
-    if (p.m1 === vecchio) p.m1 = nuovoT;
-    if (p.m2 === vecchio) p.m2 = nuovoT;
-  });
-  popolaTutto();
-  mostraPreviewConfig();
-}
-
-function cambiaProprietario(mazzo) {
-  const attuale = dati.mazzi[mazzo];
-  const opzioni = dati.giocatori.map((g, i) => `${i+1}. ${g}`).join('\n');
-  const scelta = prompt(`Mazzo "${mazzo}" — attualmente di ${attuale || '?'}.\nScegli il nuovo proprietario:\n\n${opzioni}\n\nDigita il numero:`);
-  if (!scelta) return;
-  const idx = parseInt(scelta) - 1;
-  if (isNaN(idx) || idx < 0 || idx >= dati.giocatori.length) { alert('Scelta non valida.'); return; }
-  dati.mazzi[mazzo] = dati.giocatori[idx];
-  popolaTutto();
-  mostraPreviewConfig();
-}
-
-function eliminaMazzo(mazzo) {
-  const partiteCoinvolte = dati.partite.filter(p => p.m1 === mazzo || p.m2 === mazzo).length;
-  let msg = `Eliminare il mazzo "${mazzo}"?`;
-  if (partiteCoinvolte > 0) {
-    msg += `\n\nVerranno eliminate anche ${partiteCoinvolte} partite in cui è stato usato.`;
-  }
-  if (!confirm(msg)) return;
-  delete dati.mazzi[mazzo];
-  dati.partite = dati.partite.filter(p => p.m1 !== mazzo && p.m2 !== mazzo);
-  popolaTutto();
-  mostraPreviewConfig();
-}
-
-function eliminaPartita(idx) {
-  const p = dati.partite[idx];
-  if (!p) return;
-  if (!confirm(`Eliminare la partita ${p.g1} vs ${p.g2} (${p.risultato}) del ${formatData(p.data)}?`)) return;
-  dati.partite.splice(idx, 1);
-  popolaTutto();
-  // genera output e porta l'utente alla scheda dove può scaricarlo
-  const json = JSON.stringify(dati, null, 2);
-  document.getElementById('json-preview').textContent = json;
-  const out = document.getElementById('output');
-  out.querySelector('.title').innerHTML = '<span class="check">✓</span>Partita eliminata';
-  out.querySelector('p').innerHTML = 'Scarica o copia il nuovo <code>dati.json</code> e caricalo su GitHub per applicare la modifica.';
-  out.classList.add('show');
-  // switch alla scheda "+ Partita"
-  switchTab('nuova');
-  setTimeout(() => out.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
-  mostraPreviewConfig();
-}
-
-function mostraPreviewConfig() {
-  const pre = document.getElementById('config-json-preview');
-  pre.style.display = 'block';
-  pre.textContent = JSON.stringify(dati, null, 2);
-}
-
-// ============ NAVIGAZIONE ============
-// ============ NAVIGAZIONE ============
-function switchTab(id) {
-  document.querySelectorAll('.tab-btn').forEach(x => x.classList.remove('active'));
-  document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
-  const btn = document.querySelector(`.tab-btn[data-tab="${id}"]`);
-  if (btn) btn.classList.add('active');
-  const sec = document.getElementById(id);
-  if (sec) sec.classList.add('active');
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-
-document.querySelectorAll('.tab-btn').forEach(b => {
-  b.addEventListener('click', () => {
-    document.querySelectorAll('.tab-btn').forEach(x => x.classList.remove('active'));
-    document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
-    b.classList.add('active');
-    document.getElementById(b.dataset.tab).classList.add('active');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  });
-});
-
-// ============ FORM PARTITA ============
-document.getElementById('g1').addEventListener('change', () => {
-  aggiornaSelectMazzi('m1', document.getElementById('g1').value);
-  aggiornaOpzioniRisultato();
-});
-document.getElementById('g2').addEventListener('change', () => {
-  aggiornaSelectMazzi('m2', document.getElementById('g2').value);
-  aggiornaOpzioniRisultato();
-});
-
-document.getElementById('form-partita').addEventListener('submit', e => {
-  e.preventDefault();
-  const g1 = document.getElementById('g1').value;
-  const g2 = document.getElementById('g2').value;
-  const ris = document.getElementById('risultato').value;
-  const data = document.getElementById('data').value;
-
-  // leggi mazzo 1
-  let m1 = document.getElementById('m1').value;
-  if (m1 === '__nuovo__') {
-    m1 = document.getElementById('m1-custom').value.trim();
-    if (!m1) { alert('Scrivi il nome del nuovo mazzo per il Giocatore 1.'); return; }
-  }
-  // leggi mazzo 2
-  let m2 = document.getElementById('m2').value;
-  if (m2 === '__nuovo__') {
-    m2 = document.getElementById('m2-custom').value.trim();
-    if (!m2) { alert('Scrivi il nome del nuovo mazzo per il Giocatore 2.'); return; }
-  }
-
-  if (g1 === g2) { alert('I due giocatori devono essere diversi.'); return; }
-  if (m1.toLowerCase() === m2.toLowerCase()) { alert('I due mazzi devono essere diversi.'); return; }
-  if (dati.mazzi[m1] && dati.mazzi[m1] !== g1) {
-    if (!confirm(`Il mazzo "${m1}" risulta di ${dati.mazzi[m1]}, non di ${g1}. Continuare?`)) return;
-  }
-  if (dati.mazzi[m2] && dati.mazzi[m2] !== g2) {
-    if (!confirm(`Il mazzo "${m2}" risulta di ${dati.mazzi[m2]}, non di ${g2}. Continuare?`)) return;
-  }
-
-  if (!dati.mazzi[m1]) dati.mazzi[m1] = g1;
-  if (!dati.mazzi[m2]) dati.mazzi[m2] = g2;
-  dati.partite.push({ data, g1, m1, g2, m2, risultato: ris });
-
-  popolaTutto();
-
-  const json = JSON.stringify(dati, null, 2);
-  document.getElementById('json-preview').textContent = json;
-  const out = document.getElementById('output');
-  out.querySelector('.title').innerHTML = '<span class="check">✓</span>Partita registrata';
-  out.querySelector('p').innerHTML = 'Scarica o copia il nuovo <code>dati.json</code> e caricalo su GitHub.';
-  out.classList.add('show');
-  out.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  // reset campi custom
-  document.getElementById('m1-custom').value = '';
-  document.getElementById('m2-custom').value = '';
-  document.getElementById('m1-nuovo').style.display = 'none';
-  document.getElementById('m2-nuovo').style.display = 'none';
-});
-
-function scaricaJSON() {
-  const json = JSON.stringify(dati, null, 2);
-  const blob = new Blob([json], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = 'dati.json';
-  document.body.appendChild(a); a.click(); a.remove();
-  URL.revokeObjectURL(url);
-}
-function copiaJSON() {
-  const json = JSON.stringify(dati, null, 2);
-  navigator.clipboard.writeText(json).then(() => {
-    alert('Copiato! Incolla in dati.json su GitHub.');
-  }).catch(() => alert('Copia non riuscita, usa Scarica.'));
-}
-
-// ============ MODALE PROFILO ============
-function mazzoPreferitoGiocatore(nome) {
-  const conteggio = {};
-  dati.partite.forEach(p => {
-    if (p.g1 === nome) conteggio[p.m1] = (conteggio[p.m1] || 0) + 1;
-    if (p.g2 === nome) conteggio[p.m2] = (conteggio[p.m2] || 0) + 1;
-  });
-  const entries = Object.entries(conteggio);
-  if (entries.length === 0) return '—';
-  return entries.sort((a, b) => b[1] - a[1])[0][0];
-}
-
-function apriProfilo(nome) {
-  const profilo = (dati.profili || {})[nome] || {};
-  const stat = calcolaStatGiocatori();
-  const s = stat[nome] || { punti: 0, v: 0, p: 0, partite: 0 };
-  const wr = s.partite > 0 ? Math.round(100 * s.v / s.partite) : 0;
-  const media = s.partite > 0 ? (s.punti / s.partite).toFixed(1) : '—';
-  const mazzoPref = mazzoPreferitoGiocatore(nome);
-
-  // posizione in classifica
-  const arr = Object.entries(stat).sort((a, b) => b[1].punti - a[1].punti || b[1].v - a[1].v);
-  const pos = arr.findIndex(([n]) => n === nome) + 1;
-  const medals = ['🥇', '🥈', '🥉'];
-  const posLabel = pos <= 3 ? medals[pos - 1] + ' ' + pos + '° posto' : pos + '° posto';
-
-  // foto
-  const photoWrap = document.getElementById('modal-photo-wrap');
-  if (profilo.foto) {
-    photoWrap.innerHTML = `<img class="modal-photo" src="${profilo.foto}" alt="${nome}" onerror="this.outerHTML='<div class=modal-photo-placeholder>👤</div>'">`;
-  } else {
-    photoWrap.innerHTML = `<div class="modal-photo-placeholder">👤</div>`;
-  }
-
-  document.getElementById('modal-name').textContent = nome;
-
-  // stat lines
-  document.getElementById('modal-stat-row').innerHTML = `
-    <div class="modal-stat-line"><span class="modal-stat-label">Classifica</span><strong>${posLabel}</strong></div>
-    <div class="modal-stat-line"><span class="modal-stat-label">Win Rate</span><strong>${wr}%</strong></div>
-    <div class="modal-stat-line"><span class="modal-stat-label">Media punti</span><strong>${media}</strong></div>
-    <div class="modal-stat-line"><span class="modal-stat-label">Mazzo preferito</span><strong>${mazzoPref}</strong></div>
-  `;
-
-  // descrizione (continua sotto la foto grazie al CSS float/grid)
-  document.getElementById('modal-desc').textContent = profilo.descrizione || 'Nessuna descrizione ancora.';
-
-  // carte
-  const carte = profilo.carte || [];
-  const cardsEl = document.getElementById('modal-cards');
-  if (carte.filter(Boolean).length > 0) {
-    cardsEl.innerHTML = carte.filter(Boolean).map(url =>
-      `<img src="${url}" alt="carta" onerror="this.style.opacity='0.15'">`
-    ).join('');
-  } else {
-    cardsEl.innerHTML = `<div style="grid-column:1/-1;text-align:center;color:var(--text-faint);padding:16px;font-size:0.9rem">Nessuna carta impostata.</div>`;
-  }
-
-  document.getElementById('modal-overlay').classList.add('open');
-  document.body.style.overflow = 'hidden';
-}
-
-function contaMazziGiocatore(nome) {
-  const set = new Set();
-  Object.entries(dati.mazzi || {}).forEach(([m, p]) => { if (p === nome) set.add(m); });
-  dati.partite.forEach(p => {
-    if (p.g1 === nome) set.add(p.m1);
-    if (p.g2 === nome) set.add(p.m2);
-  });
-  return set.size;
-}
-
-function chiudiModale(e) {
-  if (e.target === document.getElementById('modal-overlay')) chiudiModaleForce();
-}
-function chiudiModaleForce() {
-  document.getElementById('modal-overlay').classList.remove('open');
-  document.body.style.overflow = '';
-}
-document.addEventListener('keydown', e => { if (e.key === 'Escape') chiudiModaleForce(); });
-
-caricaDati();
-// ============ DATABASE CARTE ============
-let genesysCache = null; // cache lista Genesys
-
-document.addEventListener('DOMContentLoaded', () => {
-  const inp = document.getElementById('carte-search');
-  if (inp) inp.addEventListener('keydown', e => { if (e.key === 'Enter') cercaCarta(); });
-  const gIn = document.getElementById('genesys-search');
-  if (gIn) gIn.addEventListener('input', filtraListaGenesys);
-});
-
-function toggleFiltri() {
-  const panel = document.getElementById('filtri-panel');
-  const label = document.getElementById('filtri-toggle-label');
-  const open = panel.style.display === 'none';
-  panel.style.display = open ? 'block' : 'none';
-  label.textContent = open ? '▼ Filtri avanzati' : '▶ Filtri avanzati';
-}
-
-function resetFiltri() {
-  ['f-type','f-attribute','f-race','f-level','f-atk','f-def','f-genesys-min','f-genesys-max'].forEach(id => {
-    const el = document.getElementById(id); if (el) el.value = '';
-  });
-}
-
-let searchOffset = 0;
-let lastParams = null;
-let lastGenesysFilter = false;
-
-async function cercaCarta(append = false) {
-  const q       = document.getElementById('carte-search')?.value.trim() || '';
-  const tipo    = document.getElementById('f-type')?.value || '';
-  const attr    = document.getElementById('f-attribute')?.value || '';
-  const race    = document.getElementById('f-race')?.value || '';
-  const level   = document.getElementById('f-level')?.value || '';
-  const atk     = document.getElementById('f-atk')?.value || '';
-  const def     = document.getElementById('f-def')?.value || '';
-  const gMin    = document.getElementById('f-genesys-min')?.value || '';
-  const gMax    = document.getElementById('f-genesys-max')?.value || '';
-  const usaGenesys = gMin !== '' || gMax !== '';
-
-  if (!q && !tipo && !attr && !race && !level && !atk && !def && !usaGenesys) {
-    alert('Inserisci almeno un parametro di ricerca.');
-    return;
-  }
-
-  // Se usa solo filtro punti Genesys senza altri parametri → usa cache
-  if (usaGenesys && !q && !tipo && !attr && !race && !level && !atk && !def) {
-    await cercaDaCache(gMin, gMax);
-    return;
-  }
-
-  if (!append) searchOffset = 0;
-
-  const res = document.getElementById('carte-results');
-  const det = document.getElementById('carte-detail');
-  det.style.display = 'none';
-  res.style.display = 'block';
-  if (!append) res.innerHTML = '<div class="carte-loading">Ricerca in corso…</div>';
-
-  const params = new URLSearchParams();
-  if (q)     params.append('fname', q);
-  if (tipo)  params.append('type', tipo);
-  if (attr)  params.append('attribute', attr);
-  if (race)  params.append('race', race);
-  if (level) params.append('level', level);
-  if (atk)   params.append('atk', atk);
-  if (def)   params.append('def', def);
-  params.append('misc', 'yes');
-  params.append('num', '100');
-  params.append('offset', searchOffset);
-
-  lastParams = params;
-  lastGenesysFilter = usaGenesys;
-
-  try {
-    const r = await fetch(`https://db.ygoprodeck.com/api/v7/cardinfo.php?${params.toString()}`);
-    if (!r.ok) throw new Error();
-    const data = await r.json();
-    let cards = data.data || [];
-
-    // filtro lato client sui punti genesys se specificato
-    if (usaGenesys) {
-      const minV = gMin !== '' ? parseInt(gMin) : -1;
-      const maxV = gMax !== '' ? parseInt(gMax) : 999;
-      cards = cards.filter(c => {
-        const pts = c.misc_info?.[0]?.genesys_points ?? 0;
-        return pts >= minV && pts <= maxV;
-      });
-    }
-
-    if (!append && cards.length === 0) {
-      res.innerHTML = '<div class="carte-empty">Nessuna carta trovata con questi filtri.</div>';
-      return;
-    }
-
-    const hasMore = data.meta?.total_rows > searchOffset + 100;
-    searchOffset += 100;
-
-    const grid = buildGrid(cards);
-    const loadMoreBtn = hasMore
-      ? `<div style="text-align:center;padding:20px">
-           <button class="secondary" style="padding:14px 32px;font-size:1rem;border-radius:12px" onclick="cercaCarta(true)">
-             Carica altri risultati
-           </button>
-         </div>`
-      : '';
-
-    if (append) {
-      // rimuovi vecchio bottone "carica altri" e aggiungi nuove carte
-      const existing = res.querySelector('.carte-grid');
-      if (existing) {
-        cards.forEach(c => {
-          const div = document.createElement('div');
-          div.innerHTML = buildThumb(c);
-          existing.appendChild(div.firstElementChild);
-        });
-        const oldBtn = res.querySelector('.load-more-wrap');
-        if (oldBtn) oldBtn.remove();
-      }
-      if (hasMore) {
-        const wrap = document.createElement('div');
-        wrap.className = 'load-more-wrap';
-        wrap.innerHTML = loadMoreBtn;
-        res.querySelector('.card').appendChild(wrap);
-      }
-    } else {
-      res.innerHTML = `
-        <div class="card padded" style="margin-bottom:0">
-          <div style="font-size:0.8rem;color:var(--text-faint);margin-bottom:12px">${cards.length} risultati${hasMore ? ' (scorri per altri)' : ''}</div>
-          <div class="carte-grid">${cards.map(buildThumb).join('')}</div>
-          <div class="load-more-wrap">${loadMoreBtn}</div>
-        </div>`;
-    }
-  } catch(e) {
-    if (!append) res.innerHTML = '<div class="carte-empty">Nessuna carta trovata. Prova a modificare i filtri.</div>';
-  }
-}
-
-function buildThumb(c) {
-  const img = c.card_images?.[0]?.image_url_small || c.card_images?.[0]?.image_url || '';
-  const pts = c.misc_info?.[0]?.genesys_points ?? 0;
-  const badge = pts > 0
-    ? `<div class="genesys-thumb-badge ${pts >= 30 ? 'high' : pts >= 10 ? 'mid' : 'low'}">${pts}</div>`
-    : '';
-  return `<div class="carta-thumb" onclick="mostraDettaglioCarta(${c.id})">
-    <div style="position:relative">
-      <img src="${img}" alt="${escapeHtml(c.name)}" loading="lazy" onerror="this.style.opacity='0.2'">
-      ${badge}
-    </div>
-    <div class="carta-nome">${escapeHtml(c.name)}</div>
-  </div>`;
-}
-
-async function cercaDaCache(gMin, gMax) {
-  const res = document.getElementById('carte-results');
-  const det = document.getElementById('carte-detail');
-  det.style.display = 'none';
-  res.style.display = 'block';
-
-  // assicurati che la cache sia caricata
-  if (!genesysCache) {
-    res.innerHTML = '<div class="carte-loading">Caricamento lista Genesys…</div>';
-    await apriListaGenesys(true); // true = silent, non cambia vista
-    if (!genesysCache) {
-      res.innerHTML = '<div class="carte-empty">Errore nel caricamento. Riprova.</div>';
-      return;
-    }
-  }
-
-  const minV = gMin !== '' ? parseInt(gMin) : -1;
-  const maxV = gMax !== '' ? parseInt(gMax) : 999;
-  const filtered = genesysCache.filter(c => c.points >= minV && c.points <= maxV);
-
-  if (filtered.length === 0) {
-    res.innerHTML = '<div class="carte-empty">Nessuna carta trovata con questi punti.</div>';
-    return;
-  }
-
-  res.innerHTML = `
-    <div class="card padded" style="margin-bottom:0">
-      <div style="font-size:0.8rem;color:var(--text-faint);margin-bottom:12px">${filtered.length} carte Genesys${gMin ? ' da '+gMin : ''} a ${gMax || '100'} punti</div>
-      <div class="carte-grid">
-        ${filtered.map(c => {
-          const cls = c.points >= 30 ? 'high' : c.points >= 10 ? 'mid' : 'low';
-          return `<div class="carta-thumb" onclick="mostraDettaglioCarta(${c.id})">
-            <div style="position:relative">
-              <img src="${c.img}" alt="${escapeHtml(c.name)}" loading="lazy">
-              <div class="genesys-thumb-badge ${cls}">${c.points}</div>
-            </div>
-            <div class="carta-nome">${escapeHtml(c.name)}</div>
-          </div>`;
-        }).join('')}
-      </div>
-    </div>`;
-}
-
-async function mostraDettaglioCarta(id) {
-  const res = document.getElementById('carte-results');
-  const det = document.getElementById('carte-detail');
-  det.style.display = 'block';
-  det.innerHTML = '<div class="carte-loading">Caricamento…</div>';
-  res.style.display = 'none';
-  det.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  try {
-    const r = await fetch(`https://db.ygoprodeck.com/api/v7/cardinfo.php?id=${id}&misc=yes`);
-    const data = await r.json();
-    const c = data.data?.[0];
-    if (!c) throw new Error();
-    const img = c.card_images?.[0]?.image_url || '';
-    const chips = [];
-    if (c.type)              chips.push({txt: c.type, cls: ''});
-    if (c.attribute)         chips.push({txt: c.attribute, cls: ''});
-    if (c.level)             chips.push({txt: 'Livello ' + c.level, cls: ''});
-    if (c.atk !== undefined) chips.push({txt: 'ATK ' + c.atk, cls: ''});
-    if (c.def !== undefined) chips.push({txt: 'DEF ' + c.def, cls: ''});
-    if (c.race)              chips.push({txt: c.race, cls: ''});
-
-    // punti Genesys
-    const genesysPoints = c.misc_info?.[0]?.genesys_points;
-    if (genesysPoints !== undefined && genesysPoints !== null) {
-      chips.push({txt: `Genesys: ${genesysPoints} pt`, cls: 'genesys-chip'});
-    }
-
-    // prezzo CardMarket (se disponibile)
-    const cmPrice = c.card_prices?.[0]?.cardmarket_price;
-    const priceHtml = (cmPrice && parseFloat(cmPrice) > 0)
-      ? `<span class="carta-price">€ ${parseFloat(cmPrice).toFixed(2)}</span>`
-      : '';
-
-    // URL ruling: Yugipedia ha pagine stabili "Card_Rulings:NOME"
-    const yugipediaName = c.name.replace(/ /g, '_');
-    const rulingsUrl = `https://yugipedia.com/wiki/Card_Rulings:${encodeURIComponent(yugipediaName)}`;
-    const cardmarketUrl = `https://www.cardmarket.com/en/YuGiOh/Products/Search?searchString=${encodeURIComponent(c.name)}`;
-
-    det.innerHTML = `
-      <button class="back-btn" onclick="tornaRisultati()">← Torna ai risultati</button>
-      <div class="card padded">
-        <div class="carta-detail-wrap">
-          <img class="carta-detail-img" src="${img}" alt="${escapeHtml(c.name)}">
-          <div class="carta-detail-info">
-            <div class="carta-detail-name">${escapeHtml(c.name)}</div>
-            <div class="carta-detail-type">${escapeHtml(c.type || '')}</div>
-            <div class="carta-stat-chips">
-              ${chips.map(ch => `<span class="carta-chip ${ch.cls}">${escapeHtml(ch.txt)}</span>`).join('')}
-            </div>
-            <div class="carta-detail-text">${escapeHtml(c.desc || '')}</div>
-            <div class="carta-links">
-              <a href="${rulingsUrl}" target="_blank" rel="noopener" class="carta-link-btn">📋 Card Rulings</a>
-              <a href="${cardmarketUrl}" target="_blank" rel="noopener" class="carta-link-btn">🛒 CardMarket</a>
-              ${priceHtml}
-            </div>
-          </div>
-        </div>
-      </div>`;
-  } catch(e) {
-    det.innerHTML = '<button class="back-btn" onclick="tornaRisultati()">← Torna ai risultati</button><div class="carte-empty">Errore nel caricamento.</div>';
-  }
-}
-
-function tornaRisultati() {
-  document.getElementById('carte-detail').style.display = 'none';
-  document.getElementById('carte-results').style.display = 'block';
-}
-
-function escapeHtml(s) {
-  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
-}
-
-// ── LISTA GENESYS COMPLETA ──
-async function apriListaGenesys(silent = false) {
-  if (!silent) {
-    document.getElementById('database-view').style.display = 'none';
-    document.getElementById('genesys-view').style.display = 'block';
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
-  const cont = document.getElementById('genesys-list');
-  if (genesysCache) {
-    if (!silent) renderListaGenesys(genesysCache);
-    return;
-  }
-  if (!silent) cont.innerHTML = '<div class="carte-loading">Caricamento lista Genesys…</div>';
-  try {
-    const r = await fetch('https://db.ygoprodeck.com/api/v7/cardinfo.php?format=genesys&misc=yes');
-    if (!r.ok) throw new Error();
-    const data = await r.json();
-    const cards = (data.data || [])
-      .map(c => ({
-        id: c.id,
-        name: c.name,
-        type: c.type,
-        img: c.card_images?.[0]?.image_url_small || '',
-        points: c.misc_info?.[0]?.genesys_points ?? 0
-      }))
-      .filter(c => c.points > 0)
-      .sort((a, b) => b.points - a.points);
-    genesysCache = cards;
-    if (!silent) renderListaGenesys(cards);
-  } catch(e) {
-    if (!silent) cont.innerHTML = '<div class="carte-empty">Errore nel caricamento. Riprova più tardi.</div>';
-  }
-}
-
-function renderListaGenesys(cards) {
-  const cont = document.getElementById('genesys-list');
-  if (cards.length === 0) {
-    cont.innerHTML = '<div class="carte-empty">Nessuna carta trovata.</div>';
-    return;
-  }
-  cont.innerHTML = `
-    <div class="card" style="overflow:hidden">
-      <div style="padding:14px 16px;border-bottom:1px solid var(--border);font-size:0.8rem;color:var(--text-faint)">
-        ${cards.length} carte con punti Genesys
-      </div>
-      ${cards.map(c => {
-        const cls = c.points >= 30 ? 'high' : (c.points >= 10 ? 'mid' : 'low');
-        return `<div class="genesys-list-card" onclick="mostraDettaglioCartaDaGenesys(${c.id})">
-          <img src="${c.img}" alt="${escapeHtml(c.name)}" loading="lazy">
-          <div>
-            <div class="genesys-list-name">${escapeHtml(c.name)}</div>
-            <div class="genesys-list-type">${escapeHtml(c.type || '')}</div>
-          </div>
-          <div class="genesys-points-badge ${cls}">${c.points}</div>
-        </div>`;
-      }).join('')}
-    </div>
-  `;
-}
-
-function filtraListaGenesys() {
-  if (!genesysCache) return;
-  const q = document.getElementById('genesys-search').value.trim().toLowerCase();
-  if (!q) { renderListaGenesys(genesysCache); return; }
-  const filtered = genesysCache.filter(c => c.name.toLowerCase().includes(q));
-  renderListaGenesys(filtered);
-}
-
-function chiudiListaGenesys() {
-  document.getElementById('genesys-view').style.display = 'none';
-  document.getElementById('database-view').style.display = 'block';
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-
-// quando clicchi una carta dalla lista Genesys, torna alla vista database e apri dettaglio
-function mostraDettaglioCartaDaGenesys(id) {
-  chiudiListaGenesys();
-  setTimeout(() => mostraDettaglioCarta(id), 100);
-}
-
-
-</script>
-</body>
-</html>
+  const html =
