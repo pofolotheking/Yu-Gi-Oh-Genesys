@@ -1139,6 +1139,54 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 // ============ STATO ============
+const DATI_INIZIALI = {
+  giocatori: ["Tia", "Gio", "Richi"],
+  profili: {
+    "Tia": {
+      "foto": "img/tia.jpg",
+      "descrizione": "Scrivi qui una descrizione di Tia.",
+      "carte": [
+        "https://images.ygoprodeck.com/images/cards/90829280.jpg",
+        "https://images.ygoprodeck.com/images/cards/55537983.jpg",
+        "https://images.ygoprodeck.com/images/cards/91800273.jpg"
+      ]
+    },
+    "Gio": {
+      "foto": "img/gio.jpg",
+      "descrizione": "Giocatore di razza, specializzato in mazzi con follow-up infinito e la straordinaria capacità di brickare senza mai averlo fatto davvero. Capace di ribaltare partite che sembravano perse — per bravura, per furbizia, o per entrambe: il mondo potrebbe non saperlo mai. Contro: dice sempre che è il suo ultimo ordine su CardMarket.",
+      "carte": [
+        "https://images.ygoprodeck.com/images/cards/10443957.jpg",
+        "https://images.ygoprodeck.com/images/cards/66431519.jpg",
+        "https://images.ygoprodeck.com/images/cards/90241276.jpg"
+      ]
+    },
+    "Richi": {
+      "foto": "img/richi.jpg",
+      "descrizione": "Se il mazzo non nega, non è un mazzo. Se non è Synchro, non vale la pena giocarci. Filosofia semplice, risultati devastanti. Poker face quando tira Nibiru, meno quando lo prende lui. Contro: dice sempre che è il suo ultimo ordine su CardMarket.",
+      "carte": [
+        "https://images.ygoprodeck.com/images/cards/29981921.jpg",
+        "https://images.ygoprodeck.com/images/cards/33198837.jpg",
+        "https://images.ygoprodeck.com/images/cards/34680482.jpg"
+      ]
+    }
+  },
+  mazzi: {
+    "Drago Bianco Occhi Blu": "Tia",
+    "Dragon Ruler": "Gio",
+    "Magidolce": "Richi",
+    "Alanera": "Tia",
+    "Cyber Drago": "Gio",
+    "Sei Samurai": "Richi",
+    "Naturia": "Richi",
+    "Mimighoul": "Tia",
+    "Sacred Beast Yubel": "Tia"
+  },
+  partite: [
+    { "data": "2026-05-23", "g1": "Richi", "m1": "Magidolce", "g2": "Gio", "m2": "Dragon Ruler", "risultato": "2-1" },
+    { "data": "2026-05-23", "g1": "Richi", "m1": "Naturia", "g2": "Gio", "m2": "Dragon Ruler", "risultato": "1-2" }
+  ]
+};
+
 let dati = { giocatori: ["Tia", "Gio", "Richi"], mazzi: {}, partite: [] };
 const PUNTI = { "2-0": [3, 0], "2-1": [2, 1], "1-2": [1, 2], "0-2": [0, 3] };
 const SOGLIA_MAZZO = 3;
@@ -1151,13 +1199,16 @@ async function caricaDati() {
     if (docSnap.exists()) {
       const j = docSnap.data();
       dati = {
-        giocatori: j.giocatori || ["Tia", "Gio", "Richi"],
+        giocatori: j.giocatori || DATI_INIZIALI.giocatori,
         profili: j.profili || {},
         mazzi: j.mazzi || {},
         partite: j.partite || []
       };
     } else {
+      // Primo avvio: carica i dati dal JSON originale su Firestore
+      dati = JSON.parse(JSON.stringify(DATI_INIZIALI));
       await setDoc(docRef, dati);
+      console.log("✅ Database inizializzato con i dati storici!");
     }
   } catch (e) { console.error("Errore di caricamento dal Cloud:", e); }
   popolaTutto();
