@@ -2087,7 +2087,6 @@ async function cercaCarta(append = false) {
 
 function buildThumb(c) {
   const img = c.card_images?.[0]?.image_url_small || c.card_images?.[0]?.image_url || '';
-  // Prendi i punti dall'API, oppure dalla cache Genesys come fallback
   let pts = c.misc_info?.[0]?.genesys_points ?? null;
   if ((pts === null || pts === 0) && genesysCache) {
     const cached = genesysCache.find(x => x.id === c.id);
@@ -2098,20 +2097,15 @@ function buildThumb(c) {
   const badge = pts > 0
     ? `<div class="genesys-thumb-badge ${badgeCls}" title="${pts} punti Genesys">${pts}</div>`
     : '';
-  const descShort = c.desc ? c.desc.substring(0, 200) : '';
-  const statsAttr = JSON.stringify({
-    type: c.type || '',
-    atk: c.atk,
-    def: c.def,
-    level: c.level,
-    race: c.race || '',
-    attr: c.attribute || '',
-    pts: pts
-  }).replace(/"/g, '&quot;');
+  _cardRegistry[c.id] = {
+    name: c.name, img: img, type: c.type || '',
+    atk: c.atk ?? null, def: c.def ?? null,
+    level: c.level || null, attr: c.attribute || '',
+    desc: c.desc || '', pts: pts
+  };
   return `<div class="carta-thumb"
     onclick="mostraDettaglioCarta(${c.id})"
-    onmouseenter="mostraPreview(event, ${c.id}, '${escapeHtml(c.name).replace(/'/g,"\'")}', '${img.replace(/'/g,"\'")}', '${descShort.replace(/'/g,"\'").replace(/
-/g,' ')}', '${statsAttr}')"
+    onmouseenter="mostraPreview(event, ${c.id})"
     onmouseleave="nascondiPreview()">
     <div style="position:relative">
       <img src="${img}" alt="${escapeHtml(c.name)}" loading="lazy" onerror="this.style.opacity='0.2'">
@@ -2258,9 +2252,10 @@ function renderListaGenesys(cards) {
       <div style="padding:14px 16px;border-bottom:1px solid var(--border);font-size:0.8rem;color:var(--text-faint)">${cards.length} carte con punti Genesys</div>
       ${cards.map(c => {
         const cls = c.points >= 30 ? 'high' : (c.points >= 10 ? 'mid' : 'low');
+        _cardRegistry[c.id] = { name: c.name, img: c.img, type: c.type || '', pts: c.points, desc: '' };
         return `<div class="genesys-list-card"
           onclick="mostraDettaglioCartaDaGenesys(${c.id})"
-          onmouseenter="mostraPreviewGenesys(event, ${c.id}, '${escapeHtml(c.name).replace(/'/g,"\'")}', '${c.img.replace(/'/g,"\'")}', ${c.points})"
+          onmouseenter="mostraPreviewGenesys(event, ${c.id})"
           onmouseleave="nascondiPreview()">
           <img src="${c.img}" alt="${escapeHtml(c.name)}" loading="lazy">
           <div><div class="genesys-list-name">${escapeHtml(c.name)}</div><div class="genesys-list-type">${escapeHtml(c.type || '')}</div></div>
@@ -2297,6 +2292,7 @@ function toggleAccordion(id) {
 }
 
 // ── TOOLTIP PREVIEW ──
+const _cardRegistry = {};
 let previewTimer = null;
 const previewFetchCache = {};
 
@@ -2320,89 +2316,75 @@ function nascondiPreview() {
   tooltip.classList.remove('visible');
 }
 
-function mostraPreview(e, id, nome, img, desc, statsStr) {
+function renderTooltip(tooltip, c, e) {
+  const pts = c.pts || 0;
+  const ptsCls = pts >= 30 ? 'high' : pts >= 10 ? 'mid' : 'low';
+  const chips = [
+    c.type ? `<span class="carta-preview-chip">${escapeHtml(c.type)}</span>` : '',
+    c.attr ? `<span class="carta-preview-chip">${c.attr}</span>` : '',
+    c.level ? `<span class="carta-preview-chip">Lv.${c.level}</span>` : '',
+    c.atk != null ? `<span class="carta-preview-chip">ATK ${c.atk}</span>` : '',
+    c.def != null ? `<span class="carta-preview-chip">DEF ${c.def}</span>` : '',
+    pts > 0 ? `<span class="carta-preview-chip genesys ${ptsCls}">⬡ ${pts} pt</span>` : ''
+  ].filter(Boolean).join('');
+  tooltip.innerHTML = `
+    <img class="carta-preview-img" src="${c.img}" alt="${escapeHtml(c.name)}">
+    <div class="carta-preview-name">${escapeHtml(c.name)}</div>
+    <div class="carta-preview-type">${escapeHtml(c.type || '')}</div>
+    <div class="carta-preview-desc">${escapeHtml(c.desc || '')}</div>
+    <div class="carta-preview-stats">${chips}</div>
+  `;
+  posizionaTooltip(e);
+  tooltip.classList.add('visible');
+}
+
+function mostraPreview(e, id) {
   clearTimeout(previewTimer);
   previewTimer = setTimeout(async () => {
     const tooltip = document.getElementById('carta-preview-tooltip');
-    let stats = {};
-    try { stats = JSON.parse(statsStr.replace(/&quot;/g, '"')); } catch(err) {}
-    const pts = stats.pts || 0;
-    const ptsCls = pts >= 30 ? 'high' : pts >= 10 ? 'mid' : 'low';
-    const genesysChip = pts > 0
-      ? `<span class="carta-preview-chip genesys ${ptsCls}">⬡ ${pts} pt</span>` : '';
-    const chips = [
-      stats.type ? `<span class="carta-preview-chip">${stats.type}</span>` : '',
-      stats.attr ? `<span class="carta-preview-chip">${stats.attr}</span>` : '',
-      stats.level ? `<span class="carta-preview-chip">Lv.${stats.level}</span>` : '',
-      stats.atk !== undefined && stats.atk !== null ? `<span class="carta-preview-chip">ATK ${stats.atk}</span>` : '',
-      stats.def !== undefined && stats.def !== null ? `<span class="carta-preview-chip">DEF ${stats.def}</span>` : '',
-      genesysChip
-    ].filter(Boolean).join('');
-    // Se non ho desc completa, provo a fetchare
-    let fullDesc = desc;
+    const c = _cardRegistry[id] || {};
+    // Mostra subito con i dati che abbiamo
+    if (c.name) renderTooltip(tooltip, c, e);
+    // Arricchisci con fetch se non abbiamo desc o pts
     if (!previewFetchCache[id]) {
       try {
-        const r = await fetch(`https://db.ygoprodeck.com/api/v7/cardinfo.php?id=${id}&misc=yes`);
+        const r = await fetch('https://db.ygoprodeck.com/api/v7/cardinfo.php?id=' + id + '&misc=yes');
         const data = await r.json();
         const card = data.data?.[0];
         if (card) {
-          fullDesc = card.desc || desc;
-          // Aggiorna anche i punti genesys se disponibili
-          const apiPts = card.misc_info?.[0]?.genesys_points;
-          if (apiPts) stats.pts = apiPts;
-          previewFetchCache[id] = { desc: fullDesc, pts: stats.pts };
+          const apiPts = card.misc_info?.[0]?.genesys_points ?? c.pts ?? 0;
+          const enriched = Object.assign({}, c, { desc: card.desc || c.desc, pts: apiPts });
+          _cardRegistry[id] = enriched;
+          previewFetchCache[id] = true;
+          renderTooltip(tooltip, enriched, e);
         }
       } catch(err) {}
-    } else {
-      fullDesc = previewFetchCache[id].desc;
-      stats.pts = previewFetchCache[id].pts || stats.pts;
     }
-    const ptsUpdated = stats.pts || 0;
-    const ptsCls2 = ptsUpdated >= 30 ? 'high' : ptsUpdated >= 10 ? 'mid' : 'low';
-    const genesysChip2 = ptsUpdated > 0
-      ? `<span class="carta-preview-chip genesys ${ptsCls2}">⬡ ${ptsUpdated} pt</span>` : '';
-    tooltip.innerHTML = `
-      <img class="carta-preview-img" src="${img}" alt="${nome}">
-      <div class="carta-preview-name">${nome}</div>
-      <div class="carta-preview-type">${stats.type || ''}</div>
-      <div class="carta-preview-desc">${fullDesc}</div>
-      <div class="carta-preview-stats">${chips.replace(genesysChip, genesysChip2)}</div>
-    `;
-    posizionaTooltip(e);
-    tooltip.classList.add('visible');
   }, 250);
 }
 
-function mostraPreviewGenesys(e, id, nome, img, pts) {
+function mostraPreviewGenesys(e, id) {
   clearTimeout(previewTimer);
   previewTimer = setTimeout(async () => {
     const tooltip = document.getElementById('carta-preview-tooltip');
-    const ptsCls = pts >= 30 ? 'high' : pts >= 10 ? 'mid' : 'low';
-    let desc = '';
-    if (previewFetchCache[id]) {
-      desc = previewFetchCache[id].desc || '';
-    } else {
+    const c = _cardRegistry[id] || {};
+    if (c.name) renderTooltip(tooltip, c, e);
+    if (!previewFetchCache[id]) {
       try {
-        const r = await fetch(`https://db.ygoprodeck.com/api/v7/cardinfo.php?id=${id}&misc=yes`);
+        const r = await fetch('https://db.ygoprodeck.com/api/v7/cardinfo.php?id=' + id + '&misc=yes');
         const data = await r.json();
         const card = data.data?.[0];
-        if (card) { desc = card.desc || ''; previewFetchCache[id] = { desc, pts }; }
+        if (card) {
+          const enriched = Object.assign({}, c, { desc: card.desc || '', type: card.type || c.type });
+          _cardRegistry[id] = enriched;
+          previewFetchCache[id] = true;
+          renderTooltip(tooltip, enriched, e);
+        }
       } catch(err) {}
     }
-    tooltip.innerHTML = `
-      <img class="carta-preview-img" src="${img}" alt="${nome}">
-      <div class="carta-preview-name">${nome}</div>
-      <div class="carta-preview-stats">
-        <span class="carta-preview-chip genesys ${ptsCls}">⬡ ${pts} pt Genesys</span>
-      </div>
-      <div class="carta-preview-desc" style="margin-top:8px">${desc}</div>
-    `;
-    posizionaTooltip(e);
-    tooltip.classList.add('visible');
   }, 250);
 }
 
-// Aggiorna posizione tooltip al mousemove
 document.addEventListener('mousemove', e => {
   const tooltip = document.getElementById('carta-preview-tooltip');
   if (tooltip && tooltip.classList.contains('visible')) posizionaTooltip(e);
