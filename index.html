@@ -648,9 +648,10 @@ function renderGiocatori() {
     return;
   }
   const medals = ['🥇', '🥈', '🥉'];
-  let html = '<tr><th>#</th><th>Duellante</th><th>Punti</th><th>V</th><th>P</th><th>WR</th></tr>';
+  let html = '<tr><th>#</th><th>Duellante</th><th>Punti</th><th>PG</th><th>V</th><th>P</th><th>Media</th><th>Win Rate</th></tr>';
   arr.forEach(([nome, s], i) => {
     const wr = s.partite > 0 ? Math.round(100 * s.v / s.partite) : 0;
+    const media = s.partite > 0 ? (s.punti / s.partite).toFixed(1) : '—';
     const hasMedal = i < 3 && s.partite > 0;
     const rankCell = hasMedal
       ? `<td class="rank"><span class="medal">${medals[i]}</span></td>`
@@ -658,7 +659,9 @@ function renderGiocatori() {
     html += `<tr class="${i === 0 && s.partite > 0 ? 'top-1' : ''}">
       ${rankCell}<td>${nome}</td>
       <td class="pts">${s.punti}</td>
+      <td class="num">${s.partite}</td>
       <td class="num">${s.v}</td><td class="num">${s.p}</td>
+      <td class="num">${media}</td>
       <td><div class="wr-cell"><span class="wr-text">${wr}%</span><span class="wr-bar"><span style="width:${wr}%"></span></span></div></td>
     </tr>`;
   });
@@ -737,7 +740,7 @@ function renderMazzi() {
   const medals = ['🥇', '🥈', '🥉'];
   // conto quanti mazzi sono "ufficiali" (>= soglia) per le medaglie
   const ufficiali = arr.filter(([_, s]) => s.partite >= SOGLIA_MAZZO).length;
-  let html = '<tr><th>#</th><th>Mazzo</th><th>Prop.</th><th>V</th><th>P</th><th>WR</th></tr>';
+  let html = '<tr><th>#</th><th>Mazzo</th><th>Prop.</th><th>V</th><th>P</th><th>Win Rate</th></tr>';
   arr.forEach(([nome, s], i) => {
     const wr = Math.round(100 * s.wr);
     const provv = s.partite < SOGLIA_MAZZO;
