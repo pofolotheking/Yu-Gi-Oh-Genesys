@@ -9,7 +9,9 @@
     "Gio": {
       "foto": "img/gio.jpg",
       "descrizione": "Scrivi qui una descrizione di Gio.",
-      "carte": ["https://images.ygoprodeck.com/images/cards/10443957.jpg"]
+      "carte": ["https://images.ygoprodeck.com/images/cards/10443957.jpg",
+        "https://images.ygoprodeck.com/images/cards/66431519.jpg", 
+        "https://images.ygoprodeck.com/images/cards/90241276.jpg]
     },
     "Richi": {
       "foto": "img/richi.jpg",
