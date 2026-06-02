@@ -1064,6 +1064,31 @@
 </head>
 <body>
 
+<!-- SCHERMATA LOGIN -->
+<div id="login-screen" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:200;align-items:center;justify-content:center;padding:20px">
+  <div style="width:100%;max-width:360px">
+    <div style="text-align:center;margin-bottom:32px">
+      <div style="font-size:2rem;font-weight:700;letter-spacing:-0.03em">Yu-Gi-Oh! Genesys</div>
+      <div style="color:var(--text-dim);margin-top:6px;font-size:0.95rem">Il gioco che se vai primo vinci</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div>
+        <label style="font-size:0.85rem;font-weight:500;color:var(--text-dim);margin-bottom:6px;display:block">Email</label>
+        <input type="email" id="login-email" placeholder="la tua email" onkeydown="if(event.key==='Enter')eseguiLogin()">
+      </div>
+      <div>
+        <label style="font-size:0.85rem;font-weight:500;color:var(--text-dim);margin-bottom:6px;display:block">Password</label>
+        <input type="password" id="login-pwd" placeholder="••••••••" onkeydown="if(event.key==='Enter')eseguiLogin()">
+      </div>
+      <div id="login-err" style="color:var(--red);font-size:0.85rem;min-height:18px"></div>
+      <button id="login-btn" class="primary" style="margin-top:0" onclick="eseguiLogin()">Accedi</button>
+    </div>
+  </div>
+</div>
+
+<!-- APP (visibile solo dopo login) -->
+<div id="app-wrap" style="display:none">
+
 <header>
   <h1>Yu-Gi-Oh! Genesys</h1>
   <div class="subtitle">Il gioco che se vai primo vinci</div>
@@ -1385,7 +1410,12 @@
 
 <div class="carta-preview-tooltip" id="carta-preview-tooltip"></div>
 
-<footer>Tia · Gio · Richi</footer>
+<footer>
+  <span>Tia · Gio · Richi</span>
+  <button onclick="eseguiLogout()" style="background:none;border:none;color:var(--text-faint);font-size:0.75rem;cursor:pointer;margin-left:12px;font-family:inherit">Esci</button>
+</footer>
+
+</div><!-- fine app-wrap -->
 
 <div class="modal-overlay" id="modal-overlay" onclick="chiudiModale(event)">
   <div class="modal" id="modal">
@@ -1412,6 +1442,7 @@
 // ============ INIZIALIZZAZIONE FIREBASE ============
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDwDhaoUOpNPKO-0RMfVjvf4S-h_sI0qx0",
@@ -1424,6 +1455,7 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const auth = getAuth(app);
 
 // ============ STATO ============
 const DATI_INIZIALI = {
@@ -2616,7 +2648,41 @@ window.tornaRisultati = tornaRisultati;
 window.mostraDettaglioCarta = mostraDettaglioCarta;
 window.mostraDettaglioCartaDaGenesys = mostraDettaglioCartaDaGenesys;
 
-caricaDati();
+// ============ AVVIO CON AUTH ============
+onAuthStateChanged(auth, user => {
+  if (user) {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app-wrap').style.display = 'block';
+    caricaDati();
+  } else {
+    document.getElementById('login-screen').style.display = 'flex';
+    document.getElementById('app-wrap').style.display = 'none';
+  }
+});
+
+async function eseguiLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const pwd   = document.getElementById('login-pwd').value;
+  const errEl = document.getElementById('login-err');
+  const btn   = document.getElementById('login-btn');
+  errEl.textContent = '';
+  btn.disabled = true;
+  btn.textContent = 'Accesso…';
+  try {
+    await signInWithEmailAndPassword(auth, email, pwd);
+  } catch(e) {
+    errEl.textContent = 'Email o password errati.';
+    btn.disabled = false;
+    btn.textContent = 'Accedi';
+  }
+}
+
+async function eseguiLogout() {
+  await signOut(auth);
+}
+
+window.eseguiLogin = eseguiLogin;
+window.eseguiLogout = eseguiLogout;
 </script>
 </body>
 </html>
