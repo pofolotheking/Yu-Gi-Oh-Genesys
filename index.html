@@ -681,6 +681,75 @@
   .genesys-detail-pts { font-size: 1.2rem; font-variant-numeric: tabular-nums; }
   .genesys-detail-label { font-size: 0.75rem; font-weight: 500; opacity: 0.85; letter-spacing: 0.03em; text-transform: uppercase; }
 
+  /* ── TOOLTIP ANTEPRIMA CARTA ── */
+  .carta-thumb { position: relative; }
+  .carta-preview-tooltip {
+    display: none;
+    position: fixed;
+    z-index: 999;
+    width: 240px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.18);
+    padding: 14px;
+    pointer-events: none;
+    animation: fadeTooltip 0.15s ease;
+  }
+  @keyframes fadeTooltip {
+    from { opacity: 0; transform: translateY(4px) scale(0.97); }
+    to   { opacity: 1; transform: none; }
+  }
+  .carta-preview-tooltip.visible { display: block; }
+  .carta-preview-img {
+    width: 100%;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    display: block;
+  }
+  .carta-preview-name {
+    font-weight: 700;
+    font-size: 0.9rem;
+    letter-spacing: -0.01em;
+    margin-bottom: 4px;
+    color: var(--text);
+  }
+  .carta-preview-type {
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    margin-bottom: 6px;
+  }
+  .carta-preview-desc {
+    font-size: 0.72rem;
+    color: var(--text-dim);
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    margin-bottom: 8px;
+  }
+  .carta-preview-stats {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .carta-preview-chip {
+    background: var(--bg-soft);
+    border-radius: 6px;
+    padding: 3px 7px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .carta-preview-chip.genesys {
+    color: white;
+    font-weight: 700;
+  }
+  .carta-preview-chip.genesys.high { background: var(--red); }
+  .carta-preview-chip.genesys.mid  { background: var(--orange); }
+  .carta-preview-chip.genesys.low  { background: var(--green); }
+
   /* ── FILTRI AVANZATI ── */
   .filtri-toggle {
     background: none;
@@ -928,7 +997,6 @@
   <h1>Yu-Gi-Oh! Genesys</h1>
   <div class="subtitle">Il gioco che se vai primo vinci</div>
   <div class="header-actions">
-    <button class="header-btn-search" onclick="switchTab('carte')">🔍 Cerca una carta</button>
     <button class="header-btn-primary" onclick="switchTab('nuova')">+ Registra Partita</button>
     <button class="header-btn-secondary" onclick="switchTab('config')">✏️ Modifica</button>
   </div>
@@ -938,7 +1006,7 @@
   <button class="tab-btn active" data-tab="giocatori">Classifica</button>
   <button class="tab-btn" data-tab="mazzi">Mazzi</button>
   <button class="tab-btn" data-tab="storico">Storico</button>
-  <button class="tab-btn" data-tab="carte">Ricerca</button>
+  <button class="tab-btn" data-tab="carte"><svg width="13" height="13" viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:-1px;margin-right:4px"><circle cx="5.5" cy="5.5" r="4" stroke="currentColor" stroke-width="1.6"/><line x1="8.7" y1="8.7" x2="12" y2="12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>Ricerca</button>
 </nav>
 
 <main>
@@ -1193,6 +1261,8 @@
     </div>
   </section>
 </main>
+
+<div class="carta-preview-tooltip" id="carta-preview-tooltip"></div>
 
 <footer>Tia · Gio · Richi</footer>
 
@@ -2028,7 +2098,21 @@ function buildThumb(c) {
   const badge = pts > 0
     ? `<div class="genesys-thumb-badge ${badgeCls}" title="${pts} punti Genesys">${pts}</div>`
     : '';
-  return `<div class="carta-thumb" onclick="mostraDettaglioCarta(${c.id})">
+  const descShort = c.desc ? c.desc.substring(0, 200) : '';
+  const statsAttr = JSON.stringify({
+    type: c.type || '',
+    atk: c.atk,
+    def: c.def,
+    level: c.level,
+    race: c.race || '',
+    attr: c.attribute || '',
+    pts: pts
+  }).replace(/"/g, '&quot;');
+  return `<div class="carta-thumb"
+    onclick="mostraDettaglioCarta(${c.id})"
+    onmouseenter="mostraPreview(event, ${c.id}, '${escapeHtml(c.name).replace(/'/g,"\'")}', '${img.replace(/'/g,"\'")}', '${descShort.replace(/'/g,"\'").replace(/
+/g,' ')}', '${statsAttr}')"
+    onmouseleave="nascondiPreview()">
     <div style="position:relative">
       <img src="${img}" alt="${escapeHtml(c.name)}" loading="lazy" onerror="this.style.opacity='0.2'">
       ${badge}
@@ -2174,7 +2258,10 @@ function renderListaGenesys(cards) {
       <div style="padding:14px 16px;border-bottom:1px solid var(--border);font-size:0.8rem;color:var(--text-faint)">${cards.length} carte con punti Genesys</div>
       ${cards.map(c => {
         const cls = c.points >= 30 ? 'high' : (c.points >= 10 ? 'mid' : 'low');
-        return `<div class="genesys-list-card" onclick="mostraDettaglioCartaDaGenesys(${c.id})">
+        return `<div class="genesys-list-card"
+          onclick="mostraDettaglioCartaDaGenesys(${c.id})"
+          onmouseenter="mostraPreviewGenesys(event, ${c.id}, '${escapeHtml(c.name).replace(/'/g,"\'")}', '${c.img.replace(/'/g,"\'")}', ${c.points})"
+          onmouseleave="nascondiPreview()">
           <img src="${c.img}" alt="${escapeHtml(c.name)}" loading="lazy">
           <div><div class="genesys-list-name">${escapeHtml(c.name)}</div><div class="genesys-list-type">${escapeHtml(c.type || '')}</div></div>
           <div class="genesys-points-badge ${cls}">${c.points}</div>
@@ -2208,6 +2295,122 @@ function toggleAccordion(id) {
   body.style.display = isOpen ? 'none' : 'block';
   btn.classList.toggle('open', !isOpen);
 }
+
+// ── TOOLTIP PREVIEW ──
+let previewTimer = null;
+const previewFetchCache = {};
+
+function posizionaTooltip(e) {
+  const tooltip = document.getElementById('carta-preview-tooltip');
+  const margin = 14;
+  const tw = 240;
+  const th = tooltip.offsetHeight || 340;
+  let x = e.clientX + 16;
+  let y = e.clientY - th / 2;
+  if (x + tw > window.innerWidth - margin) x = e.clientX - tw - 16;
+  if (y < margin) y = margin;
+  if (y + th > window.innerHeight - margin) y = window.innerHeight - th - margin;
+  tooltip.style.left = x + 'px';
+  tooltip.style.top = y + 'px';
+}
+
+function nascondiPreview() {
+  clearTimeout(previewTimer);
+  const tooltip = document.getElementById('carta-preview-tooltip');
+  tooltip.classList.remove('visible');
+}
+
+function mostraPreview(e, id, nome, img, desc, statsStr) {
+  clearTimeout(previewTimer);
+  previewTimer = setTimeout(async () => {
+    const tooltip = document.getElementById('carta-preview-tooltip');
+    let stats = {};
+    try { stats = JSON.parse(statsStr.replace(/&quot;/g, '"')); } catch(err) {}
+    const pts = stats.pts || 0;
+    const ptsCls = pts >= 30 ? 'high' : pts >= 10 ? 'mid' : 'low';
+    const genesysChip = pts > 0
+      ? `<span class="carta-preview-chip genesys ${ptsCls}">⬡ ${pts} pt</span>` : '';
+    const chips = [
+      stats.type ? `<span class="carta-preview-chip">${stats.type}</span>` : '',
+      stats.attr ? `<span class="carta-preview-chip">${stats.attr}</span>` : '',
+      stats.level ? `<span class="carta-preview-chip">Lv.${stats.level}</span>` : '',
+      stats.atk !== undefined && stats.atk !== null ? `<span class="carta-preview-chip">ATK ${stats.atk}</span>` : '',
+      stats.def !== undefined && stats.def !== null ? `<span class="carta-preview-chip">DEF ${stats.def}</span>` : '',
+      genesysChip
+    ].filter(Boolean).join('');
+    // Se non ho desc completa, provo a fetchare
+    let fullDesc = desc;
+    if (!previewFetchCache[id]) {
+      try {
+        const r = await fetch(`https://db.ygoprodeck.com/api/v7/cardinfo.php?id=${id}&misc=yes`);
+        const data = await r.json();
+        const card = data.data?.[0];
+        if (card) {
+          fullDesc = card.desc || desc;
+          // Aggiorna anche i punti genesys se disponibili
+          const apiPts = card.misc_info?.[0]?.genesys_points;
+          if (apiPts) stats.pts = apiPts;
+          previewFetchCache[id] = { desc: fullDesc, pts: stats.pts };
+        }
+      } catch(err) {}
+    } else {
+      fullDesc = previewFetchCache[id].desc;
+      stats.pts = previewFetchCache[id].pts || stats.pts;
+    }
+    const ptsUpdated = stats.pts || 0;
+    const ptsCls2 = ptsUpdated >= 30 ? 'high' : ptsUpdated >= 10 ? 'mid' : 'low';
+    const genesysChip2 = ptsUpdated > 0
+      ? `<span class="carta-preview-chip genesys ${ptsCls2}">⬡ ${ptsUpdated} pt</span>` : '';
+    tooltip.innerHTML = `
+      <img class="carta-preview-img" src="${img}" alt="${nome}">
+      <div class="carta-preview-name">${nome}</div>
+      <div class="carta-preview-type">${stats.type || ''}</div>
+      <div class="carta-preview-desc">${fullDesc}</div>
+      <div class="carta-preview-stats">${chips.replace(genesysChip, genesysChip2)}</div>
+    `;
+    posizionaTooltip(e);
+    tooltip.classList.add('visible');
+  }, 250);
+}
+
+function mostraPreviewGenesys(e, id, nome, img, pts) {
+  clearTimeout(previewTimer);
+  previewTimer = setTimeout(async () => {
+    const tooltip = document.getElementById('carta-preview-tooltip');
+    const ptsCls = pts >= 30 ? 'high' : pts >= 10 ? 'mid' : 'low';
+    let desc = '';
+    if (previewFetchCache[id]) {
+      desc = previewFetchCache[id].desc || '';
+    } else {
+      try {
+        const r = await fetch(`https://db.ygoprodeck.com/api/v7/cardinfo.php?id=${id}&misc=yes`);
+        const data = await r.json();
+        const card = data.data?.[0];
+        if (card) { desc = card.desc || ''; previewFetchCache[id] = { desc, pts }; }
+      } catch(err) {}
+    }
+    tooltip.innerHTML = `
+      <img class="carta-preview-img" src="${img}" alt="${nome}">
+      <div class="carta-preview-name">${nome}</div>
+      <div class="carta-preview-stats">
+        <span class="carta-preview-chip genesys ${ptsCls}">⬡ ${pts} pt Genesys</span>
+      </div>
+      <div class="carta-preview-desc" style="margin-top:8px">${desc}</div>
+    `;
+    posizionaTooltip(e);
+    tooltip.classList.add('visible');
+  }, 250);
+}
+
+// Aggiorna posizione tooltip al mousemove
+document.addEventListener('mousemove', e => {
+  const tooltip = document.getElementById('carta-preview-tooltip');
+  if (tooltip && tooltip.classList.contains('visible')) posizionaTooltip(e);
+});
+
+window.mostraPreview = mostraPreview;
+window.mostraPreviewGenesys = mostraPreviewGenesys;
+window.nascondiPreview = nascondiPreview;
 
 window.switchTab = switchTab;
 window.apriListaGenesys = apriListaGenesys;
