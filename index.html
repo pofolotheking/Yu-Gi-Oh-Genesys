@@ -494,27 +494,28 @@
   .modal-body { padding: 24px; }
   .modal-top {
     display: grid;
-    grid-template-columns: 130px 1fr;
-    gap: 20px;
+    grid-template-columns: 200px 1fr;
+    gap: 22px;
     margin-bottom: 0;
+    align-items: start;
   }
   .modal-photo {
-    width: 130px;
-    height: 130px;
-    border-radius: 12px;
+    width: 200px;
+    height: 260px;
+    border-radius: 14px;
     object-fit: cover;
     border: 1px solid var(--border);
     background: var(--bg-soft);
     flex-shrink: 0;
   }
   .modal-photo-placeholder {
-    width: 130px;
-    height: 130px;
-    border-radius: 12px;
+    width: 200px;
+    height: 260px;
+    border-radius: 14px;
     background: var(--bg-soft);
     border: 1px solid var(--border);
     display: flex; align-items: center; justify-content: center;
-    font-size: 3rem;
+    font-size: 5rem;
     flex-shrink: 0;
   }
   .modal-info { display: flex; flex-direction: column; gap: 6px; }
@@ -594,16 +595,21 @@
     color: inherit;
     cursor: pointer;
     padding: 0;
-    text-decoration: underline;
-    text-decoration-color: var(--border-strong);
-    text-underline-offset: 3px;
-    transition: text-decoration-color 0.15s;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
   }
-  .name-btn:hover { text-decoration-color: var(--text); }
+  .info-icon {
+    color: var(--text-faint);
+    flex-shrink: 0;
+    transition: color 0.15s;
+  }
+  .name-btn:hover .info-icon { color: var(--blue); }
 
-  @media (max-width: 420px) {
-    .modal-top { grid-template-columns: 100px 1fr; gap: 14px; }
-    .modal-photo, .modal-photo-placeholder { width: 100px; height: 100px; }
+  @media (max-width: 520px) {
+    .modal-top { grid-template-columns: 1fr; }
+    .modal-photo, .modal-photo-placeholder { width: 100%; height: 200px; border-radius: 12px; }
     .modal-name { font-size: 1.25rem; }
   }
 
@@ -1048,10 +1054,10 @@
 </header>
 
 <nav>
-  <button class="tab-btn active" data-tab="giocatori">Classifica</button>
-  <button class="tab-btn" data-tab="mazzi">Deck</button>
+  <button class="tab-btn active" data-tab="giocatori"><svg width="13" height="13" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:-1px;margin-right:4px"><path d="M7 9.5c-2.5 0-4-1.8-4-4V2h8v3.5c0 2.2-1.5 4-4 4z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M5 9.8v1.7M9 9.8v1.7M4.5 11.5h5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M3 2H1.5v1.5C1.5 4.9 2.3 6 3.5 6.5M11 2h1.5v1.5C12.5 4.9 11.7 6 10.5 6.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>Classifica</button>
+  <button class="tab-btn" data-tab="mazzi"><svg width="13" height="13" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:-1px;margin-right:4px"><rect x="3" y="1" width="8" height="10" rx="1.5" stroke="currentColor" stroke-width="1.6"/><rect x="1.5" y="2.5" width="8" height="10" rx="1.5" stroke="currentColor" stroke-width="1.6"/><line x1="4.5" y1="6" x2="8.5" y2="6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><line x1="4.5" y1="8.5" x2="7" y2="8.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Deck</button>
   <button class="tab-btn" data-tab="carte"><svg width="13" height="13" viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:-1px;margin-right:4px"><circle cx="5.5" cy="5.5" r="4" stroke="currentColor" stroke-width="1.6"/><line x1="8.7" y1="8.7" x2="12" y2="12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>Ricerca</button>
-  <button class="tab-btn" data-tab="config">Modifica</button>
+  <button class="tab-btn" data-tab="config"><svg width="13" height="13" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:-1px;margin-right:4px"><path d="M9.5 2.5l2 2L5 11H3v-2l6.5-6.5z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M8.5 3.5l2 2" stroke="currentColor" stroke-width="1.6"/></svg>Modifica</button>
 </nav>
 
 <main>
@@ -1130,12 +1136,59 @@
     </div>
 
     <div id="genesys-view" style="display:none" data-inner-tab="genesys">
-      <button class="back-btn" onclick="chiudiListaGenesys()">← Torna al database</button>
-      <h3 style="margin-top:0">Lista punti Genesys</h3>
+      <h3 style="margin-top:0;margin-bottom:16px">Lista punti Genesys</h3>
       <div class="info">Tutte le carte con costo punti nel formato Genesys (fonte: <strong>YGOProDeck / Konami</strong>). Ordinate dai punti più alti ai più bassi.</div>
       <div class="card padded" style="margin-bottom:16px">
-        <div style="display:flex;gap:10px">
+        <div style="display:flex;gap:10px;margin-bottom:12px">
           <input type="text" id="genesys-search" placeholder="Filtra per nome carta…" style="flex:1">
+        </div>
+        <button class="filtri-toggle" id="gfiltri-toggle" onclick="toggleGFiltri()">
+          <span id="gfiltri-toggle-label">▶ Filtri avanzati</span>
+        </button>
+        <div id="gfiltri-panel" style="display:none">
+          <div class="filtri-grid">
+            <div>
+              <label>Tipo</label>
+              <select id="gf-type">
+                <option value="">— Tutti —</option>
+                <optgroup label="Mostri">
+                  <option value="Normal Monster">Normal Monster</option>
+                  <option value="Effect Monster">Effect Monster</option>
+                  <option value="Fusion Monster">Fusion Monster</option>
+                  <option value="Ritual Monster">Ritual Monster</option>
+                  <option value="Synchro Monster">Synchro Monster</option>
+                  <option value="XYZ Monster">XYZ Monster</option>
+                  <option value="Link Monster">Link Monster</option>
+                  <option value="Pendulum Effect Monster">Pendulum Monster</option>
+                </optgroup>
+                <optgroup label="Magie / Trappole">
+                  <option value="Spell Card">Spell Card</option>
+                  <option value="Trap Card">Trap Card</option>
+                </optgroup>
+              </select>
+            </div>
+            <div>
+              <label>Attributo</label>
+              <select id="gf-attribute">
+                <option value="">— Tutti —</option>
+                <option value="DARK">DARK</option>
+                <option value="LIGHT">LIGHT</option>
+                <option value="WATER">WATER</option>
+                <option value="FIRE">FIRE</option>
+                <option value="EARTH">EARTH</option>
+                <option value="WIND">WIND</option>
+              </select>
+            </div>
+            <div>
+              <label>Punti min.</label>
+              <input type="number" id="gf-pts-min" placeholder="es. 10" min="1" max="100">
+            </div>
+            <div>
+              <label>Punti max.</label>
+              <input type="number" id="gf-pts-max" placeholder="es. 50" min="1" max="100">
+            </div>
+          </div>
+          <button class="secondary" style="margin-top:12px;width:100%" onclick="resetGFiltri()">↺ Azzera filtri</button>
         </div>
       </div>
       <div id="genesys-list"></div>
@@ -1508,7 +1561,7 @@ function renderGiocatori() {
       ? `<td class="rank"><span class="medal">${medals[i]}</span></td>`
       : `<td class="rank">${i + 1}</td>`;
     html += `<tr class="${i === 0 && s.partite > 0 ? 'top-1' : ''}">
-      ${rankCell}<td><button class="name-btn" onclick="apriProfilo('${nome}')">${nome}</button></td>
+      ${rankCell}<td><button class="name-btn" onclick="apriProfilo('${nome}')">${nome}<span class="info-icon"><svg width="12" height="12" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:-1px"><circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.6"/><line x1="7" y1="6" x2="7" y2="10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="7" cy="4" r="0.8" fill="currentColor"/></svg></span></button></td>
       <td class="pts">${s.punti}</td>
       <td class="num">${s.partite}</td>
       <td class="num">${s.v}</td><td class="num">${s.p}</td>
@@ -2036,6 +2089,15 @@ document.addEventListener('DOMContentLoaded', () => {
   if (inp) inp.addEventListener('keydown', e => { if (e.key === 'Enter') cercaCarta(); });
   const gIn = document.getElementById('genesys-search');
   if (gIn) gIn.addEventListener('input', filtraListaGenesys);
+  // Filtri lista Genesys
+  ['gf-type','gf-attribute','gf-pts-min','gf-pts-max'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('change', filtraListaGenesys);
+  });
+  ['gf-pts-min','gf-pts-max'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('input', filtraListaGenesys);
+  });
 });
 
 function toggleFiltri() {
@@ -2193,11 +2255,16 @@ async function cercaDaCache(gMin, gMax) {
 }
 
 async function mostraDettaglioCarta(id) {
+  // Salva da dove stiamo venendo
+  _prevScrollY = window.scrollY;
+  _prevView = document.getElementById('genesys-view').style.display !== 'none' ? 'genesys' : 'db';
   const res = document.getElementById('carte-results');
   const det = document.getElementById('carte-detail');
   det.style.display = 'block';
   det.innerHTML = '<div class="carte-loading">Caricamento…</div>';
   res.style.display = 'none';
+  // Nascondi anche genesys-view se stavamo lì
+  if (_prevView === 'genesys') document.getElementById('genesys-view').style.display = 'none';
   det.scrollIntoView({ behavior: 'smooth', block: 'start' });
   try {
     const r = await fetch(`https://db.ygoprodeck.com/api/v7/cardinfo.php?id=${id}&misc=yes`);
@@ -2258,7 +2325,21 @@ async function mostraDettaglioCarta(id) {
 
 function tornaRisultati() {
   document.getElementById('carte-detail').style.display = 'none';
-  document.getElementById('carte-results').style.display = 'block';
+  if (_prevView === 'genesys') {
+    // Torna alla lista Genesys
+    document.getElementById('genesys-view').style.display = 'block';
+    document.getElementById('database-view').style.display = 'none';
+    document.getElementById('itab-db').classList.remove('active');
+    document.getElementById('itab-genesys').classList.add('active');
+  } else {
+    // Torna ai risultati database
+    document.getElementById('carte-results').style.display = 'block';
+    document.getElementById('database-view').style.display = 'block';
+  }
+  // Ripristina posizione scroll
+  requestAnimationFrame(() => {
+    window.scrollTo({ top: _prevScrollY, behavior: 'instant' });
+  });
 }
 
 function escapeHtml(s) {
@@ -2285,7 +2366,7 @@ async function apriListaGenesys(silent = false) {
     if (!r.ok) throw new Error();
     const data = await r.json();
     const cards = (data.data || [])
-      .map(c => ({ id: c.id, name: c.name, type: c.type, img: c.card_images?.[0]?.image_url_small || '', points: c.misc_info?.[0]?.genesys_points ?? 0 }))
+      .map(c => ({ id: c.id, name: c.name, type: c.type || '', attr: c.attribute || '', img: c.card_images?.[0]?.image_url_small || '', points: c.misc_info?.[0]?.genesys_points ?? 0 }))
       .filter(c => c.points > 0)
       .sort((a, b) => b.points - a.points);
     genesysCache = cards;
@@ -2318,9 +2399,19 @@ function renderListaGenesys(cards) {
 
 function filtraListaGenesys() {
   if (!genesysCache) return;
-  const q = document.getElementById('genesys-search').value.trim().toLowerCase();
-  if (!q) { renderListaGenesys(genesysCache); return; }
-  renderListaGenesys(genesysCache.filter(c => c.name.toLowerCase().includes(q)));
+  const q    = document.getElementById('genesys-search')?.value.trim().toLowerCase() || '';
+  const tipo = document.getElementById('gf-type')?.value || '';
+  const attr = document.getElementById('gf-attribute')?.value.toUpperCase() || '';
+  const pMin = document.getElementById('gf-pts-min')?.value ? parseInt(document.getElementById('gf-pts-min').value) : 0;
+  const pMax = document.getElementById('gf-pts-max')?.value ? parseInt(document.getElementById('gf-pts-max').value) : 999;
+  const filtered = genesysCache.filter(c => {
+    if (q && !c.name.toLowerCase().includes(q)) return false;
+    if (tipo && !c.type.includes(tipo)) return false;
+    if (attr && !(c.attr || '').toUpperCase().includes(attr)) return false;
+    if (c.points < pMin || c.points > pMax) return false;
+    return true;
+  });
+  renderListaGenesys(filtered);
 }
 
 function chiudiListaGenesys() {
@@ -2328,8 +2419,7 @@ function chiudiListaGenesys() {
 }
 
 function mostraDettaglioCartaDaGenesys(id) {
-  chiudiListaGenesys();
-  setTimeout(() => mostraDettaglioCarta(id), 100);
+  mostraDettaglioCarta(id);
 }
 
 function toggleAccordion(id) {
@@ -2342,6 +2432,8 @@ function toggleAccordion(id) {
 
 // ── TOOLTIP PREVIEW ──
 const _cardRegistry = {};
+let _prevView = 'db';       // 'db' o 'genesys'
+let _prevScrollY = 0;       // posizione di scroll prima di aprire dettaglio
 let previewTimer = null;
 const previewFetchCache = {};
 
@@ -2414,7 +2506,7 @@ function mostraPreview(e, id) {
         }
       } catch(err) {}
     }
-  }, 250);
+  }, 750);
 }
 
 function mostraPreviewGenesys(e, id) {
@@ -2436,7 +2528,7 @@ function mostraPreviewGenesys(e, id) {
         }
       } catch(err) {}
     }
-  }, 250);
+  }, 750);
 }
 
 document.addEventListener('mousemove', e => {
@@ -2447,6 +2539,25 @@ document.addEventListener('mousemove', e => {
 window.mostraPreview = mostraPreview;
 window.mostraPreviewGenesys = mostraPreviewGenesys;
 window.nascondiPreview = nascondiPreview;
+
+// ── FILTRI LISTA GENESYS ──
+function toggleGFiltri() {
+  const panel = document.getElementById('gfiltri-panel');
+  const label = document.getElementById('gfiltri-toggle-label');
+  const open = panel.style.display === 'none';
+  panel.style.display = open ? 'block' : 'none';
+  label.textContent = open ? '▼ Filtri avanzati' : '▶ Filtri avanzati';
+}
+
+function resetGFiltri() {
+  ['gf-type','gf-attribute','gf-pts-min','gf-pts-max'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.value = '';
+  });
+  filtraListaGenesys();
+}
+
+window.toggleGFiltri = toggleGFiltri;
+window.resetGFiltri = resetGFiltri;
 
 window.switchTab = switchTab;
 window.switchInnerTab = switchInnerTab;
