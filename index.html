@@ -776,83 +776,70 @@
   }
   /* achievements inline */
   .profile-inline-ach {
-    padding: 10px 14px;
+    padding: 14px 16px;
     border-top: 1px solid var(--border);
     background: var(--bg-soft);
     display: flex;
+    justify-content: center;
+    gap: 16px;
     flex-wrap: wrap;
-    gap: 8px;
-    align-items: center;
   }
   .ach-item {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 2px;
-    width: 38px;
+    gap: 4px;
+    min-width: 44px;
   }
-  .ach-icon {
-    font-size: 1.1rem;
-    line-height: 1;
-  }
+  .ach-icon { font-size: 1.25rem; line-height: 1; }
   .ach-label {
-    font-size: 0.48rem;
-    font-weight: 600;
-    color: var(--text-dim);
+    font-size: 0.5rem;
+    font-weight: 700;
+    color: var(--text);
     text-align: center;
-    line-height: 1.2;
+    line-height: 1.3;
     text-transform: uppercase;
     letter-spacing: 0.02em;
+    max-width: 48px;
   }
-  .ach-item.locked { opacity: 0.25; filter: grayscale(1); }
-  .ach-item.unlocked .ach-label { color: var(--text); }
-  /* tooltip achievement */
+  .ach-item.locked {
+    opacity: 0.22;
+    filter: grayscale(1);
+  }
+  .ach-item.locked .ach-label { display: none; }
+  /* tooltip solo per sbloccati: testo nero su sfondo grigio */
   .ach-item.unlocked { position: relative; cursor: default; }
   .ach-item.unlocked:hover::after {
     content: attr(data-tooltip);
     position: absolute;
-    bottom: calc(100% + 6px);
+    bottom: calc(100% + 7px);
     left: 50%;
     transform: translateX(-50%);
-    background: var(--text);
-    color: white;
-    font-size: 0.62rem;
+    background: var(--bg-soft);
+    color: var(--text);
+    border: 1px solid var(--border);
+    font-size: 0.65rem;
     font-weight: 500;
     white-space: nowrap;
-    padding: 4px 8px;
-    border-radius: 6px;
+    padding: 5px 10px;
+    border-radius: 8px;
     pointer-events: none;
-    z-index: 20;
+    z-index: 30;
     font-family: inherit;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
   }
   .ach-item.unlocked:hover::before {
     content: '';
     position: absolute;
-    bottom: calc(100% + 2px);
+    bottom: calc(100% + 3px);
     left: 50%;
     transform: translateX(-50%);
     border: 4px solid transparent;
-    border-top-color: var(--text);
+    border-top-color: var(--border);
     pointer-events: none;
-    z-index: 20;
+    z-index: 30;
   }
-  /* carte inline */
-  .profile-inline-cards {
-    padding: 10px 14px;
-    border-top: 1px solid var(--border);
-    background: var(--bg);
-    display: flex;
-    gap: 8px;
-  }
-  .profile-inline-cards img {
-    width: 56px;
-    border-radius: 6px;
-    aspect-ratio: 59/86;
-    object-fit: cover;
-    border: 1px solid var(--border);
-    transition: transform 0.15s;
-  }
-  .profile-inline-cards img:hover { transform: scale(1.08); }
+
 
   @media (max-width: 500px) {
     .modal-top { grid-template-columns: 130px 1fr; }
@@ -1922,14 +1909,11 @@ function buildProfiloInline(nome) {
   const achievements = calcolaAchievements(nome);
   const achHtml = achievements.map(a => `
     <div class="ach-item ${a.unlocked ? 'unlocked' : 'locked'}"
-      ${a.unlocked ? `data-tooltip="${a.name}: ${a.desc}"` : ''}>
+      ${a.unlocked ? `data-tooltip="${a.desc}"` : ''}>
       <span class="ach-icon">${a.icon}</span>
-      <span class="ach-label">${a.name}</span>
+      ${a.unlocked ? `<span class="ach-label">${a.name}</span>` : ''}
     </div>`).join('');
-  const carte = (profilo.carte || []).filter(Boolean);
-  const carteHtml = carte.length > 0
-    ? carte.map(url => `<img src="${url}" alt="carta" onerror="this.style.opacity='0.15'">`).join('')
-    : '<span style="font-size:0.78rem;color:var(--text-faint)">Nessuna carta impostata.</span>';
+
   return `
     <div class="profile-inline-body">
       ${fotoHtml}
@@ -1946,7 +1930,7 @@ function buildProfiloInline(nome) {
       <div class="profile-inline-stat"><span class="pis-lbl">Mazzo top</span><span class="pis-val" style="font-size:0.7rem;line-height:1.2">${mazzoPreferitoGiocatore(nome)}</span></div>
     </div>
     <div class="profile-inline-ach">${achHtml}</div>
-    <div class="profile-inline-cards">${carteHtml}</div>
+
   `;
 }
 
@@ -2156,7 +2140,6 @@ function renderProfiliConfig() {
   if (!dati.profili) dati.profili = {};
   c.innerHTML = dati.giocatori.map(g => {
     const p = dati.profili[g] || {};
-    const carte = p.carte || ['', '', ''];
     return `
     <div class="accordion-item" style="margin-bottom:8px">
       <button class="accordion-btn" onclick="toggleAccordion('acc-prof-${g}')">
@@ -2167,9 +2150,7 @@ function renderProfiliConfig() {
           <div><label>Foto (URL immagine)</label><input type="text" id="prof-foto-${g}" value="${p.foto || ''}" placeholder="https://..."></div>
           <div><label>Mazzo preferito (personalizzato)</label><input type="text" id="prof-mazzo-${g}" value="${p.mazzoPref || ''}" placeholder="es. Naturia"></div>
           <div><label>Descrizione</label><input type="text" id="prof-desc-${g}" value="${p.descrizione || ''}" placeholder="Una breve descrizione..."></div>
-          <div><label>Carta preferita 1 (URL)</label><input type="text" id="prof-c1-${g}" value="${carte[0] || ''}" placeholder="https://images.ygoprodeck.com/..."></div>
-          <div><label>Carta preferita 2 (URL)</label><input type="text" id="prof-c2-${g}" value="${carte[1] || ''}" placeholder="https://images.ygoprodeck.com/..."></div>
-          <div><label>Carta preferita 3 (URL)</label><input type="text" id="prof-c3-${g}" value="${carte[2] || ''}" placeholder="https://images.ygoprodeck.com/..."></div>
+
           <button class="primary" style="margin-top:4px" onclick="salvaProfilo('${g}')">Salva profilo ${g}</button>
         </div>
       </div>
@@ -2183,11 +2164,7 @@ async function salvaProfilo(g) {
     foto: document.getElementById(`prof-foto-${g}`).value.trim(),
     mazzoPref: document.getElementById(`prof-mazzo-${g}`).value.trim(),
     descrizione: document.getElementById(`prof-desc-${g}`).value.trim(),
-    carte: [
-      document.getElementById(`prof-c1-${g}`).value.trim(),
-      document.getElementById(`prof-c2-${g}`).value.trim(),
-      document.getElementById(`prof-c3-${g}`).value.trim()
-    ].filter(Boolean)
+    carte: []
   };
   await salvaDatiCloud();
   popolaTutto();
