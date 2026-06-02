@@ -615,6 +615,89 @@
     .modal-name { font-size: 1.25rem; }
   }
 
+  /* ── PULSANTE MEGA GENESYS ── */
+  .genesys-mega-btn {
+    width: 100%;
+    background: linear-gradient(135deg, #1d1d1f 0%, #2a2a2e 100%);
+    color: white;
+    border: none;
+    border-radius: 16px;
+    padding: 22px 24px;
+    cursor: pointer;
+    margin-bottom: 28px;
+    text-align: left;
+    transition: transform 0.1s, box-shadow 0.2s;
+    box-shadow: 0 4px 14px rgba(29, 29, 31, 0.18);
+    font-family: inherit;
+  }
+  .genesys-mega-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(29, 29, 31, 0.24);
+  }
+  .genesys-mega-btn:active { transform: translateY(0); }
+  .genesys-mega-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: 4px;
+  }
+  .genesys-mega-sub {
+    font-size: 0.88rem;
+    opacity: 0.7;
+    font-weight: 400;
+  }
+
+  /* ── LISTA GENESYS ── */
+  .genesys-list-card {
+    display: grid;
+    grid-template-columns: 50px 1fr auto;
+    gap: 14px;
+    align-items: center;
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    transition: background 0.1s;
+  }
+  .genesys-list-card:last-child { border-bottom: none; }
+  .genesys-list-card:hover { background: var(--bg-soft); }
+  .genesys-list-card img {
+    width: 50px;
+    aspect-ratio: 59/86;
+    object-fit: cover;
+    border-radius: 4px;
+    background: var(--bg-soft);
+  }
+  .genesys-list-name {
+    font-size: 0.95rem;
+    font-weight: 500;
+  }
+  .genesys-list-type {
+    font-size: 0.78rem;
+    color: var(--text-dim);
+    margin-top: 2px;
+  }
+  .genesys-points-badge {
+    background: var(--text);
+    color: white;
+    font-weight: 700;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-variant-numeric: tabular-nums;
+    min-width: 50px;
+    text-align: center;
+  }
+  .genesys-points-badge.high { background: var(--red); }
+  .genesys-points-badge.mid { background: var(--orange); }
+  .genesys-points-badge.low { background: var(--green); }
+
+  /* chip Genesys speciale nel dettaglio */
+  .carta-chip.genesys-chip {
+    background: var(--text);
+    color: white;
+    font-weight: 700;
+  }
+
   /* ── FILTRI AVANZATI ── */
   .filtri-toggle {
     background: none;
@@ -767,6 +850,17 @@
     transition: background 0.15s;
   }
   .carta-link-btn:hover { background: var(--border); }
+  .carta-price {
+    display: inline-block;
+    padding: 9px 14px;
+    border-radius: 8px;
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    color: #166534;
+    font-size: 0.88rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
 
   @media (max-width: 500px) {
     .carta-detail-wrap { grid-template-columns: 120px 1fr; gap: 14px; }
@@ -875,113 +969,142 @@
   </section>
 
   <section id="carte">
-    <h2>Database Carte</h2>
-    <div class="info">Cerca qualsiasi carta di Yu-Gi-Oh! in tempo reale da <strong>YGOProDeck</strong>. I nomi vanno inseriti in <strong>inglese</strong> (es. Blue-Eyes White Dragon, Ash Blossom).</div>
+    <h2>Carte</h2>
 
-    <div class="card padded" style="margin-bottom:16px">
-      <!-- barra ricerca + bottone cerca -->
-      <div style="display:flex;gap:10px;margin-bottom:12px">
-        <input type="text" id="carte-search" placeholder="es. Blue-Eyes White Dragon, Ash Blossom…" style="flex:1">
-        <button class="primary" style="margin-top:0;width:auto;padding:12px 20px" onclick="cercaCarta()">Cerca</button>
-      </div>
+    <!-- Bottone enorme Lista Genesys -->
+    <button class="genesys-mega-btn" onclick="apriListaGenesys()">
+      <div class="genesys-mega-title">📋 Lista aggiornata punti Genesys</div>
+      <div class="genesys-mega-sub">Consulta tutte le carte con punti nel formato Genesys ufficiale</div>
+    </button>
 
-      <!-- toggle filtri avanzati -->
-      <button class="filtri-toggle" id="filtri-toggle" onclick="toggleFiltri()">
-        <span id="filtri-toggle-label">▶ Filtri avanzati</span>
-      </button>
-
-      <!-- pannello filtri, nascosto di default -->
-      <div id="filtri-panel" style="display:none">
-        <div class="filtri-grid">
-          <div>
-            <label>Tipo</label>
-            <select id="f-type">
-              <option value="">— Tutti —</option>
-              <optgroup label="Mostri">
-                <option value="Normal Monster">Normal Monster</option>
-                <option value="Effect Monster">Effect Monster</option>
-                <option value="Fusion Monster">Fusion Monster</option>
-                <option value="Ritual Monster">Ritual Monster</option>
-                <option value="Synchro Monster">Synchro Monster</option>
-                <option value="XYZ Monster">XYZ Monster</option>
-                <option value="Link Monster">Link Monster</option>
-                <option value="Pendulum Effect Monster">Pendulum Monster</option>
-                <option value="Flip Effect Monster">Flip Monster</option>
-              </optgroup>
-              <optgroup label="Magie / Trappole">
-                <option value="Spell Card">Spell Card</option>
-                <option value="Trap Card">Trap Card</option>
-              </optgroup>
-            </select>
-          </div>
-          <div>
-            <label>Attributo</label>
-            <select id="f-attribute">
-              <option value="">— Tutti —</option>
-              <option value="DARK">DARK</option>
-              <option value="LIGHT">LIGHT</option>
-              <option value="WATER">WATER</option>
-              <option value="FIRE">FIRE</option>
-              <option value="EARTH">EARTH</option>
-              <option value="WIND">WIND</option>
-              <option value="DIVINE">DIVINE</option>
-            </select>
-          </div>
-          <div>
-            <label>Razza</label>
-            <select id="f-race">
-              <option value="">— Tutte —</option>
-              <option value="Dragon">Dragon</option>
-              <option value="Spellcaster">Spellcaster</option>
-              <option value="Warrior">Warrior</option>
-              <option value="Beast">Beast</option>
-              <option value="Beast-Warrior">Beast-Warrior</option>
-              <option value="Fiend">Fiend</option>
-              <option value="Fairy">Fairy</option>
-              <option value="Zombie">Zombie</option>
-              <option value="Machine">Machine</option>
-              <option value="Aqua">Aqua</option>
-              <option value="Pyro">Pyro</option>
-              <option value="Rock">Rock</option>
-              <option value="Insect">Insect</option>
-              <option value="Thunder">Thunder</option>
-              <option value="Plant">Plant</option>
-              <option value="Psychic">Psychic</option>
-              <option value="Reptile">Reptile</option>
-              <option value="Sea Serpent">Sea Serpent</option>
-              <option value="Dinosaur">Dinosaur</option>
-              <option value="Wyrm">Wyrm</option>
-              <option value="Cyberse">Cyberse</option>
-              <option value="Divine-Beast">Divine-Beast</option>
-            </select>
-          </div>
-          <div>
-            <label>Livello / Rango</label>
-            <select id="f-level">
-              <option value="">— Tutti —</option>
-              <option value="1">1</option><option value="2">2</option>
-              <option value="3">3</option><option value="4">4</option>
-              <option value="5">5</option><option value="6">6</option>
-              <option value="7">7</option><option value="8">8</option>
-              <option value="9">9</option><option value="10">10</option>
-              <option value="11">11</option><option value="12">12</option>
-            </select>
-          </div>
-          <div>
-            <label>ATK (esatto)</label>
-            <input type="number" id="f-atk" placeholder="es. 3000" min="0">
-          </div>
-          <div>
-            <label>DEF (esatto)</label>
-            <input type="number" id="f-def" placeholder="es. 2500" min="0">
-          </div>
+    <!-- Vista lista Genesys (nascosta di default) -->
+    <div id="genesys-view" style="display:none">
+      <button class="back-btn" onclick="chiudiListaGenesys()">← Torna al database</button>
+      <h3 style="margin-top:0">Lista punti Genesys</h3>
+      <div class="info">Tutte le carte con costo punti nel formato Genesys (fonte: <strong>YGOProDeck / Konami</strong>). Ordinate dai punti più alti ai più bassi.</div>
+      <div class="card padded" style="margin-bottom:16px">
+        <div style="display:flex;gap:10px">
+          <input type="text" id="genesys-search" placeholder="Filtra per nome carta…" style="flex:1">
         </div>
-        <button class="secondary" style="margin-top:12px;width:100%" onclick="resetFiltri()">↺ Azzera filtri</button>
       </div>
+      <div id="genesys-list"></div>
     </div>
 
-    <div id="carte-results"></div>
-    <div id="carte-detail" style="display:none"></div>
+    <!-- Vista database (default) -->
+    <div id="database-view">
+      <h3 style="margin-top:0">Database Carte</h3>
+      <div class="info">Cerca qualsiasi carta di Yu-Gi-Oh! in tempo reale da <strong>YGOProDeck</strong>. I nomi vanno inseriti in <strong>inglese</strong> (es. Blue-Eyes White Dragon, Ash Blossom).</div>
+
+      <div class="card padded" style="margin-bottom:16px">
+        <div style="display:flex;gap:10px;margin-bottom:12px">
+          <input type="text" id="carte-search" placeholder="es. Blue-Eyes White Dragon, Ash Blossom…" style="flex:1">
+          <button class="primary" style="margin-top:0;width:auto;padding:12px 20px" onclick="cercaCarta()">Cerca</button>
+        </div>
+
+        <button class="filtri-toggle" id="filtri-toggle" onclick="toggleFiltri()">
+          <span id="filtri-toggle-label">▶ Filtri avanzati</span>
+        </button>
+
+        <div id="filtri-panel" style="display:none">
+          <div class="filtri-grid">
+            <div>
+              <label>Tipo</label>
+              <select id="f-type">
+                <option value="">— Tutti —</option>
+                <optgroup label="Mostri">
+                  <option value="Normal Monster">Normal Monster</option>
+                  <option value="Effect Monster">Effect Monster</option>
+                  <option value="Fusion Monster">Fusion Monster</option>
+                  <option value="Ritual Monster">Ritual Monster</option>
+                  <option value="Synchro Monster">Synchro Monster</option>
+                  <option value="XYZ Monster">XYZ Monster</option>
+                  <option value="Link Monster">Link Monster</option>
+                  <option value="Pendulum Effect Monster">Pendulum Monster</option>
+                  <option value="Flip Effect Monster">Flip Monster</option>
+                </optgroup>
+                <optgroup label="Magie / Trappole">
+                  <option value="Spell Card">Spell Card</option>
+                  <option value="Trap Card">Trap Card</option>
+                </optgroup>
+              </select>
+            </div>
+            <div>
+              <label>Attributo</label>
+              <select id="f-attribute">
+                <option value="">— Tutti —</option>
+                <option value="DARK">DARK</option>
+                <option value="LIGHT">LIGHT</option>
+                <option value="WATER">WATER</option>
+                <option value="FIRE">FIRE</option>
+                <option value="EARTH">EARTH</option>
+                <option value="WIND">WIND</option>
+                <option value="DIVINE">DIVINE</option>
+              </select>
+            </div>
+            <div>
+              <label>Razza</label>
+              <select id="f-race">
+                <option value="">— Tutte —</option>
+                <option value="Dragon">Dragon</option>
+                <option value="Spellcaster">Spellcaster</option>
+                <option value="Warrior">Warrior</option>
+                <option value="Beast">Beast</option>
+                <option value="Beast-Warrior">Beast-Warrior</option>
+                <option value="Fiend">Fiend</option>
+                <option value="Fairy">Fairy</option>
+                <option value="Zombie">Zombie</option>
+                <option value="Machine">Machine</option>
+                <option value="Aqua">Aqua</option>
+                <option value="Pyro">Pyro</option>
+                <option value="Rock">Rock</option>
+                <option value="Insect">Insect</option>
+                <option value="Thunder">Thunder</option>
+                <option value="Plant">Plant</option>
+                <option value="Psychic">Psychic</option>
+                <option value="Reptile">Reptile</option>
+                <option value="Sea Serpent">Sea Serpent</option>
+                <option value="Dinosaur">Dinosaur</option>
+                <option value="Wyrm">Wyrm</option>
+                <option value="Cyberse">Cyberse</option>
+                <option value="Divine-Beast">Divine-Beast</option>
+              </select>
+            </div>
+            <div>
+              <label>Livello / Rango</label>
+              <select id="f-level">
+                <option value="">— Tutti —</option>
+                <option value="1">1</option><option value="2">2</option>
+                <option value="3">3</option><option value="4">4</option>
+                <option value="5">5</option><option value="6">6</option>
+                <option value="7">7</option><option value="8">8</option>
+                <option value="9">9</option><option value="10">10</option>
+                <option value="11">11</option><option value="12">12</option>
+              </select>
+            </div>
+            <div>
+              <label>ATK (esatto)</label>
+              <input type="number" id="f-atk" placeholder="es. 3000" min="0">
+            </div>
+            <div>
+              <label>DEF (esatto)</label>
+              <input type="number" id="f-def" placeholder="es. 2500" min="0">
+            </div>
+            <div>
+              <label>Punti Genesys min.</label>
+              <input type="number" id="f-genesys-min" placeholder="es. 0" min="0" max="100">
+            </div>
+            <div>
+              <label>Punti Genesys max.</label>
+              <input type="number" id="f-genesys-max" placeholder="es. 30" min="0" max="100">
+            </div>
+          </div>
+          <button class="secondary" style="margin-top:12px;width:100%" onclick="resetFiltri()">↺ Azzera filtri</button>
+        </div>
+      </div>
+
+      <div id="carte-results"></div>
+      <div id="carte-detail" style="display:none"></div>
+    </div>
   </section>
 
   <section id="config">
@@ -1797,9 +1920,13 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') chiudiModale
 
 caricaDati();
 // ============ DATABASE CARTE ============
+let genesysCache = null; // cache lista Genesys
+
 document.addEventListener('DOMContentLoaded', () => {
   const inp = document.getElementById('carte-search');
   if (inp) inp.addEventListener('keydown', e => { if (e.key === 'Enter') cercaCarta(); });
+  const gIn = document.getElementById('genesys-search');
+  if (gIn) gIn.addEventListener('input', filtraListaGenesys);
 });
 
 function toggleFiltri() {
@@ -1811,24 +1938,24 @@ function toggleFiltri() {
 }
 
 function resetFiltri() {
-  ['f-type','f-attribute','f-race','f-level'].forEach(id => {
-    const el = document.getElementById(id); if (el) el.value = '';
-  });
-  ['f-atk','f-def'].forEach(id => {
+  ['f-type','f-attribute','f-race','f-level','f-atk','f-def','f-genesys-min','f-genesys-max'].forEach(id => {
     const el = document.getElementById(id); if (el) el.value = '';
   });
 }
 
 async function cercaCarta() {
-  const q     = document.getElementById('carte-search')?.value.trim() || '';
-  const tipo  = document.getElementById('f-type')?.value || '';
-  const attr  = document.getElementById('f-attribute')?.value || '';
-  const race  = document.getElementById('f-race')?.value || '';
-  const level = document.getElementById('f-level')?.value || '';
-  const atk   = document.getElementById('f-atk')?.value || '';
-  const def   = document.getElementById('f-def')?.value || '';
+  const q       = document.getElementById('carte-search')?.value.trim() || '';
+  const tipo    = document.getElementById('f-type')?.value || '';
+  const attr    = document.getElementById('f-attribute')?.value || '';
+  const race    = document.getElementById('f-race')?.value || '';
+  const level   = document.getElementById('f-level')?.value || '';
+  const atk     = document.getElementById('f-atk')?.value || '';
+  const def     = document.getElementById('f-def')?.value || '';
+  const gMin    = document.getElementById('f-genesys-min')?.value || '';
+  const gMax    = document.getElementById('f-genesys-max')?.value || '';
+  const usaGenesys = gMin !== '' || gMax !== '';
 
-  if (!q && !tipo && !attr && !race && !level && !atk && !def) {
+  if (!q && !tipo && !attr && !race && !level && !atk && !def && !usaGenesys) {
     alert('Inserisci almeno un parametro di ricerca.');
     return;
   }
@@ -1847,14 +1974,32 @@ async function cercaCarta() {
   if (level) params.append('level', level);
   if (atk)   params.append('atk', atk);
   if (def)   params.append('def', def);
-  params.append('num', '24');
+  // se usiamo filtro genesys: chiediamo solo carte legali in Genesys
+  if (usaGenesys) {
+    params.append('format', 'genesys');
+    params.append('misc', 'yes');
+  } else {
+    params.append('misc', 'yes'); // per avere comunque genesys_points nelle chip
+  }
+  params.append('num', usaGenesys ? '60' : '24');
   params.append('offset', '0');
 
   try {
     const r = await fetch(`https://db.ygoprodeck.com/api/v7/cardinfo.php?${params.toString()}`);
     if (!r.ok) throw new Error();
     const data = await r.json();
-    const cards = data.data || [];
+    let cards = data.data || [];
+
+    // filtro lato client sui punti genesys (l'API non supporta range, solo formato)
+    if (gMin !== '' || gMax !== '') {
+      const minV = gMin !== '' ? parseInt(gMin) : -1;
+      const maxV = gMax !== '' ? parseInt(gMax) : 999;
+      cards = cards.filter(c => {
+        const pts = c.misc_info?.[0]?.genesys_points ?? 0;
+        return pts >= minV && pts <= maxV;
+      });
+    }
+
     if (cards.length === 0) {
       res.innerHTML = '<div class="carte-empty">Nessuna carta trovata con questi filtri.</div>';
       return;
@@ -1866,8 +2011,8 @@ async function cercaCarta() {
           ${cards.map(c => {
             const img = c.card_images?.[0]?.image_url_small || c.card_images?.[0]?.image_url || '';
             return `<div class="carta-thumb" onclick="mostraDettaglioCarta(${c.id})">
-              <img src="${img}" alt="${c.name}" loading="lazy" onerror="this.style.opacity='0.2'">
-              <div class="carta-nome">${c.name}</div>
+              <img src="${img}" alt="${escapeHtml(c.name)}" loading="lazy" onerror="this.style.opacity='0.2'">
+              <div class="carta-nome">${escapeHtml(c.name)}</div>
             </div>`;
           }).join('')}
         </div>
@@ -1885,37 +2030,52 @@ async function mostraDettaglioCarta(id) {
   res.style.display = 'none';
   det.scrollIntoView({ behavior: 'smooth', block: 'start' });
   try {
-    const r = await fetch(`https://db.ygoprodeck.com/api/v7/cardinfo.php?id=${id}`);
+    const r = await fetch(`https://db.ygoprodeck.com/api/v7/cardinfo.php?id=${id}&misc=yes`);
     const data = await r.json();
     const c = data.data?.[0];
     if (!c) throw new Error();
     const img = c.card_images?.[0]?.image_url || '';
     const chips = [];
-    if (c.type)              chips.push(c.type);
-    if (c.attribute)         chips.push(c.attribute);
-    if (c.level)             chips.push('Livello ' + c.level);
-    if (c.atk !== undefined) chips.push('ATK ' + c.atk);
-    if (c.def !== undefined) chips.push('DEF ' + c.def);
-    if (c.race)              chips.push(c.race);
+    if (c.type)              chips.push({txt: c.type, cls: ''});
+    if (c.attribute)         chips.push({txt: c.attribute, cls: ''});
+    if (c.level)             chips.push({txt: 'Livello ' + c.level, cls: ''});
+    if (c.atk !== undefined) chips.push({txt: 'ATK ' + c.atk, cls: ''});
+    if (c.def !== undefined) chips.push({txt: 'DEF ' + c.def, cls: ''});
+    if (c.race)              chips.push({txt: c.race, cls: ''});
 
-    const rulingsUrl    = `https://db.ygoprodeck.com/card/?search=${encodeURIComponent(c.name)}#rulings`;
+    // punti Genesys
+    const genesysPoints = c.misc_info?.[0]?.genesys_points;
+    if (genesysPoints !== undefined && genesysPoints !== null) {
+      chips.push({txt: `Genesys: ${genesysPoints} pt`, cls: 'genesys-chip'});
+    }
+
+    // prezzo CardMarket (se disponibile)
+    const cmPrice = c.card_prices?.[0]?.cardmarket_price;
+    const priceHtml = (cmPrice && parseFloat(cmPrice) > 0)
+      ? `<span class="carta-price">€ ${parseFloat(cmPrice).toFixed(2)}</span>`
+      : '';
+
+    // URL ruling: Yugipedia ha pagine stabili "Card_Rulings:NOME"
+    const yugipediaName = c.name.replace(/ /g, '_');
+    const rulingsUrl = `https://yugipedia.com/wiki/Card_Rulings:${encodeURIComponent(yugipediaName)}`;
     const cardmarketUrl = `https://www.cardmarket.com/en/YuGiOh/Products/Search?searchString=${encodeURIComponent(c.name)}`;
 
     det.innerHTML = `
       <button class="back-btn" onclick="tornaRisultati()">← Torna ai risultati</button>
       <div class="card padded">
         <div class="carta-detail-wrap">
-          <img class="carta-detail-img" src="${img}" alt="${c.name}">
+          <img class="carta-detail-img" src="${img}" alt="${escapeHtml(c.name)}">
           <div class="carta-detail-info">
-            <div class="carta-detail-name">${c.name}</div>
-            <div class="carta-detail-type">${c.type || ''}</div>
+            <div class="carta-detail-name">${escapeHtml(c.name)}</div>
+            <div class="carta-detail-type">${escapeHtml(c.type || '')}</div>
             <div class="carta-stat-chips">
-              ${chips.map(ch => `<span class="carta-chip">${ch}</span>`).join('')}
+              ${chips.map(ch => `<span class="carta-chip ${ch.cls}">${escapeHtml(ch.txt)}</span>`).join('')}
             </div>
-            <div class="carta-detail-text">${c.desc || ''}</div>
+            <div class="carta-detail-text">${escapeHtml(c.desc || '')}</div>
             <div class="carta-links">
-              <a href="${rulingsUrl}" target="_blank" class="carta-link-btn">📋 Card Rulings</a>
-              <a href="${cardmarketUrl}" target="_blank" class="carta-link-btn">🛒 CardMarket</a>
+              <a href="${rulingsUrl}" target="_blank" rel="noopener" class="carta-link-btn">📋 Card Rulings</a>
+              <a href="${cardmarketUrl}" target="_blank" rel="noopener" class="carta-link-btn">🛒 CardMarket</a>
+              ${priceHtml}
             </div>
           </div>
         </div>
@@ -1928,6 +2088,88 @@ async function mostraDettaglioCarta(id) {
 function tornaRisultati() {
   document.getElementById('carte-detail').style.display = 'none';
   document.getElementById('carte-results').style.display = 'block';
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
+}
+
+// ── LISTA GENESYS COMPLETA ──
+async function apriListaGenesys() {
+  document.getElementById('database-view').style.display = 'none';
+  document.getElementById('genesys-view').style.display = 'block';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  const cont = document.getElementById('genesys-list');
+  if (genesysCache) {
+    renderListaGenesys(genesysCache);
+    return;
+  }
+  cont.innerHTML = '<div class="carte-loading">Caricamento lista Genesys…</div>';
+  try {
+    const r = await fetch('https://db.ygoprodeck.com/api/v7/cardinfo.php?format=genesys&misc=yes');
+    if (!r.ok) throw new Error();
+    const data = await r.json();
+    const cards = (data.data || [])
+      .map(c => ({
+        id: c.id,
+        name: c.name,
+        type: c.type,
+        img: c.card_images?.[0]?.image_url_small || '',
+        points: c.misc_info?.[0]?.genesys_points ?? 0
+      }))
+      .filter(c => c.points > 0) // solo con punti > 0
+      .sort((a, b) => b.points - a.points);
+    genesysCache = cards;
+    renderListaGenesys(cards);
+  } catch(e) {
+    cont.innerHTML = '<div class="carte-empty">Errore nel caricamento. Riprova più tardi.</div>';
+  }
+}
+
+function renderListaGenesys(cards) {
+  const cont = document.getElementById('genesys-list');
+  if (cards.length === 0) {
+    cont.innerHTML = '<div class="carte-empty">Nessuna carta trovata.</div>';
+    return;
+  }
+  cont.innerHTML = `
+    <div class="card" style="overflow:hidden">
+      <div style="padding:14px 16px;border-bottom:1px solid var(--border);font-size:0.8rem;color:var(--text-faint)">
+        ${cards.length} carte con punti Genesys
+      </div>
+      ${cards.map(c => {
+        const cls = c.points >= 30 ? 'high' : (c.points >= 10 ? 'mid' : 'low');
+        return `<div class="genesys-list-card" onclick="mostraDettaglioCartaDaGenesys(${c.id})">
+          <img src="${c.img}" alt="${escapeHtml(c.name)}" loading="lazy">
+          <div>
+            <div class="genesys-list-name">${escapeHtml(c.name)}</div>
+            <div class="genesys-list-type">${escapeHtml(c.type || '')}</div>
+          </div>
+          <div class="genesys-points-badge ${cls}">${c.points}</div>
+        </div>`;
+      }).join('')}
+    </div>
+  `;
+}
+
+function filtraListaGenesys() {
+  if (!genesysCache) return;
+  const q = document.getElementById('genesys-search').value.trim().toLowerCase();
+  if (!q) { renderListaGenesys(genesysCache); return; }
+  const filtered = genesysCache.filter(c => c.name.toLowerCase().includes(q));
+  renderListaGenesys(filtered);
+}
+
+function chiudiListaGenesys() {
+  document.getElementById('genesys-view').style.display = 'none';
+  document.getElementById('database-view').style.display = 'block';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// quando clicchi una carta dalla lista Genesys, torna alla vista database e apri dettaglio
+function mostraDettaglioCartaDaGenesys(id) {
+  chiudiListaGenesys();
+  setTimeout(() => mostraDettaglioCarta(id), 100);
 }
 
 
