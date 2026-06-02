@@ -751,6 +751,7 @@ async function caricaDati() {
       const j = await res.json();
       dati = {
         giocatori: j.giocatori || ["Tia", "Gio", "Richi"],
+        profili: j.profili || {},
         mazzi: j.mazzi || {},
         partite: j.partite || []
       };
@@ -1111,7 +1112,7 @@ function salvaProfilo(g) {
   alert(`Profilo di ${g} salvato! Ricordati di scaricare il nuovo dati.json.`);
 }
 
-
+function renderConfigGiocatori() {
   const c = document.getElementById('lista-giocatori-config');
   if (dati.giocatori.length === 0) {
     c.innerHTML = '<div class="empty">Nessun giocatore.</div>';
