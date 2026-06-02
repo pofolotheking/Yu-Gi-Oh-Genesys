@@ -591,7 +591,7 @@
 
 <header>
   <h1>Yu-Gi-Oh! Genesys</h1>
-  <div class="subtitle">Lega tra Duellanti</div>
+  <div class="subtitle">Il gioco che se vai primo vinci</div>
 </header>
 
 <nav>
@@ -863,58 +863,52 @@ function renderGiocatori() {
 }
 
 function renderRiepilogo() {
-  const stat = calcolaStatGiocatori();
   const giocatori = dati.giocatori;
-  // Totali
   const totDiv = document.getElementById('riepilogo-totali');
+  totDiv.innerHTML = '';
+
+  const h2hDiv = document.getElementById('riepilogo-h2h');
   if (dati.partite.length === 0) {
-    totDiv.innerHTML = '';
-    document.getElementById('riepilogo-h2h').innerHTML = '<div class="empty" style="padding:20px 0">Nessuna partita ancora registrata.</div>';
+    h2hDiv.innerHTML = '<div class="empty" style="padding:20px 0">Nessuna partita ancora registrata.</div>';
     return;
   }
-  totDiv.innerHTML = `
-    <div class="riep-section-title">Partite giocate</div>
-    <div class="totali-row">
-      ${giocatori.map(g => `
-        <div class="totale-pill">
-          <div class="nome">${g}</div>
-          <span class="num">${(stat[g] || {partite: 0}).partite}</span>
-          <span class="num-label">partite</span>
-        </div>
-      `).join('')}
-    </div>
-  `;
-  // Head-to-head
+
+  // costruisci h2h con parziale vittorie
   const h2h = {};
   for (let i = 0; i < giocatori.length; i++) {
     for (let j = i + 1; j < giocatori.length; j++) {
       const key = [giocatori[i], giocatori[j]].sort().join('|');
-      h2h[key] = { a: giocatori[i], b: giocatori[j], n: 0 };
+      h2h[key] = { a: giocatori[i], b: giocatori[j], va: 0, vb: 0 };
     }
   }
   dati.partite.forEach(p => {
+    const [p1, p2] = PUNTI[p.risultato];
     const key = [p.g1, p.g2].sort().join('|');
-    if (h2h[key]) h2h[key].n++;
+    if (!h2h[key]) return;
+    const win1 = p1 > p2;
+    if (h2h[key].a === p.g1) {
+      win1 ? h2h[key].va++ : h2h[key].vb++;
+    } else {
+      win1 ? h2h[key].vb++ : h2h[key].va++;
+    }
   });
-  const arr = Object.values(h2h).sort((x, y) => x.n - y.n);
-  if (arr.length === 0) {
-    document.getElementById('riepilogo-h2h').innerHTML = '';
-    return;
-  }
-  const minN = arr[0].n;
+
+  const arr = Object.values(h2h);
+  const minN = Math.min(...arr.map(r => r.va + r.vb));
   const html = `
     <div class="riep-section-title">Scontri diretti</div>
     <div class="h2h-list">
       ${arr.map(r => {
-        const few = r.n === minN && arr.some(x => x.n > minN);
+        const tot = r.va + r.vb;
+        const few = tot === minN && arr.some(x => (x.va + x.vb) > minN);
         return `<div class="h2h-row ${few ? 'few' : ''}">
           <div class="pair">${r.a}<span class="vs-small">vs</span>${r.b}</div>
-          <div class="count"><strong>${r.n}</strong> partit${r.n === 1 ? 'a' : 'e'}</div>
+          <div class="count"><strong>${r.va} - ${r.vb}</strong></div>
         </div>`;
       }).join('')}
     </div>
   `;
-  document.getElementById('riepilogo-h2h').innerHTML = html;
+  h2hDiv.innerHTML = html;
 }
 
 function renderMazzi() {
