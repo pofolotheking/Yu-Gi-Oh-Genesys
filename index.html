@@ -661,6 +661,26 @@
   .genesys-thumb-badge.mid  { background: var(--orange); }
   .genesys-thumb-badge.low  { background: var(--green); }
 
+  /* ── BADGE GENESYS NEL DETTAGLIO CARTA ── */
+  .genesys-detail-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border-radius: 20px;
+    font-weight: 700;
+    color: white;
+    font-size: 0.95rem;
+    margin-top: 6px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  }
+  .genesys-detail-badge.high { background: var(--red); }
+  .genesys-detail-badge.mid  { background: var(--orange); }
+  .genesys-detail-badge.low  { background: var(--green); }
+  .genesys-detail-icon { font-size: 1rem; opacity: 0.85; }
+  .genesys-detail-pts { font-size: 1.2rem; font-variant-numeric: tabular-nums; }
+  .genesys-detail-label { font-size: 0.75rem; font-weight: 500; opacity: 0.85; letter-spacing: 0.03em; text-transform: uppercase; }
+
   /* ── FILTRI AVANZATI ── */
   .filtri-toggle {
     background: none;
@@ -856,7 +876,7 @@
   <button class="tab-btn active" data-tab="giocatori">Classifica</button>
   <button class="tab-btn" data-tab="mazzi">Mazzi</button>
   <button class="tab-btn" data-tab="storico">Storico</button>
-  <button class="tab-btn" data-tab="carte">Carte</button>
+  <button class="tab-btn" data-tab="carte">Ricerca</button>
 </nav>
 
 <main>
@@ -927,7 +947,7 @@
   </section>
 
   <section id="carte">
-    <h2>Carte</h2>
+    <h2>Ricerca</h2>
 
     <button class="genesys-mega-btn" onclick="apriListaGenesys()">
       <div class="genesys-mega-title">📋 Lista aggiornata punti Genesys</div>
@@ -1044,14 +1064,7 @@
               <label>DEF (esatto)</label>
               <input type="number" id="f-def" placeholder="es. 2500" min="0">
             </div>
-            <div>
-              <label>Punti Genesys min.</label>
-              <input type="number" id="f-genesys-min" placeholder="es. 0" min="0" max="100">
-            </div>
-            <div>
-              <label>Punti Genesys max.</label>
-              <input type="number" id="f-genesys-max" placeholder="es. 30" min="0" max="100">
-            </div>
+
           </div>
           <button class="secondary" style="margin-top:12px;width:100%" onclick="resetFiltri()">↺ Azzera filtri</button>
         </div>
@@ -1836,15 +1849,13 @@ function toggleFiltri() {
 }
 
 function resetFiltri() {
-  ['f-type','f-attribute','f-race','f-level','f-atk','f-def','f-genesys-min','f-genesys-max'].forEach(id => {
+  ['f-type','f-attribute','f-race','f-level','f-atk','f-def'].forEach(id => {
     const el = document.getElementById(id); if (el) el.value = '';
   });
 }
 
 let searchOffset = 0;
 let lastParams = null;
-let lastGenesysFilter = false;
-
 async function cercaCarta(append = false) {
   const q       = document.getElementById('carte-search')?.value.trim() || '';
   const tipo    = document.getElementById('f-type')?.value || '';
@@ -1853,15 +1864,8 @@ async function cercaCarta(append = false) {
   const level   = document.getElementById('f-level')?.value || '';
   const atk     = document.getElementById('f-atk')?.value || '';
   const def     = document.getElementById('f-def')?.value || '';
-  const gMin    = document.getElementById('f-genesys-min')?.value || '';
-  const gMax    = document.getElementById('f-genesys-max')?.value || '';
-  const usaGenesys = gMin !== '' || gMax !== '';
-  if (!q && !tipo && !attr && !race && !level && !atk && !def && !usaGenesys) {
+  if (!q && !tipo && !attr && !race && !level && !atk && !def) {
     alert('Inserisci almeno un parametro di ricerca.');
-    return;
-  }
-  if (usaGenesys && !q && !tipo && !attr && !race && !level && !atk && !def) {
-    await cercaDaCache(gMin, gMax);
     return;
   }
   if (!append) searchOffset = 0;
@@ -1882,20 +1886,11 @@ async function cercaCarta(append = false) {
   params.append('num', '100');
   params.append('offset', searchOffset);
   lastParams = params;
-  lastGenesysFilter = usaGenesys;
   try {
     const r = await fetch(`https://db.ygoprodeck.com/api/v7/cardinfo.php?${params.toString()}`);
     if (!r.ok) throw new Error();
     const data = await r.json();
     let cards = data.data || [];
-    if (usaGenesys) {
-      const minV = gMin !== '' ? parseInt(gMin) : -1;
-      const maxV = gMax !== '' ? parseInt(gMax) : 999;
-      cards = cards.filter(c => {
-        const pts = c.misc_info?.[0]?.genesys_points ?? 0;
-        return pts >= minV && pts <= maxV;
-      });
-    }
     if (!append && cards.length === 0) {
       res.innerHTML = '<div class="carte-empty">Nessuna carta trovata con questi filtri.</div>';
       return;
@@ -1938,8 +1933,9 @@ async function cercaCarta(append = false) {
 function buildThumb(c) {
   const img = c.card_images?.[0]?.image_url_small || c.card_images?.[0]?.image_url || '';
   const pts = c.misc_info?.[0]?.genesys_points ?? 0;
+  const badgeCls = pts >= 30 ? 'high' : pts >= 10 ? 'mid' : 'low';
   const badge = pts > 0
-    ? `<div class="genesys-thumb-badge ${pts >= 30 ? 'high' : pts >= 10 ? 'mid' : 'low'}">${pts}</div>`
+    ? `<div class="genesys-thumb-badge ${badgeCls}" title="${pts} punti Genesys">${pts}</div>`
     : '';
   return `<div class="carta-thumb" onclick="mostraDettaglioCarta(${c.id})">
     <div style="position:relative">
@@ -2003,9 +1999,13 @@ async function mostraDettaglioCarta(id) {
     if (c.def !== undefined) chips.push({txt: 'DEF ' + c.def, cls: ''});
     if (c.race)              chips.push({txt: c.race, cls: ''});
     const genesysPoints = c.misc_info?.[0]?.genesys_points;
-    if (genesysPoints !== undefined && genesysPoints !== null) {
-      chips.push({txt: `Genesys: ${genesysPoints} pt`, cls: 'genesys-chip'});
-    }
+    const genesysBadgeHtml = (genesysPoints !== undefined && genesysPoints !== null && genesysPoints > 0)
+      ? `<div class="genesys-detail-badge ${genesysPoints >= 30 ? 'high' : genesysPoints >= 10 ? 'mid' : 'low'}">
+           <span class="genesys-detail-icon">⬡</span>
+           <span class="genesys-detail-pts">${genesysPoints}</span>
+           <span class="genesys-detail-label">pt Genesys</span>
+         </div>`
+      : '';
     const cmPrice = c.card_prices?.[0]?.cardmarket_price;
     const priceHtml = (cmPrice && parseFloat(cmPrice) > 0)
       ? `<span class="carta-price">€ ${parseFloat(cmPrice).toFixed(2)}</span>` : '';
@@ -2023,6 +2023,7 @@ async function mostraDettaglioCarta(id) {
             <div class="carta-stat-chips">
               ${chips.map(ch => `<span class="carta-chip ${ch.cls}">${escapeHtml(ch.txt)}</span>`).join('')}
             </div>
+            ${genesysBadgeHtml}
             <div class="carta-detail-text">${escapeHtml(c.desc || '')}</div>
             <div class="carta-links">
               <a href="${rulingsUrl}" target="_blank" rel="noopener" class="carta-link-btn">📋 Card Rulings</a>
