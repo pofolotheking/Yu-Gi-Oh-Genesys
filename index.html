@@ -492,77 +492,97 @@
   .modal-close:hover { background: var(--border); }
 
   .modal-body { padding: 24px; }
+
+  /* ── SEZIONE TOP: foto sinistra + nome/desc destra ── */
   .modal-top {
     display: grid;
-    grid-template-columns: 200px 1fr;
-    gap: 22px;
-    margin-bottom: 0;
-    align-items: start;
+    grid-template-columns: 180px 1fr;
+    gap: 20px;
+    align-items: end; /* allineati in basso */
   }
   .modal-photo {
-    width: 200px;
-    height: 260px;
-    border-radius: 14px;
+    width: 180px;
+    height: 180px;
+    border-radius: 16px;
     object-fit: cover;
     border: 1px solid var(--border);
     background: var(--bg-soft);
     flex-shrink: 0;
+    display: block;
   }
   .modal-photo-placeholder {
-    width: 200px;
-    height: 260px;
-    border-radius: 14px;
+    width: 180px;
+    height: 180px;
+    border-radius: 16px;
     background: var(--bg-soft);
     border: 1px solid var(--border);
     display: flex; align-items: center; justify-content: center;
-    font-size: 5rem;
+    font-size: 4rem;
     flex-shrink: 0;
   }
-  .modal-info { display: flex; flex-direction: column; gap: 6px; }
+  .modal-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    justify-content: flex-end; /* si allinea al fondo della foto */
+  }
   .modal-name {
-    font-size: 1.5rem;
+    font-size: 1.6rem;
     font-weight: 700;
     letter-spacing: -0.025em;
     line-height: 1.1;
   }
-  .modal-stat-row {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    margin-top: 4px;
-  }
-  .modal-stat-line {
-    font-size: 0.88rem;
+  .modal-mazzo-pref {
+    font-size: 0.82rem;
     color: var(--text-dim);
+    margin-top: 2px;
+  }
+  .modal-mazzo-pref strong { color: var(--text); font-weight: 600; }
+  .modal-desc {
+    font-size: 0.9rem;
+    color: var(--text-dim);
+    line-height: 1.6;
+    font-style: italic;
+    margin-top: 8px;
+  }
+
+  /* ── SEZIONE STATS: sotto la riga foto/testo ── */
+  .modal-stats-row {
     display: flex;
-    gap: 6px;
-    align-items: baseline;
+    gap: 0;
+    margin-top: 20px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
   }
-  .modal-stat-line strong {
+  .modal-stat-cell {
+    flex: 1;
+    padding: 12px 8px;
+    text-align: center;
+    border-right: 1px solid var(--border);
+  }
+  .modal-stat-cell:last-child { border-right: none; }
+  .modal-stat-val {
+    font-size: 1.1rem;
+    font-weight: 700;
     color: var(--text);
-    font-weight: 600;
     font-variant-numeric: tabular-nums;
+    display: block;
   }
-  .modal-stat-label {
-    font-size: 0.78rem;
-    color: var(--text-faint);
+  .modal-stat-lbl {
+    font-size: 0.65rem;
     text-transform: uppercase;
     letter-spacing: 0.04em;
-    min-width: 90px;
+    color: var(--text-faint);
+    font-weight: 600;
+    margin-top: 2px;
+    display: block;
   }
-  .modal-desc-wrap {
-    margin-top: 14px;
-  }
-  .modal-desc {
-    font-size: 0.95rem;
-    color: var(--text-dim);
-    line-height: 1.65;
-    font-style: italic;
-  }
+
   .modal-divider {
     border: none;
     border-top: 1px solid var(--border);
-    margin: 22px 0 16px;
+    margin: 20px 0 14px;
   }
   .modal-section-title {
     font-size: 0.72rem;
@@ -607,10 +627,11 @@
   }
   .name-btn:hover .info-icon { color: var(--blue); }
 
-  @media (max-width: 520px) {
-    .modal-top { grid-template-columns: 1fr; }
-    .modal-photo, .modal-photo-placeholder { width: 100%; height: 200px; border-radius: 12px; }
-    .modal-name { font-size: 1.25rem; }
+  @media (max-width: 480px) {
+    .modal-top { grid-template-columns: 130px 1fr; gap: 14px; }
+    .modal-photo, .modal-photo-placeholder { width: 130px; height: 130px; }
+    .modal-name { font-size: 1.2rem; }
+    .modal-stat-lbl { font-size: 0.58rem; }
   }
 
   /* ── PULSANTE MEGA GENESYS ── */
@@ -1341,7 +1362,6 @@
         <span>🃏 Mazzi</span><span class="accordion-arrow">▶</span>
       </button>
       <div class="accordion-body" id="acc-mazzi" style="display:none">
-        <div class="card" id="lista-mazzi-config"></div>
         <div class="card">
           <div class="add-form">
             <div>
@@ -1355,6 +1375,7 @@
             <button onclick="aggiungiMazzo()">Aggiungi</button>
           </div>
         </div>
+        <div class="card" id="lista-mazzi-config"></div>
       </div>
     </div>
   </section>
@@ -1368,18 +1389,19 @@
   <div class="modal" id="modal">
     <button class="modal-close" onclick="chiudiModaleForce()">✕</button>
     <div class="modal-body">
+      <!-- TOP: foto + nome/mazzo pref/descrizione allineati in basso -->
       <div class="modal-top">
         <div id="modal-photo-wrap"></div>
         <div class="modal-info">
           <div class="modal-name" id="modal-name"></div>
-          <div class="modal-stat-row" id="modal-stat-row"></div>
+          <div class="modal-mazzo-pref" id="modal-mazzo-pref"></div>
+          <div class="modal-desc" id="modal-desc"></div>
         </div>
       </div>
-      <div class="modal-desc-wrap">
-        <div class="modal-desc" id="modal-desc"></div>
-      </div>
+      <!-- STATS: sotto la riga foto/testo -->
+      <div class="modal-stats-row" id="modal-stats-row"></div>
       <hr class="modal-divider">
-      <div class="modal-section-title">Carte caratteristiche</div>
+      <div class="modal-section-title">Carte preferite</div>
       <div class="modal-cards" id="modal-cards"></div>
     </div>
   </div>
@@ -1779,15 +1801,21 @@ function renderProfiliConfig() {
   c.innerHTML = dati.giocatori.map(g => {
     const p = dati.profili[g] || {};
     const carte = p.carte || ['', '', ''];
-    return `<div style="margin-bottom:24px;padding-bottom:24px;border-bottom:1px solid var(--border)">
-      <div style="font-weight:600;margin-bottom:12px">${g}</div>
-      <div style="display:flex;flex-direction:column;gap:10px">
-        <div><label>Foto (percorso o URL)</label><input type="text" id="prof-foto-${g}" value="${p.foto || ''}" placeholder="img/${g.toLowerCase()}.jpg"></div>
-        <div><label>Descrizione</label><input type="text" id="prof-desc-${g}" value="${p.descrizione || ''}" placeholder="Una breve descrizione del giocatore..."></div>
-        <div><label>Carta 1 (URL immagine)</label><input type="text" id="prof-c1-${g}" value="${carte[0] || ''}" placeholder="https://images.ygoprodeck.com/..."></div>
-        <div><label>Carta 2 (URL immagine)</label><input type="text" id="prof-c2-${g}" value="${carte[1] || ''}" placeholder="https://images.ygoprodeck.com/..."></div>
-        <div><label>Carta 3 (URL immagine)</label><input type="text" id="prof-c3-${g}" value="${carte[2] || ''}" placeholder="https://images.ygoprodeck.com/..."></div>
-        <button class="primary" style="margin-top:4px" onclick="salvaProfilo('${g}')">Salva profilo ${g}</button>
+    return `
+    <div class="accordion-item" style="margin-bottom:8px">
+      <button class="accordion-btn" onclick="toggleAccordion('acc-prof-${g}')">
+        <span>👤 ${g}</span><span class="accordion-arrow">▶</span>
+      </button>
+      <div class="accordion-body" id="acc-prof-${g}" style="display:none;padding:16px">
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div><label>Foto (URL immagine)</label><input type="text" id="prof-foto-${g}" value="${p.foto || ''}" placeholder="https://..."></div>
+          <div><label>Mazzo preferito (personalizzato)</label><input type="text" id="prof-mazzo-${g}" value="${p.mazzoPref || ''}" placeholder="es. Naturia"></div>
+          <div><label>Descrizione</label><input type="text" id="prof-desc-${g}" value="${p.descrizione || ''}" placeholder="Una breve descrizione..."></div>
+          <div><label>Carta preferita 1 (URL)</label><input type="text" id="prof-c1-${g}" value="${carte[0] || ''}" placeholder="https://images.ygoprodeck.com/..."></div>
+          <div><label>Carta preferita 2 (URL)</label><input type="text" id="prof-c2-${g}" value="${carte[1] || ''}" placeholder="https://images.ygoprodeck.com/..."></div>
+          <div><label>Carta preferita 3 (URL)</label><input type="text" id="prof-c3-${g}" value="${carte[2] || ''}" placeholder="https://images.ygoprodeck.com/..."></div>
+          <button class="primary" style="margin-top:4px" onclick="salvaProfilo('${g}')">Salva profilo ${g}</button>
+        </div>
       </div>
     </div>`;
   }).join('');
@@ -1797,6 +1825,7 @@ async function salvaProfilo(g) {
   if (!dati.profili) dati.profili = {};
   dati.profili[g] = {
     foto: document.getElementById(`prof-foto-${g}`).value.trim(),
+    mazzoPref: document.getElementById(`prof-mazzo-${g}`).value.trim(),
     descrizione: document.getElementById(`prof-desc-${g}`).value.trim(),
     carte: [
       document.getElementById(`prof-c1-${g}`).value.trim(),
@@ -1834,11 +1863,9 @@ function renderConfigMazzi() {
   });
   const lista = Object.entries(tuttiMazzi).sort((a, b) => a[0].localeCompare(b[0]));
   if (lista.length === 0) { c.innerHTML = '<div class="empty">Nessun mazzo registrato.</div>'; return; }
-  const stat = calcolaStatMazzi();
   c.innerHTML = lista.map(([nome, prop]) => {
-    const partite = (stat[nome] || { partite: 0 }).partite;
     return `<div class="config-row">
-      <div><span class="name">${nome}</span><span class="meta">di ${prop} · ${partite} partite</span></div>
+      <div><span class="name">${nome}</span></div>
       <div class="actions">
         <button class="secondary" onclick="rinominaMazzo('${nome.replace(/'/g, "\\'")}')">Rinomina</button>
         <button class="secondary" onclick="cambiaProprietario('${nome.replace(/'/g, "\\'")}')">Cambia prop.</button>
@@ -2053,13 +2080,17 @@ function apriProfilo(nome) {
     photoWrap.innerHTML = `<div class="modal-photo-placeholder">👤</div>`;
   }
   document.getElementById('modal-name').textContent = nome;
-  document.getElementById('modal-stat-row').innerHTML = `
-    <div class="modal-stat-line"><span class="modal-stat-label">Classifica</span><strong>${posLabel}</strong></div>
-    <div class="modal-stat-line"><span class="modal-stat-label">Win Rate</span><strong>${wr}%</strong></div>
-    <div class="modal-stat-line"><span class="modal-stat-label">Media punti</span><strong>${media}</strong></div>
-    <div class="modal-stat-line"><span class="modal-stat-label">Mazzo preferito</span><strong>${mazzoPref}</strong></div>
-  `;
+  document.getElementById('modal-mazzo-pref').innerHTML =
+    profilo.mazzoPref
+      ? `Mazzo preferito: <strong>${profilo.mazzoPref}</strong>`
+      : `Mazzo più usato: <strong>${mazzoPref}</strong>`;
   document.getElementById('modal-desc').textContent = profilo.descrizione || 'Nessuna descrizione ancora.';
+  document.getElementById('modal-stats-row').innerHTML = `
+    <div class="modal-stat-cell"><span class="modal-stat-val">${posLabel}</span><span class="modal-stat-lbl">Classifica</span></div>
+    <div class="modal-stat-cell"><span class="modal-stat-val">${wr}%</span><span class="modal-stat-lbl">Win Rate</span></div>
+    <div class="modal-stat-cell"><span class="modal-stat-val">${media}</span><span class="modal-stat-lbl">Media punti</span></div>
+    <div class="modal-stat-cell"><span class="modal-stat-val">${s.partite}</span><span class="modal-stat-lbl">Partite</span></div>
+  `;
   const carte = profilo.carte || [];
   const cardsEl = document.getElementById('modal-cards');
   if (carte.filter(Boolean).length > 0) {
