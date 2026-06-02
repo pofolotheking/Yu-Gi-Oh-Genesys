@@ -4,7 +4,10 @@
     "Tia": {
       "foto": "img/tia.jpg",
       "descrizione": "Scrivi qui una descrizione di Tia.",
-      "carte": []
+      "carte": ["https://images.ygoprodeck.com/images/cards/90829280.jpg",
+      "https://images.ygoprodeck.com/images/cards/55537983.jpg"
+        "https://images.ygoprodeck.com/images/cards/91800273.jpg",
+      ]
     },
     "Gio": {
       "foto": "img/gio.jpg",
@@ -16,7 +19,9 @@
     "Richi": {
       "foto": "img/richi.jpg",
       "descrizione": "Scrivi qui una descrizione di Richi.",
-      "carte": []
+      "carte": ["https://images.ygoprodeck.com/images/cards/29981921.jpg",
+      "https://images.ygoprodeck.com/images/cards/33198837.jpg",
+      "https://images.ygoprodeck.com/images/cards/34680482.jpg"]
     }
   },
   "mazzi": {
