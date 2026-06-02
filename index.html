@@ -430,8 +430,8 @@
     background: var(--bg);
     border-radius: 20px;
     width: 100%;
-    max-width: 480px;
-    max-height: 88vh;
+    max-width: 520px;
+    max-height: 90vh;
     overflow-y: auto;
     box-shadow: 0 24px 60px rgba(0,0,0,0.18);
     position: relative;
@@ -456,74 +456,81 @@
     transition: background 0.15s;
   }
   .modal-close:hover { background: var(--border); }
-  .modal-header {
-    display: flex;
-    align-items: center;
-    gap: 18px;
-    padding: 28px 24px 20px;
-    border-bottom: 1px solid var(--border);
-  }
-  .modal-avatar {
-    width: 72px; height: 72px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 2px solid var(--border);
-    flex-shrink: 0;
-    background: var(--bg-soft);
-  }
-  .modal-avatar-placeholder {
-    width: 72px; height: 72px;
-    border-radius: 50%;
-    background: var(--bg-soft);
-    border: 2px solid var(--border);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 1.8rem;
-    flex-shrink: 0;
-  }
-  .modal-header-info { flex: 1; }
-  .modal-name {
-    font-size: 1.4rem;
-    font-weight: 700;
-    letter-spacing: -0.02em;
-  }
-  .modal-rank {
-    font-size: 0.85rem;
-    color: var(--text-dim);
-    margin-top: 2px;
-  }
-  .modal-body { padding: 20px 24px 28px; }
-  .modal-desc {
-    font-size: 0.97rem;
-    color: var(--text-dim);
-    line-height: 1.6;
-    margin-bottom: 20px;
-    font-style: italic;
-  }
-  .modal-stats {
+
+  /* layout interno modale */
+  .modal-body { padding: 24px; }
+  .modal-top {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
-    margin-bottom: 24px;
+    grid-template-columns: 130px 1fr;
+    gap: 20px;
+    margin-bottom: 0;
   }
-  .modal-stat {
-    background: var(--bg-soft);
+  .modal-photo {
+    width: 130px;
+    height: 130px;
     border-radius: 12px;
-    padding: 12px 10px;
-    text-align: center;
+    object-fit: cover;
+    border: 1px solid var(--border);
+    background: var(--bg-soft);
+    flex-shrink: 0;
   }
-  .modal-stat .val {
-    font-size: 1.3rem;
+  .modal-photo-placeholder {
+    width: 130px;
+    height: 130px;
+    border-radius: 12px;
+    background: var(--bg-soft);
+    border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 3rem;
+    flex-shrink: 0;
+  }
+  .modal-info { display: flex; flex-direction: column; gap: 6px; }
+  .modal-name {
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    line-height: 1.1;
+  }
+  .modal-stat-row {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: 4px;
+  }
+  .modal-stat-line {
+    font-size: 0.88rem;
+    color: var(--text-dim);
+    display: flex;
+    gap: 6px;
+    align-items: baseline;
+  }
+  .modal-stat-line strong {
+    color: var(--text);
     font-weight: 600;
     font-variant-numeric: tabular-nums;
-    display: block;
   }
-  .modal-stat .lbl {
-    font-size: 0.7rem;
+  .modal-stat-label {
+    font-size: 0.78rem;
     color: var(--text-faint);
     text-transform: uppercase;
     letter-spacing: 0.04em;
-    margin-top: 2px;
-    display: block;
+    min-width: 90px;
+  }
+  /* la descrizione scorre a destra della foto e poi continua sotto */
+  .modal-desc-wrap {
+    margin-top: 14px;
+  }
+  .modal-desc {
+    font-size: 0.95rem;
+    color: var(--text-dim);
+    line-height: 1.65;
+    font-style: italic;
+  }
+  /* separatore e carte */
+  .modal-divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 22px 0 16px;
   }
   .modal-section-title {
     font-size: 0.72rem;
@@ -548,6 +555,7 @@
     transition: transform 0.15s;
   }
   .modal-cards img:hover { transform: scale(1.04); }
+
   .name-btn {
     background: none;
     border: none;
@@ -561,6 +569,12 @@
     transition: text-decoration-color 0.15s;
   }
   .name-btn:hover { text-decoration-color: var(--text); }
+
+  @media (max-width: 420px) {
+    .modal-top { grid-template-columns: 100px 1fr; gap: 14px; }
+    .modal-photo, .modal-photo-placeholder { width: 100px; height: 100px; }
+    .modal-name { font-size: 1.25rem; }
+  }
 
   footer { text-align: center; padding: 30px 20px 10px; color: var(--text-faint); font-size: 0.8rem; margin-top: 40px; }
 
@@ -721,16 +735,21 @@
 <div class="modal-overlay" id="modal-overlay" onclick="chiudiModale(event)">
   <div class="modal" id="modal">
     <button class="modal-close" onclick="chiudiModaleForce()">✕</button>
-    <div class="modal-header">
-      <div id="modal-avatar-wrap"></div>
-      <div class="modal-header-info">
-        <div class="modal-name" id="modal-name"></div>
-        <div class="modal-rank" id="modal-rank"></div>
-      </div>
-    </div>
     <div class="modal-body">
-      <div class="modal-desc" id="modal-desc"></div>
-      <div class="modal-stats" id="modal-stats"></div>
+      <!-- foto + info affiancate -->
+      <div class="modal-top">
+        <div id="modal-photo-wrap"></div>
+        <div class="modal-info">
+          <div class="modal-name" id="modal-name"></div>
+          <div class="modal-stat-row" id="modal-stat-row"></div>
+        </div>
+      </div>
+      <!-- descrizione: scorre a destra della foto, poi continua sotto -->
+      <div class="modal-desc-wrap">
+        <div class="modal-desc" id="modal-desc"></div>
+      </div>
+      <!-- carte caratteristiche in fondo -->
+      <hr class="modal-divider">
       <div class="modal-section-title">Carte caratteristiche</div>
       <div class="modal-cards" id="modal-cards"></div>
     </div>
@@ -1388,50 +1407,61 @@ function copiaJSON() {
 }
 
 // ============ MODALE PROFILO ============
+function mazzoPreferitoGiocatore(nome) {
+  const conteggio = {};
+  dati.partite.forEach(p => {
+    if (p.g1 === nome) conteggio[p.m1] = (conteggio[p.m1] || 0) + 1;
+    if (p.g2 === nome) conteggio[p.m2] = (conteggio[p.m2] || 0) + 1;
+  });
+  const entries = Object.entries(conteggio);
+  if (entries.length === 0) return '—';
+  return entries.sort((a, b) => b[1] - a[1])[0][0];
+}
+
 function apriProfilo(nome) {
   const profilo = (dati.profili || {})[nome] || {};
   const stat = calcolaStatGiocatori();
   const s = stat[nome] || { punti: 0, v: 0, p: 0, partite: 0 };
   const wr = s.partite > 0 ? Math.round(100 * s.v / s.partite) : 0;
+  const media = s.partite > 0 ? (s.punti / s.partite).toFixed(1) : '—';
+  const mazzoPref = mazzoPreferitoGiocatore(nome);
 
-  // classifica attuale
+  // posizione in classifica
   const arr = Object.entries(stat).sort((a, b) => b[1].punti - a[1].punti || b[1].v - a[1].v);
   const pos = arr.findIndex(([n]) => n === nome) + 1;
   const medals = ['🥇', '🥈', '🥉'];
   const posLabel = pos <= 3 ? medals[pos - 1] + ' ' + pos + '° posto' : pos + '° posto';
 
-  // avatar
-  const avatarWrap = document.getElementById('modal-avatar-wrap');
+  // foto
+  const photoWrap = document.getElementById('modal-photo-wrap');
   if (profilo.foto) {
-    avatarWrap.innerHTML = `<img class="modal-avatar" src="${profilo.foto}" alt="${nome}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="modal-avatar-placeholder" style="display:none">👤</div>`;
+    photoWrap.innerHTML = `<img class="modal-photo" src="${profilo.foto}" alt="${nome}" onerror="this.outerHTML='<div class=modal-photo-placeholder>👤</div>'">`;
   } else {
-    avatarWrap.innerHTML = `<div class="modal-avatar-placeholder">👤</div>`;
+    photoWrap.innerHTML = `<div class="modal-photo-placeholder">👤</div>`;
   }
 
   document.getElementById('modal-name').textContent = nome;
-  document.getElementById('modal-rank').textContent = posLabel + ' · ' + s.punti + ' punti';
-  document.getElementById('modal-desc').textContent = profilo.descrizione || 'Nessuna descrizione ancora.';
 
-  // statistiche
-  const media = s.partite > 0 ? (s.punti / s.partite).toFixed(1) : '—';
-  document.getElementById('modal-stats').innerHTML = `
-    <div class="modal-stat"><span class="val">${s.partite}</span><span class="lbl">Partite</span></div>
-    <div class="modal-stat"><span class="val">${s.v}V / ${s.p}P</span><span class="lbl">Record</span></div>
-    <div class="modal-stat"><span class="val">${wr}%</span><span class="lbl">Win Rate</span></div>
-    <div class="modal-stat"><span class="val">${s.punti}</span><span class="lbl">Punti Totali</span></div>
-    <div class="modal-stat"><span class="val">${media}</span><span class="lbl">Media Punti</span></div>
-    <div class="modal-stat"><span class="val">${contaMazziGiocatore(nome)}</span><span class="lbl">Mazzi</span></div>
+  // stat lines
+  document.getElementById('modal-stat-row').innerHTML = `
+    <div class="modal-stat-line"><span class="modal-stat-label">Classifica</span><strong>${posLabel}</strong></div>
+    <div class="modal-stat-line"><span class="modal-stat-label">Win Rate</span><strong>${wr}%</strong></div>
+    <div class="modal-stat-line"><span class="modal-stat-label">Media punti</span><strong>${media}</strong></div>
+    <div class="modal-stat-line"><span class="modal-stat-label">Mazzo preferito</span><strong>${mazzoPref}</strong></div>
   `;
 
-  // carte caratteristiche
+  // descrizione (continua sotto la foto grazie al CSS float/grid)
+  document.getElementById('modal-desc').textContent = profilo.descrizione || 'Nessuna descrizione ancora.';
+
+  // carte
   const carte = profilo.carte || [];
   const cardsEl = document.getElementById('modal-cards');
-  if (carte.length > 0) {
-    cardsEl.innerHTML = carte.map(url =>
-      `<img src="${url}" alt="carta" onerror="this.style.opacity='0.2'">`
+  if (carte.filter(Boolean).length > 0) {
+    cardsEl.innerHTML = carte.filter(Boolean).map(url =>
+      `<img src="${url}" alt="carta" onerror="this.style.opacity='0.15'">`
     ).join('');
   } else {
-    cardsEl.innerHTML = `<div style="grid-column:1/-1;text-align:center;color:var(--text-faint);padding:20px;font-size:0.9rem">Nessuna carta impostata.</div>`;
+    cardsEl.innerHTML = `<div style="grid-column:1/-1;text-align:center;color:var(--text-faint);padding:16px;font-size:0.9rem">Nessuna carta impostata.</div>`;
   }
 
   document.getElementById('modal-overlay').classList.add('open');
