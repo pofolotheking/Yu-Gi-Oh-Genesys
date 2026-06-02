@@ -664,19 +664,195 @@
     border: none;
     font: inherit;
     color: inherit;
-    cursor: pointer;
+    cursor: default;
     padding: 0;
     text-decoration: none;
     display: inline-flex;
     align-items: center;
     gap: 5px;
   }
-  .info-icon {
+  /* ── FRECCIA TOGGLE PROFILO ── */
+  .profile-toggle-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 3px 5px;
+    border-radius: 6px;
     color: var(--text-faint);
-    flex-shrink: 0;
-    transition: color 0.15s;
+    transition: color 0.15s, background 0.15s;
+    display: inline-flex;
+    align-items: center;
   }
-  .name-btn:hover .info-icon { color: var(--blue); }
+  .profile-toggle-btn:hover { color: var(--blue); background: var(--bg-soft); }
+  .profile-toggle-btn svg { transition: transform 0.25s ease; }
+  .profile-toggle-btn.open svg { transform: rotate(180deg); }
+
+  /* ── PROFILO INLINE ── */
+  .profile-inline-row { display: none; }
+  .profile-inline-row.open { display: table-row; }
+  .profile-inline-cell {
+    padding: 0 !important;
+    border-bottom: 1px solid var(--border);
+  }
+  .profile-inline-wrap {
+    overflow: hidden;
+    max-height: 0;
+    transition: max-height 0.35s ease;
+  }
+  .profile-inline-wrap.open { max-height: 600px; }
+  .profile-inline-body {
+    display: grid;
+    grid-template-columns: 140px 1fr;
+    gap: 0;
+    background: var(--bg-soft);
+  }
+  .profile-inline-photo {
+    width: 140px;
+    height: 140px;
+    object-fit: cover;
+    border-radius: 0;
+    display: block;
+  }
+  .profile-inline-placeholder {
+    width: 140px;
+    height: 140px;
+    background: var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+  }
+  .profile-inline-right {
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .profile-inline-name {
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+  .profile-inline-mazzo {
+    font-size: 0.78rem;
+    color: var(--text-dim);
+  }
+  .profile-inline-mazzo strong { color: var(--text); font-weight: 600; }
+  .profile-inline-desc {
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    line-height: 1.5;
+    font-style: italic;
+    flex: 1;
+  }
+  /* stats inline */
+  .profile-inline-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    border-top: 1px solid var(--border);
+    background: var(--bg);
+  }
+  .profile-inline-stat {
+    padding: 8px 4px;
+    text-align: center;
+    border-right: 1px solid var(--border);
+  }
+  .profile-inline-stat:last-child { border-right: none; }
+  .pis-lbl {
+    font-size: 0.55rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-faint);
+    font-weight: 600;
+    display: block;
+    margin-bottom: 2px;
+  }
+  .pis-val {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--text);
+    display: block;
+    font-variant-numeric: tabular-nums;
+  }
+  /* achievements inline */
+  .profile-inline-ach {
+    padding: 10px 14px;
+    border-top: 1px solid var(--border);
+    background: var(--bg-soft);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+  }
+  .ach-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    width: 38px;
+  }
+  .ach-icon {
+    font-size: 1.1rem;
+    line-height: 1;
+  }
+  .ach-label {
+    font-size: 0.48rem;
+    font-weight: 600;
+    color: var(--text-dim);
+    text-align: center;
+    line-height: 1.2;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+  }
+  .ach-item.locked { opacity: 0.25; filter: grayscale(1); }
+  .ach-item.unlocked .ach-label { color: var(--text); }
+  /* tooltip achievement */
+  .ach-item.unlocked { position: relative; cursor: default; }
+  .ach-item.unlocked:hover::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: calc(100% + 6px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--text);
+    color: white;
+    font-size: 0.62rem;
+    font-weight: 500;
+    white-space: nowrap;
+    padding: 4px 8px;
+    border-radius: 6px;
+    pointer-events: none;
+    z-index: 20;
+    font-family: inherit;
+  }
+  .ach-item.unlocked:hover::before {
+    content: '';
+    position: absolute;
+    bottom: calc(100% + 2px);
+    left: 50%;
+    transform: translateX(-50%);
+    border: 4px solid transparent;
+    border-top-color: var(--text);
+    pointer-events: none;
+    z-index: 20;
+  }
+  /* carte inline */
+  .profile-inline-cards {
+    padding: 10px 14px;
+    border-top: 1px solid var(--border);
+    background: var(--bg);
+    display: flex;
+    gap: 8px;
+  }
+  .profile-inline-cards img {
+    width: 56px;
+    border-radius: 6px;
+    aspect-ratio: 59/86;
+    object-fit: cover;
+    border: 1px solid var(--border);
+    transition: transform 0.15s;
+  }
+  .profile-inline-cards img:hover { transform: scale(1.08); }
 
   @media (max-width: 500px) {
     .modal-top { grid-template-columns: 130px 1fr; }
@@ -1657,6 +1833,8 @@ function popolaTutto() {
     document.getElementById('data').value = new Date().toISOString().slice(0, 10);
 }
 
+const SVG_CHEVRON = `<svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+
 function renderGiocatori() {
   const stat = calcolaStatGiocatori();
   const arr = Object.entries(stat).sort((a, b) => b[1].punti - a[1].punti || b[1].v - a[1].v);
@@ -1666,6 +1844,7 @@ function renderGiocatori() {
     return;
   }
   const medals = ['🥇', '🥈', '🥉'];
+  const cols = 8; // numero colonne totali
   let html = '<tr><th>#</th><th>Duellante</th><th>Punti</th><th>PG</th><th>V</th><th>P</th><th>Media</th><th>Win Rate</th></tr>';
   arr.forEach(([nome, s], i) => {
     const wr = s.partite > 0 ? Math.round(100 * s.v / s.partite) : 0;
@@ -1674,16 +1853,101 @@ function renderGiocatori() {
     const rankCell = hasMedal
       ? `<td class="rank"><span class="medal">${medals[i]}</span></td>`
       : `<td class="rank">${i + 1}</td>`;
+    const safeNome = nome.replace(/'/g, "\'");
     html += `<tr class="${i === 0 && s.partite > 0 ? 'top-1' : ''}">
-      ${rankCell}<td><button class="name-btn" onclick="apriProfilo('${nome}')">${nome}<span class="info-icon"><svg width="12" height="12" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:-1px"><circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.6"/><line x1="7" y1="6" x2="7" y2="10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="7" cy="4" r="0.8" fill="currentColor"/></svg></span></button></td>
+      ${rankCell}
+      <td>
+        <span class="name-btn">${nome}</span>
+        <button class="profile-toggle-btn" id="ptbtn-${safeNome}" onclick="toggleProfiloInline('${safeNome}')">${SVG_CHEVRON}</button>
+      </td>
       <td class="pts">${s.punti}</td>
       <td class="num">${s.partite}</td>
       <td class="num">${s.v}</td><td class="num">${s.p}</td>
       <td class="num">${media}</td>
       <td><div class="wr-cell"><span class="wr-text">${wr}%</span><span class="wr-bar"><span style="width:${wr}%"></span></span></div></td>
+    </tr>
+    <tr class="profile-inline-row" id="prow-${safeNome}">
+      <td class="profile-inline-cell" colspan="${cols}">
+        <div class="profile-inline-wrap" id="pwrap-${safeNome}">
+          <div id="pcontent-${safeNome}"></div>
+        </div>
+      </td>
     </tr>`;
   });
   t.innerHTML = html;
+}
+
+function toggleProfiloInline(nome) {
+  const btn   = document.getElementById('ptbtn-' + nome);
+  const row   = document.getElementById('prow-' + nome);
+  const wrap  = document.getElementById('pwrap-' + nome);
+  const cont  = document.getElementById('pcontent-' + nome);
+  const isOpen = btn.classList.contains('open');
+  // Chiudi tutti gli altri
+  document.querySelectorAll('.profile-toggle-btn.open').forEach(b => {
+    if (b !== btn) {
+      b.classList.remove('open');
+      const n = b.id.replace('ptbtn-', '');
+      document.getElementById('prow-' + n)?.classList.remove('open');
+      document.getElementById('pwrap-' + n)?.classList.remove('open');
+    }
+  });
+  if (isOpen) {
+    btn.classList.remove('open');
+    row.classList.remove('open');
+    wrap.classList.remove('open');
+  } else {
+    btn.classList.add('open');
+    row.classList.add('open');
+    wrap.classList.add('open');
+    // Renderizza contenuto profilo
+    cont.innerHTML = buildProfiloInline(nome);
+  }
+}
+
+function buildProfiloInline(nome) {
+  const profilo = (dati.profili || {})[nome] || {};
+  const stat = calcolaStatGiocatori();
+  const s = stat[nome] || { punti: 0, v: 0, p: 0, partite: 0 };
+  const wr = s.partite > 0 ? Math.round(100 * s.v / s.partite) : 0;
+  const media = s.partite > 0 ? (s.punti / s.partite).toFixed(1) : '—';
+  const mazzoPref = profilo.mazzoPref || mazzoPreferitoGiocatore(nome) || '—';
+  const arr = Object.entries(stat).sort((a, b) => b[1].punti - a[1].punti || b[1].v - a[1].v);
+  const pos = arr.findIndex(([n]) => n === nome) + 1;
+  const medals = ['🥇', '🥈', '🥉'];
+  const posLabel = pos <= 3 ? medals[pos - 1] + ' ' + pos + '°' : pos + '°';
+  const fotoHtml = profilo.foto
+    ? `<img class="profile-inline-photo" src="${profilo.foto}" alt="${nome}" onerror="this.outerHTML='<div class=profile-inline-placeholder>👤</div>'">`
+    : `<div class="profile-inline-placeholder">👤</div>`;
+  const achievements = calcolaAchievements(nome);
+  const achHtml = achievements.map(a => `
+    <div class="ach-item ${a.unlocked ? 'unlocked' : 'locked'}"
+      ${a.unlocked ? `data-tooltip="${a.name}: ${a.desc}"` : ''}>
+      <span class="ach-icon">${a.icon}</span>
+      <span class="ach-label">${a.name}</span>
+    </div>`).join('');
+  const carte = (profilo.carte || []).filter(Boolean);
+  const carteHtml = carte.length > 0
+    ? carte.map(url => `<img src="${url}" alt="carta" onerror="this.style.opacity='0.15'">`).join('')
+    : '<span style="font-size:0.78rem;color:var(--text-faint)">Nessuna carta impostata.</span>';
+  return `
+    <div class="profile-inline-body">
+      ${fotoHtml}
+      <div class="profile-inline-right">
+        <div class="profile-inline-name">${nome}</div>
+        <div class="profile-inline-mazzo">Mazzo preferito: <strong>${mazzoPref}</strong></div>
+        <div class="profile-inline-desc">${profilo.descrizione || 'Nessuna descrizione ancora.'}</div>
+      </div>
+    </div>
+    <div class="profile-inline-stats">
+      <div class="profile-inline-stat"><span class="pis-lbl">Classifica</span><span class="pis-val">${posLabel}</span></div>
+      <div class="profile-inline-stat"><span class="pis-lbl">Win Rate</span><span class="pis-val">${wr}%</span></div>
+      <div class="profile-inline-stat"><span class="pis-lbl">Media pts</span><span class="pis-val">${media}</span></div>
+      <div class="profile-inline-stat"><span class="pis-lbl">Mazzo top</span><span class="pis-val" style="font-size:0.7rem;line-height:1.2">${mazzoPreferitoGiocatore(nome)}</span></div>
+    </div>
+    <div class="profile-inline-ach">${achHtml}</div>
+    <div class="profile-inline-cards">${carteHtml}</div>
+  `;
 }
 
 function renderRiepilogo() {
@@ -2850,6 +3114,7 @@ window.cercaCarta = cercaCarta;
 window.toggleFiltri = toggleFiltri;
 window.resetFiltri = resetFiltri;
 window.apriProfilo = apriProfilo;
+window.toggleProfiloInline = toggleProfiloInline;
 window.chiudiModale = chiudiModale;
 window.chiudiModaleForce = chiudiModaleForce;
 window.aggiungiGiocatore = aggiungiGiocatore;
