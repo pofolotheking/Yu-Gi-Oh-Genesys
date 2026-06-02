@@ -852,6 +852,67 @@
 
   footer { text-align: center; padding: 30px 20px 10px; color: var(--text-faint); font-size: 0.8rem; margin-top: 40px; }
 
+  /* ── BOTTONE RICERCA HEADER ── */
+  .header-btn-search {
+    width: 100%;
+    max-width: 320px;
+    background: var(--bg-soft);
+    color: var(--blue);
+    border: 1px solid var(--blue);
+    padding: 13px 20px;
+    font-family: inherit;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.05s;
+  }
+  .header-btn-search:hover { background: #e8f0fe; }
+  .header-btn-search:active { transform: scale(0.98); }
+
+  /* ── ACCORDION MODIFICA ── */
+  .accordion-item {
+    margin-bottom: 10px;
+  }
+  .accordion-btn {
+    width: 100%;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px 20px;
+    font-family: inherit;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text);
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background 0.15s, border-color 0.15s;
+    text-align: left;
+  }
+  .accordion-btn:hover { background: var(--bg-soft); }
+  .accordion-btn.open {
+    border-radius: 14px 14px 0 0;
+    border-color: var(--border-strong);
+    background: var(--bg-soft);
+  }
+  .accordion-arrow {
+    font-size: 0.75rem;
+    color: var(--text-faint);
+    transition: transform 0.2s;
+  }
+  .accordion-btn.open .accordion-arrow { transform: rotate(90deg); }
+  .accordion-body {
+    border: 1px solid var(--border-strong);
+    border-top: none;
+    border-radius: 0 0 14px 14px;
+    padding: 16px;
+    background: var(--bg-soft);
+  }
+  .accordion-body .card { margin-bottom: 12px; }
+  .accordion-body .card:last-child { margin-bottom: 0; }
+
   @media (max-width: 600px) {
     .row { grid-template-columns: 1fr; }
     th, td { padding: 12px 12px; font-size: 0.9rem; }
@@ -867,8 +928,9 @@
   <h1>Yu-Gi-Oh! Genesys</h1>
   <div class="subtitle">Il gioco che se vai primo vinci</div>
   <div class="header-actions">
+    <button class="header-btn-search" onclick="switchTab('carte')">🔍 Cerca una carta</button>
     <button class="header-btn-primary" onclick="switchTab('nuova')">+ Registra Partita</button>
-    <button class="header-btn-secondary" onclick="switchTab('config')">⚙ Configurazione</button>
+    <button class="header-btn-secondary" onclick="switchTab('config')">✏️ Modifica</button>
   </div>
 </header>
 
@@ -1076,36 +1138,57 @@
   </section>
 
   <section id="config">
-    <h2>Configurazione</h2>
+    <h2>Modifica</h2>
 
-    <h3>Profili Giocatori</h3>
-    <div class="card padded" id="profili-config"></div>
-
-    <h3>Giocatori</h3>
-    <div class="card" id="lista-giocatori-config"></div>
-    <div class="card">
-      <div class="add-form">
-        <div>
-          <label>Nuovo giocatore</label>
-          <input type="text" id="new-player" placeholder="Nome">
-        </div>
-        <button onclick="aggiungiGiocatore()">Aggiungi</button>
+    <!-- ACCORDION PROFILI -->
+    <div class="accordion-item">
+      <button class="accordion-btn" onclick="toggleAccordion('acc-profili')">
+        <span>👤 Profili Giocatori</span><span class="accordion-arrow">▶</span>
+      </button>
+      <div class="accordion-body" id="acc-profili" style="display:none">
+        <div class="card padded" id="profili-config"></div>
       </div>
     </div>
 
-    <h3>Mazzi</h3>
-    <div class="card" id="lista-mazzi-config"></div>
-    <div class="card">
-      <div class="add-form">
-        <div>
-          <label>Nome mazzo</label>
-          <input type="text" id="new-deck" placeholder="es. Sky Striker">
+    <!-- ACCORDION GIOCATORI -->
+    <div class="accordion-item">
+      <button class="accordion-btn" onclick="toggleAccordion('acc-giocatori')">
+        <span>🎮 Giocatori</span><span class="accordion-arrow">▶</span>
+      </button>
+      <div class="accordion-body" id="acc-giocatori" style="display:none">
+        <div class="card" id="lista-giocatori-config"></div>
+        <div class="card">
+          <div class="add-form">
+            <div>
+              <label>Nuovo giocatore</label>
+              <input type="text" id="new-player" placeholder="Nome">
+            </div>
+            <button onclick="aggiungiGiocatore()">Aggiungi</button>
+          </div>
         </div>
-        <div>
-          <label>Proprietario</label>
-          <select id="new-deck-owner"></select>
+      </div>
+    </div>
+
+    <!-- ACCORDION MAZZI -->
+    <div class="accordion-item">
+      <button class="accordion-btn" onclick="toggleAccordion('acc-mazzi')">
+        <span>🃏 Mazzi</span><span class="accordion-arrow">▶</span>
+      </button>
+      <div class="accordion-body" id="acc-mazzi" style="display:none">
+        <div class="card" id="lista-mazzi-config"></div>
+        <div class="card">
+          <div class="add-form">
+            <div>
+              <label>Nome mazzo</label>
+              <input type="text" id="new-deck" placeholder="es. Sky Striker">
+            </div>
+            <div>
+              <label>Proprietario</label>
+              <select id="new-deck-owner"></select>
+            </div>
+            <button onclick="aggiungiMazzo()">Aggiungi</button>
+          </div>
         </div>
-        <button onclick="aggiungiMazzo()">Aggiungi</button>
       </div>
     </div>
   </section>
@@ -1857,6 +1940,8 @@ function resetFiltri() {
 let searchOffset = 0;
 let lastParams = null;
 async function cercaCarta(append = false) {
+  // Precarica la cache Genesys in background per i badge
+  if (!genesysCache) apriListaGenesys(true);
   const q       = document.getElementById('carte-search')?.value.trim() || '';
   const tipo    = document.getElementById('f-type')?.value || '';
   const attr    = document.getElementById('f-attribute')?.value || '';
@@ -1932,7 +2017,13 @@ async function cercaCarta(append = false) {
 
 function buildThumb(c) {
   const img = c.card_images?.[0]?.image_url_small || c.card_images?.[0]?.image_url || '';
-  const pts = c.misc_info?.[0]?.genesys_points ?? 0;
+  // Prendi i punti dall'API, oppure dalla cache Genesys come fallback
+  let pts = c.misc_info?.[0]?.genesys_points ?? null;
+  if ((pts === null || pts === 0) && genesysCache) {
+    const cached = genesysCache.find(x => x.id === c.id);
+    if (cached) pts = cached.points;
+  }
+  pts = pts ?? 0;
   const badgeCls = pts >= 30 ? 'high' : pts >= 10 ? 'mid' : 'low';
   const badge = pts > 0
     ? `<div class="genesys-thumb-badge ${badgeCls}" title="${pts} punti Genesys">${pts}</div>`
@@ -1998,7 +2089,11 @@ async function mostraDettaglioCarta(id) {
     if (c.atk !== undefined) chips.push({txt: 'ATK ' + c.atk, cls: ''});
     if (c.def !== undefined) chips.push({txt: 'DEF ' + c.def, cls: ''});
     if (c.race)              chips.push({txt: c.race, cls: ''});
-    const genesysPoints = c.misc_info?.[0]?.genesys_points;
+    let genesysPoints = c.misc_info?.[0]?.genesys_points ?? null;
+    if ((genesysPoints === null || genesysPoints === 0) && genesysCache) {
+      const cached = genesysCache.find(x => x.id === c.id);
+      if (cached) genesysPoints = cached.points;
+    }
     const genesysBadgeHtml = (genesysPoints !== undefined && genesysPoints !== null && genesysPoints > 0)
       ? `<div class="genesys-detail-badge ${genesysPoints >= 30 ? 'high' : genesysPoints >= 10 ? 'mid' : 'low'}">
            <span class="genesys-detail-icon">⬡</span>
@@ -2106,6 +2201,14 @@ function mostraDettaglioCartaDaGenesys(id) {
   setTimeout(() => mostraDettaglioCarta(id), 100);
 }
 
+function toggleAccordion(id) {
+  const body = document.getElementById(id);
+  const btn = body.previousElementSibling;
+  const isOpen = body.style.display !== 'none';
+  body.style.display = isOpen ? 'none' : 'block';
+  btn.classList.toggle('open', !isOpen);
+}
+
 window.switchTab = switchTab;
 window.apriListaGenesys = apriListaGenesys;
 window.chiudiListaGenesys = chiudiListaGenesys;
@@ -2124,6 +2227,7 @@ window.cambiaProprietario = cambiaProprietario;
 window.eliminaMazzo = eliminaMazzo;
 window.eliminaPartita = eliminaPartita;
 window.salvaProfilo = salvaProfilo;
+window.toggleAccordion = toggleAccordion;
 window.tornaRisultati = tornaRisultati;
 window.mostraDettaglioCarta = mostraDettaglioCarta;
 window.mostraDettaglioCartaDaGenesys = mostraDettaglioCartaDaGenesys;
