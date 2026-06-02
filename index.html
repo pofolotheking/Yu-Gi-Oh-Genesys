@@ -573,7 +573,7 @@
     line-height: 1.2;
   }
 
-  /* sezione carte */
+  /* sezione carte e achievements */
   .modal-bottom {
     padding: 12px 14px 16px;
     border-top: 1px solid var(--border);
@@ -585,6 +585,45 @@
     color: var(--text-faint);
     font-weight: 600;
     margin-bottom: 8px;
+  }
+  /* ── ACHIEVEMENTS ── */
+  .achievements-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 7px;
+    margin-bottom: 14px;
+  }
+  .achievement {
+    border-radius: 10px;
+    padding: 8px 6px;
+    text-align: center;
+    border: 1px solid var(--border);
+    transition: transform 0.15s;
+  }
+  .achievement.unlocked {
+    background: var(--bg-soft);
+    border-color: var(--border);
+  }
+  .achievement.locked {
+    background: var(--bg);
+    border-color: var(--border);
+    opacity: 0.38;
+    filter: grayscale(1);
+  }
+  .achievement-icon { font-size: 1.3rem; display: block; margin-bottom: 3px; }
+  .achievement-name {
+    font-size: 0.6rem;
+    font-weight: 700;
+    color: var(--text);
+    display: block;
+    line-height: 1.2;
+  }
+  .achievement-desc {
+    font-size: 0.55rem;
+    color: var(--text-faint);
+    display: block;
+    margin-top: 2px;
+    line-height: 1.3;
   }
   .modal-cards {
     display: grid;
@@ -1431,7 +1470,9 @@
       </div>
       <div class="modal-stats-row" id="modal-stats-row"></div>
       <div class="modal-bottom">
-        <div class="modal-section-title">Carte preferite</div>
+        <div class="modal-section-title">Achievements</div>
+        <div class="achievements-grid" id="modal-achievements"></div>
+        <div class="modal-section-title" style="margin-top:10px">Carte preferite</div>
         <div class="modal-cards" id="modal-cards"></div>
       </div>
     </div>
@@ -2084,6 +2125,155 @@ document.getElementById('form-partita').addEventListener('submit', async e => {
   document.getElementById('m2-nuovo').style.display = 'none';
 });
 
+// ============ ACHIEVEMENTS ============
+const ACHIEVEMENTS_DEF = [
+  {
+    id: 'prima_vittoria',
+    icon: '🌟',
+    name: 'Prima vittoria',
+    desc: 'Vinci la tua prima partita',
+    check: (nome, partite) => {
+      return partite.some(p => {
+        const [p1, p2] = PUNTI[p.risultato];
+        return (p.g1 === nome && p1 > p2) || (p.g2 === nome && p2 > p1);
+      });
+    }
+  },
+  {
+    id: 'streak',
+    icon: '🔥',
+    name: 'Streak',
+    desc: '3 vittorie di fila',
+    check: (nome, partite) => {
+      const mie = partite.filter(p => p.g1 === nome || p.g2 === nome);
+      let streak = 0;
+      for (const p of mie) {
+        const [p1, p2] = PUNTI[p.risultato];
+        const vinto = (p.g1 === nome && p1 > p2) || (p.g2 === nome && p2 > p1);
+        if (vinto) { streak++; if (streak >= 3) return true; }
+        else streak = 0;
+      }
+      return false;
+    }
+  },
+  {
+    id: 'imbattibile',
+    icon: '⚡',
+    name: 'Imbattibile',
+    desc: '5 vittorie di fila',
+    check: (nome, partite) => {
+      const mie = partite.filter(p => p.g1 === nome || p.g2 === nome);
+      let streak = 0;
+      for (const p of mie) {
+        const [p1, p2] = PUNTI[p.risultato];
+        const vinto = (p.g1 === nome && p1 > p2) || (p.g2 === nome && p2 > p1);
+        if (vinto) { streak++; if (streak >= 5) return true; }
+        else streak = 0;
+      }
+      return false;
+    }
+  },
+  {
+    id: 'dominatore',
+    icon: '👑',
+    name: 'Dominatore',
+    desc: '3 vittorie 2-0 consecutive',
+    check: (nome, partite) => {
+      const mie = partite.filter(p => p.g1 === nome || p.g2 === nome);
+      let streak = 0;
+      for (const p of mie) {
+        const sweep = (p.g1 === nome && p.risultato === '2-0') ||
+                      (p.g2 === nome && p.risultato === '0-2');
+        if (sweep) { streak++; if (streak >= 3) return true; }
+        else streak = 0;
+      }
+      return false;
+    }
+  },
+  {
+    id: 'affezionato',
+    icon: '💚',
+    name: 'Affezionato',
+    desc: '10 partite con stesso mazzo',
+    check: (nome, partite) => {
+      const conteggio = {};
+      partite.forEach(p => {
+        if (p.g1 === nome) conteggio[p.m1] = (conteggio[p.m1] || 0) + 1;
+        if (p.g2 === nome) conteggio[p.m2] = (conteggio[p.m2] || 0) + 1;
+      });
+      return Object.values(conteggio).some(n => n >= 10);
+    }
+  },
+  {
+    id: 'versatile',
+    icon: '🎭',
+    name: 'Versatile',
+    desc: 'Vinto con 3 mazzi diversi',
+    check: (nome, partite) => {
+      const mazziVinti = new Set();
+      partite.forEach(p => {
+        const [p1, p2] = PUNTI[p.risultato];
+        if (p.g1 === nome && p1 > p2) mazziVinti.add(p.m1);
+        if (p.g2 === nome && p2 > p1) mazziVinti.add(p.m2);
+      });
+      return mazziVinti.size >= 3;
+    }
+  },
+  {
+    id: 'prestigiatore',
+    icon: '🎩',
+    name: 'Prestigiatore',
+    desc: '3 vittorie con 3 mazzi diversi',
+    check: (nome, partite) => {
+      const mazziVinti = {};
+      partite.forEach(p => {
+        const [p1, p2] = PUNTI[p.risultato];
+        if (p.g1 === nome && p1 > p2) mazziVinti[p.m1] = (mazziVinti[p.m1] || 0) + 1;
+        if (p.g2 === nome && p2 > p1) mazziVinti[p.m2] = (mazziVinti[p.m2] || 0) + 1;
+      });
+      return Object.values(mazziVinti).filter(n => n >= 3).length >= 3;
+    }
+  },
+  {
+    id: 'brick_master',
+    icon: '🧱',
+    name: 'Brick Master',
+    desc: '3 sconfitte 0-2 consecutive',
+    check: (nome, partite) => {
+      const mie = partite.filter(p => p.g1 === nome || p.g2 === nome);
+      let streak = 0;
+      for (const p of mie) {
+        const brick = (p.g1 === nome && p.risultato === '0-2') ||
+                      (p.g2 === nome && p.risultato === '2-0');
+        if (brick) { streak++; if (streak >= 3) return true; }
+        else streak = 0;
+      }
+      return false;
+    }
+  },
+  {
+    id: 'la_decima',
+    icon: '💎',
+    name: 'La decima',
+    desc: '10 partite vinte',
+    check: (nome, partite) => {
+      let vittorie = 0;
+      partite.forEach(p => {
+        const [p1, p2] = PUNTI[p.risultato];
+        if ((p.g1 === nome && p1 > p2) || (p.g2 === nome && p2 > p1)) vittorie++;
+      });
+      return vittorie >= 10;
+    }
+  }
+];
+
+function calcolaAchievements(nome) {
+  return ACHIEVEMENTS_DEF.map(a => ({
+    ...a,
+    unlocked: a.check(nome, dati.partite)
+  }));
+}
+
 function mazzoPreferitoGiocatore(nome) {
   const conteggio = {};
   dati.partite.forEach(p => {
@@ -2123,6 +2313,17 @@ function apriProfilo(nome) {
     <div class="modal-stat-cell"><span class="modal-stat-lbl">Media punti</span><span class="modal-stat-val">${media}</span></div>
     <div class="modal-stat-cell"><span class="modal-stat-lbl">Mazzo usato</span><span class="modal-stat-val" style="font-size:0.75rem;line-height:1.2">${mazzoPref}</span></div>
   `;
+  // Achievements
+  const achievements = calcolaAchievements(nome);
+  document.getElementById('modal-achievements').innerHTML = achievements.map(a => `
+    <div class="achievement ${a.unlocked ? 'unlocked' : 'locked'}">
+      <span class="achievement-icon">${a.icon}</span>
+      <span class="achievement-name">${a.name}</span>
+      <span class="achievement-desc">${a.desc}</span>
+    </div>
+  `).join('');
+
+  // Carte preferite
   const carte = profilo.carte || [];
   const cardsEl = document.getElementById('modal-cards');
   if (carte.filter(Boolean).length > 0) {
