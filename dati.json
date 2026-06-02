@@ -9,7 +9,7 @@
     "Gio": {
       "foto": "img/gio.jpg",
       "descrizione": "Scrivi qui una descrizione di Gio.",
-      "carte": []
+      "carte": ["https://images.ygoprodeck.com/images/cards/10443957.jpg"]
     },
     "Richi": {
       "foto": "img/richi.jpg",
