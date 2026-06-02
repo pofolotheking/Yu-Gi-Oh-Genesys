@@ -615,6 +615,41 @@
     .modal-name { font-size: 1.25rem; }
   }
 
+  /* ── FILTRI AVANZATI ── */
+  .filtri-toggle {
+    background: none;
+    border: none;
+    color: var(--blue);
+    font-family: inherit;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    padding: 4px 0;
+    display: block;
+    margin-bottom: 0;
+  }
+  .filtri-toggle:hover { opacity: 0.75; }
+  .filtri-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 12px;
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border);
+  }
+  .filtri-grid label {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--text-dim);
+    margin-bottom: 5px;
+    display: block;
+  }
+  .filtri-grid input,
+  .filtri-grid select {
+    padding: 10px 12px;
+    font-size: 0.9rem;
+  }
+
   /* ── DATABASE CARTE ── */
   .carte-grid {
     display: grid;
@@ -713,6 +748,26 @@
     color: var(--text-faint);
     font-size: 0.95rem;
   }
+  .carta-links {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 14px;
+  }
+  .carta-link-btn {
+    display: inline-block;
+    padding: 9px 14px;
+    border-radius: 8px;
+    background: var(--bg-soft);
+    border: 1px solid var(--border-strong);
+    color: var(--text);
+    font-size: 0.85rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: background 0.15s;
+  }
+  .carta-link-btn:hover { background: var(--border); }
+
   @media (max-width: 500px) {
     .carta-detail-wrap { grid-template-columns: 120px 1fr; gap: 14px; }
     .carta-detail-img { width: 120px; }
@@ -821,13 +876,110 @@
 
   <section id="carte">
     <h2>Database Carte</h2>
-    <div class="info">Cerca qualsiasi carta di Yu-Gi-Oh!. I dati arrivano in tempo reale da <strong>YGOProDeck</strong>. Le carte vanno cercate in <strong>inglese</strong> (es. Blue-Eyes White Dragon, Ash Blossom).</div>
+    <div class="info">Cerca qualsiasi carta di Yu-Gi-Oh! in tempo reale da <strong>YGOProDeck</strong>. I nomi vanno inseriti in <strong>inglese</strong> (es. Blue-Eyes White Dragon, Ash Blossom).</div>
+
     <div class="card padded" style="margin-bottom:16px">
-      <div style="display:flex;gap:10px">
+      <!-- barra ricerca + bottone cerca -->
+      <div style="display:flex;gap:10px;margin-bottom:12px">
         <input type="text" id="carte-search" placeholder="es. Blue-Eyes White Dragon, Ash Blossom…" style="flex:1">
         <button class="primary" style="margin-top:0;width:auto;padding:12px 20px" onclick="cercaCarta()">Cerca</button>
       </div>
+
+      <!-- toggle filtri avanzati -->
+      <button class="filtri-toggle" id="filtri-toggle" onclick="toggleFiltri()">
+        <span id="filtri-toggle-label">▶ Filtri avanzati</span>
+      </button>
+
+      <!-- pannello filtri, nascosto di default -->
+      <div id="filtri-panel" style="display:none">
+        <div class="filtri-grid">
+          <div>
+            <label>Tipo</label>
+            <select id="f-type">
+              <option value="">— Tutti —</option>
+              <optgroup label="Mostri">
+                <option value="Normal Monster">Normal Monster</option>
+                <option value="Effect Monster">Effect Monster</option>
+                <option value="Fusion Monster">Fusion Monster</option>
+                <option value="Ritual Monster">Ritual Monster</option>
+                <option value="Synchro Monster">Synchro Monster</option>
+                <option value="XYZ Monster">XYZ Monster</option>
+                <option value="Link Monster">Link Monster</option>
+                <option value="Pendulum Effect Monster">Pendulum Monster</option>
+                <option value="Flip Effect Monster">Flip Monster</option>
+              </optgroup>
+              <optgroup label="Magie / Trappole">
+                <option value="Spell Card">Spell Card</option>
+                <option value="Trap Card">Trap Card</option>
+              </optgroup>
+            </select>
+          </div>
+          <div>
+            <label>Attributo</label>
+            <select id="f-attribute">
+              <option value="">— Tutti —</option>
+              <option value="DARK">DARK</option>
+              <option value="LIGHT">LIGHT</option>
+              <option value="WATER">WATER</option>
+              <option value="FIRE">FIRE</option>
+              <option value="EARTH">EARTH</option>
+              <option value="WIND">WIND</option>
+              <option value="DIVINE">DIVINE</option>
+            </select>
+          </div>
+          <div>
+            <label>Razza</label>
+            <select id="f-race">
+              <option value="">— Tutte —</option>
+              <option value="Dragon">Dragon</option>
+              <option value="Spellcaster">Spellcaster</option>
+              <option value="Warrior">Warrior</option>
+              <option value="Beast">Beast</option>
+              <option value="Beast-Warrior">Beast-Warrior</option>
+              <option value="Fiend">Fiend</option>
+              <option value="Fairy">Fairy</option>
+              <option value="Zombie">Zombie</option>
+              <option value="Machine">Machine</option>
+              <option value="Aqua">Aqua</option>
+              <option value="Pyro">Pyro</option>
+              <option value="Rock">Rock</option>
+              <option value="Insect">Insect</option>
+              <option value="Thunder">Thunder</option>
+              <option value="Plant">Plant</option>
+              <option value="Psychic">Psychic</option>
+              <option value="Reptile">Reptile</option>
+              <option value="Sea Serpent">Sea Serpent</option>
+              <option value="Dinosaur">Dinosaur</option>
+              <option value="Wyrm">Wyrm</option>
+              <option value="Cyberse">Cyberse</option>
+              <option value="Divine-Beast">Divine-Beast</option>
+            </select>
+          </div>
+          <div>
+            <label>Livello / Rango</label>
+            <select id="f-level">
+              <option value="">— Tutti —</option>
+              <option value="1">1</option><option value="2">2</option>
+              <option value="3">3</option><option value="4">4</option>
+              <option value="5">5</option><option value="6">6</option>
+              <option value="7">7</option><option value="8">8</option>
+              <option value="9">9</option><option value="10">10</option>
+              <option value="11">11</option><option value="12">12</option>
+            </select>
+          </div>
+          <div>
+            <label>ATK (esatto)</label>
+            <input type="number" id="f-atk" placeholder="es. 3000" min="0">
+          </div>
+          <div>
+            <label>DEF (esatto)</label>
+            <input type="number" id="f-def" placeholder="es. 2500" min="0">
+          </div>
+        </div>
+        <button class="secondary" style="margin-top:12px;width:100%" onclick="resetFiltri()">↺ Azzera filtri</button>
+      </div>
     </div>
+
     <div id="carte-results"></div>
     <div id="carte-detail" style="display:none"></div>
   </section>
@@ -1644,41 +1796,72 @@ function chiudiModaleForce() {
 document.addEventListener('keydown', e => { if (e.key === 'Escape') chiudiModaleForce(); });
 
 caricaDati();
-let carteSearchTimeout = null;
-
+// ============ DATABASE CARTE ============
 document.addEventListener('DOMContentLoaded', () => {
   const inp = document.getElementById('carte-search');
-  if (inp) {
-    inp.addEventListener('keydown', e => { if (e.key === 'Enter') cercaCarta(); });
-    inp.addEventListener('input', () => {
-      clearTimeout(carteSearchTimeout);
-      if (inp.value.trim().length >= 3) {
-        carteSearchTimeout = setTimeout(cercaCarta, 500);
-      }
-    });
-  }
+  if (inp) inp.addEventListener('keydown', e => { if (e.key === 'Enter') cercaCarta(); });
 });
 
+function toggleFiltri() {
+  const panel = document.getElementById('filtri-panel');
+  const label = document.getElementById('filtri-toggle-label');
+  const open = panel.style.display === 'none';
+  panel.style.display = open ? 'block' : 'none';
+  label.textContent = open ? '▼ Filtri avanzati' : '▶ Filtri avanzati';
+}
+
+function resetFiltri() {
+  ['f-type','f-attribute','f-race','f-level'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.value = '';
+  });
+  ['f-atk','f-def'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.value = '';
+  });
+}
+
 async function cercaCarta() {
-  const q = document.getElementById('carte-search').value.trim();
-  if (!q) return;
+  const q     = document.getElementById('carte-search')?.value.trim() || '';
+  const tipo  = document.getElementById('f-type')?.value || '';
+  const attr  = document.getElementById('f-attribute')?.value || '';
+  const race  = document.getElementById('f-race')?.value || '';
+  const level = document.getElementById('f-level')?.value || '';
+  const atk   = document.getElementById('f-atk')?.value || '';
+  const def   = document.getElementById('f-def')?.value || '';
+
+  if (!q && !tipo && !attr && !race && !level && !atk && !def) {
+    alert('Inserisci almeno un parametro di ricerca.');
+    return;
+  }
+
   const res = document.getElementById('carte-results');
   const det = document.getElementById('carte-detail');
   det.style.display = 'none';
+  res.style.display = 'block';
   res.innerHTML = '<div class="carte-loading">Ricerca in corso…</div>';
+
+  const params = new URLSearchParams();
+  if (q)     params.append('fname', q);
+  if (tipo)  params.append('type', tipo);
+  if (attr)  params.append('attribute', attr);
+  if (race)  params.append('race', race);
+  if (level) params.append('level', level);
+  if (atk)   params.append('atk', atk);
+  if (def)   params.append('def', def);
+  params.append('num', '24');
+  params.append('offset', '0');
+
   try {
-    const url = `https://db.ygoprodeck.com/api/v7/cardinfo.php?fname=${encodeURIComponent(q)}&num=24&offset=0`;
-    const r = await fetch(url);
-    if (!r.ok) throw new Error('not found');
+    const r = await fetch(`https://db.ygoprodeck.com/api/v7/cardinfo.php?${params.toString()}`);
+    if (!r.ok) throw new Error();
     const data = await r.json();
     const cards = data.data || [];
     if (cards.length === 0) {
-      res.innerHTML = '<div class="carte-empty">Nessuna carta trovata.</div>';
+      res.innerHTML = '<div class="carte-empty">Nessuna carta trovata con questi filtri.</div>';
       return;
     }
     res.innerHTML = `
       <div class="card padded" style="margin-bottom:0">
-        <div style="font-size:0.8rem;color:var(--text-faint);margin-bottom:12px">${cards.length} risultati per "${q}"</div>
+        <div style="font-size:0.8rem;color:var(--text-faint);margin-bottom:12px">${cards.length} risultati</div>
         <div class="carte-grid">
           ${cards.map(c => {
             const img = c.card_images?.[0]?.image_url_small || c.card_images?.[0]?.image_url || '';
@@ -1690,7 +1873,7 @@ async function cercaCarta() {
         </div>
       </div>`;
   } catch(e) {
-    res.innerHTML = '<div class="carte-empty">Nessuna carta trovata. Prova con un altro nome.</div>';
+    res.innerHTML = '<div class="carte-empty">Nessuna carta trovata. Prova a modificare i filtri.</div>';
   }
 }
 
@@ -1708,12 +1891,16 @@ async function mostraDettaglioCarta(id) {
     if (!c) throw new Error();
     const img = c.card_images?.[0]?.image_url || '';
     const chips = [];
-    if (c.type) chips.push(c.type);
-    if (c.attribute) chips.push(c.attribute);
-    if (c.level) chips.push('Livello ' + c.level);
+    if (c.type)              chips.push(c.type);
+    if (c.attribute)         chips.push(c.attribute);
+    if (c.level)             chips.push('Livello ' + c.level);
     if (c.atk !== undefined) chips.push('ATK ' + c.atk);
     if (c.def !== undefined) chips.push('DEF ' + c.def);
-    if (c.race) chips.push(c.race);
+    if (c.race)              chips.push(c.race);
+
+    const rulingsUrl    = `https://db.ygoprodeck.com/card/?search=${encodeURIComponent(c.name)}#rulings`;
+    const cardmarketUrl = `https://www.cardmarket.com/en/YuGiOh/Products/Search?searchString=${encodeURIComponent(c.name)}`;
+
     det.innerHTML = `
       <button class="back-btn" onclick="tornaRisultati()">← Torna ai risultati</button>
       <div class="card padded">
@@ -1726,11 +1913,15 @@ async function mostraDettaglioCarta(id) {
               ${chips.map(ch => `<span class="carta-chip">${ch}</span>`).join('')}
             </div>
             <div class="carta-detail-text">${c.desc || ''}</div>
+            <div class="carta-links">
+              <a href="${rulingsUrl}" target="_blank" class="carta-link-btn">📋 Card Rulings</a>
+              <a href="${cardmarketUrl}" target="_blank" class="carta-link-btn">🛒 CardMarket</a>
+            </div>
           </div>
         </div>
       </div>`;
   } catch(e) {
-    det.innerHTML = '<button class="back-btn" onclick="tornaRisultati()">← Torna ai risultati</button><div class="carte-empty">Errore nel caricamento della carta.</div>';
+    det.innerHTML = '<button class="back-btn" onclick="tornaRisultati()">← Torna ai risultati</button><div class="carte-empty">Errore nel caricamento.</div>';
   }
 }
 
