@@ -1,9 +1,22 @@
 {
-  "giocatori": [
-    "Tia",
-    "Gio",
-    "Richi"
-  ],
+  "giocatori": ["Tia", "Gio", "Richi"],
+  "profili": {
+    "Tia": {
+      "foto": "img/tia.jpg",
+      "descrizione": "Scrivi qui una descrizione di Tia.",
+      "carte": []
+    },
+    "Gio": {
+      "foto": "img/gio.jpg",
+      "descrizione": "Scrivi qui una descrizione di Gio.",
+      "carte": []
+    },
+    "Richi": {
+      "foto": "img/richi.jpg",
+      "descrizione": "Scrivi qui una descrizione di Richi.",
+      "carte": []
+    }
+  },
   "mazzi": {
     "Drago Bianco Occhi Blu": "Tia",
     "Dragon Ruler": "Gio",
