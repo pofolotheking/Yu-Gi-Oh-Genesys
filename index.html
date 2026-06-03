@@ -175,162 +175,214 @@
   }
 
   /* ── OVERLAY DUELLO ── */
+  /* ── OVERLAY DUELLO ── */
   .duel-overlay {
     display: none;
     position: fixed;
     inset: 0;
-    background: #0a0a0f;
+    background: #ffffff;
     z-index: 300;
     flex-direction: column;
     overflow: hidden;
   }
   .duel-overlay.open { display: flex; }
 
-  /* Due metà: top = giocatore 2 (ruotato), bottom = giocatore 1 */
-  .duel-half {
+  /* Topbar con freccia back */
+  .duel-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border);
+    background: #fff;
+    flex-shrink: 0;
+    z-index: 5;
+  }
+  .duel-back-btn {
+    background: none;
+    border: none;
+    color: var(--blue);
+    font-family: inherit;
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 0;
+  }
+  .duel-back-btn:hover { opacity: 0.75; }
+  .duel-topbar-title {
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.01em;
+  }
+  .duel-topbar-actions { display: flex; gap: 6px; }
+  .duel-top-btn {
+    background: var(--bg-soft);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text-dim);
+    font-family: inherit;
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 5px 10px;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+  }
+  .duel-top-btn:hover { background: var(--border); color: var(--text); }
+  .duel-top-btn.active { background: rgba(52,199,89,0.15); color: #28a745; border-color: var(--green); }
+
+  /* Layout: su desktop due colonne affiancate, su mobile due righe */
+  .duel-arena {
     flex: 1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    overflow: hidden;
+  }
+
+  .duel-half {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 16px;
+    padding: 20px 16px;
     position: relative;
     transition: background 0.3s;
+    border-right: 1px solid var(--border);
   }
-  .duel-half.p2 { transform: rotate(180deg); border-bottom: 1px solid rgba(255,255,255,0.08); }
-  .duel-half.p1 { border-top: 1px solid rgba(255,255,255,0.08); }
-  .duel-half.winning { background: rgba(52,199,89,0.12); }
-  .duel-half.losing  { background: rgba(255,59,48,0.08); }
+  .duel-half:last-child { border-right: none; }
+  .duel-half.winning { background: rgba(52,199,89,0.07); }
+  .duel-half.losing  { background: rgba(255,59,48,0.05); }
 
-  .duel-player-name {
-    font-size: 0.72rem;
-    font-weight: 600;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: rgba(255,255,255,0.45);
-    margin-bottom: 6px;
-  }
   .duel-lp {
-    font-size: clamp(3rem, 14vw, 5.5rem);
+    font-size: clamp(2.4rem, 6vw, 4.5rem);
     font-weight: 800;
     font-variant-numeric: tabular-nums;
     letter-spacing: -0.03em;
-    color: white;
+    color: var(--text);
     line-height: 1;
-    margin-bottom: 12px;
+    margin-bottom: 10px;
     transition: color 0.3s;
   }
-  .duel-lp.danger { color: #ff3b30; }
-  .duel-lp.zero   { color: rgba(255,59,48,0.5); }
+  .duel-lp.danger { color: var(--red); }
+  .duel-lp.zero   { color: rgba(255,59,48,0.4); }
 
   /* Barra LP */
   .duel-bar-wrap {
     width: 100%;
-    max-width: 300px;
-    height: 4px;
-    background: rgba(255,255,255,0.12);
-    border-radius: 2px;
-    margin-bottom: 14px;
+    max-width: 220px;
+    height: 5px;
+    background: var(--border);
+    border-radius: 3px;
+    margin-bottom: 16px;
     overflow: hidden;
   }
   .duel-bar {
     height: 100%;
-    border-radius: 2px;
-    background: #34c759;
+    border-radius: 3px;
+    background: var(--green);
     transition: width 0.4s ease, background 0.3s;
   }
-  .duel-bar.danger { background: #ff9500; }
-  .duel-bar.critical { background: #ff3b30; }
+  .duel-bar.danger   { background: var(--orange); }
+  .duel-bar.critical { background: var(--red); }
 
-  /* Tasti +/- veloci */
+  /* Tasti veloci */
   .duel-quick-btns {
     display: flex;
-    gap: 6px;
+    gap: 5px;
     flex-wrap: wrap;
     justify-content: center;
   }
   .duel-quick-btn {
-    background: rgba(255,255,255,0.08);
-    border: 1px solid rgba(255,255,255,0.12);
+    background: var(--bg-soft);
+    border: 1px solid var(--border);
     border-radius: 8px;
-    color: white;
+    color: var(--text);
     font-family: inherit;
     font-size: 0.78rem;
     font-weight: 600;
-    padding: 6px 10px;
+    padding: 6px 9px;
     cursor: pointer;
-    transition: background 0.15s;
+    transition: background 0.12s;
   }
-  .duel-quick-btn:hover { background: rgba(255,255,255,0.16); }
-  .duel-quick-btn.minus { color: #ff6b6b; }
-  .duel-quick-btn.plus  { color: #5eea7e; }
+  .duel-quick-btn:hover { background: var(--border); }
+  .duel-quick-btn.minus { color: var(--red); }
+  .duel-quick-btn.plus  { color: var(--green-dark); }
 
-  /* Barra centrale: cronometro + timer + reset + chiudi */
+  /* Barra centrale orizzontale (cronometro + controlli) */
   .duel-center-bar {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+    flex-shrink: 0;
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 8px;
-    z-index: 10;
-    background: #1a1a22;
-    border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 20px;
-    padding: 6px 12px;
+    padding: 8px 16px;
+    background: var(--bg-soft);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
   }
   .duel-center-time {
     font-size: 1rem;
     font-weight: 700;
     font-variant-numeric: tabular-nums;
-    color: white;
-    min-width: 54px;
+    color: var(--text);
+    min-width: 50px;
     text-align: center;
   }
   .duel-center-btn {
-    background: rgba(255,255,255,0.08);
-    border: none;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
     border-radius: 8px;
-    color: rgba(255,255,255,0.7);
-    font-size: 0.8rem;
-    padding: 5px 8px;
+    color: var(--text-dim);
+    font-size: 0.82rem;
+    padding: 5px 10px;
     cursor: pointer;
     font-family: inherit;
     font-weight: 600;
     transition: background 0.15s, color 0.15s;
   }
-  .duel-center-btn:hover { background: rgba(255,255,255,0.16); color: white; }
-  .duel-center-btn.active { background: rgba(52,199,89,0.25); color: #34c759; }
+  .duel-center-btn:hover { background: var(--border); color: var(--text); }
+  .duel-center-btn.active { background: rgba(52,199,89,0.15); color: #28a745; border-color: var(--green); }
+
+  /* ── MOBILE: layout verticale a specchio ── */
+  @media (max-width: 600px) {
+    .duel-arena {
+      grid-template-columns: 1fr;
+      grid-template-rows: 1fr 1fr;
+    }
+    .duel-half { border-right: none; border-bottom: 1px solid var(--border); }
+    .duel-half:last-child { border-bottom: none; }
+    .duel-half.p2 { transform: rotate(180deg); }
+    .duel-lp { font-size: clamp(2.6rem, 12vw, 4rem); }
+    .duel-quick-btn { font-size: 0.72rem; padding: 5px 7px; }
+  }
 
   /* Modal calcolatrice LP */
   .duel-calc-overlay {
     display: none;
     position: fixed;
     inset: 0;
-    background: rgba(0,0,0,0.7);
+    background: rgba(0,0,0,0.5);
     z-index: 400;
     align-items: flex-end;
     justify-content: center;
-    padding: 0;
   }
   .duel-calc-overlay.open { display: flex; }
   .duel-calc-modal {
-    background: #1a1a22;
+    background: var(--bg);
     border-radius: 20px 20px 0 0;
     width: 100%;
     max-width: 420px;
     padding: 20px 16px 32px;
     animation: slideUp 0.25s ease;
   }
-  @keyframes slideUp {
-    from { transform: translateY(100%); }
-    to { transform: translateY(0); }
-  }
+  @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
   .duel-calc-title {
     font-size: 0.8rem;
     font-weight: 600;
-    color: rgba(255,255,255,0.5);
+    color: var(--text-faint);
     text-align: center;
     letter-spacing: 0.06em;
     text-transform: uppercase;
@@ -339,10 +391,10 @@
   .duel-calc-display {
     font-size: 2.4rem;
     font-weight: 700;
-    color: white;
+    color: var(--text);
     text-align: right;
     font-variant-numeric: tabular-nums;
-    background: rgba(255,255,255,0.06);
+    background: var(--bg-soft);
     border-radius: 12px;
     padding: 10px 16px;
     margin-bottom: 12px;
@@ -359,10 +411,10 @@
     margin-bottom: 10px;
   }
   .duel-calc-key {
-    background: rgba(255,255,255,0.08);
-    border: none;
+    background: var(--bg-soft);
+    border: 1px solid var(--border);
     border-radius: 12px;
-    color: white;
+    color: var(--text);
     font-family: inherit;
     font-size: 1.2rem;
     font-weight: 600;
@@ -371,21 +423,19 @@
     transition: background 0.1s, transform 0.05s;
   }
   .duel-calc-key:active { transform: scale(0.93); }
-  .duel-calc-key:hover { background: rgba(255,255,255,0.14); }
-  .duel-calc-key.op  { background: rgba(255,149,0,0.2); color: #ff9500; }
-  .duel-calc-key.op:hover { background: rgba(255,149,0,0.35); }
-  .duel-calc-key.del { background: rgba(255,59,48,0.15); color: #ff6b6b; }
-  .duel-calc-key.apply-minus { background: rgba(255,59,48,0.25); color: #ff6b6b; font-size: 0.85rem; }
-  .duel-calc-key.apply-plus  { background: rgba(52,199,89,0.25); color: #5eea7e; font-size: 0.85rem; }
-  .duel-calc-key.apply-minus:hover { background: rgba(255,59,48,0.4); }
-  .duel-calc-key.apply-plus:hover  { background: rgba(52,199,89,0.4); }
+  .duel-calc-key:hover { background: var(--border); }
+  .duel-calc-key.del { background: var(--red-soft); color: var(--red); border-color: transparent; }
+  .duel-calc-key.apply-minus { background: var(--red-soft); color: var(--red); font-size: 0.85rem; border-color: transparent; }
+  .duel-calc-key.apply-plus  { background: var(--green-soft); color: var(--green-dark); font-size: 0.85rem; border-color: transparent; }
+  .duel-calc-key.apply-minus:hover { background: #fecaca; }
+  .duel-calc-key.apply-plus:hover  { background: #bbf7d0; }
 
   /* Timer modal */
   .duel-timer-overlay {
     display: none;
     position: fixed;
     inset: 0;
-    background: rgba(0,0,0,0.7);
+    background: rgba(0,0,0,0.5);
     z-index: 400;
     align-items: center;
     justify-content: center;
@@ -393,22 +443,23 @@
   }
   .duel-timer-overlay.open { display: flex; }
   .duel-timer-modal {
-    background: #1a1a22;
+    background: var(--bg);
     border-radius: 20px;
     width: 100%;
     max-width: 320px;
     padding: 24px 20px;
     text-align: center;
+    border: 1px solid var(--border);
   }
   .duel-timer-display {
     font-size: 3.5rem;
     font-weight: 800;
-    color: white;
+    color: var(--text);
     font-variant-numeric: tabular-nums;
     letter-spacing: -0.03em;
     margin: 12px 0;
   }
-  .duel-timer-display.expired { color: #ff3b30; animation: blink 1s infinite; }
+  .duel-timer-display.expired { color: var(--red); animation: blink 1s infinite; }
   @keyframes blink { 0%,100% { opacity:1; } 50% { opacity:0.3; } }
   .duel-timer-presets {
     display: flex;
@@ -418,10 +469,10 @@
     flex-wrap: wrap;
   }
   .duel-timer-preset {
-    background: rgba(255,255,255,0.08);
-    border: none;
+    background: var(--bg-soft);
+    border: 1px solid var(--border);
     border-radius: 8px;
-    color: rgba(255,255,255,0.7);
+    color: var(--text-dim);
     font-family: inherit;
     font-size: 0.85rem;
     font-weight: 600;
@@ -429,14 +480,14 @@
     cursor: pointer;
     transition: background 0.15s;
   }
-  .duel-timer-preset:hover { background: rgba(255,255,255,0.16); color: white; }
-  .duel-timer-btns { display: flex; gap: 8px; justify-content: center; }
+  .duel-timer-preset:hover { background: var(--border); color: var(--text); }
+  .duel-timer-btns { display: flex; gap: 8px; }
   .duel-timer-btn {
     flex: 1;
-    background: rgba(255,255,255,0.08);
-    border: none;
+    background: var(--bg-soft);
+    border: 1px solid var(--border);
     border-radius: 10px;
-    color: white;
+    color: var(--text);
     font-family: inherit;
     font-size: 0.9rem;
     font-weight: 600;
@@ -444,10 +495,10 @@
     cursor: pointer;
     transition: background 0.15s;
   }
-  .duel-timer-btn.start { background: rgba(52,199,89,0.25); color: #34c759; }
-  .duel-timer-btn.start:hover { background: rgba(52,199,89,0.4); }
-  .duel-timer-btn.stop { background: rgba(255,59,48,0.2); color: #ff6b6b; }
-  .duel-timer-btn.stop:hover { background: rgba(255,59,48,0.35); }
+  .duel-timer-btn.start { background: var(--green-soft); color: var(--green-dark); border-color: var(--green-border); }
+  .duel-timer-btn.start:hover { background: var(--green-border); }
+  .duel-timer-btn.stop { background: var(--red-soft); color: var(--red); border-color: #fecaca; }
+  .duel-timer-btn.stop:hover { background: #fecaca; }
 
   /* ── PROFILO SEMPRE APERTO (classifica) ── */
   .profile-always {
@@ -2050,47 +2101,55 @@
 <!-- OVERLAY DUELLO -->
 <div class="duel-overlay" id="duel-overlay">
 
-  <!-- Giocatore 2 (sopra, ruotato) -->
-  <div class="duel-half p2" id="duel-half-p2">
-    <div class="duel-player-name" id="duel-name-p2">GIOCATORE 2</div>
-    <div class="duel-lp" id="duel-lp-p2">8000</div>
-    <div class="duel-bar-wrap"><div class="duel-bar" id="duel-bar-p2" style="width:100%"></div></div>
-    <div class="duel-quick-btns">
-      <button class="duel-quick-btn minus" onclick="duelQuick(2,-2000)">-2000</button>
-      <button class="duel-quick-btn minus" onclick="duelQuick(2,-1000)">-1000</button>
-      <button class="duel-quick-btn minus" onclick="duelQuick(2,-500)">-500</button>
-      <button class="duel-quick-btn minus" onclick="duelQuick(2,-100)">-100</button>
-      <button class="duel-quick-btn" onclick="apriCalc(2)">🧮</button>
-      <button class="duel-quick-btn plus" onclick="duelQuick(2,100)">+100</button>
-      <button class="duel-quick-btn plus" onclick="duelQuick(2,500)">+500</button>
-      <button class="duel-quick-btn plus" onclick="duelQuick(2,1000)">+1000</button>
+  <!-- Topbar con freccia back e controlli -->
+  <div class="duel-topbar">
+    <button class="duel-back-btn" onclick="chiudiDuello()">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Home
+    </button>
+    <div class="duel-topbar-title">⚔️ Duello</div>
+    <div class="duel-topbar-actions">
+      <button class="duel-top-btn" id="duel-chrono-btn" onclick="toggleChrono()">▶ <span id="duel-chrono-display">0:00</span></button>
+      <button class="duel-top-btn" onclick="apriTimer()">⏱</button>
+      <button class="duel-top-btn" onclick="resetDuello()">↺</button>
     </div>
   </div>
 
-  <!-- Barra centrale -->
-  <div class="duel-center-bar">
-    <div class="duel-center-time" id="duel-chrono-display">0:00</div>
-    <button class="duel-center-btn" id="duel-chrono-btn" onclick="toggleChrono()">▶</button>
-    <button class="duel-center-btn" onclick="apriTimer()" title="Timer">⏱</button>
-    <button class="duel-center-btn" onclick="resetDuello()" title="Reset">↺</button>
-    <button class="duel-center-btn" onclick="chiudiDuello()" title="Chiudi">✕</button>
-  </div>
+  <!-- Arena: due colonne su desktop, due righe su mobile -->
+  <div class="duel-arena">
 
-  <!-- Giocatore 1 (sotto) -->
-  <div class="duel-half p1" id="duel-half-p1">
-    <div class="duel-player-name" id="duel-name-p1">GIOCATORE 1</div>
-    <div class="duel-lp" id="duel-lp-p1">8000</div>
-    <div class="duel-bar-wrap"><div class="duel-bar" id="duel-bar-p1" style="width:100%"></div></div>
-    <div class="duel-quick-btns">
-      <button class="duel-quick-btn minus" onclick="duelQuick(1,-2000)">-2000</button>
-      <button class="duel-quick-btn minus" onclick="duelQuick(1,-1000)">-1000</button>
-      <button class="duel-quick-btn minus" onclick="duelQuick(1,-500)">-500</button>
-      <button class="duel-quick-btn minus" onclick="duelQuick(1,-100)">-100</button>
-      <button class="duel-quick-btn" onclick="apriCalc(1)">🧮</button>
-      <button class="duel-quick-btn plus" onclick="duelQuick(1,100)">+100</button>
-      <button class="duel-quick-btn plus" onclick="duelQuick(1,500)">+500</button>
-      <button class="duel-quick-btn plus" onclick="duelQuick(1,1000)">+1000</button>
+    <!-- Giocatore 1 (sinistra su desktop, sotto su mobile) -->
+    <div class="duel-half p1" id="duel-half-p1">
+      <div class="duel-lp" id="duel-lp-p1">8000</div>
+      <div class="duel-bar-wrap"><div class="duel-bar" id="duel-bar-p1" style="width:100%"></div></div>
+      <div class="duel-quick-btns">
+        <button class="duel-quick-btn minus" onclick="duelQuick(1,-2000)">-2000</button>
+        <button class="duel-quick-btn minus" onclick="duelQuick(1,-1000)">-1000</button>
+        <button class="duel-quick-btn minus" onclick="duelQuick(1,-500)">-500</button>
+        <button class="duel-quick-btn minus" onclick="duelQuick(1,-100)">-100</button>
+        <button class="duel-quick-btn" onclick="apriCalc(1)">🧮</button>
+        <button class="duel-quick-btn plus" onclick="duelQuick(1,100)">+100</button>
+        <button class="duel-quick-btn plus" onclick="duelQuick(1,500)">+500</button>
+        <button class="duel-quick-btn plus" onclick="duelQuick(1,1000)">+1000</button>
+      </div>
     </div>
+
+    <!-- Giocatore 2 (destra su desktop, sopra ruotato su mobile) -->
+    <div class="duel-half p2" id="duel-half-p2">
+      <div class="duel-lp" id="duel-lp-p2">8000</div>
+      <div class="duel-bar-wrap"><div class="duel-bar" id="duel-bar-p2" style="width:100%"></div></div>
+      <div class="duel-quick-btns">
+        <button class="duel-quick-btn minus" onclick="duelQuick(2,-2000)">-2000</button>
+        <button class="duel-quick-btn minus" onclick="duelQuick(2,-1000)">-1000</button>
+        <button class="duel-quick-btn minus" onclick="duelQuick(2,-500)">-500</button>
+        <button class="duel-quick-btn minus" onclick="duelQuick(2,-100)">-100</button>
+        <button class="duel-quick-btn" onclick="apriCalc(2)">🧮</button>
+        <button class="duel-quick-btn plus" onclick="duelQuick(2,100)">+100</button>
+        <button class="duel-quick-btn plus" onclick="duelQuick(2,500)">+500</button>
+        <button class="duel-quick-btn plus" onclick="duelQuick(2,1000)">+1000</button>
+      </div>
+    </div>
+
   </div>
 
 </div>
@@ -4350,20 +4409,16 @@ function _duelAggiornaBarre() {
 }
 
 function apriDuello() {
-  // popola nomi giocatori dai dati se disponibili
-  const g = dati.giocatori || [];
-  if (g[0]) document.getElementById('duel-name-p1').textContent = g[0].toUpperCase();
-  if (g[1]) document.getElementById('duel-name-p2').textContent = g[1].toUpperCase();
+  // apri senza resettare — lo stato LP persiste
   document.getElementById('duel-overlay').classList.add('open');
   document.body.style.overflow = 'hidden';
   _duelAggiornaBarre();
 }
 
 function chiudiDuello() {
+  // chiude l'overlay ma NON stoppa cronometro/timer (stato persistente)
   document.getElementById('duel-overlay').classList.remove('open');
   document.body.style.overflow = '';
-  _chronoStop();
-  _timerStop();
 }
 
 function duelQuick(player, delta) {
