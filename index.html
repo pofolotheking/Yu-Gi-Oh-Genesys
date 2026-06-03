@@ -2446,8 +2446,11 @@ function buildProfiloInline(nome) {
       <div class="profile-inline-stat"><span class="pis-lbl">Win Rate</span><span class="pis-val">${wr}%</span></div>
       <div class="profile-inline-stat"><span class="pis-lbl">Media pts</span><span class="pis-val">${media}</span></div>
       <div class="profile-inline-stat"><span class="pis-lbl">Mazzo top</span><span class="pis-val" style="font-size:0.7rem;line-height:1.2">${mazzoPreferitoGiocatore(nome)}</span></div>
+   </div>
+    <div style="padding: 12px 14px 0; background: var(--bg-soft);">
+      <div class="modal-section-title" style="margin-bottom: 0;">Achievements</div>
     </div>
-    <div class="profile-inline-ach">${achHtml}</div>
+    <div class="profile-inline-ach" style="border-top: none;">${achHtml}</div>
   `;
 }
 
