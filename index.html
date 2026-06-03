@@ -2363,7 +2363,10 @@ function renderGiocatori() {
     const safeNome = nome.replace(/'/g, "\'");
     html += `<tr class="${i === 0 && s.partite > 0 ? 'top-1' : ''}">
       ${rankCell}
-      <td><span class="name-btn">${nome}</span></td>
+      <td>
+        <span class="name-btn">${nome}</span>
+        <button class="profile-toggle-btn" id="ptbtn-${safeNome}" onclick="toggleProfiloInline('${safeNome}')">${SVG_CHEVRON}</button>
+      </td>
       <td class="pts">${s.punti}</td>
       <td class="num">${s.partite}</td>
       <td class="num">${s.v}</td><td class="num">${s.p}</td>
