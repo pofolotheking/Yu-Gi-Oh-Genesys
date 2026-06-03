@@ -3719,6 +3719,8 @@ function toggleAccordion(id) {
 
 // ── TOOLTIP PREVIEW ──
 const _cardRegistry = {};
+let _prevView = 'db';
+let _prevScrollY = 0;
 let previewTimer = null;
 const previewFetchCache = {};
 
