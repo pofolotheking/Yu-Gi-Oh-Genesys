@@ -3821,7 +3821,11 @@ document.addEventListener('mousemove', e => {
 window.mostraPreview = mostraPreview;
 window.mostraPreviewGenesys = mostraPreviewGenesys;
 window.nascondiPreview = nascondiPreview;
-
+function escapeHtml(s) {
+  if (!s) return '';
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
+}
+window.escapeHtml = escapeHtml;
 // ── FILTRI LISTA GENESYS ──
 function toggleGFiltri() {
   const panel = document.getElementById('gfiltri-panel');
