@@ -712,7 +712,6 @@
   }
   .modal-close:hover { background: var(--border); }
 
-  /* ── MODAL: layout a due colonne, no scroll ── */
   .modal-body { padding: 0; }
 
   .modal-top {
@@ -761,7 +760,6 @@
     font-style: italic;
   }
 
-  /* stats: 4 pill staccate */
   .modal-stats-row {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -795,7 +793,6 @@
     line-height: 1.2;
   }
 
-  /* sezione carte e achievements */
   .modal-bottom {
     padding: 12px 14px 16px;
     border-top: 1px solid var(--border);
@@ -808,7 +805,7 @@
     font-weight: 600;
     margin-bottom: 8px;
   }
-  /* ── ACHIEVEMENTS ── */
+  
   .achievements-grid {
     display: flex;
     flex-wrap: wrap;
@@ -836,7 +833,7 @@
     opacity: 0.25;
     filter: grayscale(1);
   }
-  /* tooltip solo per unlocked */
+  
   .achievement.unlocked:hover::after {
     content: attr(data-tooltip);
     position: absolute;
@@ -893,7 +890,7 @@
     align-items: center;
     gap: 5px;
   }
-  /* ── FRECCIA TOGGLE PROFILO ── */
+  
   .profile-toggle-btn {
     background: none;
     border: none;
@@ -909,7 +906,6 @@
   .profile-toggle-btn svg { transition: transform 0.25s ease; }
   .profile-toggle-btn.open svg { transform: rotate(180deg); }
 
-  /* ── PROFILO INLINE ── */
   .profile-inline-row { display: none; }
   .profile-inline-row.open { display: table-row; }
   .profile-inline-cell {
@@ -939,9 +935,7 @@
     width: 140px;
     height: 140px;
     background: var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: flex; align-items: center; justify-content: center;
     font-size: 3rem;
   }
   .profile-inline-right {
@@ -967,7 +961,7 @@
     font-style: italic;
     flex: 1;
   }
-  /* stats inline */
+  
   .profile-inline-stats {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -996,7 +990,7 @@
     display: block;
     font-variant-numeric: tabular-nums;
   }
-  /* achievements inline */
+  
   .profile-inline-ach {
     padding: 14px 16px;
     border-top: 1px solid var(--border);
@@ -1029,7 +1023,7 @@
     filter: grayscale(1);
   }
   .ach-item.locked .ach-label { display: none; }
-  /* tooltip solo per sbloccati: testo nero su sfondo grigio */
+  
   .ach-item.unlocked { position: relative; cursor: default; }
   .ach-item.unlocked:hover::after {
     content: attr(data-tooltip);
@@ -1061,7 +1055,6 @@
     pointer-events: none;
     z-index: 30;
   }
-
 
   @media (max-width: 500px) {
     .modal-top { grid-template-columns: 130px 1fr; }
@@ -1212,7 +1205,6 @@
     to   { opacity: 1; transform: none; }
   }
   .carta-preview-tooltip.visible { display: block; }
-  /* Layout: immagine sinistra + contenuto destra */
   .carta-preview-inner {
     display: grid;
     grid-template-columns: 100px 1fr;
@@ -1243,7 +1235,6 @@
     font-size: 0.72rem;
     color: var(--text-dim);
     line-height: 1.55;
-    /* Nessun clamp: si legge tutto */
     margin-top: 2px;
   }
   .carta-preview-chip {
@@ -1635,12 +1626,7 @@
   .accordion-body .card { margin-bottom: 12px; }
   .accordion-body .card:last-child { margin-bottom: 0; }
 
-  /* ══════════════════════════════════════
-     RESPONSIVE MOBILE (max 600px)
-     ══════════════════════════════════════ */
   @media (max-width: 600px) {
-
-    /* ── GENERALI ── */
     .row { grid-template-columns: 1fr; }
     .add-form > div { min-width: 100%; }
     .add-form button { width: 100%; }
@@ -1648,12 +1634,10 @@
     main { padding: 0 10px; }
     header { padding: 24px 16px 16px; }
 
-    /* ── NAV: testo più piccolo, icone nascoste ── */
     nav { padding: 4px; gap: 1px; }
     nav button { font-size: 0.72rem; padding: 7px 4px; }
     nav button svg { display: none; }
 
-    /* ── TABELLA CLASSIFICA: nascondi colonne PG, V, P, Media ── */
     #tabella-giocatori th:nth-child(4),
     #tabella-giocatori td:nth-child(4),
     #tabella-giocatori th:nth-child(5),
@@ -1667,13 +1651,11 @@
     .wr-bar { display: none; }
     .wr-text { min-width: unset; }
 
-    /* ── TABELLA MAZZI: nascondi V e P ── */
     #tabella-mazzi th:nth-child(4),
     #tabella-mazzi td:nth-child(4),
     #tabella-mazzi th:nth-child(5),
     #tabella-mazzi td:nth-child(5) { display: none; }
 
-    /* ── PROFILO INLINE ── */
     .profile-inline-body {
       grid-template-columns: 100px 1fr;
     }
@@ -1692,13 +1674,9 @@
     .profile-inline-ach { gap: 10px; padding: 10px; }
     .ach-item { min-width: 36px; }
 
-    /* ── FORM REGISTRA PARTITA ── */
     .vs { margin: 0; }
-
-    /* ── MATCHUP TABLE: scroll orizzontale ── */
     .matchup-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 
-    /* ── MODAL (se ancora usato) ── */
     .modal { max-width: 100%; border-radius: 14px; }
     .modal-top { grid-template-columns: 110px 1fr; }
     .modal-photo, .modal-photo-placeholder { width: 110px; height: 110px; }
@@ -1707,30 +1685,23 @@
     .modal-stat-cell:nth-child(3) { border-top: 1px solid var(--border); }
     .modal-stat-cell:nth-child(4) { border-top: 1px solid var(--border); }
 
-    /* ── SEZIONE RICERCA ── */
     .inner-tab-bar { padding: 3px; }
     .inner-tab { font-size: 0.8rem; padding: 7px 6px; }
     .carta-detail-wrap { grid-template-columns: 110px 1fr; gap: 12px; }
     .carta-detail-img { width: 110px; }
 
-    /* ── TOOLTIP ANTEPRIMA: disabilitato su mobile ── */
     .carta-preview-tooltip { display: none !important; }
-
-    /* ── NOTIZIE ── */
     .news-title { font-size: 0.88rem; }
 
-    /* ── ACCORDION MODIFICA ── */
     .accordion-btn { font-size: 0.9rem; padding: 14px; }
     .config-row { grid-template-columns: 1fr; gap: 8px; }
     .config-row .actions { display: flex; flex-wrap: wrap; gap: 6px; }
 
-    /* ── GENESYS LIST ── */
     .genesys-list-card { grid-template-columns: 40px 1fr auto; gap: 10px; padding: 10px 12px; }
     .genesys-list-card img { width: 40px; }
     .genesys-list-name { font-size: 0.85rem; }
     .genesys-points-badge { padding: 4px 8px; font-size: 0.82rem; min-width: 38px; }
 
-    /* ── HEADER ── */
     .header-btn-primary, .header-btn-secondary { max-width: 100%; }
     h1 { font-size: 1.6rem; }
   }
@@ -1738,7 +1709,6 @@
 </head>
 <body>
 
-<!-- SCHERMATA LOGIN -->
 <div id="login-screen" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:200;align-items:center;justify-content:center;padding:20px">
   <div style="width:100%;max-width:360px">
     <div style="text-align:center;margin-bottom:32px">
@@ -1760,7 +1730,6 @@
   </div>
 </div>
 
-<!-- APP (visibile solo dopo login) -->
 <div id="app-wrap" style="display:none">
 
 <header>
@@ -1771,7 +1740,6 @@
   </div>
 </header>
 
-<!-- Gear fisso in alto a sinistra -->
 <button class="gear-btn" onclick="apriImpostazioni()" title="Impostazioni" id="gear-btn">
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
@@ -1811,7 +1779,6 @@
     <div id="stat-dado-wrap"></div>
   </section>
 
-
   <section id="mazzi">
     <h2 class="section-title-centered">Deck</h2>
     <p class="section-note"><em>Ordinati per win rate. I mazzi con meno di 3 partite sono In prova.</em></p>
@@ -1821,8 +1788,7 @@
     <div class="card matchup-wrap" id="grid-matchup"></div>
   </section>
 
-  <section id="storico" style="display:none">
-  </section>
+  <section id="storico" style="display:none"></section>
 
   <section id="nuova">
     <h2>Registra una Partita</h2>
@@ -1877,14 +1843,13 @@
   <section id="carte" class="active">
     <h2 class="section-title-centered">Ricerca</h2>
 
-    <!-- Tab interni: Database | Lista Genesys -->
     <div id="inner-tab-bar-wrap">
-    <div class="inner-tab-bar">
-      <button class="inner-tab active" id="itab-db" onclick="switchInnerTab('db')">🔍 Database</button>
-      <button class="inner-tab" id="itab-genesys" onclick="switchInnerTab('genesys')">📋 Lista Genesys</button>
+      <div class="inner-tab-bar">
+        <button class="inner-tab active" id="itab-db" onclick="switchInnerTab('db')">🔍 Database</button>
+        <button class="inner-tab" id="itab-genesys" onclick="switchInnerTab('genesys')">📋 Lista Genesys</button>
+      </div>
     </div>
 
-    </div>
     <div id="genesys-view" style="display:none" data-inner-tab="genesys">
       <h3 class="subsection-title" style="margin-top:0">Lista punti Genesys</h3>
       <p class="section-note"><em>Tutte le carte con punti nel formato Genesys. Ordinate dai più alti ai più bassi.</em></p>
@@ -2042,7 +2007,6 @@
               <label>DEF (esatto)</label>
               <input type="number" id="f-def" placeholder="es. 2500" min="0">
             </div>
-
           </div>
           <button class="secondary" style="margin-top:12px;width:100%" onclick="resetFiltri()">↺ Azzera filtri</button>
         </div>
@@ -2051,14 +2015,12 @@
       <div id="carte-results"></div>
     </div>
 
-    <!-- Dettaglio carta: comune a database e genesys -->
     <div id="carte-detail" style="display:none"></div>
   </section>
 
   <section id="config">
     <h2 class="section-title-centered">Modifica</h2>
 
-    <!-- ACCORDION PROFILI -->
     <div class="accordion-item">
       <button class="accordion-btn" onclick="toggleAccordion('acc-profili')">
         <span>👤 Profili Giocatori</span><span class="accordion-arrow">▶</span>
@@ -2068,7 +2030,6 @@
       </div>
     </div>
 
-    <!-- ACCORDION GIOCATORI -->
     <div class="accordion-item">
       <button class="accordion-btn" onclick="toggleAccordion('acc-giocatori')">
         <span>🎮 Giocatori</span><span class="accordion-arrow">▶</span>
@@ -2087,7 +2048,6 @@
       </div>
     </div>
 
-    <!-- ACCORDION MAZZI -->
     <div class="accordion-item">
       <button class="accordion-btn" onclick="toggleAccordion('acc-mazzi')">
         <span>🃏 Mazzi</span><span class="accordion-arrow">▶</span>
@@ -2110,6 +2070,7 @@
       </div>
     </div>
   </section>
+
   <section id="news">
     <h2 class="section-title-centered">Notizie Genesys</h2>
     <p class="section-note">Aggiornamenti dal mondo ufficiale Yu-Gi-Oh! Genesys</p>
@@ -2117,12 +2078,10 @@
       <div class="news-loading">Caricamento notizie…</div>
     </div>
   </section>
-
 </main>
 
 <div class="carta-preview-tooltip" id="carta-preview-tooltip"></div>
 
-<!-- MODAL MODIFICA PARTITA -->
 <div class="edit-overlay" id="edit-overlay" onclick="chiudiModifica(event)">
   <div class="edit-modal">
     <div class="edit-modal-header">
@@ -2155,9 +2114,7 @@
   <button onclick="eseguiLogout()" style="background:none;border:none;color:var(--text-faint);font-size:0.75rem;cursor:pointer;margin-left:12px;font-family:inherit">Esci</button>
 </footer>
 
-</div><!-- fine app-wrap -->
-
-<div class="modal-overlay" id="modal-overlay" onclick="chiudiModale(event)">
+</div><div class="modal-overlay" id="modal-overlay" onclick="chiudiModale(event)">
   <div class="modal" id="modal">
     <button class="modal-close" onclick="chiudiModaleForce()">✕</button>
     <div class="modal-body">
@@ -2198,6 +2155,9 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
+
+// ============ ICONE E STRINGHE SVG ============
+const SVG_CHEVRON = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>`;
 
 // ============ STATO ============
 const DATI_INIZIALI = {
@@ -2266,7 +2226,6 @@ async function caricaDati() {
         partite: j.partite || []
       };
     } else {
-      // Primo avvio: carica i dati dal JSON originale su Firestore
       dati = JSON.parse(JSON.stringify(DATI_INIZIALI));
       await setDoc(docRef, dati);
       console.log("✅ Database inizializzato con i dati storici!");
@@ -2351,7 +2310,7 @@ function renderGiocatori() {
     return;
   }
   const medals = ['🥇', '🥈', '🥉'];
-  const cols = 8; // numero colonne totali
+  const cols = 8;
   let html = '<tr><th>#</th><th>Duellante</th><th>Punti</th><th>PG</th><th>V</th><th>P</th><th>Media</th><th>Win Rate</th></tr>';
   arr.forEach(([nome, s], i) => {
     const wr = s.partite > 0 ? Math.round(100 * s.v / s.partite) : 0;
@@ -2384,7 +2343,6 @@ function renderGiocatori() {
   t.innerHTML = html;
 }
 
-// ── PROFILI SEMPRE APERTI IN CLASSIFICA ──
 function renderProfiliSempreAperti() {
   const wrap = document.getElementById('profili-inline-wrap');
   if (!wrap) return;
@@ -2431,7 +2389,7 @@ function toggleProfiloInline(nome) {
   const wrap  = document.getElementById('pwrap-' + nome);
   const cont  = document.getElementById('pcontent-' + nome);
   const isOpen = btn.classList.contains('open');
-  // Chiudi tutti gli altri
+  
   document.querySelectorAll('.profile-toggle-btn.open').forEach(b => {
     if (b !== btn) {
       b.classList.remove('open');
@@ -2448,7 +2406,6 @@ function toggleProfiloInline(nome) {
     btn.classList.add('open');
     row.classList.add('open');
     wrap.classList.add('open');
-    // Renderizza contenuto profilo
     cont.innerHTML = buildProfiloInline(nome);
   }
 }
@@ -2491,7 +2448,6 @@ function buildProfiloInline(nome) {
       <div class="profile-inline-stat"><span class="pis-lbl">Mazzo top</span><span class="pis-val" style="font-size:0.7rem;line-height:1.2">${mazzoPreferitoGiocatore(nome)}</span></div>
     </div>
     <div class="profile-inline-ach">${achHtml}</div>
-
   `;
 }
 
@@ -2524,8 +2480,7 @@ function renderRiepilogo() {
 
   const arr = Object.values(h2h);
   const minN = Math.min(...arr.map(r => r.va + r.vb));
-  const html =
- `
+  const html = `
     <div class="riep-section-title">Scontri diretti</div>
     <div class="h2h-list">
       ${arr.map(r => {
@@ -2547,7 +2502,6 @@ const COLORS = ['#007aff', '#34c759', '#ff9500', '#ff3b30'];
 
 function renderGrafico() {
   if (typeof Chart === 'undefined') return;
-  const stat = calcolaStatGiocatori();
   const giocatori = dati.giocatori;
   if (!dati.partite.length) {
     document.getElementById('chart-card').style.display = 'none';
@@ -2555,7 +2509,6 @@ function renderGrafico() {
   }
   document.getElementById('chart-card').style.display = 'block';
 
-  // Costruisci timeline cumulativa per ogni giocatore
   const partiteOrd = [...dati.partite].sort((a,b) => a.data.localeCompare(b.data));
   const puntiCum = {};
   giocatori.forEach(g => puntiCum[g] = [0]);
@@ -2572,7 +2525,6 @@ function renderGrafico() {
 
   const labels = ['Start', ...partiteOrd.map((p,i) => `P${i+1}`)];
 
-  // Legenda
   const legendEl = document.getElementById('chart-legend');
   legendEl.innerHTML = giocatori.map((g,i) => `
     <div class="chart-legend-item">
@@ -2659,23 +2611,20 @@ function renderStatDado() {
       });
     }
     if (p.dado) {
-      // Entrambi i giocatori partecipano al dado — incrementa dadoT per entrambi
       [p.g1, p.g2].forEach(g => {
         if (!stat[g]) return;
         const hadDado = p.dado === g;
         const vinto = (p.g1 === g && g1win) || (p.g2 === g && !g1win);
-        stat[g].dadoT++; // totale partite con dado registrato
-        if (hadDado) stat[g].dadoV++; // volte che ha VINTO il dado
-        if (hadDado && vinto) stat[g].dadoWinV++; // vittorie dopo aver vinto il dado
-        if (!hadDado) stat[g].dadoPers++; // volte che ha PERSO il dado
+        stat[g].dadoT++;
+        if (hadDado) stat[g].dadoV++;
+        if (hadDado && vinto) stat[g].dadoWinV++;
+        if (!hadDado) stat[g].dadoPers++;
       });
     }
   });
 
   const pct = (v, t) => t > 0 ? Math.round(100 * v / t) + '%' : '—';
 
-  // Ordina per classifica
-  const statArr = Object.entries(stat);
   const classificaOrd = calcolaStatGiocatori();
   const ordine = Object.keys(classificaOrd).sort((a,b) =>
     classificaOrd[b].punti - classificaOrd[a].punti || classificaOrd[b].v - classificaOrd[a].v
@@ -2683,8 +2632,8 @@ function renderStatDado() {
 
   const rows = ordine.map(g => {
     const s = stat[g] || { primoV:0, primoT:0, secondoV:0, secondoT:0, dadoV:0, dadoT:0 };
-    const dadoVintoT = s.dadoV; // quante volte ha vinto il dado
-    const dadoTotale = s.dadoT; // quante partite totali con dado
+    const dadoVintoT = s.dadoV;
+    const dadoTotale = s.dadoT;
     const dadoStr = dadoTotale > 0 ? `${dadoVintoT}/${dadoTotale} <span class="dado-pct">(${pct(dadoVintoT,dadoTotale)})</span>` : '—';
     const wrDado  = (s.dadoWinV !== undefined && s.dadoV > 0) ? pct(s.dadoWinV, s.dadoV) : '—';
     const primoStr = s.primoT > 0 ? `${s.primoT}` : '—';
@@ -2838,7 +2787,6 @@ function popolaSelectGiocatori() {
   }
   aggiornaSelectMazzi('m1', document.getElementById('g1').value);
   aggiornaSelectMazzi('m2', document.getElementById('g2').value);
-  // Popola dado e primo
   aggiornaSelectDadoPrimo();
 }
 
@@ -2915,7 +2863,6 @@ function renderProfiliConfig() {
           <div><label>Foto (URL immagine)</label><input type="text" id="prof-foto-${g}" value="${p.foto || ''}" placeholder="https://..."></div>
           <div><label>Mazzo preferito (personalizzato)</label><input type="text" id="prof-mazzo-${g}" value="${p.mazzoPref || ''}" placeholder="es. Naturia"></div>
           <div><label>Descrizione</label><input type="text" id="prof-desc-${g}" value="${p.descrizione || ''}" placeholder="Una breve descrizione..."></div>
-
           <button class="primary" style="margin-top:4px" onclick="salvaProfilo('${g}')">Salva profilo ${g}</button>
         </div>
       </div>
@@ -3080,11 +3027,8 @@ function apriModifica(idx) {
   if (!p) return;
   _editIdx = idx;
 
-  // Titolo
-  document.getElementById('edit-modal-title').textContent =
-    `${p.g1} vs ${p.g2} — ${formatData(p.data)}`;
+  document.getElementById('edit-modal-title').textContent = `${p.g1} vs ${p.g2} — ${formatData(p.data)}`;
 
-  // Risultato
   const selRis = document.getElementById('edit-risultato');
   selRis.innerHTML = `
     <option value="2-0">2-0 (${p.g1} stravince)</option>
@@ -3093,7 +3037,6 @@ function apriModifica(idx) {
     <option value="0-2">0-2 (${p.g2} stravince)</option>`;
   selRis.value = p.risultato;
 
-  // Dado e primo
   ['edit-dado', 'edit-primo'].forEach(id => {
     const sel = document.getElementById(id);
     sel.innerHTML = `<option value="">— Non specificato —</option>
@@ -3103,7 +3046,6 @@ function apriModifica(idx) {
   document.getElementById('edit-dado').value  = p.dado  || '';
   document.getElementById('edit-primo').value = p.primo || '';
 
-  // Apri overlay
   document.getElementById('edit-overlay').classList.add('open');
   document.body.style.overflow = 'hidden';
 }
@@ -3388,8 +3330,7 @@ function apriProfilo(nome) {
   }
   document.getElementById('modal-name').textContent = nome;
   const mazzoLabel = profilo.mazzoPref || '—';
-  document.getElementById('modal-mazzo-pref').innerHTML =
-    `Mazzo preferito: <strong>${mazzoLabel}</strong>`;
+  document.getElementById('modal-mazzo-pref').innerHTML = `Mazzo preferito: <strong>${mazzoLabel}</strong>`;
   document.getElementById('modal-desc').textContent = profilo.descrizione || 'Nessuna descrizione ancora.';
   document.getElementById('modal-stats-row').innerHTML = `
     <div class="modal-stat-cell"><span class="modal-stat-lbl">Classifica</span><span class="modal-stat-val">${posLabel}</span></div>
@@ -3397,7 +3338,7 @@ function apriProfilo(nome) {
     <div class="modal-stat-cell"><span class="modal-stat-lbl">Media punti</span><span class="modal-stat-val">${media}</span></div>
     <div class="modal-stat-cell"><span class="modal-stat-lbl">Mazzo usato</span><span class="modal-stat-val" style="font-size:0.75rem;line-height:1.2">${mazzoPref}</span></div>
   `;
-  // Achievements
+  
   const achievements = calcolaAchievements(nome);
   document.getElementById('modal-achievements').innerHTML = achievements.map(a => `
     <div class="achievement ${a.unlocked ? 'unlocked' : 'locked'}"
@@ -3406,7 +3347,6 @@ function apriProfilo(nome) {
     </div>
   `).join('');
 
-  // Carte preferite
   const carte = profilo.carte || [];
   const cardsEl = document.getElementById('modal-cards');
   if (carte.filter(Boolean).length > 0) {
@@ -3436,7 +3376,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (inp) inp.addEventListener('keydown', e => { if (e.key === 'Enter') cercaCarta(); });
   const gIn = document.getElementById('genesys-search');
   if (gIn) gIn.addEventListener('input', filtraListaGenesys);
-  // Filtri lista Genesys
+  
   ['gf-type','gf-attribute','gf-pts-min','gf-pts-max'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.addEventListener('change', filtraListaGenesys);
@@ -3464,7 +3404,6 @@ function resetFiltri() {
 let searchOffset = 0;
 let lastParams = null;
 async function cercaCarta(append = false) {
-  // Precarica la cache Genesys in background per i badge
   if (!genesysCache) apriListaGenesys(true);
   const q       = document.getElementById('carte-search')?.value.trim() || '';
   const tipo    = document.getElementById('f-type')?.value || '';
@@ -3606,7 +3545,6 @@ async function mostraDettaglioCarta(id) {
   _prevView = document.getElementById('genesys-view').style.display !== 'none' ? 'genesys' : 'db';
   const res = document.getElementById('carte-results');
   const det = document.getElementById('carte-detail');
-  // Nascondi tutto tranne il dettaglio
   document.getElementById('inner-tab-bar-wrap').style.display = 'none';
   document.getElementById('database-view').style.display = 'none';
   document.getElementById('genesys-view').style.display = 'none';
@@ -3691,10 +3629,6 @@ function tornaRisultati() {
   });
 }
 
-function escapeHtml(s) {
-  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
-}
-
 async function switchInnerTab(tab) {
   document.getElementById('database-view').style.display = tab === 'db' ? 'block' : 'none';
   document.getElementById('genesys-view').style.display = tab === 'genesys' ? 'block' : 'none';
@@ -3771,6 +3705,7 @@ function mostraDettaglioCartaDaGenesys(id) {
   mostraDettaglioCarta(id);
 }
 
+// ── ACCORDION ──
 function toggleAccordion(id) {
   const body = document.getElementById(id);
   const btn = body.previousElementSibling;
@@ -3781,8 +3716,6 @@ function toggleAccordion(id) {
 
 // ── TOOLTIP PREVIEW ──
 const _cardRegistry = {};
-let _prevView = 'db';       // 'db' o 'genesys'
-let _prevScrollY = 0;       // posizione di scroll prima di aprire dettaglio
 let previewTimer = null;
 const previewFetchCache = {};
 
@@ -3816,7 +3749,6 @@ function renderTooltip(tooltip, c, e) {
     c.def != null ? `<span class="carta-preview-chip">DEF ${c.def}</span>` : '',
     pts > 0  ? `<span class="carta-preview-chip genesys ${ptsCls}">⬡ ${pts} pt</span>` : ''
   ].filter(Boolean).join('');
-  // Tipo carta in corsivo piccolo sopra il nome
   const typeStr = c.type ? `<div style="font-size:0.65rem;color:var(--text-faint);font-style:italic;margin-bottom:3px">${escapeHtml(c.type)}</div>` : '';
   tooltip.innerHTML = `
     <div class="carta-preview-inner">
@@ -3838,9 +3770,7 @@ function mostraPreview(e, id) {
   previewTimer = setTimeout(async () => {
     const tooltip = document.getElementById('carta-preview-tooltip');
     const c = _cardRegistry[id] || {};
-    // Mostra subito con i dati che abbiamo
     if (c.name) renderTooltip(tooltip, c, e);
-    // Arricchisci con fetch se non abbiamo desc o pts
     if (!previewFetchCache[id]) {
       try {
         const r = await fetch('https://db.ygoprodeck.com/api/v7/cardinfo.php?id=' + id + '&misc=yes');
@@ -3918,7 +3848,6 @@ async function caricaNotizie() {
   c.innerHTML = '<div class="news-loading">Caricamento notizie…</div>';
   const RSS_URL = 'https://ygorganization.com/category/events/yu-gi-oh-genesys/feed/';
 
-  // Prova più proxy in ordine finché uno funziona
   const PROXIES = [
     `https://api.allorigins.win/get?url=${encodeURIComponent(RSS_URL)}`,
     `https://corsproxy.io/?${encodeURIComponent(RSS_URL)}`,
@@ -3930,14 +3859,12 @@ async function caricaNotizie() {
       const r = await fetch(proxy);
       if (!r.ok) continue;
       const data = await r.json();
-      // allorigins restituisce {contents: "..."}, corsproxy restituisce testo diretto
       const raw = data.contents || await r.text?.() || '';
       if (raw.includes('<item>') || raw.includes('<entry>')) { xml = raw; break; }
     } catch(e) { continue; }
   }
 
   if (!xml) {
-    // Fallback: mostra articoli hardcoded presi dalla pagina
     _newsLoaded = true;
     const articoli = [
       { title: 'GENESYS Points List (June 1st 2026 Onwards)', date: '15/05/26', url: 'https://ygorganization.com/genesys-points-list-june-1st-2026-onwards-ocg/' },
@@ -3962,7 +3889,6 @@ async function caricaNotizie() {
     return;
   }
 
-  // Parsa XML RSS
   try {
     const parser = new DOMParser();
     const doc = parser.parseFromString(xml, 'text/xml');
@@ -3990,7 +3916,7 @@ async function caricaNotizie() {
 }
 
 window.caricaNotizie = caricaNotizie;
-// ── IMPOSTAZIONI (overlay) ──
+
 function apriImpostazioni() {
   switchTab('config');
   window.scrollTo({ top: 0, behavior: 'smooth' });
