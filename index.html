@@ -3150,28 +3150,75 @@ async function caricaNotizie() {
   if (!c) return;
   c.innerHTML = '<div class="news-loading">Caricamento notizie…</div>';
   const RSS_URL = 'https://ygorganization.com/category/events/yu-gi-oh-genesys/feed/';
-  const API = 'https://api.rss2json.com/v1/api.json?rss_url=' + encodeURIComponent(RSS_URL) + '&count=20';
-  try {
-    const r = await fetch(API);
-    if (!r.ok) throw new Error();
-    const data = await r.json();
-    if (data.status !== 'ok' || !data.items?.length) throw new Error();
+
+  // Prova più proxy in ordine finché uno funziona
+  const PROXIES = [
+    `https://api.allorigins.win/get?url=${encodeURIComponent(RSS_URL)}`,
+    `https://corsproxy.io/?${encodeURIComponent(RSS_URL)}`,
+  ];
+
+  let xml = null;
+  for (const proxy of PROXIES) {
+    try {
+      const r = await fetch(proxy);
+      if (!r.ok) continue;
+      const data = await r.json();
+      // allorigins restituisce {contents: "..."}, corsproxy restituisce testo diretto
+      const raw = data.contents || await r.text?.() || '';
+      if (raw.includes('<item>') || raw.includes('<entry>')) { xml = raw; break; }
+    } catch(e) { continue; }
+  }
+
+  if (!xml) {
+    // Fallback: mostra articoli hardcoded presi dalla pagina
     _newsLoaded = true;
-    c.innerHTML = data.items.map(item => {
-      const date = new Date(item.pubDate);
-      const dateStr = date.toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit', year: '2-digit' });
-      // Pulisci il titolo da tag HTML
-      const title = item.title.replace(/&amp;/g,'&').replace(/&#8211;/g,'–').replace(/&#8220;/g,'"').replace(/&#8221;/g,'"').replace(/<[^>]+>/g,'');
-      return `<a class="news-card" href="${item.link}" target="_blank" rel="noopener">
+    const articoli = [
+      { title: 'GENESYS Points List (June 1st 2026 Onwards)', date: '15/05/26', url: 'https://ygorganization.com/genesys-points-list-june-1st-2026-onwards-ocg/' },
+      { title: 'Genesys April Points Update', date: '30/04/26', url: 'https://ygorganization.com/genesysapril2026/' },
+      { title: '[YGOrg Tourneys] GENESYS 2 Top 4 Deck Lists', date: '19/04/26', url: 'https://ygorganization.com/ygorg2ndgenesys/' },
+      { title: 'GENESYS Comes To Japan', date: '10/03/26', url: 'https://ygorganization.com/genesysisnowbiginjapan/' },
+      { title: 'GENESYS Celebration Playmat', date: '09/03/26', url: 'https://ygorganization.com/genesyszeus/' },
+      { title: 'What to Expect for March 2026', date: '03/03/26', url: 'https://ygorganization.com/march2026genesywhattoexpect/' },
+      { title: 'Genesys Database Oddities', date: '01/02/26', url: 'https://ygorganization.com/genesys-database-oddities-genesys/' },
+      { title: 'Burst Protocol Pre-Release Points', date: '29/01/26', url: 'https://ygorganization.com/burstprotocolgenesyspoints/' },
+      { title: 'GENESYS Roadmap for 2026', date: '23/01/26', url: 'https://ygorganization.com/genesys2026roadmap/' },
+      { title: '[YGOrg Tourneys] Genesys 1 Top 8 Decklists', date: '21/01/26', url: 'https://ygorganization.com/hankowins/' },
+    ];
+    c.innerHTML = articoli.map(a => `
+      <a class="news-card" href="${a.url}" target="_blank" rel="noopener">
+        <div class="news-title">${a.title}</div>
+        <div class="news-meta">
+          <span class="news-date">${a.date}</span>
+          <span class="news-source">YGOrganization</span>
+        </div>
+      </a>`).join('');
+    return;
+  }
+
+  // Parsa XML RSS
+  try {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(xml, 'text/xml');
+    const items = [...doc.querySelectorAll('item')];
+    if (!items.length) throw new Error();
+    _newsLoaded = true;
+    c.innerHTML = items.slice(0, 20).map(item => {
+      const title = (item.querySelector('title')?.textContent || '')
+        .replace(/&amp;/g,'&').replace(/&#8211;/g,'–').replace(/<!\[CDATA\[|\]\]>/g,'').trim();
+      const link  = item.querySelector('link')?.textContent?.trim() ||
+                    item.querySelector('guid')?.textContent?.trim() || '#';
+      const pub   = item.querySelector('pubDate')?.textContent || '';
+      const date  = pub ? new Date(pub).toLocaleDateString('it-IT', { day:'2-digit', month:'2-digit', year:'2-digit' }) : '';
+      return `<a class="news-card" href="${link}" target="_blank" rel="noopener">
         <div class="news-title">${title}</div>
         <div class="news-meta">
-          <span class="news-date">${dateStr}</span>
+          <span class="news-date">${date}</span>
           <span class="news-source">YGOrganization</span>
         </div>
       </a>`;
     }).join('');
   } catch(e) {
-    c.innerHTML = '<div class="news-empty">Impossibile caricare le notizie.<br>Prova a riaprire la sezione o controlla la connessione.</div>';
+    c.innerHTML = '<div class="news-empty">Errore nel parsing delle notizie.</div>';
   }
 }
 
