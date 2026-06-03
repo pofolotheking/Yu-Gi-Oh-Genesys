@@ -323,6 +323,75 @@
     border-radius: 6px;
   }
   .match-card .del-btn:hover { color: var(--red); background: var(--red-soft); }
+  .match-card .edit-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-faint);
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 4px 8px;
+    border-radius: 6px;
+  }
+  .match-card .edit-btn:hover { color: var(--blue); background: var(--bg-soft); }
+  .match-card .btn-group {
+    display: flex;
+    gap: 2px;
+    align-items: center;
+  }
+
+  /* ── MODAL MODIFICA PARTITA ── */
+  .edit-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 150;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .edit-overlay.open { display: flex; animation: fade 0.2s ease; }
+  .edit-modal {
+    background: var(--bg);
+    border-radius: 18px;
+    width: 100%;
+    max-width: 440px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.18);
+    overflow: hidden;
+    animation: modalIn 0.2s ease;
+  }
+  .edit-modal-header {
+    padding: 18px 20px 14px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .edit-modal-title {
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+  .edit-modal-close {
+    background: var(--bg-soft);
+    border: none;
+    border-radius: 50%;
+    width: 28px; height: 28px;
+    cursor: pointer;
+    color: var(--text-dim);
+    font-size: 0.9rem;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .edit-modal-body { padding: 18px 20px; display: flex; flex-direction: column; gap: 14px; }
+  .edit-modal-footer {
+    padding: 14px 20px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    gap: 10px;
+  }
+  .edit-modal-footer button { flex: 1; }
 
   .matchup-wrap { overflow-x: auto; }
   .matchup-wrap table { min-width: 480px; }
@@ -1891,6 +1960,34 @@
 
 <div class="carta-preview-tooltip" id="carta-preview-tooltip"></div>
 
+<!-- MODAL MODIFICA PARTITA -->
+<div class="edit-overlay" id="edit-overlay" onclick="chiudiModifica(event)">
+  <div class="edit-modal">
+    <div class="edit-modal-header">
+      <div class="edit-modal-title" id="edit-modal-title">Modifica partita</div>
+      <button class="edit-modal-close" onclick="chiudiModificaForce()">✕</button>
+    </div>
+    <div class="edit-modal-body">
+      <div>
+        <label>Risultato</label>
+        <select id="edit-risultato"></select>
+      </div>
+      <div>
+        <label>Chi ha vinto il dado?</label>
+        <select id="edit-dado"></select>
+      </div>
+      <div>
+        <label>Chi è andato primo?</label>
+        <select id="edit-primo"></select>
+      </div>
+    </div>
+    <div class="edit-modal-footer">
+      <button class="secondary" onclick="chiudiModificaForce()">Annulla</button>
+      <button class="primary" style="margin-top:0" onclick="salvaModifica()">Salva</button>
+    </div>
+  </div>
+</div>
+
 <footer>
   <span>Tia · Gio · Richi</span>
   <button onclick="eseguiLogout()" style="background:none;border:none;color:var(--text-faint);font-size:0.75rem;cursor:pointer;margin-left:12px;font-family:inherit">Esci</button>
@@ -2456,7 +2553,10 @@ function renderStorico() {
         <span class="player ${!g1win ? 'win' : ''}">${p.g2}</span>
         <span class="deck">${p.m2}</span>
       </div>
-      <button class="del-btn" onclick="eliminaPartita(${idx})" title="Elimina questa partita">🗑</button>
+      <div class="btn-group">
+        <button class="edit-btn" onclick="apriModifica(${idx})" title="Modifica partita">✏️</button>
+        <button class="del-btn" onclick="eliminaPartita(${idx})" title="Elimina questa partita">🗑</button>
+      </div>
       ${extraBadges.length ? `<div class="match-extra">${extraBadges.join('')}</div>` : ''}
     </div>`;
   }).join('');
@@ -2741,6 +2841,62 @@ async function eliminaMazzo(mazzo) {
   dati.partite = dati.partite.filter(p => p.m1 !== mazzo && p.m2 !== mazzo);
   await salvaDatiCloud();
   popolaTutto();
+}
+
+// ============ MODIFICA PARTITA ============
+let _editIdx = null;
+
+function apriModifica(idx) {
+  const p = dati.partite[idx];
+  if (!p) return;
+  _editIdx = idx;
+
+  // Titolo
+  document.getElementById('edit-modal-title').textContent =
+    `${p.g1} vs ${p.g2} — ${formatData(p.data)}`;
+
+  // Risultato
+  const selRis = document.getElementById('edit-risultato');
+  selRis.innerHTML = `
+    <option value="2-0">2-0 (${p.g1} stravince)</option>
+    <option value="2-1">2-1 (${p.g1} vince)</option>
+    <option value="1-2">1-2 (${p.g2} vince)</option>
+    <option value="0-2">0-2 (${p.g2} stravince)</option>`;
+  selRis.value = p.risultato;
+
+  // Dado e primo
+  ['edit-dado', 'edit-primo'].forEach(id => {
+    const sel = document.getElementById(id);
+    sel.innerHTML = `<option value="">— Non specificato —</option>
+      <option value="${p.g1}">${p.g1}</option>
+      <option value="${p.g2}">${p.g2}</option>`;
+  });
+  document.getElementById('edit-dado').value  = p.dado  || '';
+  document.getElementById('edit-primo').value = p.primo || '';
+
+  // Apri overlay
+  document.getElementById('edit-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+async function salvaModifica() {
+  if (_editIdx === null) return;
+  const p = dati.partite[_editIdx];
+  p.risultato = document.getElementById('edit-risultato').value;
+  p.dado      = document.getElementById('edit-dado').value;
+  p.primo     = document.getElementById('edit-primo').value;
+  chiudiModificaForce();
+  await salvaDatiCloud();
+  popolaTutto();
+}
+
+function chiudiModifica(e) {
+  if (e.target === document.getElementById('edit-overlay')) chiudiModificaForce();
+}
+function chiudiModificaForce() {
+  document.getElementById('edit-overlay').classList.remove('open');
+  document.body.style.overflow = '';
+  _editIdx = null;
 }
 
 async function eliminaPartita(idx) {
@@ -3624,6 +3780,10 @@ window.rinominaMazzo = rinominaMazzo;
 window.cambiaProprietario = cambiaProprietario;
 window.eliminaMazzo = eliminaMazzo;
 window.eliminaPartita = eliminaPartita;
+window.apriModifica = apriModifica;
+window.salvaModifica = salvaModifica;
+window.chiudiModifica = chiudiModifica;
+window.chiudiModificaForce = chiudiModificaForce;
 window.salvaProfilo = salvaProfilo;
 window.toggleAccordion = toggleAccordion;
 window.tornaRisultati = tornaRisultati;
