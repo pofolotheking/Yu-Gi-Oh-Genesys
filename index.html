@@ -2043,6 +2043,7 @@
     justify-content: center;
   }
   .duel-input-sheet.open { display: flex; }
+  .duel-overlay:not(.open) ~ .duel-input-sheet { display: none !important; }
   .duel-input-inner {
     background: #fff;
     border-radius: 22px 22px 0 0;
@@ -4648,6 +4649,7 @@ function apriTimerSetup() { document.getElementById('duel-timer-setup').classLis
 let _inputSheetPlayer = 1;
 
 function apriInputSheet(player) {
+  if (!document.getElementById('duel-overlay').classList.contains('open')) return;
   _inputSheetPlayer = player;
   const lp = _duelLP[player - 1];
   const title = document.getElementById('duel-input-title');
