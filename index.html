@@ -4,6 +4,12 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Yu-Gi-Oh! Genesys</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1d1d1f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Genesys">
+<link rel="apple-touch-icon" href="icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=SF+Mono&display=swap" rel="stylesheet">
@@ -2111,6 +2117,117 @@
   }
   .duel-input-cancel:hover { background: #e5e5ea; }
 
+/* ═══ DECK BUILDER ═══ */
+.db-selettori {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.db-split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  align-items: start;
+}
+.db-col-title {
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+.db-search-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.db-results-grid,
+.db-deck-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
+  gap: 8px;
+  max-height: 460px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.db-card {
+  position: relative;
+  cursor: pointer;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: var(--bg-soft);
+  transition: transform 0.12s;
+}
+.db-card:hover { transform: translateY(-2px); }
+.db-card img {
+  width: 100%;
+  aspect-ratio: 59/86;
+  object-fit: cover;
+  display: block;
+}
+.db-card-pts {
+  position: absolute;
+  top: 3px; right: 3px;
+  background: #1d1d1f;
+  color: #fff;
+  font-size: 0.6rem;
+  font-weight: 700;
+  padding: 1px 5px;
+  border-radius: 5px;
+  line-height: 1.4;
+}
+.db-card-pts.zero { background: var(--text-faint); }
+.db-card .db-card-qty {
+  position: absolute;
+  bottom: 3px; left: 3px;
+  background: var(--green);
+  color: #fff;
+  font-size: 0.62rem;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 5px;
+}
+.db-counter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  margin-bottom: 16px;
+}
+.db-counter-block { text-align: center; flex: 1; }
+.db-counter-val {
+  font-size: 1.5rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  display: block;
+  line-height: 1;
+}
+.db-counter-val.over { color: var(--red); }
+.db-counter-lbl {
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-faint);
+  font-weight: 600;
+}
+.db-empty {
+  grid-column: 1 / -1;
+  text-align: center;
+  color: var(--text-faint);
+  padding: 30px 10px;
+  font-size: 0.85rem;
+}
+@media (max-width: 600px) {
+  .db-split { grid-template-columns: 1fr; }
+  .db-selettori { grid-template-columns: 1fr; }
+  .db-results-grid, .db-deck-grid { max-height: 320px; }
+}
 </style>
 </head>
 <body>
@@ -2288,6 +2405,7 @@
   <button class="tab-btn active" data-tab="carte"><svg width="13" height="13" viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:-1px;margin-right:4px"><circle cx="5.5" cy="5.5" r="4" stroke="currentColor" stroke-width="1.6"/><line x1="8.7" y1="8.7" x2="12" y2="12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>Ricerca</button>
   <button class="tab-btn" data-tab="giocatori"><svg width="13" height="13" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:-1px;margin-right:4px"><path d="M7 9.5c-2.5 0-4-1.8-4-4V2h8v3.5c0 2.2-1.5 4-4 4z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M5 9.8v1.7M9 9.8v1.7M4.5 11.5h5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M3 2H1.5v1.5C1.5 4.9 2.3 6 3.5 6.5M11 2h1.5v1.5C12.5 4.9 11.7 6 10.5 6.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>Classifica</button>
   <button class="tab-btn" data-tab="mazzi"><svg width="13" height="13" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:-1px;margin-right:4px"><rect x="3" y="1" width="8" height="10" rx="1.5" stroke="currentColor" stroke-width="1.6"/><rect x="1.5" y="2.5" width="8" height="10" rx="1.5" stroke="currentColor" stroke-width="1.6"/><line x1="4.5" y1="6" x2="8.5" y2="6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><line x1="4.5" y1="8.5" x2="7" y2="8.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Deck</button>
+  <button class="tab-btn" data-tab="deck-builder"><svg width="13" height="13" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:-1px;margin-right:4px"><path d="M7 1v12M1 7h12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>Builder</button>
   <button class="tab-btn" data-tab="statistiche"><svg width="13" height="13" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:-1px;margin-right:4px"><polyline points="2,11 5,7 8,9 12,3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>Statistiche</button>
   <button class="tab-btn" data-tab="news" onclick="caricaNotizie()"><svg width="13" height="13" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:-1px;margin-right:4px"><rect x="1" y="2" width="12" height="10" rx="2" stroke="currentColor" stroke-width="1.6"/><line x1="4" y1="6" x2="10" y2="6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><line x1="4" y1="8.5" x2="8" y2="8.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><line x1="4" y1="4" x2="10" y2="4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Notizie</button>
 </nav>
@@ -2615,6 +2733,57 @@
       <div class="news-loading">Caricamento notizie…</div>
     </div>
   </section>
+
+  <section id="deck-builder">
+    <h2 class="section-title-centered">Deck Builder</h2>
+    <p class="section-note"><em>Costruisci la lista del tuo mazzo. Le liste sono salvate separatamente nel Cloud.</em></p>
+
+    <div class="card padded">
+      <div class="db-selettori">
+        <div>
+          <label>Giocatore</label>
+          <select id="db-giocatore"></select>
+        </div>
+        <div>
+          <label>Mazzo</label>
+          <select id="db-mazzo"></select>
+        </div>
+      </div>
+
+      <div class="db-counter">
+        <div class="db-counter-block">
+          <span class="db-counter-val" id="db-tot-carte">0</span>
+          <span class="db-counter-lbl">Carte</span>
+        </div>
+        <div class="db-counter-block">
+          <span class="db-counter-val" id="db-tot-punti">0</span>
+          <span class="db-counter-lbl">Punti Genesys</span>
+        </div>
+      </div>
+
+      <button class="primary" style="margin-top:0;width:100%" onclick="salvaDeckBuilder()">💾 Salva Deck nel Cloud</button>
+    </div>
+
+    <div class="db-split">
+      <div class="card padded">
+        <div class="db-col-title">🔍 Cerca carte</div>
+        <div class="db-search-row">
+          <input type="text" id="db-search" placeholder="Nome carta…" style="flex:1">
+          <button class="primary" style="margin-top:0;width:auto;padding:12px 18px" onclick="dbCercaCarte()">Cerca</button>
+        </div>
+        <div class="db-results-grid" id="db-results">
+          <div class="db-empty">Cerca una carta per aggiungerla.</div>
+        </div>
+      </div>
+
+      <div class="card padded">
+        <div class="db-col-title">🃏 Carte nel deck</div>
+        <div class="db-deck-grid" id="db-deck">
+          <div class="db-empty">Nessuna carta nel deck.</div>
+        </div>
+      </div>
+    </div>
+  </section>
 </main>
 
 <div class="carta-preview-tooltip" id="carta-preview-tooltip"></div>
@@ -2834,6 +3003,7 @@ function popolaTutto() {
   renderConfigMazzi();
   renderProfiliConfig();
   popolaSelectOwnerNuovoMazzo();
+  popolaDeckBuilder();
   if (!document.getElementById('data').value)
     document.getElementById('data').value = new Date().toISOString().slice(0, 10);
 }
@@ -4836,6 +5006,178 @@ async function eseguiLogout() {
 
 window.eseguiLogin = eseguiLogin;
 window.eseguiLogout = eseguiLogout;
+
+// ════════════════════════════════════════
+// DECK BUILDER — liste salvate in collection separata
+// ════════════════════════════════════════
+let _dbDeckCorrente = [];   // [{id, name, img, pts, qty}, ...]
+let _dbResultsCache = {};   // id -> dati carta dai risultati ricerca
+
+function _dbDocId(giocatore, mazzo) {
+  return `${giocatore}_${mazzo}`.replace(/[^a-zA-Z0-9_]/g, '_');
+}
+
+function popolaDeckBuilder() {
+  const selG = document.getElementById('db-giocatore');
+  if (!selG) return;
+  const prev = selG.value;
+  selG.innerHTML = dati.giocatori.map(g => `<option>${g}</option>`).join('');
+  if (dati.giocatori.includes(prev)) selG.value = prev;
+  popolaMazziDeckBuilder();
+}
+
+function popolaMazziDeckBuilder() {
+  const giocatore = document.getElementById('db-giocatore').value;
+  const selM = document.getElementById('db-mazzo');
+  const mazziSuoi = Object.entries(dati.mazzi)
+    .filter(([_, prop]) => prop === giocatore)
+    .map(([nome]) => nome)
+    .sort();
+  if (mazziSuoi.length === 0) {
+    selM.innerHTML = '<option value="">— Nessun mazzo —</option>';
+  } else {
+    selM.innerHTML = mazziSuoi.map(m => `<option value="${m}">${m}</option>`).join('');
+  }
+  caricaDeckSalvato();
+}
+
+async function caricaDeckSalvato() {
+  const giocatore = document.getElementById('db-giocatore').value;
+  const mazzo = document.getElementById('db-mazzo').value;
+  _dbDeckCorrente = [];
+  if (!giocatore || !mazzo) { renderDeckBuilder(); return; }
+  try {
+    const ref = doc(db, 'liste_mazzi', _dbDocId(giocatore, mazzo));
+    const snap = await getDoc(ref);
+    if (snap.exists()) {
+      _dbDeckCorrente = snap.data().carte || [];
+    }
+  } catch (e) {
+    console.error('Errore caricamento lista mazzo:', e);
+  }
+  renderDeckBuilder();
+}
+
+async function dbCercaCarte() {
+  const q = document.getElementById('db-search').value.trim();
+  if (!q) { alert('Scrivi il nome di una carta.'); return; }
+  const cont = document.getElementById('db-results');
+  cont.innerHTML = '<div class="db-empty">Ricerca…</div>';
+  try {
+    const r = await fetch(`https://db.ygoprodeck.com/api/v7/cardinfo.php?fname=${encodeURIComponent(q)}&misc=yes&num=60&offset=0`);
+    if (!r.ok) throw new Error();
+    const data = await r.json();
+    const cards = data.data || [];
+    if (cards.length === 0) { cont.innerHTML = '<div class="db-empty">Nessun risultato.</div>'; return; }
+    cont.innerHTML = cards.map(c => {
+      const img = c.card_images?.[0]?.image_url_small || '';
+      const pts = c.misc_info?.[0]?.genesys_points ?? 0;
+      _dbResultsCache[c.id] = { id: c.id, name: c.name, img, pts };
+      const ptsCls = pts > 0 ? '' : 'zero';
+      return `<div class="db-card" onclick="dbAggiungiCarta(${c.id})" title="${escapeHtml(c.name)}">
+        <img src="${img}" alt="${escapeHtml(c.name)}" loading="lazy">
+        <span class="db-card-pts ${ptsCls}">${pts}</span>
+      </div>`;
+    }).join('');
+  } catch (e) {
+    cont.innerHTML = '<div class="db-empty">Errore nella ricerca.</div>';
+  }
+}
+
+function dbAggiungiCarta(id) {
+  const carta = _dbResultsCache[id];
+  if (!carta) return;
+  const esistente = _dbDeckCorrente.find(c => c.id === id);
+  const totCopie = _dbDeckCorrente.reduce((s, c) => s + (c.qty || 1), 0);
+  if (totCopie >= 60) { alert('Limite di 60 carte raggiunto.'); return; }
+  if (esistente) {
+    if ((esistente.qty || 1) >= 3) { alert('Massimo 3 copie per carta.'); return; }
+    esistente.qty = (esistente.qty || 1) + 1;
+  } else {
+    _dbDeckCorrente.push({ id: carta.id, name: carta.name, img: carta.img, pts: carta.pts, qty: 1 });
+  }
+  renderDeckBuilder();
+}
+
+function dbRimuoviCarta(id) {
+  const idx = _dbDeckCorrente.findIndex(c => c.id === id);
+  if (idx === -1) return;
+  const c = _dbDeckCorrente[idx];
+  if ((c.qty || 1) > 1) c.qty--;
+  else _dbDeckCorrente.splice(idx, 1);
+  renderDeckBuilder();
+}
+
+function renderDeckBuilder() {
+  const cont = document.getElementById('db-deck');
+  if (!cont) return;
+  let totCarte = 0, totPunti = 0;
+  _dbDeckCorrente.forEach(c => {
+    const q = c.qty || 1;
+    totCarte += q;
+    totPunti += (c.pts || 0) * q;
+  });
+  if (_dbDeckCorrente.length === 0) {
+    cont.innerHTML = '<div class="db-empty">Nessuna carta nel deck.</div>';
+  } else {
+    cont.innerHTML = _dbDeckCorrente.map(c => {
+      const ptsCls = c.pts > 0 ? '' : 'zero';
+      const qty = c.qty || 1;
+      return `<div class="db-card" onclick="dbRimuoviCarta(${c.id})" title="${escapeHtml(c.name)} — tocca per rimuovere">
+        <img src="${c.img}" alt="${escapeHtml(c.name)}" loading="lazy">
+        <span class="db-card-pts ${ptsCls}">${c.pts || 0}</span>
+        ${qty > 1 ? `<span class="db-card-qty">×${qty}</span>` : ''}
+      </div>`;
+    }).join('');
+  }
+  const elCarte = document.getElementById('db-tot-carte');
+  const elPunti = document.getElementById('db-tot-punti');
+  if (elCarte) elCarte.textContent = totCarte;
+  if (elPunti) {
+    elPunti.textContent = totPunti;
+    elPunti.classList.toggle('over', totPunti > 100);
+  }
+}
+
+async function salvaDeckBuilder() {
+  const giocatore = document.getElementById('db-giocatore').value;
+  const mazzo = document.getElementById('db-mazzo').value;
+  if (!giocatore || !mazzo) { alert('Seleziona giocatore e mazzo.'); return; }
+  try {
+    const ref = doc(db, 'liste_mazzi', _dbDocId(giocatore, mazzo));
+    await setDoc(ref, {
+      giocatore, mazzo,
+      carte: _dbDeckCorrente,
+      aggiornato: new Date().toISOString()
+    });
+    alert(`Deck "${mazzo}" di ${giocatore} salvato nel Cloud!`);
+  } catch (e) {
+    console.error('Errore salvataggio deck:', e);
+    alert('Errore nel salvataggio. Riprova.');
+  }
+}
+
+document.getElementById('db-giocatore')?.addEventListener('change', popolaMazziDeckBuilder);
+document.getElementById('db-mazzo')?.addEventListener('change', caricaDeckSalvato);
+document.getElementById('db-search')?.addEventListener('keydown', e => {
+  if (e.key === 'Enter') dbCercaCarte();
+});
+
+window.dbCercaCarte = dbCercaCarte;
+window.dbAggiungiCarta = dbAggiungiCarta;
+window.dbRimuoviCarta = dbRimuoviCarta;
+window.salvaDeckBuilder = salvaDeckBuilder;
+window.popolaDeckBuilder = popolaDeckBuilder;
+
+// ============ REGISTRAZIONE SERVICE WORKER (PWA) ============
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js')
+      .then(reg => console.log('✅ Service Worker registrato', reg.scope))
+      .catch(err => console.warn('SW non registrato:', err));
+  });
+}
+
 </script>
 </body>
 </html>
