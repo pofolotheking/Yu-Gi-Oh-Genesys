@@ -1992,7 +1992,10 @@
   .duel-calc-apply.minus { background: #ff3b30; color: #fff; }
   .duel-calc-apply.plus { background: #34c759; color: #fff; }
 
+  /* ── DUELLO MOBILE INPUT SHEET ── */
+  .duel-lp-num { cursor: default; }
   @media (max-width: 600px) {
+    /* entrambe le metà ruotate 180° — leggibili da ogni lato del tavolo */
     .duel-body {
       grid-template-columns: 1fr;
       grid-template-rows: 1fr 1fr;
@@ -2000,22 +2003,108 @@
     .duel-player-col {
       border-right: none;
       border-bottom: 1px solid rgba(0,0,0,0.06);
-      padding: 16px 14px 14px;
-    }
-    .duel-player-col:last-child {
-      border-bottom: none;
+      padding: 0;
+      justify-content: center;
       transform: rotate(180deg);
     }
-    .duel-lp-num { font-size: clamp(2.6rem, 12vw, 4rem); }
-    .duel-lp-bar-wrap { margin: 8px 0 12px; max-width: 160px; }
-    .duel-calc { max-width: 280px; gap: 4px; }
-    .duel-calc-disp { font-size: 1.05rem; padding: 7px 11px; min-height: 34px; }
-    .duel-key { padding: 7px 0; font-size: 0.92rem; }
-    .duel-calc-apply { padding: 8px 6px; font-size: 0.8rem; }
-    .duel-top-tools { padding: 8px 10px; gap: 6px; }
-    .duel-tool { padding: 5px 9px; gap: 5px; }
-    .duel-tool-val { font-size: 0.85rem; min-width: 32px; }
+    .duel-player-col:last-child { border-bottom: none; }
+    /* nasconde calcolatrice su mobile — si apre toccando il numero */
+    .duel-calc { display: none; }
+    /* LP numero grande, cliccabile */
+    .duel-lp-num {
+      font-size: clamp(3.8rem, 18vw, 6rem);
+      cursor: pointer;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .duel-lp-num:active { opacity: 0.6; }
+    .duel-lp-bar-wrap { margin: 12px 0 0; max-width: 140px; height: 3px; }
+    /* topbar più compatta */
+    .duel-topbar { padding: 10px 16px; }
+    .duel-back-btn { font-size: 0.92rem; }
+    /* tools: orizzontali, più compatti */
+    .duel-top-tools { padding: 8px 12px; gap: 8px; }
+    .duel-tool { padding: 6px 10px; gap: 6px; border-radius: 10px; }
+    .duel-tool-val { font-size: 0.88rem; min-width: 34px; }
+    .duel-tool-icon { font-size: 0.95rem; }
   }
+
+  /* Sheet input mobile calcolatrice */
+  .duel-input-sheet {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.45);
+    z-index: 400;
+    align-items: flex-end;
+    justify-content: center;
+  }
+  .duel-input-sheet.open { display: flex; }
+  .duel-input-inner {
+    background: #fff;
+    border-radius: 22px 22px 0 0;
+    width: 100%; max-width: 480px;
+    padding: 20px 20px 40px;
+    animation: slideUp 0.25s ease;
+  }
+  @keyframes slideUp { from{transform:translateY(100%)} to{transform:translateY(0)} }
+  .duel-input-drag {
+    width: 36px; height: 4px;
+    background: #e5e5ea; border-radius: 2px;
+    margin: 0 auto 16px;
+  }
+  .duel-input-title {
+    font-size: 0.75rem; font-weight: 700;
+    letter-spacing: 0.06em; text-transform: uppercase;
+    color: rgba(60,60,67,0.5);
+    text-align: center; margin-bottom: 12px;
+  }
+  .duel-input-lp-display {
+    text-align: center;
+    font-size: 2rem; font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.03em; color: #1c1c1e;
+    margin-bottom: 14px;
+  }
+  .duel-input-lp-display span { color: #a1a1a6; font-size: 1rem; font-weight: 500; }
+  .duel-input-field {
+    width: 100%;
+    background: #f2f2f7;
+    border: 2px solid transparent;
+    border-radius: 14px;
+    font-family: inherit;
+    font-size: 1.8rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: #1c1c1e;
+    text-align: center;
+    padding: 14px;
+    margin-bottom: 12px;
+    -webkit-appearance: none;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .duel-input-field:focus { border-color: #007aff; }
+  .duel-input-actions {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+    margin-bottom: 10px;
+  }
+  .duel-input-btn {
+    border: none; border-radius: 14px;
+    font-family: inherit; font-size: 1rem; font-weight: 700;
+    padding: 16px 8px; cursor: pointer;
+    transition: opacity 0.1s;
+  }
+  .duel-input-btn:active { opacity: 0.75; }
+  .duel-input-btn.minus { background: #ff3b30; color: #fff; }
+  .duel-input-btn.plus  { background: #34c759; color: #fff; }
+  .duel-input-cancel {
+    width: 100%; border: none;
+    background: #f2f2f7; border-radius: 14px;
+    font-family: inherit; font-size: 1rem; font-weight: 600;
+    color: #1c1c1e; padding: 14px;
+    cursor: pointer; transition: background 0.15s;
+  }
+  .duel-input-cancel:hover { background: #e5e5ea; }
 
 </style>
 </head>
@@ -2078,6 +2167,7 @@
       <span class="duel-tool-icon">⏱</span>
       <span class="duel-tool-val" id="duel-chrono-val">0:00</span>
       <button class="duel-tool-btn go" id="duel-chrono-btn" onclick="toggleChrono()" title="Avvia">▶</button>
+      <button class="duel-tool-btn" id="duel-chrono-reset-btn" onclick="resetChrono()" title="Reset" style="color:rgba(60,60,67,0.45);font-size:0.8rem">↺</button>
     </div>
     <div class="duel-tool" id="duel-timer-tool">
       <span class="duel-tool-icon">⏳</span>
@@ -2090,7 +2180,7 @@
   <div class="duel-body">
 
     <div class="duel-player-col" id="duel-half-p1">
-      <div class="duel-lp-num" id="duel-lp-p1">8000</div>
+      <div class="duel-lp-num" id="duel-lp-p1" onclick="apriInputSheet(1)" title="Tocca per modificare">8000</div>
       <div class="duel-lp-bar-wrap"><div class="duel-lp-bar" id="duel-bar-p1" style="width:100%"></div></div>
       <div class="duel-calc">
         <div class="duel-calc-disp" id="duel-disp-p1">0</div>
@@ -2116,7 +2206,7 @@
     </div>
 
     <div class="duel-player-col" id="duel-half-p2">
-      <div class="duel-lp-num" id="duel-lp-p2">8000</div>
+      <div class="duel-lp-num" id="duel-lp-p2" onclick="apriInputSheet(2)" title="Tocca per modificare">8000</div>
       <div class="duel-lp-bar-wrap"><div class="duel-lp-bar" id="duel-bar-p2" style="width:100%"></div></div>
       <div class="duel-calc">
         <div class="duel-calc-disp" id="duel-disp-p2">0</div>
@@ -2143,6 +2233,21 @@
 
   </div>
 
+</div>
+
+<!-- SHEET INPUT MOBILE -->
+<div class="duel-input-sheet" id="duel-input-sheet" onclick="chiudiInputSheet(event)">
+  <div class="duel-input-inner">
+    <div class="duel-input-drag"></div>
+    <div class="duel-input-title" id="duel-input-title">Modifica LP</div>
+    <div class="duel-input-lp-display" id="duel-input-lp-display">LP correnti: <span id="duel-input-lp-cur">8000</span></div>
+    <input class="duel-input-field" id="duel-input-field" type="number" inputmode="numeric" pattern="[0-9]*" placeholder="0" min="0" max="99999">
+    <div class="duel-input-actions">
+      <button class="duel-input-btn minus" onclick="applicaInputSheet(-1)">− Togli</button>
+      <button class="duel-input-btn plus"  onclick="applicaInputSheet(1)">+ Aggiungi</button>
+    </div>
+    <button class="duel-input-cancel" onclick="chiudiInputSheet(null)">Annulla</button>
+  </div>
 </div>
 
 <!-- TIMER SETUP MODAL -->
@@ -4520,6 +4625,12 @@ function _chronoStop() {
   if (btn) { btn.textContent = '▶'; btn.className = 'duel-tool-btn go'; }
   if (tool) tool.classList.remove('active');
 }
+function resetChrono() {
+  _chronoStop();
+  _chronoSec = 0;
+  const el = document.getElementById('duel-chrono-val');
+  if (el) el.textContent = '0:00';
+}
 
 let _timerSec = 0;
 let _timerRemaining = 0;
@@ -4528,6 +4639,40 @@ let _timerIv = null;
 let _timerSet = false;
 
 function apriTimerSetup() { document.getElementById('duel-timer-setup').classList.add('open'); }
+
+// ── Sheet input mobile ──
+let _inputSheetPlayer = 1;
+
+function apriInputSheet(player) {
+  _inputSheetPlayer = player;
+  const lp = _duelLP[player - 1];
+  const title = document.getElementById('duel-input-title');
+  const cur   = document.getElementById('duel-input-lp-cur');
+  const field = document.getElementById('duel-input-field');
+  if (title) title.textContent = 'Giocatore ' + player + ' — Modifica LP';
+  if (cur)   cur.textContent = _fmt(lp);
+  if (field) { field.value = ''; }
+  document.getElementById('duel-input-sheet').classList.add('open');
+  // focus con leggero ritardo per animazione
+  setTimeout(() => { if (field) field.focus(); }, 300);
+}
+
+function chiudiInputSheet(e) {
+  if (!e || e.target === document.getElementById('duel-input-sheet')) {
+    document.getElementById('duel-input-sheet').classList.remove('open');
+    document.getElementById('duel-input-field').blur();
+  }
+}
+
+function applicaInputSheet(sign) {
+  const field = document.getElementById('duel-input-field');
+  const val = parseInt(field?.value) || 0;
+  if (val <= 0) { chiudiInputSheet(null); return; }
+  const i = _inputSheetPlayer - 1;
+  _duelLP[i] = Math.max(0, _duelLP[i] + sign * val);
+  _duelAggiornaBarre();
+  chiudiInputSheet(null);
+}
 function chiudiTimerSetup(e) {
   if (!e || e.target === document.getElementById('duel-timer-setup'))
     document.getElementById('duel-timer-setup').classList.remove('open');
@@ -4606,6 +4751,10 @@ window.chiudiTimerSetup = chiudiTimerSetup;
 window.setTimer = setTimer;
 window.setTimerCustom = setTimerCustom;
 window.toggleTimer = toggleTimer;
+window.resetChrono = resetChrono;
+window.apriInputSheet = apriInputSheet;
+window.chiudiInputSheet = chiudiInputSheet;
+window.applicaInputSheet = applicaInputSheet;
 
 function apriImpostazioni() {
   switchTab('config');
