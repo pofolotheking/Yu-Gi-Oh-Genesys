@@ -223,12 +223,13 @@
 
   .mini-action {
     background: var(--bg-soft); border: 1px solid var(--border-strong);
-    border-radius: 9px; padding: 7px 11px; font-family: inherit;
-    font-size: 0.8rem; font-weight: 600; color: var(--text); cursor: pointer;
-    white-space: nowrap; transition: background 0.15s;
+    border-radius: 9px; padding: 8px 10px; font-family: inherit;
+    font-size: 0.8rem; font-weight: 600; color: var(--text-dim); cursor: pointer;
+    white-space: nowrap; transition: background 0.15s, color 0.15s;
+    display: inline-flex; align-items: center; justify-content: center; gap: 5px;
   }
-  .mini-action:hover { background: var(--border); }
-  .builder-chart-wrap { display: flex; align-items: center; gap: 10px; }
+  .mini-action:hover { background: var(--border); color: var(--text); }
+  .builder-chart-wrap { display: flex; align-items: center; gap: 8px; }
   .builder-chart-wrap canvas { width: 56px !important; height: 56px !important; }
   .builder-chart-legend { display: flex; flex-direction: column; gap: 1px; }
   .bcl-item { display: flex; align-items: center; gap: 5px; font-size: 0.64rem; color: var(--text-dim); font-weight: 500; white-space: nowrap; }
@@ -519,14 +520,18 @@
         <span class="bh-by">di</span>
         <select id="proprietario-mazzo" class="bh-owner"></select>
         <span class="bh-pts" id="cnt-punti-wrap"><b id="cnt-punti">0</b> pt</span>
-        <button class="mini-action" onclick="manoDiProva()" title="Pesca 5 carte a caso dal Main">🎴 Mano</button>
-        <button class="mini-action" onclick="nuovoMazzoVuoto()" title="Svuota il deck">🗑</button>
-      </div>
-      <div class="builder-header-right">
         <div class="builder-chart-wrap" id="builder-chart-wrap" style="display:none">
           <canvas id="main-pie" width="80" height="80"></canvas>
           <div class="builder-chart-legend" id="main-pie-legend"></div>
         </div>
+      </div>
+      <div class="builder-header-right">
+        <button class="mini-action" onclick="manoDiProva()" title="Mano di prova">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 11V6a2 2 0 0 0-4 0v5"/><path d="M14 10V4a2 2 0 0 0-4 0v6"/><path d="M10 10.5V6a2 2 0 0 0-4 0v8"/><path d="M6 14a4 4 0 0 0 4 4h4a4 4 0 0 0 4-4v-2.5"/></svg>
+        </button>
+        <button class="mini-action" onclick="nuovoMazzoVuoto()" title="Svuota il deck">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+        </button>
         <button class="primary" onclick="salvaMazzo()">💾 Salva</button>
       </div>
     </div>
