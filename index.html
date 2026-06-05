@@ -619,6 +619,25 @@
     margin-left: 6px;
     vertical-align: middle;
   }
+  .decklist-info-btn {
+    background: none; border: none; cursor: pointer;
+    color: var(--blue); padding: 2px 4px; vertical-align: middle;
+    display: inline-flex; align-items: center; border-radius: 5px;
+    transition: background 0.15s;
+  }
+  .decklist-info-btn:hover { background: var(--bg-soft); }
+  .dl-assoc-group-title {
+    font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--text-faint); font-weight: 700; margin: 14px 0 8px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .dl-assoc-group-title:first-of-type { margin-top: 0; }
+  .dl-assoc-count { background: var(--border); color: var(--text-dim); padding: 1px 7px; border-radius: 6px; font-size: 0.68rem; }
+  .dl-assoc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(66px, 1fr)); gap: 7px; }
+  .dl-assoc-card { position: relative; border-radius: 6px; overflow: hidden; border: 1px solid var(--border); }
+  .dl-assoc-card img { width: 100%; aspect-ratio: 59/86; object-fit: cover; display: block; background: var(--bg-soft); }
+  .dl-assoc-pts { position: absolute; top: 2px; right: 2px; background: #1d1d1f; color: #fff; font-size: 0.58rem; font-weight: 700; padding: 1px 4px; border-radius: 4px; }
+  .dl-assoc-pts.high { background: var(--red); } .dl-assoc-pts.mid { background: var(--orange); } .dl-assoc-pts.low { background: var(--green); }
 
   .medal {
     display: inline-block;
@@ -2149,7 +2168,7 @@
   <div class="subtitle">Il gioco che se vai primo vinci</div>
   <div class="header-actions">
     <button class="header-btn-primary" onclick="switchTab('nuova')">+ Registra Partita</button>
-    <a class="header-btn-search" href="deck-builder.html" style="text-decoration:none;text-align:center;display:block">🛠️ Deck Builder</a>
+    <a class="header-btn-search" href="deck-builder.html" style="text-decoration:none;text-align:center;display:flex;align-items:center;justify-content:center;gap:7px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#a1a1a6" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>Deck Editing</a>
   </div>
 </header>
 
@@ -2659,7 +2678,14 @@
   <button onclick="eseguiLogout()" style="background:none;border:none;color:var(--text-faint);font-size:0.75rem;cursor:pointer;margin-left:12px;font-family:inherit">Esci</button>
 </footer>
 
-</div><div class="modal-overlay" id="modal-overlay" onclick="chiudiModale(event)">
+</div>
+<div class="modal-overlay" id="decklist-overlay" onclick="chiudiDecklist(event)" style="z-index:160">
+  <div class="modal" style="max-width:680px">
+    <button class="modal-close" onclick="chiudiDecklistForce()">✕</button>
+    <div style="padding:20px;max-height:85vh;overflow-y:auto" id="decklist-body"></div>
+  </div>
+</div>
+<div class="modal-overlay" id="modal-overlay" onclick="chiudiModale(event)">
   <div class="modal" id="modal">
     <button class="modal-close" onclick="chiudiModaleForce()">✕</button>
     <div class="modal-body">
@@ -2768,7 +2794,8 @@ async function caricaDati() {
         giocatori: j.giocatori || DATI_INIZIALI.giocatori,
         profili: j.profili || {},
         mazzi: j.mazzi || {},
-        partite: j.partite || []
+        partite: j.partite || [],
+        mazziDecklist: j.mazziDecklist || {}
       };
     } else {
       dati = JSON.parse(JSON.stringify(DATI_INIZIALI));
@@ -3244,9 +3271,13 @@ function renderMazzi() {
     const rankCell = hasMedal
       ? `<td class="rank"><span class="medal">${medals[i]}</span></td>`
       : `<td class="rank">${i + 1}</td>`;
+    const hasDecklist = dati.mazziDecklist && dati.mazziDecklist[nome];
+    const infoIcon = hasDecklist
+      ? ` <button class="decklist-info-btn" onclick="mostraDecklistAssociata('${nome.replace(/'/g, "\\'")}')" title="Vedi la decklist"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg></button>`
+      : '';
     html += `<tr class="${i === 0 && !provv ? 'top-1' : ''}">
       ${rankCell}
-      <td>${nome}${provv ? '<span class="pill">In prova</span>' : ''}</td>
+      <td>${nome}${provv ? '<span class="pill">In prova</span>' : ''}${infoIcon}</td>
       <td style="color:var(--text-dim)">${s.proprietario}</td>
       <td class="num">${s.v}</td><td class="num">${s.p}</td>
       <td><div class="wr-cell"><span class="wr-text">${wr}%</span><span class="wr-bar"><span style="width:${wr}%"></span></span></div></td>
@@ -3969,6 +4000,49 @@ function chiudiModaleForce() {
   document.body.style.overflow = '';
 }
 document.addEventListener('keydown', e => { if (e.key === 'Escape') chiudiModaleForce(); });
+
+// ─────────── DECKLIST ASSOCIATA (vista da classifica) ───────────
+async function mostraDecklistAssociata(nomeMazzo) {
+  const docId = dati.mazziDecklist && dati.mazziDecklist[nomeMazzo];
+  if (!docId) return;
+  const body = document.getElementById('decklist-body');
+  body.innerHTML = '<div class="empty">Caricamento decklist…</div>';
+  document.getElementById('decklist-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  try {
+    const snap = await getDoc(doc(db, 'liste_mazzi', docId));
+    if (!snap.exists()) { body.innerHTML = '<div class="empty">Decklist non trovata.</div>'; return; }
+    const d = snap.data();
+    const grp = (titolo, arr) => {
+      arr = arr || [];
+      if (!arr.length) return '';
+      const cards = arr.map(c => {
+        const pts = c.pts || 0;
+        const cls = pts >= 30 ? 'high' : pts >= 10 ? 'mid' : 'low';
+        const badge = pts > 0 ? `<span class="dl-assoc-pts ${cls}">${pts}</span>` : '';
+        return `<div class="dl-assoc-card"><img src="${c.img}" alt="" loading="lazy">${badge}</div>`;
+      }).join('');
+      return `<div class="dl-assoc-group-title">${titolo} <span class="dl-assoc-count">${arr.length}</span></div><div class="dl-assoc-grid">${cards}</div>`;
+    };
+    const corpo = grp('🎴 Main Deck', d.main) + grp('⚡ Extra Deck', d.extra) + grp('🔄 Side Deck', d.side);
+    body.innerHTML = `
+      <div style="font-size:1.2rem;font-weight:700;letter-spacing:-0.02em;margin-bottom:2px">${nomeMazzo}</div>
+      <div style="font-size:0.82rem;color:var(--text-dim);margin-bottom:16px">Decklist · ${d.giocatore || ''}</div>
+      ${corpo || '<div class="empty">Decklist vuota.</div>'}`;
+  } catch (e) {
+    body.innerHTML = '<div class="empty">Errore nel caricamento.</div>';
+  }
+}
+function chiudiDecklist(e) {
+  if (e.target === document.getElementById('decklist-overlay')) chiudiDecklistForce();
+}
+function chiudiDecklistForce() {
+  document.getElementById('decklist-overlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+window.mostraDecklistAssociata = mostraDecklistAssociata;
+window.chiudiDecklist = chiudiDecklist;
+window.chiudiDecklistForce = chiudiDecklistForce;
 
 let genesysCache = null;
 
