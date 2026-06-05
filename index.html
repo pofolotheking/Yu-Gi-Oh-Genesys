@@ -2766,7 +2766,7 @@
 <script type="module">
 // ============ INIZIALIZZAZIONE FIREBASE ============
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFirestore, doc, getDoc, setDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 const firebaseConfig = {
@@ -2835,6 +2835,7 @@ const DATI_INIZIALI = {
 };
 
 let dati = { giocatori: ["Tia", "Gio", "Richi"], mazzi: {}, partite: [] };
+let _decklist70 = {}; // { nomeGiocatore: true } se ha almeno una decklist da 70+ carte
 const PUNTI = { "2-0": [3, 0], "2-1": [2, 1], "1-2": [1, 2], "0-2": [0, 3] };
 const SOGLIA_MAZZO = 3;
 
@@ -2858,7 +2859,22 @@ async function caricaDati() {
       console.log("✅ Database inizializzato con i dati storici!");
     }
   } catch (e) { console.error("Errore di caricamento dal Cloud:", e); }
+  await caricaDecklist70();
   popolaTutto();
+}
+
+// popola _decklist70: per ogni giocatore, true se ha una decklist con 70+ carte (main+extra+side)
+async function caricaDecklist70() {
+  try {
+    const snaps = await getDocs(collection(db, 'liste_mazzi'));
+    const res = {};
+    snaps.forEach(s => {
+      const d = s.data();
+      const tot = (d.main?.length || 0) + (d.extra?.length || 0) + (d.side?.length || 0);
+      if (tot >= 70 && d.giocatore) res[d.giocatore] = true;
+    });
+    _decklist70 = res;
+  } catch (e) { console.error('Errore caricamento decklist per achievement:', e); }
 }
 
 async function salvaDatiCloud() {
@@ -3976,6 +3992,139 @@ const ACHIEVEMENTS_DEF = [
         if ((p.g1 === nome && p1 > p2) || (p.g2 === nome && p2 > p1)) vittorie++;
       });
       return vittorie >= 10;
+    }
+  },
+  {
+    id: 'underdog',
+    icon: '🐺',
+    name: 'Underdog',
+    desc: 'Vinci 3 partite contro chi ha vinto il dado',
+    check: (nome, partite) => {
+      let n = 0;
+      partite.forEach(p => {
+        if (!p.dado || p.dado === nome) return;
+        const [p1, p2] = PUNTI[p.risultato];
+        const vinto = (p.g1 === nome && p1 > p2) || (p.g2 === nome && p2 > p1);
+        const coinvolto = p.g1 === nome || p.g2 === nome;
+        if (coinvolto && vinto) n++;
+      });
+      return n >= 3;
+    }
+  },
+  {
+    id: 'collezionista',
+    icon: '🗃️',
+    name: 'Collezionista',
+    desc: 'Gioca con 4 mazzi diversi',
+    check: (nome, partite) => {
+      const mazzi = new Set();
+      partite.forEach(p => {
+        if (p.g1 === nome) mazzi.add(p.m1);
+        if (p.g2 === nome) mazzi.add(p.m2);
+      });
+      return mazzi.size >= 4;
+    }
+  },
+  {
+    id: 'deck_builder',
+    icon: '🛠️',
+    name: 'Deck builder',
+    desc: 'Costruisci il tuo primo mazzo (70+ carte)',
+    check: (nome) => {
+      return !!(_decklist70 && _decklist70[nome]);
+    }
+  },
+  {
+    id: 'monogamo',
+    icon: '💍',
+    name: 'Monogamo',
+    desc: '10 partite con lo stesso mazzo',
+    check: (nome, partite) => {
+      const conteggio = {};
+      partite.forEach(p => {
+        if (p.g1 === nome) conteggio[p.m1] = (conteggio[p.m1] || 0) + 1;
+        if (p.g2 === nome) conteggio[p.m2] = (conteggio[p.m2] || 0) + 1;
+      });
+      return Object.values(conteggio).some(n => n >= 10);
+    }
+  },
+  {
+    id: 'malato',
+    icon: '🤒',
+    name: 'Malato',
+    desc: '20 partite giocate',
+    check: (nome, partite) => {
+      return partite.filter(p => p.g1 === nome || p.g2 === nome).length >= 20;
+    }
+  },
+  {
+    id: 'sfortunato',
+    icon: '😩',
+    name: 'Sfortunato',
+    desc: 'Perdi il dado 3 volte di fila',
+    check: (nome, partite) => {
+      const mie = partite.filter(p => (p.g1 === nome || p.g2 === nome) && p.dado);
+      let streak = 0;
+      for (const p of mie) {
+        if (p.dado !== nome) { streak++; if (streak >= 3) return true; }
+        else streak = 0;
+      }
+      return false;
+    }
+  },
+  {
+    id: 'duellante',
+    icon: '🎮',
+    name: 'Duellante',
+    desc: '10 partite fatte',
+    check: (nome, partite) => {
+      return partite.filter(p => p.g1 === nome || p.g2 === nome).length >= 10;
+    }
+  },
+  {
+    id: 'matricola',
+    icon: '🌱',
+    name: 'Matricola',
+    desc: '3 partite fatte',
+    check: (nome, partite) => {
+      return partite.filter(p => p.g1 === nome || p.g2 === nome).length >= 3;
+    }
+  },
+  {
+    id: 'sfidante',
+    icon: '🥊',
+    name: 'Sfidante',
+    desc: '5 partite fatte',
+    check: (nome, partite) => {
+      return partite.filter(p => p.g1 === nome || p.g2 === nome).length >= 5;
+    }
+  },
+  {
+    id: 'esperto',
+    icon: '🎓',
+    name: 'Esperto',
+    desc: '5 partite vinte',
+    check: (nome, partite) => {
+      let v = 0;
+      partite.forEach(p => {
+        const [p1, p2] = PUNTI[p.risultato];
+        if ((p.g1 === nome && p1 > p2) || (p.g2 === nome && p2 > p1)) v++;
+      });
+      return v >= 5;
+    }
+  },
+  {
+    id: 'recluta',
+    icon: '🎗️',
+    name: 'Recluta',
+    desc: '3 partite vinte',
+    check: (nome, partite) => {
+      let v = 0;
+      partite.forEach(p => {
+        const [p1, p2] = PUNTI[p.risultato];
+        if ((p.g1 === nome && p1 > p2) || (p.g2 === nome && p2 > p1)) v++;
+      });
+      return v >= 3;
     }
   }
 ];
