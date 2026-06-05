@@ -73,7 +73,7 @@
     box-shadow: 0 1px 3px rgba(0,0,0,0.08);
   }
 
-  main { max-width: 1180px; margin: 0 auto; padding: 0 16px; }
+  main { max-width: 1600px; margin: 0 auto; padding: 0 16px; }
   section { display: none; }
   section.active { display: block; animation: fade 0.25s ease; }
   @keyframes fade { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
@@ -133,16 +133,16 @@
   .deck-list-item { margin-bottom: 10px; }
   .deck-list-btn {
     width: 100%; background: var(--bg-card);
-    border: 1px solid var(--border); border-radius: 13px;
-    padding: 15px 18px; font-family: inherit; cursor: pointer;
+    border: 1px solid var(--border); border-radius: 11px;
+    padding: 9px 14px; font-family: inherit; cursor: pointer;
     display: flex; align-items: center; justify-content: space-between;
     text-align: left; transition: background 0.15s;
   }
   .deck-list-btn:hover { background: var(--bg-soft); }
   .deck-list-btn.open { border-radius: 13px 13px 0 0; background: var(--bg-soft); border-color: var(--border-strong); }
   .deck-list-info { display: flex; flex-direction: column; gap: 2px; }
-  .deck-list-name { font-size: 1.02rem; font-weight: 600; letter-spacing: -0.01em; }
-  .deck-list-owner { font-size: 0.8rem; color: var(--text-dim); }
+  .deck-list-name { font-size: 0.82rem; font-weight: 600; letter-spacing: -0.01em; }
+  .deck-list-owner { font-size: 0.68rem; color: var(--text-dim); }
   .deck-list-meta { display: flex; align-items: center; gap: 12px; }
   .deck-list-pts {
     background: var(--text); color: white; font-weight: 700;
@@ -181,11 +181,6 @@
     padding: 1px 4px; border-radius: 4px;
   }
   .dl-card-pts.zero { background: var(--text-faint); }
-  .dl-card-qty {
-    position: absolute; bottom: 2px; left: 2px;
-    background: var(--green); color: #fff; font-size: 0.58rem; font-weight: 700;
-    padding: 1px 5px; border-radius: 4px;
-  }
 
   /* ─── SEZIONE CREA MAZZO ─── */
   .builder-topbar {
@@ -210,14 +205,14 @@
   }
 
   .builder-split {
-    display: grid; grid-template-columns: 300px 1fr; gap: 16px; align-items: start;
+    display: grid; grid-template-columns: 420px 1fr; gap: 18px; align-items: start;
   }
 
   .search-panel { position: sticky; top: 12px; }
   .search-row { display: flex; gap: 8px; margin-bottom: 12px; }
   .search-results {
-    display: grid; grid-template-columns: repeat(auto-fill, minmax(76px, 1fr));
-    gap: 8px; max-height: 620px; overflow-y: auto;
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(92px, 1fr));
+    gap: 9px; max-height: 760px; overflow-y: auto;
     -webkit-overflow-scrolling: touch;
   }
   .search-card {
@@ -252,7 +247,7 @@
     font-variant-numeric: tabular-nums;
   }
   .deck-zone-grid {
-    display: grid; grid-template-columns: repeat(auto-fill, minmax(72px, 1fr)); gap: 8px;
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); gap: 9px;
   }
   .deck-zone-empty { color: var(--text-faint); font-size: 0.82rem; padding: 18px 8px; text-align: center; grid-column: 1/-1; }
   .deck-card {
@@ -267,11 +262,6 @@
     padding: 1px 5px; border-radius: 4px; pointer-events: none;
   }
   .deck-card-pts.zero { background: var(--text-faint); }
-  .deck-card-qty {
-    position: absolute; bottom: 3px; left: 3px;
-    background: var(--green); color: #fff; font-size: 0.6rem; font-weight: 700;
-    padding: 1px 6px; border-radius: 5px; pointer-events: none;
-  }
   .deck-card-side {
     position: absolute; bottom: 3px; right: 3px;
     background: var(--blue); color: #fff; border: none; cursor: pointer;
@@ -294,16 +284,60 @@
     flex-direction: column; gap: 14px; text-align: center;
   }
 
+  /* ─── FILTRI AVANZATI ─── */
+  .filtri-toggle {
+    background: none; border: none; color: var(--blue);
+    font-family: inherit; font-size: 0.85rem; font-weight: 500;
+    cursor: pointer; padding: 4px 0; display: block; margin: 4px 0 0;
+  }
+  .filtri-toggle:hover { opacity: 0.75; }
+  .filtri-panel {
+    margin-top: 10px; padding-top: 12px; border-top: 1px solid var(--border);
+    display: grid; grid-template-columns: 1fr 1fr; gap: 9px;
+  }
+  .filtri-panel label { font-size: 0.72rem; margin-bottom: 3px; }
+  .filtri-panel input, .filtri-panel select { padding: 9px 10px; font-size: 0.85rem; }
+  .filtri-panel .full { grid-column: 1 / -1; }
+
+  /* ─── TOOLTIP ANTEPRIMA CARTA ─── */
+  .preview-tip {
+    display: none; position: fixed; z-index: 999;
+    width: 420px; background: var(--bg);
+    border: 1px solid var(--border); border-radius: 16px;
+    box-shadow: 0 16px 48px rgba(0,0,0,0.20); padding: 16px;
+    pointer-events: none; animation: fadeTip 0.15s ease;
+  }
+  @keyframes fadeTip { from { opacity: 0; transform: scale(0.97); } to { opacity: 1; transform: none; } }
+  .preview-tip.visible { display: block; }
+  .preview-inner { display: grid; grid-template-columns: 120px 1fr; gap: 14px; align-items: start; }
+  .preview-img { width: 120px; border-radius: 8px; display: block; border: 1px solid var(--border); }
+  .preview-body { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+  .preview-name { font-weight: 700; font-size: 1rem; letter-spacing: -0.01em; color: var(--text); line-height: 1.2; }
+  .preview-type { font-size: 0.72rem; color: var(--text-faint); font-style: italic; }
+  .preview-chips { display: flex; gap: 4px; flex-wrap: wrap; }
+  .preview-chip {
+    background: var(--bg-soft); border-radius: 5px; padding: 2px 7px;
+    font-size: 0.66rem; font-weight: 600; color: var(--text);
+  }
+  .preview-chip.genesys { color: #fff; font-weight: 700; }
+  .preview-chip.genesys.high { background: var(--red); }
+  .preview-chip.genesys.mid { background: var(--orange); }
+  .preview-chip.genesys.low { background: var(--green); }
+  .preview-desc { font-size: 0.78rem; color: var(--text-dim); line-height: 1.55; margin-top: 2px; }
+
+  @media (max-width: 600px) { .preview-tip { display: none !important; } }
+
   /* loading */
   .loading { text-align: center; padding: 36px; color: var(--text-faint); font-size: 0.92rem; }
 
   @media (max-width: 820px) {
     .builder-split { grid-template-columns: 1fr; }
     .search-panel { position: static; }
-    .search-results { max-height: 280px; }
+    .search-results { max-height: 320px; }
   }
   @media (max-width: 600px) {
     .builder-topbar { grid-template-columns: 1fr; }
+    .filtri-panel { grid-template-columns: 1fr; }
     main { padding: 0 10px; }
     header { padding: 50px 16px 14px; }
     nav button { font-size: 0.76rem; padding: 8px 5px; }
@@ -397,7 +431,91 @@
           <input type="text" id="search-input" placeholder="Nome carta…" style="flex:1">
           <button class="primary" onclick="cercaCarte()" style="padding:11px 16px">Vai</button>
         </div>
-        <div class="search-results" id="search-results">
+        <button class="filtri-toggle" id="filtri-toggle" onclick="toggleFiltri()">▶ Filtri avanzati</button>
+        <div class="filtri-panel" id="filtri-panel" style="display:none">
+          <div>
+            <label>Tipo</label>
+            <select id="f-type">
+              <option value="">— Tutti —</option>
+              <optgroup label="Mostri">
+                <option value="Normal Monster">Normal</option>
+                <option value="Effect Monster">Effect</option>
+                <option value="Fusion Monster">Fusion</option>
+                <option value="Ritual Monster">Ritual</option>
+                <option value="Synchro Monster">Synchro</option>
+                <option value="XYZ Monster">XYZ</option>
+                <option value="Link Monster">Link</option>
+                <option value="Pendulum Effect Monster">Pendulum</option>
+              </optgroup>
+              <optgroup label="Magie / Trappole">
+                <option value="Spell Card">Spell</option>
+                <option value="Trap Card">Trap</option>
+              </optgroup>
+            </select>
+          </div>
+          <div>
+            <label>Attributo</label>
+            <select id="f-attribute">
+              <option value="">— Tutti —</option>
+              <option value="DARK">DARK</option>
+              <option value="LIGHT">LIGHT</option>
+              <option value="WATER">WATER</option>
+              <option value="FIRE">FIRE</option>
+              <option value="EARTH">EARTH</option>
+              <option value="WIND">WIND</option>
+              <option value="DIVINE">DIVINE</option>
+            </select>
+          </div>
+          <div>
+            <label>Razza / Tipo</label>
+            <select id="f-race">
+              <option value="">— Tutte —</option>
+              <option value="Dragon">Dragon</option>
+              <option value="Spellcaster">Spellcaster</option>
+              <option value="Warrior">Warrior</option>
+              <option value="Beast">Beast</option>
+              <option value="Beast-Warrior">Beast-Warrior</option>
+              <option value="Fiend">Fiend</option>
+              <option value="Fairy">Fairy</option>
+              <option value="Zombie">Zombie</option>
+              <option value="Machine">Machine</option>
+              <option value="Aqua">Aqua</option>
+              <option value="Pyro">Pyro</option>
+              <option value="Rock">Rock</option>
+              <option value="Insect">Insect</option>
+              <option value="Thunder">Thunder</option>
+              <option value="Plant">Plant</option>
+              <option value="Psychic">Psychic</option>
+              <option value="Reptile">Reptile</option>
+              <option value="Sea Serpent">Sea Serpent</option>
+              <option value="Dinosaur">Dinosaur</option>
+              <option value="Wyrm">Wyrm</option>
+              <option value="Cyberse">Cyberse</option>
+            </select>
+          </div>
+          <div>
+            <label>Livello / Rango</label>
+            <select id="f-level">
+              <option value="">— Tutti —</option>
+              <option value="1">1</option><option value="2">2</option>
+              <option value="3">3</option><option value="4">4</option>
+              <option value="5">5</option><option value="6">6</option>
+              <option value="7">7</option><option value="8">8</option>
+              <option value="9">9</option><option value="10">10</option>
+              <option value="11">11</option><option value="12">12</option>
+            </select>
+          </div>
+          <div>
+            <label>ATK (esatto)</label>
+            <input type="number" id="f-atk" placeholder="es. 3000" min="0">
+          </div>
+          <div>
+            <label>DEF (esatto)</label>
+            <input type="number" id="f-def" placeholder="es. 2500" min="0">
+          </div>
+          <button class="secondary full" onclick="resetFiltri()" style="margin-top:2px">↺ Azzera filtri</button>
+        </div>
+        <div class="search-results" id="search-results" style="margin-top:12px">
           <div class="empty" style="grid-column:1/-1;padding:24px 8px;font-size:0.85rem">Cerca una carta per iniziare.</div>
         </div>
       </div>
@@ -440,6 +558,7 @@
 
 </div>
 
+<div class="preview-tip" id="preview-tip"></div>
 <div class="toast" id="toast"></div>
 
 <script type="module">
@@ -464,16 +583,44 @@ const auth = getAuth(app);
 // ─────────── STATO ───────────
 let datiPrincipali = { giocatori: [], mazzi: {} };
 let deckCostruiti = [];   // [{docId, giocatore, mazzo, main:[], extra:[], side:[], punti}]
-let _searchCache = {};    // id -> {id,name,img,pts,type}
+let _searchCache = {};    // id -> {id,name,img,pts,type,desc,attr,level,atk,def}
+let genesysCache = null;  // lista ufficiale punti Genesys (fonte di verità)
 
-// deck in costruzione: ogni zona è array di {id,name,img,pts,type,qty}
+// deck in costruzione: ogni zona è array di carte SINGOLE {uid,id,name,img,pts,type}
+// ogni copia è un elemento separato (niente qty)
 let buildDeck = { main: [], extra: [], side: [] };
 let editingDocId = null;  // se stiamo modificando un deck esistente
+let _uidCounter = 1;      // id univoco per ogni istanza-carta nel deck
 
 const EXTRA_TYPES = ['Fusion', 'Synchro', 'XYZ', 'Xyz', 'Link'];
 function isExtraCard(type) {
   if (!type) return false;
   return EXTRA_TYPES.some(t => type.includes(t));
+}
+
+// scarica la lista ufficiale Genesys una sola volta (punti affidabili)
+async function caricaGenesysCache() {
+  if (genesysCache) return;
+  try {
+    const r = await fetch('https://db.ygoprodeck.com/api/v7/cardinfo.php?format=genesys&misc=yes');
+    if (!r.ok) throw new Error();
+    const data = await r.json();
+    genesysCache = {};
+    (data.data || []).forEach(c => {
+      const p = c.misc_info?.[0]?.genesys_points ?? 0;
+      if (p > 0) genesysCache[c.id] = p;
+    });
+  } catch (e) {
+    console.warn('Lista Genesys non caricata, punti potrebbero essere imprecisi:', e);
+    genesysCache = {};
+  }
+}
+
+// punti corretti: prima la lista ufficiale, poi il misc_info della ricerca
+function puntiGenesys(card) {
+  const fromList = genesysCache ? genesysCache[card.id] : undefined;
+  if (fromList !== undefined) return fromList;
+  return card.misc_info?.[0]?.genesys_points ?? 0;
 }
 
 // ─────────── UTIL ───────────
@@ -549,11 +696,11 @@ async function caricaDeckCostruiti() {
 
 function calcolaPunti(...zone) {
   let tot = 0;
-  zone.forEach(arr => arr.forEach(c => { tot += (c.pts || 0) * (c.qty || 1); }));
+  zone.forEach(arr => arr.forEach(c => { tot += (c.pts || 0); }));
   return tot;
 }
 function contaCarte(arr) {
-  return arr.reduce((s, c) => s + (c.qty || 1), 0);
+  return arr.length;
 }
 
 // ─────────── RENDER: DECK COSTRUITI ───────────
@@ -606,7 +753,6 @@ function buildDeckListBody(dk) {
       <div class="dl-card" title="${escapeHtml(c.name)}">
         <img src="${c.img}" alt="${escapeHtml(c.name)}" loading="lazy">
         <span class="dl-card-pts ${ptsClass(c.pts)}">${c.pts || 0}</span>
-        ${(c.qty||1) > 1 ? `<span class="dl-card-qty">×${c.qty}</span>` : ''}
       </div>`).join('');
     return `<div class="dl-group-title">${titolo} <span class="dl-group-count">${n}</span></div>
       <div class="dl-cards-grid">${cards}</div>`;
@@ -622,13 +768,49 @@ function buildDeckListBody(dk) {
 }
 
 // ─────────── RICERCA CARTE ───────────
+function toggleFiltri() {
+  const p = document.getElementById('filtri-panel');
+  const t = document.getElementById('filtri-toggle');
+  const open = p.style.display === 'none';
+  p.style.display = open ? 'grid' : 'none';
+  t.textContent = open ? '▼ Filtri avanzati' : '▶ Filtri avanzati';
+}
+function resetFiltri() {
+  ['f-type','f-attribute','f-race','f-level','f-atk','f-def'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.value = '';
+  });
+}
+
 async function cercaCarte() {
-  const q = document.getElementById('search-input').value.trim();
-  if (!q) { toast('Scrivi il nome di una carta', true); return; }
+  const q     = document.getElementById('search-input').value.trim();
+  const tipo  = document.getElementById('f-type')?.value || '';
+  const attr  = document.getElementById('f-attribute')?.value || '';
+  const race  = document.getElementById('f-race')?.value || '';
+  const level = document.getElementById('f-level')?.value || '';
+  const atk   = document.getElementById('f-atk')?.value || '';
+  const def   = document.getElementById('f-def')?.value || '';
+  if (!q && !tipo && !attr && !race && !level && !atk && !def) {
+    toast('Inserisci un nome o un filtro', true); return;
+  }
   const cont = document.getElementById('search-results');
   cont.innerHTML = '<div class="empty" style="grid-column:1/-1;padding:24px 8px">Ricerca…</div>';
+
+  await caricaGenesysCache(); // assicura punti corretti
+
+  const params = new URLSearchParams();
+  if (q)     params.append('fname', q);
+  if (tipo)  params.append('type', tipo);
+  if (attr)  params.append('attribute', attr);
+  if (race)  params.append('race', race);
+  if (level) params.append('level', level);
+  if (atk)   params.append('atk', atk);
+  if (def)   params.append('def', def);
+  params.append('misc', 'yes');
+  params.append('num', '100');
+  params.append('offset', '0');
+
   try {
-    const r = await fetch(`https://db.ygoprodeck.com/api/v7/cardinfo.php?fname=${encodeURIComponent(q)}&misc=yes&num=80&offset=0`);
+    const r = await fetch(`https://db.ygoprodeck.com/api/v7/cardinfo.php?${params.toString()}`);
     if (!r.ok) throw new Error();
     const data = await r.json();
     const cards = data.data || [];
@@ -638,13 +820,19 @@ async function cercaCarte() {
     }
     cont.innerHTML = cards.map(c => {
       const img = c.card_images?.[0]?.image_url_small || c.card_images?.[0]?.image_url || '';
-      const pts = c.misc_info?.[0]?.genesys_points ?? 0;
+      const pts = puntiGenesys(c);
       const type = c.type || '';
-      _searchCache[c.id] = { id: c.id, name: c.name, img, pts, type };
+      _searchCache[c.id] = {
+        id: c.id, name: c.name, img, pts, type,
+        desc: c.desc || '', attr: c.attribute || '',
+        level: c.level || null, atk: c.atk ?? null, def: c.def ?? null
+      };
       return `<div class="search-card" draggable="true"
           ondragstart="dragStart(event,${c.id})"
           ondblclick="aggiungiAuto(${c.id})"
-          title="${escapeHtml(c.name)} — doppio click per aggiungere">
+          onmouseenter="hoverPreview(event,${c.id})"
+          onmouseleave="hidePreview()"
+          title="${escapeHtml(c.name)}">
         <img src="${img}" alt="${escapeHtml(c.name)}" loading="lazy">
         <span class="search-card-pts ${ptsClass(pts)}">${pts}</span>
       </div>`;
@@ -687,48 +875,48 @@ function aggiungiAuto(id) {
 function aggiungiCarta(id, zonaRichiesta) {
   const c = _searchCache[id];
   if (!c) return;
-  // Forza coerenza: carte Extra non possono stare nel Main e viceversa.
-  // Eccezione: il Side può contenere qualsiasi cosa.
+  // Forza coerenza Main/Extra. Il Side accetta qualsiasi cosa.
   let zona = zonaRichiesta;
   if (zona === 'main' && isExtraCard(c.type)) zona = 'extra';
   if (zona === 'extra' && !isExtraCard(c.type)) {
     toast('Solo Fusion/Synchro/XYZ/Link nell\'Extra', true);
     return;
   }
-  // limiti
   const limiti = { main: 60, extra: 15, side: 15 };
   if (contaCarte(buildDeck[zona]) >= limiti[zona]) {
     toast(`Limite ${zona} raggiunto (${limiti[zona]})`, true);
     return;
   }
-  // max 3 copie totali tra tutte le zone
-  const copieTotali = ['main','extra','side'].reduce((s,z) => {
-    const f = buildDeck[z].find(x => x.id === id);
-    return s + (f ? (f.qty||1) : 0);
-  }, 0);
+  // max 3 copie totali (per cardId) tra tutte le zone
+  const copieTotali = ['main','extra','side'].reduce((s,z) =>
+    s + buildDeck[z].filter(x => x.id === id).length, 0);
   if (copieTotali >= 3) { toast('Massimo 3 copie per carta', true); return; }
 
-  const esistente = buildDeck[zona].find(x => x.id === id);
-  if (esistente) esistente.qty = (esistente.qty || 1) + 1;
-  else buildDeck[zona].push({ id: c.id, name: c.name, img: c.img, pts: c.pts, type: c.type, qty: 1 });
+  buildDeck[zona].push({
+    uid: _uidCounter++, id: c.id, name: c.name, img: c.img,
+    pts: c.pts, type: c.type, desc: c.desc, attr: c.attr,
+    level: c.level, atk: c.atk, def: c.def
+  });
   renderBuilder();
 }
 
-function rimuoviCarta(id, zona) {
-  const idx = buildDeck[zona].findIndex(x => x.id === id);
+function rimuoviCartaUid(uid, zona) {
+  const idx = buildDeck[zona].findIndex(x => x.uid === uid);
   if (idx === -1) return;
-  const c = buildDeck[zona][idx];
-  if ((c.qty || 1) > 1) c.qty--;
-  else buildDeck[zona].splice(idx, 1);
+  buildDeck[zona].splice(idx, 1);
   renderBuilder();
 }
 
-// sposta carta nel side (da mobile, bottone)
-function mandaAlSide(id, zonaOrig, ev) {
+// sposta una singola istanza nel side
+function mandaAlSideUid(uid, zonaOrig, ev) {
   if (ev) ev.stopPropagation();
-  const c = _searchCache[id] || buildDeck[zonaOrig]?.find(x => x.id === id);
-  rimuoviCarta(id, zonaOrig);
-  if (c) { _searchCache[id] = _searchCache[id] || c; aggiungiCarta(id, 'side'); }
+  const idx = buildDeck[zonaOrig].findIndex(x => x.uid === uid);
+  if (idx === -1) return;
+  if (contaCarte(buildDeck.side) >= 15) { toast('Side pieno (15)', true); return; }
+  const carta = buildDeck[zonaOrig].splice(idx, 1)[0];
+  carta.uid = _uidCounter++;
+  buildDeck.side.push(carta);
+  renderBuilder();
 }
 
 // ─────────── RENDER BUILDER ───────────
@@ -743,16 +931,18 @@ function renderBuilder() {
       grid.innerHTML = `<div class="deck-zone-empty">${label}</div>`;
     } else {
       grid.innerHTML = arr.map(c => `
-        <div class="deck-card" onclick="rimuoviCartaUI(${c.id},'${zona}')" title="${escapeHtml(c.name)} — click per rimuovere">
+        <div class="deck-card"
+             onclick="rimuoviCartaUI(${c.uid},'${zona}')"
+             onmouseenter="hoverPreviewDeck(event,${c.uid},'${zona}')"
+             onmouseleave="hidePreview()"
+             title="${escapeHtml(c.name)} — click per rimuovere">
           <img src="${c.img}" alt="${escapeHtml(c.name)}" loading="lazy">
           <span class="deck-card-pts ${ptsClass(c.pts)}">${c.pts || 0}</span>
-          ${(c.qty||1) > 1 ? `<span class="deck-card-qty">×${c.qty}</span>` : ''}
-          ${zona !== 'side' ? `<button class="deck-card-side" onclick="mandaAlSideUI(${c.id},'${zona}',event)">→S</button>` : ''}
+          ${zona !== 'side' ? `<button class="deck-card-side" onclick="mandaAlSideUI(${c.uid},'${zona}',event)">→S</button>` : ''}
         </div>`).join('');
     }
     document.getElementById('zone-' + zona + '-count').textContent = contaCarte(arr);
   });
-  // contatori
   const punti = calcolaPunti(buildDeck.main, buildDeck.extra);
   const elP = document.getElementById('cnt-punti');
   elP.textContent = punti;
@@ -811,12 +1001,23 @@ function modificaDeck(docId) {
   document.getElementById('nome-mazzo').value = dk.mazzo;
   popolaProprietari();
   document.getElementById('proprietario-mazzo').value = dk.giocatore;
-  buildDeck = {
-    main: JSON.parse(JSON.stringify(dk.main || [])),
-    extra: JSON.parse(JSON.stringify(dk.extra || [])),
-    side: JSON.parse(JSON.stringify(dk.side || []))
+  // espandi eventuali vecchi formati con qty in copie singole + assegna uid
+  const espandi = arr => {
+    const out = [];
+    (arr || []).forEach(c => {
+      const n = c.qty || 1;
+      for (let i = 0; i < n; i++) {
+        out.push({
+          uid: _uidCounter++, id: c.id, name: c.name, img: c.img,
+          pts: c.pts, type: c.type, desc: c.desc || '', attr: c.attr || '',
+          level: c.level || null, atk: c.atk ?? null, def: c.def ?? null
+        });
+      }
+    });
+    return out;
   };
-  // popola la cache così il bottone "→S" funziona anche su carte caricate
+  buildDeck = { main: espandi(dk.main), extra: espandi(dk.extra), side: espandi(dk.side) };
+  // popola cache per anteprima e bottone side
   ['main','extra','side'].forEach(z => buildDeck[z].forEach(c => { _searchCache[c.id] = c; }));
   document.getElementById('crea-titolo').textContent = 'Modifica: ' + dk.mazzo;
   renderBuilder();
@@ -848,9 +1049,103 @@ function nuovoMazzoVuoto() {
   renderBuilder();
 }
 
-// wrapper UI (necessari per evitare conflitti di naming negli onclick)
-function rimuoviCartaUI(id, zona) { rimuoviCarta(id, zona); }
-function mandaAlSideUI(id, zona, ev) { mandaAlSide(id, zona, ev); }
+// wrapper UI
+function rimuoviCartaUI(uid, zona) { rimuoviCartaUid(uid, zona); }
+function mandaAlSideUI(uid, zona, ev) { mandaAlSideUid(uid, zona, ev); }
+
+// ─────────── ANTEPRIMA CARTA (750ms) ───────────
+let _previewTimer = null;
+const _descFetchCache = {};
+
+function _posizionaTip(e) {
+  const tip = document.getElementById('preview-tip');
+  const margin = 14, tw = 420;
+  const th = tip.offsetHeight || 240;
+  let x = e.clientX + 20;
+  let y = e.clientY - th / 2;
+  if (x + tw > window.innerWidth - margin) x = e.clientX - tw - 20;
+  if (y < margin) y = margin;
+  if (y + th > window.innerHeight - margin) y = window.innerHeight - th - margin;
+  tip.style.left = x + 'px';
+  tip.style.top = y + 'px';
+}
+
+function _renderTip(c, e) {
+  const tip = document.getElementById('preview-tip');
+  const pts = c.pts || 0;
+  const ptsCls = pts >= 30 ? 'high' : pts >= 10 ? 'mid' : 'low';
+  const chips = [
+    c.attr ? `<span class="preview-chip">${escapeHtml(c.attr)}</span>` : '',
+    c.level ? `<span class="preview-chip">Lv.${c.level}</span>` : '',
+    (c.atk != null) ? `<span class="preview-chip">ATK ${c.atk}</span>` : '',
+    (c.def != null) ? `<span class="preview-chip">DEF ${c.def}</span>` : '',
+    pts > 0 ? `<span class="preview-chip genesys ${ptsCls}">⬡ ${pts} pt</span>` : ''
+  ].filter(Boolean).join('');
+  tip.innerHTML = `
+    <div class="preview-inner">
+      <img class="preview-img" src="${c.img}" alt="${escapeHtml(c.name)}">
+      <div class="preview-body">
+        ${c.type ? `<div class="preview-type">${escapeHtml(c.type)}</div>` : ''}
+        <div class="preview-name">${escapeHtml(c.name)}</div>
+        <div class="preview-chips">${chips}</div>
+        <div class="preview-desc">${escapeHtml(c.desc || 'Caricamento descrizione…')}</div>
+      </div>
+    </div>`;
+  _posizionaTip(e);
+  tip.classList.add('visible');
+}
+
+async function _arricchisciDesc(c, e) {
+  if (c.desc || _descFetchCache[c.id]) return;
+  try {
+    const r = await fetch('https://db.ygoprodeck.com/api/v7/cardinfo.php?id=' + c.id + '&misc=yes');
+    const data = await r.json();
+    const card = data.data?.[0];
+    if (card) {
+      c.desc = card.desc || '';
+      c.attr = c.attr || card.attribute || '';
+      c.level = c.level || card.level || null;
+      c.atk = (c.atk != null) ? c.atk : (card.atk ?? null);
+      c.def = (c.def != null) ? c.def : (card.def ?? null);
+      _descFetchCache[c.id] = true;
+      const tip = document.getElementById('preview-tip');
+      if (tip.classList.contains('visible')) _renderTip(c, e);
+    }
+  } catch (err) {}
+}
+
+function hoverPreview(e, id) {
+  clearTimeout(_previewTimer);
+  const evt = { clientX: e.clientX, clientY: e.clientY };
+  _previewTimer = setTimeout(() => {
+    const c = _searchCache[id];
+    if (!c) return;
+    _renderTip(c, evt);
+    _arricchisciDesc(c, evt);
+  }, 750);
+}
+
+function hoverPreviewDeck(e, uid, zona) {
+  clearTimeout(_previewTimer);
+  const evt = { clientX: e.clientX, clientY: e.clientY };
+  _previewTimer = setTimeout(() => {
+    const c = buildDeck[zona].find(x => x.uid === uid);
+    if (!c) return;
+    _renderTip(c, evt);
+    _arricchisciDesc(c, evt);
+  }, 750);
+}
+
+function hidePreview() {
+  clearTimeout(_previewTimer);
+  document.getElementById('preview-tip').classList.remove('visible');
+}
+
+document.addEventListener('mousemove', e => {
+  const tip = document.getElementById('preview-tip');
+  if (tip && tip.classList.contains('visible')) _posizionaTip(e);
+});
+document.addEventListener('scroll', hidePreview, true);
 
 // ─────────── ENTER per ricerca ───────────
 document.getElementById('search-input')?.addEventListener('keydown', e => {
@@ -860,6 +1155,8 @@ document.getElementById('search-input')?.addEventListener('keydown', e => {
 // ─────────── ESPORTA FUNZIONI ───────────
 window.switchTab = switchTab;
 window.cercaCarte = cercaCarte;
+window.toggleFiltri = toggleFiltri;
+window.resetFiltri = resetFiltri;
 window.dragStart = dragStart;
 window.allowDrop = allowDrop;
 window.dragLeave = dragLeave;
@@ -867,6 +1164,9 @@ window.dropCarta = dropCarta;
 window.aggiungiAuto = aggiungiAuto;
 window.rimuoviCartaUI = rimuoviCartaUI;
 window.mandaAlSideUI = mandaAlSideUI;
+window.hoverPreview = hoverPreview;
+window.hoverPreviewDeck = hoverPreviewDeck;
+window.hidePreview = hidePreview;
 window.salvaMazzo = salvaMazzo;
 window.toggleDeck = toggleDeck;
 window.modificaDeck = modificaDeck;
@@ -878,6 +1178,7 @@ onAuthStateChanged(auth, async user => {
   if (user) {
     document.getElementById('login-gate').style.display = 'none';
     document.getElementById('app-wrap').style.display = 'block';
+    await caricaGenesysCache();
     await caricaDatiPrincipali();
     await caricaDeckCostruiti();
     renderBuilder();
