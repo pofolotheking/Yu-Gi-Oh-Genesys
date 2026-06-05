@@ -806,7 +806,7 @@ async function caricaDeckCostruiti() {
       const main = d.main || [];
       const extra = d.extra || [];
       const side = d.side || [];
-      const punti = calcolaPunti(main, extra); // side non conta nei punti del deck principale
+      const punti = calcolaPunti(main, extra, side);
       deckCostruiti.push({
         docId: s.id,
         giocatore: d.giocatore || '?',
@@ -1012,15 +1012,20 @@ function caricaAltriRisultati() { eseguiRicerca(true); }
 // _drag descrive l'origine: dalla ricerca {from:'search', id} o da una zona {from:'deck', uid, zona}
 let _drag = null;
 let _justDragged = false;
+let _dragging = false;
 
 function dragStart(e, id) {
   _drag = { from: 'search', id };
+  _dragging = true;
+  hidePreview();
   e.dataTransfer.effectAllowed = 'copy';
   e.dataTransfer.setData('text/plain', 'search:' + id);
 }
 function dragStartDeck(e, uid, zona) {
   _drag = { from: 'deck', uid, zona };
   _justDragged = true;
+  _dragging = true;
+  hidePreview();
   e.dataTransfer.effectAllowed = 'move';
   e.dataTransfer.setData('text/plain', 'deck:' + zona + ':' + uid);
 }
@@ -1185,7 +1190,7 @@ function renderBuilder() {
     }
     document.getElementById('zone-' + zona + '-count').textContent = contaCarte(arr);
   });
-  const punti = calcolaPunti(buildDeck.main, buildDeck.extra);
+  const punti = calcolaPunti(buildDeck.main, buildDeck.extra, buildDeck.side);
   const elP = document.getElementById('cnt-punti');
   elP.textContent = punti;
   document.getElementById('cnt-punti-wrap').classList.toggle('over', punti > 100);
@@ -1470,8 +1475,10 @@ async function _arricchisciDesc(c, e) {
 
 function hoverPreview(e, id) {
   clearTimeout(_previewTimer);
+  if (_dragging) return;
   const evt = { clientX: e.clientX, clientY: e.clientY };
   _previewTimer = setTimeout(() => {
+    if (_dragging) return;
     const c = _searchCache[id];
     if (!c) return;
     _renderTip(c, evt);
@@ -1481,8 +1488,10 @@ function hoverPreview(e, id) {
 
 function hoverPreviewDeck(e, uid, zona) {
   clearTimeout(_previewTimer);
+  if (_dragging) return;
   const evt = { clientX: e.clientX, clientY: e.clientY };
   _previewTimer = setTimeout(() => {
+    if (_dragging) return;
     const c = buildDeck[zona].find(x => x.uid === uid);
     if (!c) return;
     _renderTip(c, evt);
@@ -1572,7 +1581,10 @@ document.addEventListener('mousemove', e => {
   if (tip && tip.classList.contains('visible')) _posizionaTip(e);
 });
 document.addEventListener('scroll', hidePreview, true);
-document.addEventListener('dragend', () => { setTimeout(() => { _justDragged = false; }, 50); });
+document.addEventListener('dragend', () => {
+  _dragging = false;
+  setTimeout(() => { _justDragged = false; }, 50);
+});
 document.addEventListener('keydown', e => { if (e.key === 'Escape') chiudiDettaglioDL(null); });
 
 // ─────────── ENTER per ricerca ───────────
