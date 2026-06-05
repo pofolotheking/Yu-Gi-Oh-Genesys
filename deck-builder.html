@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Deck Builder · Yu-Gi-Oh! Genesys</title>
+<title>Deck Editing · Yu-Gi-Oh! Genesys</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -504,13 +504,13 @@
 </a>
 
 <header>
-  <h1>🛠️ Deck Builder</h1>
+  <h1><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#a1a1a6" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>Deck Editing</h1>
   <div class="subtitle">Costruisci, salva e gestisci le decklist Genesys</div>
 </header>
 
 <nav>
-  <button class="tab-btn active" data-tab="costruiti">📚 Deck Costruiti</button>
-  <button class="tab-btn" data-tab="crea">✏️ Crea un Mazzo</button>
+  <button class="tab-btn active" data-tab="costruiti"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:5px"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>Deck Costruiti</button>
+  <button class="tab-btn" data-tab="crea"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:5px"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>Crea un Mazzo</button>
 </nav>
 
 <main>
@@ -550,6 +550,7 @@
         <button class="mini-action mini-action-trash" onclick="nuovoMazzoVuoto()" title="Svuota il deck">
           <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
         </button>
+        <button class="mini-action" onclick="apriAssociaDecklist()" title="Associa questa decklist a un mazzo della classifica">🔗 Associa</button>
         <button class="primary" onclick="salvaMazzo()">💾 Salva</button>
       </div>
     </div>
@@ -693,6 +694,17 @@
 <div class="card-modal-overlay" id="card-modal-overlay" onclick="chiudiDettaglioDL(event)">
   <div class="card-modal" id="card-modal"></div>
 </div>
+<div class="hand-overlay" id="associa-overlay" onclick="chiudiAssocia(event)">
+  <div class="hand-modal" style="max-width:440px">
+    <div class="hand-modal-head">
+      <div class="hand-modal-title">🔗 Associa decklist a un mazzo</div>
+      <button class="mini-action" onclick="chiudiAssocia(null)">✕</button>
+    </div>
+    <p class="section-note" style="text-align:left;margin:0 0 12px">Scegli un mazzo della classifica a cui collegare questa decklist. In classifica comparirà un'icona per visualizzarla.</p>
+    <div id="associa-lista"></div>
+  </div>
+</div>
+
 <div class="hand-overlay" id="hand-overlay" onclick="chiudiMano(event)">
   <div class="hand-modal">
     <div class="hand-modal-head">
@@ -808,6 +820,7 @@ async function caricaDatiPrincipali() {
       const d = snap.data();
       datiPrincipali.giocatori = d.giocatori || [];
       datiPrincipali.mazzi = d.mazzi || {};
+      datiPrincipali.mazziDecklist = d.mazziDecklist || {};
     }
   } catch (e) { console.error('Errore dati principali:', e); }
   popolaProprietari();
@@ -1455,6 +1468,73 @@ async function scaricaDeckImmagine() {
   }
 }
 
+// ─────────── ASSOCIA DECKLIST A MAZZO CLASSIFICA ───────────
+function apriAssociaDecklist() {
+  const nome = document.getElementById('nome-mazzo').value.trim();
+  const owner = document.getElementById('proprietario-mazzo').value;
+  const totCarte = buildDeck.main.length + buildDeck.extra.length + buildDeck.side.length;
+  if (totCarte === 0) { toast('Costruisci prima una decklist', true); return; }
+  if (!nome) { toast('Dai un nome alla decklist e salvala', true); return; }
+
+  // mazzi della classifica = dati_principali.mazzi (nome -> proprietario)
+  const mazzi = Object.entries(datiPrincipali.mazzi || {});
+  const lista = document.getElementById('associa-lista');
+  if (mazzi.length === 0) {
+    lista.innerHTML = '<div class="empty" style="padding:20px">Nessun mazzo in classifica. Registra prima qualche partita.</div>';
+  } else {
+    // ordino per proprietario poi nome
+    mazzi.sort((a,b) => (a[1]||'').localeCompare(b[1]||'') || a[0].localeCompare(b[0]));
+    const assoc = datiPrincipali.mazziDecklist || {};
+    lista.innerHTML = mazzi.map(([m, prop]) => {
+      const giaAssoc = assoc[m] ? ' · 🔗 già collegato' : '';
+      return `<button class="deck-list-btn" style="margin-bottom:8px" onclick="confermaAssocia('${m.replace(/'/g, "\\'")}')">
+        <div class="deck-list-info">
+          <span class="deck-list-name">${escapeHtml(m)}</span>
+          <span class="deck-list-owner">${escapeHtml(prop || '')}${giaAssoc}</span>
+        </div>
+        <span class="deck-list-arrow">▶</span>
+      </button>`;
+    }).join('');
+  }
+  document.getElementById('associa-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+async function confermaAssocia(mazzoClassifica) {
+  const nome = document.getElementById('nome-mazzo').value.trim();
+  const owner = document.getElementById('proprietario-mazzo').value;
+  const docId = docIdFor(owner, nome);
+
+  // prima assicuro che la decklist sia salvata in liste_mazzi
+  try {
+    await setDoc(doc(db, 'liste_mazzi', docId), {
+      giocatore: owner, mazzo: nome,
+      main: buildDeck.main, extra: buildDeck.extra, side: buildDeck.side,
+      aggiornato: new Date().toISOString()
+    });
+  } catch (e) { console.error(e); toast('Errore nel salvataggio decklist', true); return; }
+
+  // salvo l'associazione in dati_principali.mazziDecklist
+  if (!datiPrincipali.mazziDecklist) datiPrincipali.mazziDecklist = {};
+  datiPrincipali.mazziDecklist[mazzoClassifica] = docId;
+  try {
+    await setDoc(doc(db, 'lega', 'dati_principali'),
+      { mazziDecklist: datiPrincipali.mazziDecklist }, { merge: true });
+    chiudiAssocia(null);
+    toast(`Decklist associata a "${mazzoClassifica}"!`);
+    await caricaDeckCostruiti();
+  } catch (e) {
+    console.error(e); toast('Errore nell\'associazione', true);
+  }
+}
+
+function chiudiAssocia(e) {
+  if (!e || e.target === document.getElementById('associa-overlay')) {
+    document.getElementById('associa-overlay').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+}
+
 // ─────────── SALVA / MODIFICA / ELIMINA ───────────
 async function salvaMazzo() {
   const nome = document.getElementById('nome-mazzo').value.trim();
@@ -1478,15 +1558,6 @@ async function salvaMazzo() {
       side: buildDeck.side,
       aggiornato: new Date().toISOString()
     });
-    // se il mazzo non esiste in dati_principali, lo aggiungo lì
-    if (!datiPrincipali.mazzi[nome]) {
-      datiPrincipali.mazzi[nome] = owner;
-      try {
-        await setDoc(doc(db, 'lega', 'dati_principali'),
-          { giocatori: datiPrincipali.giocatori, mazzi: datiPrincipali.mazzi },
-          { merge: true });
-      } catch(e) { console.warn('Non sono riuscito ad aggiornare dati_principali:', e); }
-    }
     editingDocId = null;
     toast(`Deck "${nome}" salvato!`);
     await caricaDeckCostruiti();
@@ -1757,6 +1828,9 @@ window.duplicaCarta = duplicaCarta;
 window.ordinaZona = ordinaZona;
 window.manoDiProva = manoDiProva;
 window.scaricaDeckImmagine = scaricaDeckImmagine;
+window.apriAssociaDecklist = apriAssociaDecklist;
+window.confermaAssocia = confermaAssocia;
+window.chiudiAssocia = chiudiAssocia;
 window.ripescaMano = ripescaMano;
 window.mulliganMano = mulliganMano;
 window.chiudiMano = chiudiMano;
