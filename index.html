@@ -4055,6 +4055,13 @@ async function cercaCarta(append = false) {
         const r2 = await fetch(`https://db.ygoprodeck.com/api/v7/cardinfo.php?${pArch.toString()}`);
         if (r2.ok) { const d2 = await r2.json(); aggiungi(d2.data); }
       } catch(e) {}
+      // ricerca nel testo dell'effetto (carte che menzionano il termine)
+      const pDesc = new URLSearchParams(filtri);
+      pDesc.append('desc', q);
+      try {
+        const r3 = await fetch(`https://db.ygoprodeck.com/api/v7/cardinfo.php?${pDesc.toString()}`);
+        if (r3.ok) { const d3 = await r3.json(); aggiungi(d3.data); }
+      } catch(e) {}
     } else {
       const r = await fetch(`https://db.ygoprodeck.com/api/v7/cardinfo.php?${filtri.toString()}`);
       if (r.ok) { const d = await r.json(); aggiungi(d.data); }
@@ -4212,25 +4219,41 @@ async function caricaCarteCollegate(carta) {
   const wrap = document.getElementById('carte-collegate-wrap');
   if (!wrap) return;
   const arch = carta.archetype;
-  if (!arch) return; // niente archetipo, niente sezione
+  // termine da cercare: l'archetipo se esiste, altrimenti il nome della carta
+  const termine = arch || carta.name;
+  if (!termine) return;
+  const etichetta = arch
+    ? `Carte dell'archetipo <strong>${escapeHtml(arch)}</strong> e carte che lo menzionano`
+    : `Carte che menzionano <strong>${escapeHtml(carta.name)}</strong> nel testo`;
   wrap.innerHTML = `<div class="card padded" style="margin-top:16px">
     <h3 style="margin:0 0 4px">Carte collegate</h3>
-    <p class="section-note" style="text-align:left;margin-bottom:12px"><em>Altre carte dell'archetipo <strong>${escapeHtml(arch)}</strong></em></p>
+    <p class="section-note" style="text-align:left;margin-bottom:12px"><em>${etichetta}</em></p>
     <div class="carte-loading">Caricamento…</div>
   </div>`;
   try {
-    const r = await fetch(`https://db.ygoprodeck.com/api/v7/cardinfo.php?archetype=${encodeURIComponent(arch)}&misc=yes`);
-    if (!r.ok) throw new Error();
-    const data = await r.json();
-    const altre = (data.data || []).filter(c => c.id !== carta.id);
-    if (altre.length === 0) {
-      wrap.innerHTML = '';
-      return;
+    const collegate = [];
+    const visti = new Set([carta.id]);
+    const aggiungi = (arr) => {
+      (arr || []).forEach(c => { if (!visti.has(c.id)) { visti.add(c.id); collegate.push(c); } });
+    };
+    // archetipo (se presente)
+    if (arch) {
+      try {
+        const r1 = await fetch(`https://db.ygoprodeck.com/api/v7/cardinfo.php?archetype=${encodeURIComponent(arch)}&misc=yes`);
+        if (r1.ok) { const d1 = await r1.json(); aggiungi(d1.data); }
+      } catch(e) {}
     }
+    // carte che menzionano il termine nel testo dell'effetto
+    try {
+      const r2 = await fetch(`https://db.ygoprodeck.com/api/v7/cardinfo.php?desc=${encodeURIComponent(termine)}&misc=yes`);
+      if (r2.ok) { const d2 = await r2.json(); aggiungi(d2.data); }
+    } catch(e) {}
+
+    if (collegate.length === 0) { wrap.innerHTML = ''; return; }
     wrap.innerHTML = `<div class="card padded" style="margin-top:16px">
       <h3 style="margin:0 0 4px">Carte collegate</h3>
-      <p class="section-note" style="text-align:left;margin-bottom:12px"><em>Altre ${altre.length} carte dell'archetipo <strong>${escapeHtml(arch)}</strong></em></p>
-      <div class="carte-grid">${altre.map(buildThumb).join('')}</div>
+      <p class="section-note" style="text-align:left;margin-bottom:12px"><em>${collegate.length} carte · ${etichetta}</em></p>
+      <div class="carte-grid">${collegate.map(buildThumb).join('')}</div>
     </div>`;
   } catch(e) {
     wrap.innerHTML = '';
