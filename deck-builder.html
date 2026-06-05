@@ -4,6 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Deck Builder · Yu-Gi-Oh! Genesys</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -212,6 +213,82 @@
     font-size: 0.55rem; text-transform: uppercase; letter-spacing: 0.04em;
     color: var(--text-faint); font-weight: 600; white-space: nowrap;
   }
+
+  /* riga inferiore: contatore + azioni a sx, torta a dx */
+  .builder-bottom-row {
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  }
+  .mini-action {
+    background: var(--bg-soft); border: 1px solid var(--border-strong);
+    border-radius: 9px; padding: 8px 12px; font-family: inherit;
+    font-size: 0.8rem; font-weight: 600; color: var(--text); cursor: pointer;
+    white-space: nowrap; transition: background 0.15s;
+  }
+  .mini-action:hover { background: var(--border); }
+  .builder-chart-wrap {
+    margin-left: auto; display: flex; align-items: center; gap: 10px;
+  }
+  .builder-chart-wrap canvas { width: 64px !important; height: 64px !important; }
+  .builder-chart-legend { display: flex; flex-direction: column; gap: 2px; }
+  .bcl-item { display: flex; align-items: center; gap: 5px; font-size: 0.66rem; color: var(--text-dim); font-weight: 500; white-space: nowrap; }
+  .bcl-dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+  .bcl-item b { color: var(--text); font-variant-numeric: tabular-nums; }
+
+  /* bottoncino ordina nelle zone */
+  .zone-sort-btn {
+    background: none; border: 1px solid var(--border); border-radius: 7px;
+    width: 24px; height: 24px; cursor: pointer; color: var(--text-faint);
+    font-size: 0.8rem; display: inline-flex; align-items: center; justify-content: center;
+    margin-left: 6px; transition: background 0.15s, color 0.15s;
+  }
+  .zone-sort-btn:hover { background: var(--bg-soft); color: var(--text); }
+  .deck-zone-head-left { display: flex; align-items: center; }
+
+  /* tasto duplica sulla carta nel deck (in alto a sx) */
+  .deck-card-dup {
+    position: absolute; top: 3px; left: 3px;
+    background: var(--green); color: #fff; border: none; cursor: pointer;
+    font-size: 0.62rem; font-weight: 700; width: 18px; height: 18px;
+    border-radius: 4px; display: none; align-items: center; justify-content: center;
+    line-height: 1; padding: 0;
+  }
+  .deck-card:hover .deck-card-dup { display: flex; }
+
+  /* badge copie sui risultati di ricerca (#5 conteggio) */
+  .search-card-owned {
+    position: absolute; top: 3px; left: 3px;
+    background: var(--blue); color: #fff; font-size: 0.55rem; font-weight: 700;
+    padding: 1px 5px; border-radius: 4px; pointer-events: none;
+  }
+
+  /* carica altri risultati */
+  .load-more {
+    grid-column: 1 / -1; margin-top: 6px;
+    background: var(--bg-soft); border: 1px solid var(--border-strong);
+    border-radius: 10px; padding: 11px; font-family: inherit;
+    font-size: 0.85rem; font-weight: 600; color: var(--text); cursor: pointer;
+  }
+  .load-more:hover { background: var(--border); }
+
+  /* MANO DI PROVA */
+  .hand-overlay {
+    display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55);
+    backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+    z-index: 650; align-items: center; justify-content: center; padding: 20px;
+  }
+  .hand-overlay.open { display: flex; animation: fadeTip 0.2s ease; }
+  .hand-modal {
+    background: var(--bg); border-radius: 18px; width: 100%; max-width: 720px;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.2); padding: 20px;
+    max-height: 90vh; overflow-y: auto;
+  }
+  .hand-modal-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+  .hand-modal-title { font-size: 1.05rem; font-weight: 700; letter-spacing: -0.01em; }
+  .hand-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; }
+  .hand-card { border-radius: 8px; overflow: hidden; border: 1px solid var(--border); }
+  .hand-card img { width: 100%; aspect-ratio: 59/86; object-fit: cover; display: block; }
+  .hand-actions { display: flex; gap: 8px; margin-top: 16px; }
+  .hand-actions button { flex: 1; }
 
   .builder-split {
     display: grid; grid-template-columns: 420px 1fr; gap: 18px; align-items: start;
@@ -466,10 +543,17 @@
         <button class="secondary" onclick="nuovoMazzoVuoto()" style="height:44px">🗑 Svuota</button>
       </div>
 
-      <div class="builder-counters">
-        <div class="builder-counter">
-          <span class="builder-counter-val" id="cnt-punti">0</span>
-          <span class="builder-counter-lbl">Punti Genesys</span>
+      <div class="builder-bottom-row">
+        <div class="builder-counters">
+          <div class="builder-counter">
+            <span class="builder-counter-val" id="cnt-punti">0</span>
+            <span class="builder-counter-lbl">Punti Genesys</span>
+          </div>
+        </div>
+        <button class="mini-action" onclick="manoDiProva()" title="Pesca 5 carte a caso dal Main">🎴 Mano di prova</button>
+        <div class="builder-chart-wrap" id="builder-chart-wrap" style="display:none">
+          <canvas id="main-pie" width="80" height="80"></canvas>
+          <div class="builder-chart-legend" id="main-pie-legend"></div>
         </div>
       </div>
     </div>
@@ -577,7 +661,7 @@
              ondrop="dropCarta(event,'main')" ondragover="allowDrop(event,'main')"
              ondragleave="dragLeave(event,'main')">
           <div class="deck-zone-head">
-            <span class="deck-zone-title">🎴 Main Deck</span>
+            <span class="deck-zone-head-left"><span class="deck-zone-title">🎴 Main Deck</span><button class="zone-sort-btn" onclick="ordinaZona('main')" title="Ordina">⇅</button></span>
             <span class="deck-zone-count" id="zone-main-count">0</span>
           </div>
           <div class="deck-zone-grid" id="zone-main-grid"></div>
@@ -587,7 +671,7 @@
              ondrop="dropCarta(event,'extra')" ondragover="allowDrop(event,'extra')"
              ondragleave="dragLeave(event,'extra')">
           <div class="deck-zone-head">
-            <span class="deck-zone-title">⚡ Extra Deck</span>
+            <span class="deck-zone-head-left"><span class="deck-zone-title">⚡ Extra Deck</span><button class="zone-sort-btn" onclick="ordinaZona('extra')" title="Ordina">⇅</button></span>
             <span class="deck-zone-count" id="zone-extra-count">0</span>
           </div>
           <div class="deck-zone-grid" id="zone-extra-grid"></div>
@@ -597,7 +681,7 @@
              ondrop="dropCarta(event,'side')" ondragover="allowDrop(event,'side')"
              ondragleave="dragLeave(event,'side')">
           <div class="deck-zone-head">
-            <span class="deck-zone-title">🔄 Side Deck</span>
+            <span class="deck-zone-head-left"><span class="deck-zone-title">🔄 Side Deck</span><button class="zone-sort-btn" onclick="ordinaZona('side')" title="Ordina">⇅</button></span>
             <span class="deck-zone-count" id="zone-side-count">0</span>
           </div>
           <div class="deck-zone-grid" id="zone-side-grid"></div>
@@ -612,6 +696,19 @@
 <div class="preview-tip" id="preview-tip"></div>
 <div class="card-modal-overlay" id="card-modal-overlay" onclick="chiudiDettaglioDL(event)">
   <div class="card-modal" id="card-modal"></div>
+</div>
+<div class="hand-overlay" id="hand-overlay" onclick="chiudiMano(event)">
+  <div class="hand-modal">
+    <div class="hand-modal-head">
+      <div class="hand-modal-title" id="hand-title">Mano di prova</div>
+      <button class="mini-action" onclick="chiudiMano(null)">✕ Chiudi</button>
+    </div>
+    <div class="hand-cards" id="hand-cards"></div>
+    <div class="hand-actions">
+      <button class="primary" onclick="ripescaMano()">🔄 Ripesca</button>
+      <button class="secondary" onclick="mulliganMano()">↩ Mulligan (+1 carta)</button>
+    </div>
+  </div>
 </div>
 <div class="toast" id="toast"></div>
 
@@ -847,6 +944,32 @@ function resetFiltri() {
   });
 }
 
+let _searchOffset = 0;
+let _searchParams = null;
+let _searchTotal = 0;
+
+function buildSearchCard(c) {
+  const img = c.card_images?.[0]?.image_url_small || c.card_images?.[0]?.image_url || '';
+  const pts = puntiGenesys(c);
+  const type = c.type || '';
+  _searchCache[c.id] = {
+    id: c.id, name: c.name, img, pts, type,
+    desc: c.desc || '', attr: c.attribute || '',
+    level: c.level || null, atk: c.atk ?? null, def: c.def ?? null
+  };
+  const owned = copiePossedute(c.id);
+  return `<div class="search-card" draggable="true" data-cardid="${c.id}"
+      ondragstart="dragStart(event,${c.id})"
+      ondblclick="aggiungiAuto(${c.id})"
+      onmouseenter="hoverPreview(event,${c.id})"
+      onmouseleave="hidePreview()"
+      title="${escapeHtml(c.name)}">
+    <img src="${img}" alt="${escapeHtml(c.name)}" loading="lazy">
+    ${ptsBadge(pts, 'search-card-pts')}
+    <span class="search-card-owned" data-owned="${c.id}" style="${owned > 0 ? '' : 'display:none'}">${owned}/3</span>
+  </div>`;
+}
+
 async function cercaCarte() {
   const q     = document.getElementById('search-input').value.trim();
   const tipo  = document.getElementById('f-type')?.value || '';
@@ -861,7 +984,7 @@ async function cercaCarte() {
   const cont = document.getElementById('search-results');
   cont.innerHTML = '<div class="empty" style="grid-column:1/-1;padding:24px 8px">Ricerca…</div>';
 
-  await caricaGenesysCache(); // assicura punti corretti
+  await caricaGenesysCache();
 
   const params = new URLSearchParams();
   if (q)     params.append('fname', q);
@@ -872,41 +995,45 @@ async function cercaCarte() {
   if (atk)   params.append('atk', atk);
   if (def)   params.append('def', def);
   params.append('misc', 'yes');
-  params.append('num', '100');
-  params.append('offset', '0');
+  params.append('num', '50');
+  _searchOffset = 0;
+  _searchParams = params;
+  await eseguiRicerca(false);
+}
 
+async function eseguiRicerca(append) {
+  const cont = document.getElementById('search-results');
+  const params = new URLSearchParams(_searchParams);
+  params.append('offset', String(_searchOffset));
   try {
     const r = await fetch(`https://db.ygoprodeck.com/api/v7/cardinfo.php?${params.toString()}`);
     if (!r.ok) throw new Error();
     const data = await r.json();
     const cards = data.data || [];
-    if (cards.length === 0) {
+    _searchTotal = data.meta?.total_rows ?? cards.length;
+    if (!append && cards.length === 0) {
       cont.innerHTML = '<div class="empty" style="grid-column:1/-1;padding:24px 8px">Nessun risultato.</div>';
       return;
     }
-    cont.innerHTML = cards.map(c => {
-      const img = c.card_images?.[0]?.image_url_small || c.card_images?.[0]?.image_url || '';
-      const pts = puntiGenesys(c);
-      const type = c.type || '';
-      _searchCache[c.id] = {
-        id: c.id, name: c.name, img, pts, type,
-        desc: c.desc || '', attr: c.attribute || '',
-        level: c.level || null, atk: c.atk ?? null, def: c.def ?? null
-      };
-      return `<div class="search-card" draggable="true"
-          ondragstart="dragStart(event,${c.id})"
-          ondblclick="aggiungiAuto(${c.id})"
-          onmouseenter="hoverPreview(event,${c.id})"
-          onmouseleave="hidePreview()"
-          title="${escapeHtml(c.name)}">
-        <img src="${img}" alt="${escapeHtml(c.name)}" loading="lazy">
-        ${ptsBadge(pts, 'search-card-pts')}
-      </div>`;
-    }).join('');
+    const html = cards.map(buildSearchCard).join('');
+    if (append) {
+      const oldBtn = cont.querySelector('.load-more');
+      if (oldBtn) oldBtn.remove();
+      cont.insertAdjacentHTML('beforeend', html);
+    } else {
+      cont.innerHTML = html;
+    }
+    _searchOffset += 50;
+    if (_searchOffset < _searchTotal) {
+      cont.insertAdjacentHTML('beforeend',
+        `<button class="load-more" onclick="caricaAltriRisultati()">Carica più risultati (${_searchTotal - _searchOffset} rimasti)</button>`);
+    }
   } catch (e) {
-    cont.innerHTML = '<div class="empty" style="grid-column:1/-1;padding:24px 8px">Errore nella ricerca.</div>';
+    if (!append) cont.innerHTML = '<div class="empty" style="grid-column:1/-1;padding:24px 8px">Errore nella ricerca.</div>';
   }
 }
+
+function caricaAltriRisultati() { eseguiRicerca(true); }
 
 // ─────────── DRAG & DROP ───────────
 let _dragId = null;
@@ -1004,6 +1131,7 @@ function renderBuilder() {
              title="${escapeHtml(c.name)} — click per rimuovere">
           <img src="${c.img}" alt="${escapeHtml(c.name)}" loading="lazy">
           ${ptsBadge(c.pts, 'deck-card-pts')}
+          <button class="deck-card-dup" onclick="duplicaCarta(${c.uid},'${zona}',event)" title="Aggiungi un'altra copia">+</button>
           ${zona !== 'side' ? `<button class="deck-card-side" onclick="mandaAlSideUI(${c.uid},'${zona}',event)">→S</button>` : ''}
         </div>`).join('');
     }
@@ -1013,6 +1141,117 @@ function renderBuilder() {
   const elP = document.getElementById('cnt-punti');
   elP.textContent = punti;
   elP.classList.toggle('over', punti > 100);
+  aggiornaTortaMain();
+  aggiornaBadgeOwned();
+}
+
+// ─────────── #5 CONTEGGIO COPIE + DUPLICA ───────────
+function copiePossedute(id) {
+  return ['main','extra','side'].reduce((s,z) => s + buildDeck[z].filter(x => x.id === id).length, 0);
+}
+function aggiornaBadgeOwned() {
+  document.querySelectorAll('.search-card-owned').forEach(el => {
+    const id = parseInt(el.dataset.owned);
+    const n = copiePossedute(id);
+    el.textContent = n + '/3';
+    el.style.display = n > 0 ? '' : 'none';
+  });
+}
+function duplicaCarta(uid, zona, ev) {
+  if (ev) ev.stopPropagation();
+  const c = buildDeck[zona].find(x => x.uid === uid);
+  if (!c) return;
+  aggiungiCarta(c.id, zona);
+}
+
+// ─────────── #2 ORDINA ZONA ───────────
+function _ordineTipo(type) {
+  if (!type) return 9;
+  if (type.includes('Spell')) return 7;
+  if (type.includes('Trap')) return 8;
+  // mostri prima, ordinati grossomodo
+  return 1;
+}
+function ordinaZona(zona) {
+  buildDeck[zona].sort((a, b) => {
+    const ta = _ordineTipo(a.type), tb = _ordineTipo(b.type);
+    if (ta !== tb) return ta - tb;
+    // tra mostri: per livello desc, poi nome
+    const la = a.level || 0, lb = b.level || 0;
+    if (la !== lb) return lb - la;
+    return (a.name || '').localeCompare(b.name || '');
+  });
+  renderBuilder();
+}
+
+// ─────────── #10 GRAFICO A TORTA MAIN ───────────
+let _pieChart = null;
+function aggiornaTortaMain() {
+  const wrap = document.getElementById('builder-chart-wrap');
+  const legend = document.getElementById('main-pie-legend');
+  const arr = buildDeck.main;
+  if (!arr.length || typeof Chart === 'undefined') {
+    if (wrap) wrap.style.display = 'none';
+    if (_pieChart) { _pieChart.destroy(); _pieChart = null; }
+    return;
+  }
+  let mostri = 0, magie = 0, trappole = 0;
+  arr.forEach(c => {
+    const t = c.type || '';
+    if (t.includes('Spell')) magie++;
+    else if (t.includes('Trap')) trappole++;
+    else mostri++;
+  });
+  wrap.style.display = 'flex';
+  const COL = ['#ff9500', '#34c759', '#ff3b30'];
+  legend.innerHTML = [
+    `<div class="bcl-item"><span class="bcl-dot" style="background:${COL[0]}"></span>Mostri <b>${mostri}</b></div>`,
+    `<div class="bcl-item"><span class="bcl-dot" style="background:${COL[1]}"></span>Magie <b>${magie}</b></div>`,
+    `<div class="bcl-item"><span class="bcl-dot" style="background:${COL[2]}"></span>Trappole <b>${trappole}</b></div>`
+  ].join('');
+  const ctx = document.getElementById('main-pie').getContext('2d');
+  if (_pieChart) _pieChart.destroy();
+  _pieChart = new Chart(ctx, {
+    type: 'doughnut',
+    data: { labels: ['Mostri','Magie','Trappole'], datasets: [{ data: [mostri, magie, trappole], backgroundColor: COL, borderWidth: 0 }] },
+    options: { responsive: false, plugins: { legend: { display: false }, tooltip: { enabled: true } }, cutout: '58%' }
+  });
+}
+
+// ─────────── #20 MANO DI PROVA (goldfish) ───────────
+let _manoCount = 5;
+function manoDiProva() {
+  if (buildDeck.main.length === 0) { toast('Il Main Deck è vuoto', true); return; }
+  _manoCount = 5;
+  pescaMano();
+  document.getElementById('hand-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function pescaMano() {
+  const pool = [...buildDeck.main];
+  // shuffle Fisher-Yates
+  for (let i = pool.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [pool[i], pool[j]] = [pool[j], pool[i]];
+  }
+  const n = Math.min(_manoCount, pool.length);
+  const mano = pool.slice(0, n);
+  document.getElementById('hand-title').textContent = `Mano di prova — ${n} carte`;
+  document.getElementById('hand-cards').innerHTML = mano.map(c => `
+    <div class="hand-card" title="${escapeHtml(c.name)}">
+      <img src="${c.img}" alt="${escapeHtml(c.name)}" loading="lazy">
+    </div>`).join('');
+}
+function ripescaMano() { _manoCount = 5; pescaMano(); }
+function mulliganMano() {
+  if (_manoCount < buildDeck.main.length) _manoCount++;
+  pescaMano();
+}
+function chiudiMano(e) {
+  if (!e || e.target === document.getElementById('hand-overlay')) {
+    document.getElementById('hand-overlay').classList.remove('open');
+    document.body.style.overflow = '';
+  }
 }
 
 // ─────────── SALVA / MODIFICA / ELIMINA ───────────
@@ -1291,6 +1530,7 @@ document.getElementById('search-input')?.addEventListener('keydown', e => {
 // ─────────── ESPORTA FUNZIONI ───────────
 window.switchTab = switchTab;
 window.cercaCarte = cercaCarte;
+window.caricaAltriRisultati = caricaAltriRisultati;
 window.toggleFiltri = toggleFiltri;
 window.resetFiltri = resetFiltri;
 window.dragStart = dragStart;
@@ -1300,6 +1540,12 @@ window.dropCarta = dropCarta;
 window.aggiungiAuto = aggiungiAuto;
 window.rimuoviCartaUI = rimuoviCartaUI;
 window.mandaAlSideUI = mandaAlSideUI;
+window.duplicaCarta = duplicaCarta;
+window.ordinaZona = ordinaZona;
+window.manoDiProva = manoDiProva;
+window.ripescaMano = ripescaMano;
+window.mulliganMano = mulliganMano;
+window.chiudiMano = chiudiMano;
 window.hoverPreview = hoverPreview;
 window.hoverPreviewDeck = hoverPreviewDeck;
 window.hoverPreviewDL = hoverPreviewDL;
