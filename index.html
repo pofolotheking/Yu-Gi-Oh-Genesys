@@ -2408,6 +2408,11 @@
       <div class="chart-wrap"><canvas id="chart-andamento"></canvas></div>
       <div class="chart-legend" id="chart-legend"></div>
     </div>
+    <p class="section-note" style="margin-top:8px"><em>Vittorie dei mazzi nel tempo</em></p>
+    <div class="card" id="chart-mazzi-card">
+      <div class="chart-wrap"><canvas id="chart-mazzi"></canvas></div>
+      <div class="chart-legend" id="chart-mazzi-legend"></div>
+    </div>
     <h3 class="subsection-title">Scontri diretti</h3>
     <div class="card padded" id="riepilogo-card">
       <div id="riepilogo-totali"></div>
@@ -2951,6 +2956,7 @@ function popolaTutto() {
   renderGiocatori();
   renderRiepilogo();
   renderGrafico();
+  renderGraficoMazzi();
   renderStatDado();
   renderMazzi();
   renderStorico();
@@ -3196,6 +3202,8 @@ function renderRiepilogo() {
 // ============ GRAFICO ANDAMENTO PUNTI ============
 let _chartInstance = null;
 const COLORS = ['#007aff', '#34c759', '#ff9500', '#ff3b30'];
+let _chartMazziInstance = null;
+const COLORS_MAZZI = ['#007aff','#34c759','#ff9500','#ff3b30','#af52de','#5ac8fa','#ff2d55','#ffcc00','#5856d6','#a2845e','#34aadc','#8e8e93','#00c7be','#ff6482'];
 
 function renderGrafico() {
   if (typeof Chart === 'undefined') return;
@@ -3277,6 +3285,100 @@ function renderGrafico() {
             stepSize: 1,
             precision: 0
           }
+        }
+      }
+    }
+  });
+}
+
+function renderGraficoMazzi() {
+  if (typeof Chart === 'undefined') return;
+  const card = document.getElementById('chart-mazzi-card');
+  if (!dati.partite.length) { if (card) card.style.display = 'none'; return; }
+
+  // raccolgo, in ordine cronologico, l'esito di ogni partita per ciascun mazzo
+  const partiteOrd = [...dati.partite].sort((a,b) => a.data.localeCompare(b.data));
+  const mazziSet = new Set();
+  dati.partite.forEach(p => { mazziSet.add(p.m1); mazziSet.add(p.m2); });
+  const mazzi = [...mazziSet].sort();
+
+  // per ogni mazzo: array di vittorie cumulate, indicizzato per n-esima partita giocata da quel mazzo
+  const vittorieCum = {};
+  const partiteGiocate = {};
+  mazzi.forEach(m => { vittorieCum[m] = [0]; partiteGiocate[m] = 0; });
+
+  partiteOrd.forEach(p => {
+    const [p1, p2] = PUNTI[p.risultato];
+    const g1win = p1 > p2;
+    // mazzo di g1
+    if (vittorieCum[p.m1]) {
+      partiteGiocate[p.m1]++;
+      const last = vittorieCum[p.m1][vittorieCum[p.m1].length - 1];
+      vittorieCum[p.m1].push(last + (g1win ? 1 : 0));
+    }
+    // mazzo di g2
+    if (vittorieCum[p.m2]) {
+      partiteGiocate[p.m2]++;
+      const last = vittorieCum[p.m2][vittorieCum[p.m2].length - 1];
+      vittorieCum[p.m2].push(last + (g1win ? 0 : 1));
+    }
+  });
+
+  card.style.display = 'block';
+  const maxPartite = Math.max(...mazzi.map(m => partiteGiocate[m]), 0);
+  const labels = Array.from({ length: maxPartite + 1 }, (_, i) => i === 0 ? 'Start' : `${i}`);
+
+  const legendEl = document.getElementById('chart-mazzi-legend');
+  legendEl.innerHTML = mazzi.map((m, i) => `
+    <div class="chart-legend-item">
+      <div class="chart-legend-dot" style="background:${COLORS_MAZZI[i % COLORS_MAZZI.length]}"></div>
+      ${m}
+    </div>`).join('');
+
+  const ctx = document.getElementById('chart-mazzi').getContext('2d');
+  if (_chartMazziInstance) _chartMazziInstance.destroy();
+  _chartMazziInstance = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: mazzi.map((m, i) => ({
+        label: m,
+        data: vittorieCum[m],
+        borderColor: COLORS_MAZZI[i % COLORS_MAZZI.length],
+        backgroundColor: COLORS_MAZZI[i % COLORS_MAZZI.length] + '18',
+        borderWidth: 2.5,
+        pointRadius: 3,
+        pointHoverRadius: 6,
+        tension: 0.3,
+        fill: false,
+        spanGaps: true,
+      }))
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            title: (items) => {
+              const idx = items[0].dataIndex;
+              return idx === 0 ? 'Inizio' : `Dopo ${idx} partite`;
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          title: { display: true, text: 'Partite giocate', font: { size: 10 }, color: '#a1a1a6' },
+          grid: { color: 'rgba(0,0,0,0.05)' },
+          ticks: { font: { size: 10 }, color: '#a1a1a6' }
+        },
+        y: {
+          beginAtZero: true,
+          title: { display: true, text: 'Vittorie', font: { size: 10 }, color: '#a1a1a6' },
+          grid: { color: 'rgba(0,0,0,0.05)' },
+          ticks: { font: { size: 10 }, color: '#a1a1a6', stepSize: 1, precision: 0 }
         }
       }
     }
