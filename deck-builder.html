@@ -1269,11 +1269,25 @@ function _ordineTipo(type) {
   // mostri prima, ordinati grossomodo
   return 1;
 }
+// ordine dei tipi dentro l'Extra Deck: Fusion → Synchro → XYZ → Link
+function _ordineExtra(type) {
+  if (!type) return 9;
+  if (type.includes('Fusion'))  return 1;
+  if (type.includes('Synchro')) return 2;
+  if (type.includes('XYZ') || type.includes('Xyz')) return 3;
+  if (type.includes('Link'))    return 4;
+  return 5;
+}
 function ordinaZona(zona) {
   buildDeck[zona].sort((a, b) => {
-    const ta = _ordineTipo(a.type), tb = _ordineTipo(b.type);
-    if (ta !== tb) return ta - tb;
-    // tra mostri: per livello desc, poi nome
+    if (zona === 'extra') {
+      const ta = _ordineExtra(a.type), tb = _ordineExtra(b.type);
+      if (ta !== tb) return ta - tb;
+    } else {
+      const ta = _ordineTipo(a.type), tb = _ordineTipo(b.type);
+      if (ta !== tb) return ta - tb;
+    }
+    // a parità di tipo: per livello/rango desc, poi nome
     const la = a.level || 0, lb = b.level || 0;
     if (la !== lb) return lb - la;
     return (a.name || '').localeCompare(b.name || '');
