@@ -1416,8 +1416,23 @@ async function scaricaDeckImmagine() {
     <div style="text-align:right;font-size:11px;color:#a1a1a6;margin-top:10px">Yu-Gi-Oh! Genesys · Deck Builder</div>`;
   document.body.appendChild(box);
 
-  toast('Genero l\'immagine…');
+  toast('Preparo l\'immagine... attendi qualche secondo');
+
   try {
+    // 1. Aspetta che tutte le immagini delle carte siano fisicamente caricate dal browser
+    const images = Array.from(box.querySelectorAll('img'));
+    await Promise.all(images.map(img => {
+      if (img.complete) return Promise.resolve();
+      return new Promise(resolve => {
+        img.onload = resolve;
+        img.onerror = resolve; // Risolve comunque per non bloccare tutto se una singola carta dà errore
+      });
+    }));
+
+    // 2. Un micro-ritardo extra per far stabilizzare il layout al browser
+    await new Promise(r => setTimeout(r, 300));
+
+    // 3. Ora scatta la foto
     const canvas = await html2canvas(box, { backgroundColor: '#ffffff', scale: 2, useCORS: true, logging: false });
     document.body.removeChild(box);
     const fileName = nome.replace(/[^a-zA-Z0-9]/g, '_') + '.png';
@@ -1446,7 +1461,6 @@ async function scaricaDeckImmagine() {
     toast('Errore nella generazione dell\'immagine', true);
   }
 }
-
 // ─────────── SALVA / MODIFICA / ELIMINA ───────────
 async function salvaMazzo() {
   const nome = document.getElementById('nome-mazzo').value.trim();
