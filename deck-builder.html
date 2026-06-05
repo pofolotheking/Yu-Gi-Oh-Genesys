@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Deck Builder · Yu-Gi-Oh! Genesys</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<meta name="theme-color" content="#1d1d1f">
+<style>
+  :root {
+    --bg: #ffffff;
+    --bg-soft: #f5f5f7;
+    --bg-card: #ffffff;
+    --border: #e5e5ea;
+    --border-strong: #d2d2d7;
+    --text: #1d1d1f;
+    --text-dim: #6e6e73;
+    --text-faint: #a1a1a6;
+    --green: #34c759;
+    --green-dark: #28a745;
+    --green-soft: #f0fdf4;
+    --green-border: #bbf7d0;
+    --blue: #007aff;
+    --red: #ff3b30;
+    --red-soft: #fef2f2;
+    --orange: #ff9500;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 16px;
+    line-height: 1.5;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+  body { padding-bottom: 60px; }
+
+  header { text-align: center; padding: 36px 20px 18px; }
+  h1 { font-weight: 700; font-size: clamp(1.6rem, 5vw, 2.2rem); letter-spacing: -0.03em; }
+  .subtitle { color: var(--text-dim); margin-top: 6px; font-size: 0.95rem; }
+
+  .back-home {
+    position: fixed; top: 16px; left: 16px;
+    background: var(--bg-soft); border: 1px solid var(--border);
+    border-radius: 10px; padding: 9px 14px;
+    font-family: inherit; font-size: 0.88rem; font-weight: 500;
+    color: var(--text); text-decoration: none; cursor: pointer;
+    display: flex; align-items: center; gap: 6px; z-index: 50;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    transition: background 0.15s;
+  }
+  .back-home:hover { background: var(--border); }
+
+  nav {
+    display: flex; gap: 2px; padding: 6px;
+    margin: 0 auto 24px; background: var(--bg-soft);
+    border-radius: 12px; max-width: 540px;
+  }
+  nav button {
+    flex: 1; background: transparent; border: none;
+    color: var(--text-dim); font-family: inherit;
+    font-size: 0.85rem; font-weight: 500; padding: 9px 10px;
+    cursor: pointer; border-radius: 8px; transition: all 0.2s;
+    white-space: nowrap;
+  }
+  nav button:hover { color: var(--text); }
+  nav button.active {
+    background: var(--bg-card); color: var(--text);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  }
+
+  main { max-width: 1180px; margin: 0 auto; padding: 0 16px; }
+  section { display: none; }
+  section.active { display: block; animation: fade 0.25s ease; }
+  @keyframes fade { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+
+  h2 { font-weight: 600; font-size: 1.4rem; letter-spacing: -0.02em; margin-bottom: 6px; }
+  .section-note { color: var(--text-dim); font-size: 0.88rem; margin-bottom: 18px; font-style: italic; }
+
+  .card {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: 14px; margin-bottom: 16px; overflow: hidden;
+  }
+  .card.padded { padding: 18px; }
+
+  label { font-size: 0.82rem; font-weight: 500; color: var(--text-dim); margin-bottom: 5px; display: block; }
+  input, select {
+    width: 100%; background: var(--bg-card);
+    border: 1px solid var(--border-strong); color: var(--text);
+    padding: 11px 13px; font-family: inherit; font-size: 0.95rem;
+    border-radius: 10px; transition: border-color 0.15s, box-shadow 0.15s;
+    -webkit-appearance: none; appearance: none;
+  }
+  select {
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'><path fill='%236e6e73' d='M6 8L0 0h12z'/></svg>");
+    background-repeat: no-repeat; background-position: right 13px center; padding-right: 34px;
+  }
+  input:focus, select:focus {
+    outline: none; border-color: var(--blue);
+    box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.15);
+  }
+
+  button.primary {
+    background: var(--green); color: white; border: none;
+    padding: 12px 18px; font-family: inherit; font-weight: 600;
+    font-size: 0.95rem; cursor: pointer; border-radius: 10px;
+    transition: background 0.15s, transform 0.05s;
+  }
+  button.primary:hover { background: var(--green-dark); }
+  button.primary:active { transform: scale(0.98); }
+  button.secondary {
+    background: var(--bg-card); color: var(--text);
+    border: 1px solid var(--border-strong); padding: 10px 14px;
+    font-family: inherit; font-size: 0.9rem; font-weight: 500;
+    cursor: pointer; border-radius: 8px; transition: background 0.15s;
+  }
+  button.secondary:hover { background: var(--bg-soft); }
+  button.danger {
+    background: var(--bg-card); color: var(--red);
+    border: 1px solid var(--border-strong); padding: 9px 13px;
+    font-family: inherit; font-size: 0.85rem; font-weight: 500;
+    cursor: pointer; border-radius: 8px;
+  }
+  button.danger:hover { background: var(--red-soft); border-color: var(--red); }
+
+  .empty { text-align: center; color: var(--text-faint); padding: 36px 20px; font-size: 0.92rem; }
+
+  /* ─── SEZIONE DECK COSTRUITI ─── */
+  .deck-list-item { margin-bottom: 10px; }
+  .deck-list-btn {
+    width: 100%; background: var(--bg-card);
+    border: 1px solid var(--border); border-radius: 13px;
+    padding: 15px 18px; font-family: inherit; cursor: pointer;
+    display: flex; align-items: center; justify-content: space-between;
+    text-align: left; transition: background 0.15s;
+  }
+  .deck-list-btn:hover { background: var(--bg-soft); }
+  .deck-list-btn.open { border-radius: 13px 13px 0 0; background: var(--bg-soft); border-color: var(--border-strong); }
+  .deck-list-info { display: flex; flex-direction: column; gap: 2px; }
+  .deck-list-name { font-size: 1.02rem; font-weight: 600; letter-spacing: -0.01em; }
+  .deck-list-owner { font-size: 0.8rem; color: var(--text-dim); }
+  .deck-list-meta { display: flex; align-items: center; gap: 12px; }
+  .deck-list-pts {
+    background: var(--text); color: white; font-weight: 700;
+    padding: 4px 10px; border-radius: 8px; font-size: 0.85rem;
+    font-variant-numeric: tabular-nums;
+  }
+  .deck-list-pts.over { background: var(--red); }
+  .deck-list-arrow { font-size: 0.72rem; color: var(--text-faint); transition: transform 0.2s; }
+  .deck-list-btn.open .deck-list-arrow { transform: rotate(90deg); }
+  .deck-list-body {
+    border: 1px solid var(--border-strong); border-top: none;
+    border-radius: 0 0 13px 13px; background: var(--bg-soft);
+    padding: 16px; overflow: hidden;
+  }
+  .deck-list-actions { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+
+  .dl-group-title {
+    font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--text-faint); font-weight: 700; margin: 14px 0 8px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .dl-group-title:first-child { margin-top: 0; }
+  .dl-group-count {
+    background: var(--border); color: var(--text-dim);
+    padding: 1px 7px; border-radius: 6px; font-size: 0.68rem;
+  }
+  .dl-cards-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
+    gap: 7px;
+  }
+  .dl-card { position: relative; border-radius: 6px; overflow: hidden; border: 1px solid var(--border); }
+  .dl-card img { width: 100%; aspect-ratio: 59/86; object-fit: cover; display: block; background: var(--bg-soft); }
+  .dl-card-pts {
+    position: absolute; top: 2px; right: 2px;
+    background: #1d1d1f; color: #fff; font-size: 0.58rem; font-weight: 700;
+    padding: 1px 4px; border-radius: 4px;
+  }
+  .dl-card-pts.zero { background: var(--text-faint); }
+  .dl-card-qty {
+    position: absolute; bottom: 2px; left: 2px;
+    background: var(--green); color: #fff; font-size: 0.58rem; font-weight: 700;
+    padding: 1px 5px; border-radius: 4px;
+  }
+
+  /* ─── SEZIONE CREA MAZZO ─── */
+  .builder-topbar {
+    display: grid; grid-template-columns: 1fr 1fr auto; gap: 12px;
+    align-items: end; margin-bottom: 14px;
+  }
+  .builder-counters {
+    display: flex; gap: 10px; margin-bottom: 16px;
+  }
+  .builder-counter {
+    flex: 1; background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: 12px; padding: 12px 14px; text-align: center;
+  }
+  .builder-counter-val {
+    font-size: 1.4rem; font-weight: 700; font-variant-numeric: tabular-nums;
+    display: block; line-height: 1; margin-bottom: 3px;
+  }
+  .builder-counter-val.over { color: var(--red); }
+  .builder-counter-lbl {
+    font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.04em;
+    color: var(--text-faint); font-weight: 600;
+  }
+
+  .builder-split {
+    display: grid; grid-template-columns: 300px 1fr; gap: 16px; align-items: start;
+  }
+
+  .search-panel { position: sticky; top: 12px; }
+  .search-row { display: flex; gap: 8px; margin-bottom: 12px; }
+  .search-results {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(76px, 1fr));
+    gap: 8px; max-height: 620px; overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .search-card {
+    position: relative; cursor: grab; border-radius: 6px; overflow: hidden;
+    border: 1px solid var(--border); background: var(--bg-soft);
+    transition: transform 0.12s, box-shadow 0.12s;
+  }
+  .search-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+  .search-card:active { cursor: grabbing; }
+  .search-card img { width: 100%; aspect-ratio: 59/86; object-fit: cover; display: block; pointer-events: none; }
+  .search-card-pts {
+    position: absolute; top: 3px; right: 3px;
+    background: #1d1d1f; color: #fff; font-size: 0.58rem; font-weight: 700;
+    padding: 1px 5px; border-radius: 4px; pointer-events: none;
+  }
+  .search-card-pts.zero { background: var(--text-faint); }
+
+  .deck-zones { display: flex; flex-direction: column; gap: 14px; }
+  .deck-zone {
+    background: var(--bg-card); border: 2px dashed var(--border);
+    border-radius: 14px; padding: 14px; transition: border-color 0.15s, background 0.15s;
+    min-height: 130px;
+  }
+  .deck-zone.dragover { border-color: var(--green); background: var(--green-soft); }
+  .deck-zone-head {
+    display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;
+  }
+  .deck-zone-title { font-size: 0.92rem; font-weight: 700; letter-spacing: -0.01em; }
+  .deck-zone-count {
+    font-size: 0.72rem; color: var(--text-dim); font-weight: 600;
+    background: var(--bg-soft); padding: 2px 9px; border-radius: 8px;
+    font-variant-numeric: tabular-nums;
+  }
+  .deck-zone-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(72px, 1fr)); gap: 8px;
+  }
+  .deck-zone-empty { color: var(--text-faint); font-size: 0.82rem; padding: 18px 8px; text-align: center; grid-column: 1/-1; }
+  .deck-card {
+    position: relative; cursor: pointer; border-radius: 6px; overflow: hidden;
+    border: 1px solid var(--border); background: var(--bg-soft); transition: transform 0.12s;
+  }
+  .deck-card:hover { transform: translateY(-2px); }
+  .deck-card img { width: 100%; aspect-ratio: 59/86; object-fit: cover; display: block; pointer-events: none; }
+  .deck-card-pts {
+    position: absolute; top: 3px; right: 3px;
+    background: #1d1d1f; color: #fff; font-size: 0.58rem; font-weight: 700;
+    padding: 1px 5px; border-radius: 4px; pointer-events: none;
+  }
+  .deck-card-pts.zero { background: var(--text-faint); }
+  .deck-card-qty {
+    position: absolute; bottom: 3px; left: 3px;
+    background: var(--green); color: #fff; font-size: 0.6rem; font-weight: 700;
+    padding: 1px 6px; border-radius: 5px; pointer-events: none;
+  }
+  .deck-card-side {
+    position: absolute; bottom: 3px; right: 3px;
+    background: var(--blue); color: #fff; border: none; cursor: pointer;
+    font-size: 0.55rem; font-weight: 700; padding: 2px 5px; border-radius: 4px;
+    display: none;
+  }
+
+  .toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px);
+    background: var(--text); color: #fff; padding: 12px 22px; border-radius: 12px;
+    font-size: 0.9rem; font-weight: 500; z-index: 500; opacity: 0;
+    transition: transform 0.3s ease, opacity 0.3s ease; box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+  .toast.error { background: var(--red); }
+
+  .login-gate {
+    position: fixed; inset: 0; background: var(--bg); z-index: 200;
+    display: flex; align-items: center; justify-content: center; padding: 20px;
+    flex-direction: column; gap: 14px; text-align: center;
+  }
+
+  /* loading */
+  .loading { text-align: center; padding: 36px; color: var(--text-faint); font-size: 0.92rem; }
+
+  @media (max-width: 820px) {
+    .builder-split { grid-template-columns: 1fr; }
+    .search-panel { position: static; }
+    .search-results { max-height: 280px; }
+  }
+  @media (max-width: 600px) {
+    .builder-topbar { grid-template-columns: 1fr; }
+    main { padding: 0 10px; }
+    header { padding: 50px 16px 14px; }
+    nav button { font-size: 0.76rem; padding: 8px 5px; }
+    .deck-card-side { display: block; }
+    .search-card { cursor: pointer; }
+    h2 { font-size: 1.2rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="login-gate" id="login-gate">
+  <div style="font-size:1.4rem;font-weight:700;letter-spacing:-0.02em">Accesso richiesto</div>
+  <div style="color:var(--text-dim);font-size:0.92rem">Devi effettuare il login dalla home.</div>
+  <a href="index.html" class="primary" style="text-decoration:none;display:inline-block">← Torna alla Home</a>
+</div>
+
+<div id="app-wrap" style="display:none">
+
+<a href="index.html" class="back-home">
+  <svg width="9" height="14" viewBox="0 0 10 16" fill="none"><path d="M8 2L2 8l6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  Home
+</a>
+
+<header>
+  <h1>🛠️ Deck Builder</h1>
+  <div class="subtitle">Costruisci, salva e gestisci le decklist Genesys</div>
+</header>
+
+<nav>
+  <button class="tab-btn active" data-tab="costruiti">📚 Deck Costruiti</button>
+  <button class="tab-btn" data-tab="crea">✏️ Crea un Mazzo</button>
+</nav>
+
+<main>
+  <!-- ════ SEZIONE 1: DECK COSTRUITI ════ -->
+  <section id="costruiti" class="active">
+    <h2>Deck Costruiti</h2>
+    <p class="section-note">Tutti i mazzi salvati. Clicca la freccetta per vedere la decklist completa.</p>
+    <div id="lista-deck-costruiti">
+      <div class="loading">Caricamento deck…</div>
+    </div>
+  </section>
+
+  <!-- ════ SEZIONE 2: CREA UN MAZZO ════ -->
+  <section id="crea">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:6px">
+      <h2 style="margin-bottom:0" id="crea-titolo">Crea un Mazzo</h2>
+      <button class="primary" onclick="salvaMazzo()">💾 Salva Deck</button>
+    </div>
+    <p class="section-note">Trascina le carte dalla ricerca alle zone, oppure doppio click per aggiungerle.</p>
+
+    <div class="card padded">
+      <div class="builder-topbar">
+        <div>
+          <label>Nome del mazzo</label>
+          <input type="text" id="nome-mazzo" placeholder="es. Sky Striker">
+        </div>
+        <div>
+          <label>Proprietario</label>
+          <select id="proprietario-mazzo"></select>
+        </div>
+        <button class="secondary" onclick="nuovoMazzoVuoto()" style="height:44px">🗑 Svuota</button>
+      </div>
+
+      <div class="builder-counters">
+        <div class="builder-counter">
+          <span class="builder-counter-val" id="cnt-punti">0</span>
+          <span class="builder-counter-lbl">Punti Genesys</span>
+        </div>
+        <div class="builder-counter">
+          <span class="builder-counter-val" id="cnt-main">0</span>
+          <span class="builder-counter-lbl">Main Deck</span>
+        </div>
+        <div class="builder-counter">
+          <span class="builder-counter-val" id="cnt-extra">0</span>
+          <span class="builder-counter-lbl">Extra Deck</span>
+        </div>
+        <div class="builder-counter">
+          <span class="builder-counter-val" id="cnt-side">0</span>
+          <span class="builder-counter-lbl">Side Deck</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="builder-split">
+      <!-- Pannello ricerca (sx) -->
+      <div class="card padded search-panel">
+        <label>🔍 Cerca carte</label>
+        <div class="search-row">
+          <input type="text" id="search-input" placeholder="Nome carta…" style="flex:1">
+          <button class="primary" onclick="cercaCarte()" style="padding:11px 16px">Vai</button>
+        </div>
+        <div class="search-results" id="search-results">
+          <div class="empty" style="grid-column:1/-1;padding:24px 8px;font-size:0.85rem">Cerca una carta per iniziare.</div>
+        </div>
+      </div>
+
+      <!-- Zone deck (dx) -->
+      <div class="deck-zones">
+        <div class="deck-zone" id="zone-main" data-zone="main"
+             ondrop="dropCarta(event,'main')" ondragover="allowDrop(event,'main')"
+             ondragleave="dragLeave(event,'main')">
+          <div class="deck-zone-head">
+            <span class="deck-zone-title">🎴 Main Deck</span>
+            <span class="deck-zone-count" id="zone-main-count">0</span>
+          </div>
+          <div class="deck-zone-grid" id="zone-main-grid"></div>
+        </div>
+
+        <div class="deck-zone" id="zone-extra" data-zone="extra"
+             ondrop="dropCarta(event,'extra')" ondragover="allowDrop(event,'extra')"
+             ondragleave="dragLeave(event,'extra')">
+          <div class="deck-zone-head">
+            <span class="deck-zone-title">⚡ Extra Deck</span>
+            <span class="deck-zone-count" id="zone-extra-count">0</span>
+          </div>
+          <div class="deck-zone-grid" id="zone-extra-grid"></div>
+        </div>
+
+        <div class="deck-zone" id="zone-side" data-zone="side"
+             ondrop="dropCarta(event,'side')" ondragover="allowDrop(event,'side')"
+             ondragleave="dragLeave(event,'side')">
+          <div class="deck-zone-head">
+            <span class="deck-zone-title">🔄 Side Deck</span>
+            <span class="deck-zone-count" id="zone-side-count">0</span>
+          </div>
+          <div class="deck-zone-grid" id="zone-side-grid"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, doc, getDoc, setDoc, deleteDoc, collection, getDocs }
+  from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getAuth, onAuthStateChanged }
+  from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDwDhaoUOpNPKO-0RMfVjvf4S-h_sI0qx0",
+  authDomain: "yu-gi-oh--genesys.firebaseapp.com",
+  projectId: "yu-gi-oh--genesys",
+  storageBucket: "yu-gi-oh--genesys.firebasestorage.app",
+  messagingSenderId: "706385915066",
+  appId: "1:706385915066:web:9e29e0dda71305d475e683"
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+
+// ─────────── STATO ───────────
+let datiPrincipali = { giocatori: [], mazzi: {} };
+let deckCostruiti = [];   // [{docId, giocatore, mazzo, main:[], extra:[], side:[], punti}]
+let _searchCache = {};    // id -> {id,name,img,pts,type}
+
+// deck in costruzione: ogni zona è array di {id,name,img,pts,type,qty}
+let buildDeck = { main: [], extra: [], side: [] };
+let editingDocId = null;  // se stiamo modificando un deck esistente
+
+const EXTRA_TYPES = ['Fusion', 'Synchro', 'XYZ', 'Xyz', 'Link'];
+function isExtraCard(type) {
+  if (!type) return false;
+  return EXTRA_TYPES.some(t => type.includes(t));
+}
+
+// ─────────── UTIL ───────────
+function escapeHtml(s) {
+  if (!s) return '';
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
+}
+function docIdFor(giocatore, mazzo) {
+  return `${giocatore}_${mazzo}`.replace(/[^a-zA-Z0-9_]/g, '_');
+}
+function toast(msg, isError) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show' + (isError ? ' error' : '');
+  setTimeout(() => { t.className = 'toast'; }, 2600);
+}
+function ptsClass(pts) { return pts > 0 ? '' : 'zero'; }
+
+// ─────────── TABS ───────────
+function switchTab(id) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === id));
+  document.querySelectorAll('section').forEach(s => s.classList.toggle('active', s.id === id));
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+document.querySelectorAll('.tab-btn').forEach(b => {
+  b.addEventListener('click', () => switchTab(b.dataset.tab));
+});
+
+// ─────────── CARICAMENTO DATI ───────────
+async function caricaDatiPrincipali() {
+  try {
+    const snap = await getDoc(doc(db, 'lega', 'dati_principali'));
+    if (snap.exists()) {
+      const d = snap.data();
+      datiPrincipali.giocatori = d.giocatori || [];
+      datiPrincipali.mazzi = d.mazzi || {};
+    }
+  } catch (e) { console.error('Errore dati principali:', e); }
+  popolaProprietari();
+}
+
+function popolaProprietari() {
+  const sel = document.getElementById('proprietario-mazzo');
+  sel.innerHTML = datiPrincipali.giocatori.map(g => `<option>${escapeHtml(g)}</option>`).join('');
+}
+
+async function caricaDeckCostruiti() {
+  const cont = document.getElementById('lista-deck-costruiti');
+  cont.innerHTML = '<div class="loading">Caricamento deck…</div>';
+  try {
+    const snaps = await getDocs(collection(db, 'liste_mazzi'));
+    deckCostruiti = [];
+    snaps.forEach(s => {
+      const d = s.data();
+      const main = d.main || [];
+      const extra = d.extra || [];
+      const side = d.side || [];
+      const punti = calcolaPunti(main, extra); // side non conta nei punti del deck principale
+      deckCostruiti.push({
+        docId: s.id,
+        giocatore: d.giocatore || '?',
+        mazzo: d.mazzo || s.id,
+        main, extra, side, punti
+      });
+    });
+    deckCostruiti.sort((a,b) => a.giocatore.localeCompare(b.giocatore) || a.mazzo.localeCompare(b.mazzo));
+    renderDeckCostruiti();
+  } catch (e) {
+    console.error('Errore caricamento deck costruiti:', e);
+    cont.innerHTML = '<div class="empty">Errore nel caricamento dei deck.</div>';
+  }
+}
+
+function calcolaPunti(...zone) {
+  let tot = 0;
+  zone.forEach(arr => arr.forEach(c => { tot += (c.pts || 0) * (c.qty || 1); }));
+  return tot;
+}
+function contaCarte(arr) {
+  return arr.reduce((s, c) => s + (c.qty || 1), 0);
+}
+
+// ─────────── RENDER: DECK COSTRUITI ───────────
+function renderDeckCostruiti() {
+  const cont = document.getElementById('lista-deck-costruiti');
+  if (deckCostruiti.length === 0) {
+    cont.innerHTML = '<div class="empty">Nessun deck ancora costruito.<br>Vai su "Crea un Mazzo" per iniziare!</div>';
+    return;
+  }
+  cont.innerHTML = deckCostruiti.map(dk => {
+    const overCls = dk.punti > 100 ? 'over' : '';
+    const safe = dk.docId;
+    return `<div class="deck-list-item">
+      <button class="deck-list-btn" onclick="toggleDeck('${safe}')">
+        <div class="deck-list-info">
+          <span class="deck-list-name">${escapeHtml(dk.mazzo)}</span>
+          <span class="deck-list-owner">${escapeHtml(dk.giocatore)}</span>
+        </div>
+        <div class="deck-list-meta">
+          <span class="deck-list-pts ${overCls}">${dk.punti} pt</span>
+          <span class="deck-list-arrow">▶</span>
+        </div>
+      </button>
+      <div class="deck-list-body" id="body-${safe}" style="display:none"></div>
+    </div>`;
+  }).join('');
+}
+
+function toggleDeck(docId) {
+  const body = document.getElementById('body-' + docId);
+  const btn = body.previousElementSibling;
+  const isOpen = body.style.display !== 'none';
+  if (isOpen) {
+    body.style.display = 'none';
+    btn.classList.remove('open');
+    return;
+  }
+  const dk = deckCostruiti.find(d => d.docId === docId);
+  if (!dk) return;
+  body.innerHTML = buildDeckListBody(dk);
+  body.style.display = 'block';
+  btn.classList.add('open');
+}
+
+function buildDeckListBody(dk) {
+  const grp = (titolo, arr) => {
+    const n = contaCarte(arr);
+    if (n === 0) return '';
+    const cards = arr.map(c => `
+      <div class="dl-card" title="${escapeHtml(c.name)}">
+        <img src="${c.img}" alt="${escapeHtml(c.name)}" loading="lazy">
+        <span class="dl-card-pts ${ptsClass(c.pts)}">${c.pts || 0}</span>
+        ${(c.qty||1) > 1 ? `<span class="dl-card-qty">×${c.qty}</span>` : ''}
+      </div>`).join('');
+    return `<div class="dl-group-title">${titolo} <span class="dl-group-count">${n}</span></div>
+      <div class="dl-cards-grid">${cards}</div>`;
+  };
+  const corpo = grp('🎴 Main Deck', dk.main) + grp('⚡ Extra Deck', dk.extra) + grp('🔄 Side Deck', dk.side)
+    || '<div class="empty" style="padding:16px">Deck vuoto.</div>';
+  return `
+    <div class="deck-list-actions">
+      <button class="secondary" onclick="modificaDeck('${dk.docId}')">✏️ Modifica</button>
+      <button class="danger" onclick="eliminaDeck('${dk.docId}')">🗑 Elimina</button>
+    </div>
+    ${corpo}`;
+}
+
+// ─────────── RICERCA CARTE ───────────
+async function cercaCarte() {
+  const q = document.getElementById('search-input').value.trim();
+  if (!q) { toast('Scrivi il nome di una carta', true); return; }
+  const cont = document.getElementById('search-results');
+  cont.innerHTML = '<div class="empty" style="grid-column:1/-1;padding:24px 8px">Ricerca…</div>';
+  try {
+    const r = await fetch(`https://db.ygoprodeck.com/api/v7/cardinfo.php?fname=${encodeURIComponent(q)}&misc=yes&num=80&offset=0`);
+    if (!r.ok) throw new Error();
+    const data = await r.json();
+    const cards = data.data || [];
+    if (cards.length === 0) {
+      cont.innerHTML = '<div class="empty" style="grid-column:1/-1;padding:24px 8px">Nessun risultato.</div>';
+      return;
+    }
+    cont.innerHTML = cards.map(c => {
+      const img = c.card_images?.[0]?.image_url_small || c.card_images?.[0]?.image_url || '';
+      const pts = c.misc_info?.[0]?.genesys_points ?? 0;
+      const type = c.type || '';
+      _searchCache[c.id] = { id: c.id, name: c.name, img, pts, type };
+      return `<div class="search-card" draggable="true"
+          ondragstart="dragStart(event,${c.id})"
+          ondblclick="aggiungiAuto(${c.id})"
+          title="${escapeHtml(c.name)} — doppio click per aggiungere">
+        <img src="${img}" alt="${escapeHtml(c.name)}" loading="lazy">
+        <span class="search-card-pts ${ptsClass(pts)}">${pts}</span>
+      </div>`;
+    }).join('');
+  } catch (e) {
+    cont.innerHTML = '<div class="empty" style="grid-column:1/-1;padding:24px 8px">Errore nella ricerca.</div>';
+  }
+}
+
+// ─────────── DRAG & DROP ───────────
+let _dragId = null;
+function dragStart(e, id) {
+  _dragId = id;
+  e.dataTransfer.effectAllowed = 'copy';
+  e.dataTransfer.setData('text/plain', String(id));
+}
+function allowDrop(e, zona) {
+  e.preventDefault();
+  document.getElementById('zone-' + zona)?.classList.add('dragover');
+}
+function dragLeave(e, zona) {
+  document.getElementById('zone-' + zona)?.classList.remove('dragover');
+}
+function dropCarta(e, zona) {
+  e.preventDefault();
+  document.getElementById('zone-' + zona)?.classList.remove('dragover');
+  const id = _dragId || parseInt(e.dataTransfer.getData('text/plain'));
+  if (!id) return;
+  aggiungiCarta(id, zona);
+  _dragId = null;
+}
+
+// doppio click: Main o Extra in automatico (mai side da dblclick)
+function aggiungiAuto(id) {
+  const c = _searchCache[id];
+  if (!c) return;
+  aggiungiCarta(id, isExtraCard(c.type) ? 'extra' : 'main');
+}
+
+function aggiungiCarta(id, zonaRichiesta) {
+  const c = _searchCache[id];
+  if (!c) return;
+  // Forza coerenza: carte Extra non possono stare nel Main e viceversa.
+  // Eccezione: il Side può contenere qualsiasi cosa.
+  let zona = zonaRichiesta;
+  if (zona === 'main' && isExtraCard(c.type)) zona = 'extra';
+  if (zona === 'extra' && !isExtraCard(c.type)) {
+    toast('Solo Fusion/Synchro/XYZ/Link nell\'Extra', true);
+    return;
+  }
+  // limiti
+  const limiti = { main: 60, extra: 15, side: 15 };
+  if (contaCarte(buildDeck[zona]) >= limiti[zona]) {
+    toast(`Limite ${zona} raggiunto (${limiti[zona]})`, true);
+    return;
+  }
+  // max 3 copie totali tra tutte le zone
+  const copieTotali = ['main','extra','side'].reduce((s,z) => {
+    const f = buildDeck[z].find(x => x.id === id);
+    return s + (f ? (f.qty||1) : 0);
+  }, 0);
+  if (copieTotali >= 3) { toast('Massimo 3 copie per carta', true); return; }
+
+  const esistente = buildDeck[zona].find(x => x.id === id);
+  if (esistente) esistente.qty = (esistente.qty || 1) + 1;
+  else buildDeck[zona].push({ id: c.id, name: c.name, img: c.img, pts: c.pts, type: c.type, qty: 1 });
+  renderBuilder();
+}
+
+function rimuoviCarta(id, zona) {
+  const idx = buildDeck[zona].findIndex(x => x.id === id);
+  if (idx === -1) return;
+  const c = buildDeck[zona][idx];
+  if ((c.qty || 1) > 1) c.qty--;
+  else buildDeck[zona].splice(idx, 1);
+  renderBuilder();
+}
+
+// sposta carta nel side (da mobile, bottone)
+function mandaAlSide(id, zonaOrig, ev) {
+  if (ev) ev.stopPropagation();
+  const c = _searchCache[id] || buildDeck[zonaOrig]?.find(x => x.id === id);
+  rimuoviCarta(id, zonaOrig);
+  if (c) { _searchCache[id] = _searchCache[id] || c; aggiungiCarta(id, 'side'); }
+}
+
+// ─────────── RENDER BUILDER ───────────
+function renderBuilder() {
+  ['main','extra','side'].forEach(zona => {
+    const grid = document.getElementById('zone-' + zona + '-grid');
+    const arr = buildDeck[zona];
+    if (arr.length === 0) {
+      const label = zona === 'main' ? 'Trascina qui le carte del Main' :
+                    zona === 'extra' ? 'Fusion / Synchro / XYZ / Link' :
+                    'Trascina qui le carte del Side';
+      grid.innerHTML = `<div class="deck-zone-empty">${label}</div>`;
+    } else {
+      grid.innerHTML = arr.map(c => `
+        <div class="deck-card" onclick="rimuoviCartaUI(${c.id},'${zona}')" title="${escapeHtml(c.name)} — click per rimuovere">
+          <img src="${c.img}" alt="${escapeHtml(c.name)}" loading="lazy">
+          <span class="deck-card-pts ${ptsClass(c.pts)}">${c.pts || 0}</span>
+          ${(c.qty||1) > 1 ? `<span class="deck-card-qty">×${c.qty}</span>` : ''}
+          ${zona !== 'side' ? `<button class="deck-card-side" onclick="mandaAlSideUI(${c.id},'${zona}',event)">→S</button>` : ''}
+        </div>`).join('');
+    }
+    document.getElementById('zone-' + zona + '-count').textContent = contaCarte(arr);
+  });
+  // contatori
+  const punti = calcolaPunti(buildDeck.main, buildDeck.extra);
+  const elP = document.getElementById('cnt-punti');
+  elP.textContent = punti;
+  elP.classList.toggle('over', punti > 100);
+  document.getElementById('cnt-main').textContent = contaCarte(buildDeck.main);
+  document.getElementById('cnt-extra').textContent = contaCarte(buildDeck.extra);
+  document.getElementById('cnt-side').textContent = contaCarte(buildDeck.side);
+}
+
+// ─────────── SALVA / MODIFICA / ELIMINA ───────────
+async function salvaMazzo() {
+  const nome = document.getElementById('nome-mazzo').value.trim();
+  const owner = document.getElementById('proprietario-mazzo').value;
+  if (!nome) { toast('Inserisci un nome per il mazzo', true); return; }
+  if (!owner) { toast('Seleziona un proprietario', true); return; }
+  const totCarte = contaCarte(buildDeck.main) + contaCarte(buildDeck.extra) + contaCarte(buildDeck.side);
+  if (totCarte === 0) { toast('Il deck è vuoto', true); return; }
+
+  const newDocId = docIdFor(owner, nome);
+  // se sto modificando e ho cambiato nome/owner, elimino il vecchio doc
+  if (editingDocId && editingDocId !== newDocId) {
+    try { await deleteDoc(doc(db, 'liste_mazzi', editingDocId)); } catch(e) {}
+  }
+  try {
+    await setDoc(doc(db, 'liste_mazzi', newDocId), {
+      giocatore: owner,
+      mazzo: nome,
+      main: buildDeck.main,
+      extra: buildDeck.extra,
+      side: buildDeck.side,
+      aggiornato: new Date().toISOString()
+    });
+    // se il mazzo non esiste in dati_principali, lo aggiungo lì
+    if (!datiPrincipali.mazzi[nome]) {
+      datiPrincipali.mazzi[nome] = owner;
+      try {
+        await setDoc(doc(db, 'lega', 'dati_principali'),
+          { giocatori: datiPrincipali.giocatori, mazzi: datiPrincipali.mazzi },
+          { merge: true });
+      } catch(e) { console.warn('Non sono riuscito ad aggiornare dati_principali:', e); }
+    }
+    editingDocId = null;
+    toast(`Deck "${nome}" salvato!`);
+    await caricaDeckCostruiti();
+    switchTab('costruiti');
+  } catch (e) {
+    console.error('Errore salvataggio:', e);
+    toast('Errore nel salvataggio', true);
+  }
+}
+
+function modificaDeck(docId) {
+  const dk = deckCostruiti.find(d => d.docId === docId);
+  if (!dk) return;
+  editingDocId = docId;
+  document.getElementById('nome-mazzo').value = dk.mazzo;
+  popolaProprietari();
+  document.getElementById('proprietario-mazzo').value = dk.giocatore;
+  buildDeck = {
+    main: JSON.parse(JSON.stringify(dk.main || [])),
+    extra: JSON.parse(JSON.stringify(dk.extra || [])),
+    side: JSON.parse(JSON.stringify(dk.side || []))
+  };
+  // popola la cache così il bottone "→S" funziona anche su carte caricate
+  ['main','extra','side'].forEach(z => buildDeck[z].forEach(c => { _searchCache[c.id] = c; }));
+  document.getElementById('crea-titolo').textContent = 'Modifica: ' + dk.mazzo;
+  renderBuilder();
+  switchTab('crea');
+}
+
+async function eliminaDeck(docId) {
+  const dk = deckCostruiti.find(d => d.docId === docId);
+  if (!dk) return;
+  if (!confirm(`Eliminare il deck "${dk.mazzo}" di ${dk.giocatore}?`)) return;
+  try {
+    await deleteDoc(doc(db, 'liste_mazzi', docId));
+    toast('Deck eliminato');
+    await caricaDeckCostruiti();
+  } catch (e) {
+    console.error('Errore eliminazione:', e);
+    toast('Errore nell\'eliminazione', true);
+  }
+}
+
+function nuovoMazzoVuoto() {
+  if (contaCarte(buildDeck.main) + contaCarte(buildDeck.extra) + contaCarte(buildDeck.side) > 0) {
+    if (!confirm('Svuotare il deck in costruzione?')) return;
+  }
+  editingDocId = null;
+  buildDeck = { main: [], extra: [], side: [] };
+  document.getElementById('nome-mazzo').value = '';
+  document.getElementById('crea-titolo').textContent = 'Crea un Mazzo';
+  renderBuilder();
+}
+
+// wrapper UI (necessari per evitare conflitti di naming negli onclick)
+function rimuoviCartaUI(id, zona) { rimuoviCarta(id, zona); }
+function mandaAlSideUI(id, zona, ev) { mandaAlSide(id, zona, ev); }
+
+// ─────────── ENTER per ricerca ───────────
+document.getElementById('search-input')?.addEventListener('keydown', e => {
+  if (e.key === 'Enter') cercaCarte();
+});
+
+// ─────────── ESPORTA FUNZIONI ───────────
+window.switchTab = switchTab;
+window.cercaCarte = cercaCarte;
+window.dragStart = dragStart;
+window.allowDrop = allowDrop;
+window.dragLeave = dragLeave;
+window.dropCarta = dropCarta;
+window.aggiungiAuto = aggiungiAuto;
+window.rimuoviCartaUI = rimuoviCartaUI;
+window.mandaAlSideUI = mandaAlSideUI;
+window.salvaMazzo = salvaMazzo;
+window.toggleDeck = toggleDeck;
+window.modificaDeck = modificaDeck;
+window.eliminaDeck = eliminaDeck;
+window.nuovoMazzoVuoto = nuovoMazzoVuoto;
+
+// ─────────── AUTH GATE ───────────
+onAuthStateChanged(auth, async user => {
+  if (user) {
+    document.getElementById('login-gate').style.display = 'none';
+    document.getElementById('app-wrap').style.display = 'block';
+    await caricaDatiPrincipali();
+    await caricaDeckCostruiti();
+    renderBuilder();
+  } else {
+    document.getElementById('login-gate').style.display = 'flex';
+    document.getElementById('app-wrap').style.display = 'none';
+  }
+});
+</script>
+</body>
+</html>
