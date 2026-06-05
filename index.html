@@ -748,18 +748,22 @@
   /* H2H espandibile */
   .h2h-item { background: var(--bg-soft); border-radius: 10px; overflow: hidden; }
   .h2h-btn {
-    display: flex; align-items: center; justify-content: space-between;
-    gap: 10px; width: 100%; padding: 10px 14px;
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+    width: 100%; padding: 12px 14px 8px;
     background: none; border: none; cursor: pointer; font-family: inherit;
-    text-align: left; color: var(--text);
+    color: var(--text);
   }
-  .h2h-btn .pair { font-size: 0.95rem; font-weight: 500; flex: 1; }
-  .h2h-btn .pair .vs-small { color: var(--text-faint); font-weight: 400; margin: 0 6px; }
-  .h2h-btn .count { font-size: 0.9rem; color: var(--text-dim); font-variant-numeric: tabular-nums; }
-  .h2h-btn .count strong { color: var(--text); font-weight: 600; }
+  .h2h-score-line {
+    display: flex; align-items: center; justify-content: center;
+    gap: 20px; width: 100%;
+  }
+  .h2h-pname { font-size: 0.98rem; font-weight: 500; min-width: 60px; text-align: center; }
+  .h2h-score { font-size: 1rem; color: var(--text-dim); font-variant-numeric: tabular-nums; }
+  .h2h-score strong { color: var(--text); font-weight: 700; font-size: 1.1rem; }
   .h2h-btn.few { background: #fff7ed; }
-  .h2h-btn.few .count strong { color: var(--orange); }
-  .h2h-btn.open .deck-mu-arrow { transform: rotate(90deg); }
+  .h2h-btn.few .h2h-score strong { color: var(--orange); }
+  .h2h-arrow { font-size: 0.62rem; }
+  .h2h-btn.open .h2h-arrow { transform: rotate(180deg); }
 
   /* Configurazione */
   .config-row {
@@ -2409,6 +2413,9 @@
       <div id="riepilogo-totali"></div>
       <div id="riepilogo-h2h"></div>
     </div>
+    <h3 class="subsection-title">Match-up tra Deck</h3>
+    <p class="section-note"><em>Espandi un mazzo per vedere le statistiche dettagliate.</em></p>
+    <div id="grid-matchup"></div>
     <h3 class="subsection-title">Statistiche dado</h3>
     <p class="section-note"><em>Espandi un giocatore per vedere le statistiche dado e primo/secondo.</em></p>
     <div id="stat-dado-wrap"></div>
@@ -2418,9 +2425,6 @@
     <h2 class="section-title-centered">Deck</h2>
     <p class="section-note"><em>Ordinati per win rate. I mazzi con meno di 3 partite sono In prova.</em></p>
     <div class="card"><table id="tabella-mazzi"></table></div>
-    <h3 class="subsection-title">Match-up tra Deck</h3>
-    <p class="section-note"><em>Espandi un mazzo per vedere le statistiche dettagliate.</em></p>
-    <div id="grid-matchup"></div>
   </section>
 
   <section id="storico" style="display:none"></section>
@@ -3127,8 +3131,7 @@ function renderRiepilogo() {
     for (let j = i + 1; j < giocatori.length; j++) {
       const key = [giocatori[i], giocatori[j]].sort().join('|');
       h2h[key] = { a: giocatori[i], b: giocatori[j], va: 0, vb: 0,
-                   gamesA: 0, gamesB: 0, dadoA: 0, dadoB: 0,
-                   dueZeroA: 0, dueZeroB: 0, ultimo: null };
+                   gamesA: 0, gamesB: 0, dadoA: 0, dadoB: 0, ultimo: null };
     }
   }
   dati.partite.forEach(p => {
@@ -3141,21 +3144,14 @@ function renderRiepilogo() {
     const g1isA = r.a === p.g1;
     // match vinti
     if (g1isA) { win1 ? r.va++ : r.vb++; } else { win1 ? r.vb++ : r.va++; }
-    // game vinti (dal punteggio del match: 2-0 → 2 game, 2-1 → 2 e 1)
-    const [gw, gl] = p.risultato.split('-').map(Number); // es "2-1" → vincitore 2, perdente 1
-    const g1games = win1 ? gw : gl;
-    const g2games = win1 ? gl : gw;
+    // game vinti: il risultato è sempre dal punto di vista di g1 (es "2-1" → g1=2, g2=1)
+    const [g1games, g2games] = p.risultato.split('-').map(Number);
     if (g1isA) { r.gamesA += g1games; r.gamesB += g2games; }
     else       { r.gamesB += g1games; r.gamesA += g2games; }
     // dadi vinti nello scontro
     if (p.dado) {
       if (p.dado === r.a) r.dadoA++;
       else if (p.dado === r.b) r.dadoB++;
-    }
-    // 2-0 (sweep)
-    if (p.risultato === '2-0' || p.risultato === '0-2') {
-      const vincitore = win1 ? p.g1 : p.g2;
-      if (vincitore === r.a) r.dueZeroA++; else if (vincitore === r.b) r.dueZeroB++;
     }
     // ultimo risultato (le partite sono in ordine cronologico)
     const vincitore = win1 ? p.g1 : p.g2;
@@ -3165,22 +3161,21 @@ function renderRiepilogo() {
   const arr = Object.values(h2h);
   const minN = Math.min(...arr.map(r => r.va + r.vb));
   const html = `
-    <div class="riep-section-title">Scontri diretti</div>
     <div class="h2h-list">
       ${arr.map((r, idx) => {
         const tot = r.va + r.vb;
         const few = tot === minN && arr.some(x => (x.va + x.vb) > minN);
         const safeId = 'h2h-' + idx;
-        const leader = r.va > r.vb ? r.a : r.vb > r.va ? r.b : null;
-        const ultimoStr = r.ultimo
-          ? `${r.ultimo.vincitore} (${r.ultimo.risultato})`
-          : '—';
+        const ultimoStr = r.ultimo ? `${r.ultimo.vincitore} (${r.ultimo.risultato})` : '—';
         const bodyVuoto = tot === 0;
         return `<div class="h2h-item">
           <button class="h2h-btn ${few ? 'few' : ''}" onclick="toggleDeckMu('${safeId}')">
-            <div class="pair">${r.a}<span class="vs-small">vs</span>${r.b}</div>
-            <div class="count"><strong>${r.va} - ${r.vb}</strong></div>
-            <span class="deck-mu-arrow">▶</span>
+            <div class="h2h-score-line">
+              <span class="h2h-pname">${r.a}</span>
+              <span class="h2h-score"><strong>${r.va}</strong> - <strong>${r.vb}</strong></span>
+              <span class="h2h-pname">${r.b}</span>
+            </div>
+            <span class="deck-mu-arrow h2h-arrow">▼</span>
           </button>
           <div class="deck-mu-body" id="${safeId}" style="display:none">
             ${bodyVuoto ? '<div style="padding:12px 16px;font-size:0.85rem;color:var(--text-faint)">Nessuno scontro registrato.</div>' : `
@@ -3188,8 +3183,6 @@ function renderRiepilogo() {
               <div class="deck-mu-stat"><span class="deck-mu-stat-lbl">Match totali</span><span class="deck-mu-stat-val">${tot}</span></div>
               <div class="deck-mu-stat"><span class="deck-mu-stat-lbl">Game vinti</span><span class="deck-mu-stat-val">${r.gamesA} - ${r.gamesB}</span></div>
               <div class="deck-mu-stat"><span class="deck-mu-stat-lbl">Dadi vinti</span><span class="deck-mu-stat-val">${r.dadoA} - ${r.dadoB}</span></div>
-              <div class="deck-mu-stat"><span class="deck-mu-stat-lbl">Sweep 2-0</span><span class="deck-mu-stat-val">${r.dueZeroA} - ${r.dueZeroB}</span></div>
-              <div class="deck-mu-stat"><span class="deck-mu-stat-lbl">In testa</span><span class="deck-mu-stat-val">${leader || 'Pari'}</span></div>
               <div class="deck-mu-stat"><span class="deck-mu-stat-lbl">Ultimo</span><span class="deck-mu-stat-val">${ultimoStr}</span></div>
             </div>`}
           </div>
