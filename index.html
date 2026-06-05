@@ -3166,7 +3166,7 @@ function renderRiepilogo() {
         const tot = r.va + r.vb;
         const few = tot === minN && arr.some(x => (x.va + x.vb) > minN);
         const safeId = 'h2h-' + idx;
-        const ultimoStr = r.ultimo ? `${r.ultimo.vincitore} (${r.ultimo.risultato})` : '—';
+        const ultimoStr = r.ultimo ? `Vittoria ${r.ultimo.vincitore}` : '—';
         const bodyVuoto = tot === 0;
         return `<div class="h2h-item">
           <button class="h2h-btn ${few ? 'few' : ''}" onclick="toggleDeckMu('${safeId}')">
@@ -3183,7 +3183,7 @@ function renderRiepilogo() {
               <div class="deck-mu-stat"><span class="deck-mu-stat-lbl">Match totali</span><span class="deck-mu-stat-val">${tot}</span></div>
               <div class="deck-mu-stat"><span class="deck-mu-stat-lbl">Game vinti</span><span class="deck-mu-stat-val">${r.gamesA} - ${r.gamesB}</span></div>
               <div class="deck-mu-stat"><span class="deck-mu-stat-lbl">Dadi vinti</span><span class="deck-mu-stat-val">${r.dadoA} - ${r.dadoB}</span></div>
-              <div class="deck-mu-stat"><span class="deck-mu-stat-lbl">Ultimo</span><span class="deck-mu-stat-val">${ultimoStr}</span></div>
+              <div class="deck-mu-stat"><span class="deck-mu-stat-lbl">Last game</span><span class="deck-mu-stat-val">${ultimoStr}</span></div>
             </div>`}
           </div>
         </div>`;
