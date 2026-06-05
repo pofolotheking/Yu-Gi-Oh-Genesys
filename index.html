@@ -626,6 +626,57 @@
     transition: background 0.15s;
   }
   .decklist-info-btn:hover { background: var(--bg-soft); }
+  /* ─── MODALE DECKLIST ASSOCIATA (larga) ─── */
+  .decklist-modal {
+    max-width: 1100px; width: 96vw; position: relative;
+    max-height: 90vh; display: flex; flex-direction: column;
+  }
+  .decklist-close {
+    position: absolute; top: 12px; right: 12px;
+    width: 32px; height: 32px; border-radius: 50%;
+    background: var(--red); color: #fff; border: none;
+    font-size: 1rem; font-weight: 700; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    z-index: 10; transition: transform 0.1s, background 0.15s;
+    box-shadow: 0 2px 8px rgba(255,59,48,0.3);
+  }
+  .decklist-close:hover { background: #e0271c; transform: scale(1.08); }
+  .decklist-body-wrap { padding: 22px 24px 24px; overflow-y: auto; }
+  .dla-header {
+    display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+    border-bottom: 2px solid var(--border); padding-bottom: 14px; margin-bottom: 16px;
+    padding-right: 40px;
+  }
+  .dla-name { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.03em; }
+  .dla-owner { font-size: 0.95rem; color: var(--text-dim); }
+  .dla-pts { font-size: 0.95rem; color: var(--text-dim); font-weight: 500; padding: 4px 12px; background: var(--bg-soft); border-radius: 9px; }
+  .dla-pts b { color: var(--text); font-weight: 700; font-variant-numeric: tabular-nums; }
+  .dla-pts.over b { color: var(--red); }
+  .dla-charts { display: flex; align-items: center; gap: 14px; margin-left: auto; }
+  .dla-chart { display: flex; align-items: center; gap: 8px; }
+  .dla-chart canvas { width: 52px !important; height: 52px !important; }
+  .dla-chart-legend { display: flex; flex-direction: column; gap: 1px; }
+  .dla-cl-item { display: flex; align-items: center; gap: 5px; font-size: 0.62rem; color: var(--text-dim); font-weight: 500; white-space: nowrap; }
+  .dla-cl-dot { width: 8px; height: 8px; border-radius: 2px; }
+  .dla-cl-item b { color: var(--text); }
+  .dla-group-title {
+    font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--text-faint); font-weight: 700; margin: 16px 0 8px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .dla-group-title:first-of-type { margin-top: 0; }
+  .dla-group-count { background: var(--border); color: var(--text-dim); padding: 1px 7px; border-radius: 6px; font-size: 0.68rem; }
+  .dla-grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 6px; }
+  .dla-card { position: relative; border-radius: 5px; overflow: hidden; border: 1px solid var(--border); }
+  .dla-card img { width: 100%; aspect-ratio: 59/86; object-fit: cover; display: block; background: var(--bg-soft); }
+  .dla-pts-badge { position: absolute; top: 2px; right: 2px; background: #1d1d1f; color: #fff; font-size: 0.54rem; font-weight: 700; padding: 1px 4px; border-radius: 4px; }
+  .dla-pts-badge.high { background: var(--red); } .dla-pts-badge.mid { background: var(--orange); } .dla-pts-badge.low { background: var(--green); }
+  @media (max-width: 700px) {
+    .decklist-modal { width: 96vw; }
+    .dla-grid { grid-template-columns: repeat(5, 1fr); }
+    .dla-name { font-size: 1.2rem; }
+    .dla-charts { margin-left: 0; width: 100%; }
+  }
   .dl-assoc-group-title {
     font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em;
     color: var(--text-faint); font-weight: 700; margin: 14px 0 8px;
@@ -2680,9 +2731,9 @@
 
 </div>
 <div class="modal-overlay" id="decklist-overlay" onclick="chiudiDecklist(event)" style="z-index:160">
-  <div class="modal" style="max-width:680px">
-    <button class="modal-close" onclick="chiudiDecklistForce()">✕</button>
-    <div style="padding:20px;max-height:85vh;overflow-y:auto" id="decklist-body"></div>
+  <div class="modal decklist-modal">
+    <button class="decklist-close" onclick="chiudiDecklistForce()" title="Chiudi">✕</button>
+    <div class="decklist-body-wrap" id="decklist-body"></div>
   </div>
 </div>
 <div class="modal-overlay" id="modal-overlay" onclick="chiudiModale(event)">
@@ -4002,6 +4053,7 @@ function chiudiModaleForce() {
 document.addEventListener('keydown', e => { if (e.key === 'Escape') chiudiModaleForce(); });
 
 // ─────────── DECKLIST ASSOCIATA (vista da classifica) ───────────
+let _dlaPieType = null, _dlaPieAttr = null;
 async function mostraDecklistAssociata(nomeMazzo) {
   const docId = dati.mazziDecklist && dati.mazziDecklist[nomeMazzo];
   if (!docId) return;
@@ -4013,24 +4065,97 @@ async function mostraDecklistAssociata(nomeMazzo) {
     const snap = await getDoc(doc(db, 'liste_mazzi', docId));
     if (!snap.exists()) { body.innerHTML = '<div class="empty">Decklist non trovata.</div>'; return; }
     const d = snap.data();
+    const main = d.main || [], extra = d.extra || [], side = d.side || [];
+    const tutte = [...main, ...extra, ...side];
+    const punti = tutte.reduce((s,c) => s + (c.pts || 0), 0);
+
     const grp = (titolo, arr) => {
-      arr = arr || [];
       if (!arr.length) return '';
       const cards = arr.map(c => {
         const pts = c.pts || 0;
         const cls = pts >= 30 ? 'high' : pts >= 10 ? 'mid' : 'low';
-        const badge = pts > 0 ? `<span class="dl-assoc-pts ${cls}">${pts}</span>` : '';
-        return `<div class="dl-assoc-card"><img src="${c.img}" alt="" loading="lazy">${badge}</div>`;
+        const badge = pts > 0 ? `<span class="dla-pts-badge ${cls}">${pts}</span>` : '';
+        return `<div class="dla-card"><img src="${c.img}" alt="" loading="lazy">${badge}</div>`;
       }).join('');
-      return `<div class="dl-assoc-group-title">${titolo} <span class="dl-assoc-count">${arr.length}</span></div><div class="dl-assoc-grid">${cards}</div>`;
+      return `<div class="dla-group-title">${titolo} <span class="dla-group-count">${arr.length}</span></div><div class="dla-grid">${cards}</div>`;
     };
-    const corpo = grp('🎴 Main Deck', d.main) + grp('⚡ Extra Deck', d.extra) + grp('🔄 Side Deck', d.side);
+    const corpo = grp('🎴 Main Deck', main) + grp('⚡ Extra Deck', extra) + grp('🔄 Side Deck', side);
+
     body.innerHTML = `
-      <div style="font-size:1.2rem;font-weight:700;letter-spacing:-0.02em;margin-bottom:2px">${nomeMazzo}</div>
-      <div style="font-size:0.82rem;color:var(--text-dim);margin-bottom:16px">Decklist · ${d.giocatore || ''}</div>
+      <div class="dla-header">
+        <div>
+          <div class="dla-name">${nomeMazzo}</div>
+          <div class="dla-owner">di ${d.giocatore || ''}</div>
+        </div>
+        <span class="dla-pts ${punti > 100 ? 'over' : ''}"><b>${punti}</b> pt Genesys</span>
+        <div class="dla-charts">
+          <div class="dla-chart" id="dla-chart-type" style="display:none">
+            <canvas id="dla-pie-type" width="60" height="60"></canvas>
+            <div class="dla-chart-legend" id="dla-legend-type"></div>
+          </div>
+          <div class="dla-chart" id="dla-chart-attr" style="display:none">
+            <canvas id="dla-pie-attr" width="60" height="60"></canvas>
+            <div class="dla-chart-legend" id="dla-legend-attr"></div>
+          </div>
+        </div>
+      </div>
       ${corpo || '<div class="empty">Decklist vuota.</div>'}`;
+
+    renderDlaCharts(main, extra);
   } catch (e) {
     body.innerHTML = '<div class="empty">Errore nel caricamento.</div>';
+  }
+}
+
+function renderDlaCharts(main, extra) {
+  if (typeof Chart === 'undefined') return;
+  // torta tipi (Main)
+  let mostri=0, magie=0, trappole=0;
+  main.forEach(c => {
+    const t = c.type || '';
+    if (t.includes('Spell')) magie++;
+    else if (t.includes('Trap')) trappole++;
+    else mostri++;
+  });
+  if (main.length) {
+    document.getElementById('dla-chart-type').style.display = 'flex';
+    const COL = ['#d8954a', '#1d9e74', '#bc5a84'];
+    document.getElementById('dla-legend-type').innerHTML = [
+      `<div class="dla-cl-item"><span class="dla-cl-dot" style="background:${COL[0]}"></span>Mostri <b>${mostri}</b></div>`,
+      `<div class="dla-cl-item"><span class="dla-cl-dot" style="background:${COL[1]}"></span>Magie <b>${magie}</b></div>`,
+      `<div class="dla-cl-item"><span class="dla-cl-dot" style="background:${COL[2]}"></span>Trap <b>${trappole}</b></div>`
+    ].join('');
+    if (_dlaPieType) _dlaPieType.destroy();
+    _dlaPieType = new Chart(document.getElementById('dla-pie-type').getContext('2d'), {
+      type: 'doughnut',
+      data: { labels:['Mostri','Magie','Trappole'], datasets:[{ data:[mostri,magie,trappole], backgroundColor:COL, borderWidth:0 }] },
+      options: { responsive:false, plugins:{legend:{display:false}}, cutout:'58%' }
+    });
+  }
+  // torta attributi (Main+Extra mostri)
+  const ATTR_COLORS = {'DARK':'#8e44c4','LIGHT':'#e8c84a','EARTH':'#9c7a4d','WATER':'#3a8fd0','FIRE':'#d84a3a','WIND':'#3aae6e','DIVINE':'#d8a93a'};
+  const ATTR_LABEL = {'DARK':'Oscurità','LIGHT':'Luce','EARTH':'Terra','WATER':'Acqua','FIRE':'Fuoco','WIND':'Vento','DIVINE':'Divino'};
+  const conteggio = {};
+  [...main, ...extra].forEach(c => {
+    const t = c.type || '';
+    if (t.includes('Spell') || t.includes('Trap')) return;
+    const a = (c.attr || '').toUpperCase();
+    if (!a) return;
+    conteggio[a] = (conteggio[a] || 0) + 1;
+  });
+  const attrs = Object.keys(conteggio);
+  if (attrs.length) {
+    document.getElementById('dla-chart-attr').style.display = 'flex';
+    const cols = attrs.map(a => ATTR_COLORS[a] || '#999');
+    document.getElementById('dla-legend-attr').innerHTML = attrs.map((a,i) =>
+      `<div class="dla-cl-item"><span class="dla-cl-dot" style="background:${cols[i]}"></span>${ATTR_LABEL[a]||a} <b>${conteggio[a]}</b></div>`
+    ).join('');
+    if (_dlaPieAttr) _dlaPieAttr.destroy();
+    _dlaPieAttr = new Chart(document.getElementById('dla-pie-attr').getContext('2d'), {
+      type: 'doughnut',
+      data: { labels: attrs.map(a=>ATTR_LABEL[a]||a), datasets:[{ data: attrs.map(a=>conteggio[a]), backgroundColor:cols, borderWidth:0 }] },
+      options: { responsive:false, plugins:{legend:{display:false}}, cutout:'58%' }
+    });
   }
 }
 function chiudiDecklist(e) {
