@@ -4017,65 +4017,60 @@ async function cercaCarta(append = false) {
     alert('Inserisci almeno un parametro di ricerca.');
     return;
   }
-  if (!append) searchOffset = 0;
   const res = document.getElementById('carte-results');
   const det = document.getElementById('carte-detail');
   det.style.display = 'none';
   res.style.display = 'block';
-  if (!append) res.innerHTML = '<div class="carte-loading">Ricerca in corso…</div>';
-  const params = new URLSearchParams();
-  if (q)     params.append('fname', q);
-  if (tipo)  params.append('type', tipo);
-  if (attr)  params.append('attribute', attr);
-  if (race)  params.append('race', race);
-  if (level) params.append('level', level);
-  if (atk)   params.append('atk', atk);
-  if (def)   params.append('def', def);
-  params.append('misc', 'yes');
-  params.append('num', '100');
-  params.append('offset', searchOffset);
-  lastParams = params;
+  res.innerHTML = '<div class="carte-loading">Ricerca in corso…</div>';
+
+  // filtri comuni validi sia per nome sia per archetipo
+  const filtri = new URLSearchParams();
+  if (tipo)  filtri.append('type', tipo);
+  if (attr)  filtri.append('attribute', attr);
+  if (race)  filtri.append('race', race);
+  if (level) filtri.append('level', level);
+  if (atk)   filtri.append('atk', atk);
+  if (def)   filtri.append('def', def);
+  filtri.append('misc', 'yes');
+
   try {
-    const r = await fetch(`https://db.ygoprodeck.com/api/v7/cardinfo.php?${params.toString()}`);
-    if (!r.ok) throw new Error();
-    const data = await r.json();
-    let cards = data.data || [];
-    if (!append && cards.length === 0) {
+    let cards = [];
+    const visti = new Set();
+    const aggiungi = (arr) => {
+      (arr || []).forEach(c => { if (!visti.has(c.id)) { visti.add(c.id); cards.push(c); } });
+    };
+
+    if (q) {
+      // ricerca per nome
+      const pName = new URLSearchParams(filtri);
+      pName.append('fname', q);
+      try {
+        const r1 = await fetch(`https://db.ygoprodeck.com/api/v7/cardinfo.php?${pName.toString()}`);
+        if (r1.ok) { const d1 = await r1.json(); aggiungi(d1.data); }
+      } catch(e) {}
+      // ricerca per archetipo (carte dell'archetipo senza il nome)
+      const pArch = new URLSearchParams(filtri);
+      pArch.append('archetype', q);
+      try {
+        const r2 = await fetch(`https://db.ygoprodeck.com/api/v7/cardinfo.php?${pArch.toString()}`);
+        if (r2.ok) { const d2 = await r2.json(); aggiungi(d2.data); }
+      } catch(e) {}
+    } else {
+      const r = await fetch(`https://db.ygoprodeck.com/api/v7/cardinfo.php?${filtri.toString()}`);
+      if (r.ok) { const d = await r.json(); aggiungi(d.data); }
+    }
+
+    if (cards.length === 0) {
       res.innerHTML = '<div class="carte-empty">Nessuna carta trovata con questi filtri.</div>';
       return;
     }
-    const hasMore = data.meta?.total_rows > searchOffset + 100;
-    searchOffset += 100;
-    const loadMoreBtn = hasMore
-      ? `<div style="text-align:center;padding:20px"><button class="secondary" style="padding:14px 32px;font-size:1rem;border-radius:12px" onclick="cercaCarta(true)">Carica altri risultati</button></div>`
-      : '';
-    if (append) {
-      const existing = res.querySelector('.carte-grid');
-      if (existing) {
-        cards.forEach(c => {
-          const div = document.createElement('div');
-          div.innerHTML = buildThumb(c);
-          existing.appendChild(div.firstElementChild);
-        });
-        const oldBtn = res.querySelector('.load-more-wrap');
-        if (oldBtn) oldBtn.remove();
-      }
-      if (hasMore) {
-        const wrap = document.createElement('div');
-        wrap.className = 'load-more-wrap';
-        wrap.innerHTML = loadMoreBtn;
-        res.querySelector('.card').appendChild(wrap);
-      }
-    } else {
-      res.innerHTML = `
-        <div class="card padded" style="margin-bottom:0">
-          <div style="font-size:0.8rem;color:var(--text-faint);margin-bottom:12px">${cards.length} risultati${hasMore ? ' (scorri per altri)' : ''}</div>
-          <div class="carte-grid">${cards.map(buildThumb).join('')}</div>
-          <div class="load-more-wrap">${loadMoreBtn}</div>
-        </div>`;
-    }
+    res.innerHTML = `
+      <div class="card padded" style="margin-bottom:0">
+        <div style="font-size:0.8rem;color:var(--text-faint);margin-bottom:12px">${cards.length} risultati</div>
+        <div class="carte-grid">${cards.map(buildThumb).join('')}</div>
+      </div>`;
   } catch(e) {
-    if (!append) res.innerHTML = '<div class="carte-empty">Nessuna carta trovata. Prova a modificare i filtri.</div>';
+    res.innerHTML = '<div class="carte-empty">Nessuna carta trovata. Prova a modificare i filtri.</div>';
   }
 }
 
@@ -4205,9 +4200,40 @@ async function mostraDettaglioCarta(id) {
             </div>
           </div>
         </div>
-      </div>`;
+      </div>
+      <div id="carte-collegate-wrap"></div>`;
+    caricaCarteCollegate(c);
   } catch(e) {
     det.innerHTML = `<button class="back-btn" onclick="tornaRisultati()">${_prevView === 'genesys' ? '← Torna alla lista Genesys' : '← Torna ai risultati'}</button><div class="carte-empty">Errore nel caricamento.</div>`;
+  }
+}
+
+async function caricaCarteCollegate(carta) {
+  const wrap = document.getElementById('carte-collegate-wrap');
+  if (!wrap) return;
+  const arch = carta.archetype;
+  if (!arch) return; // niente archetipo, niente sezione
+  wrap.innerHTML = `<div class="card padded" style="margin-top:16px">
+    <h3 style="margin:0 0 4px">Carte collegate</h3>
+    <p class="section-note" style="text-align:left;margin-bottom:12px"><em>Altre carte dell'archetipo <strong>${escapeHtml(arch)}</strong></em></p>
+    <div class="carte-loading">Caricamento…</div>
+  </div>`;
+  try {
+    const r = await fetch(`https://db.ygoprodeck.com/api/v7/cardinfo.php?archetype=${encodeURIComponent(arch)}&misc=yes`);
+    if (!r.ok) throw new Error();
+    const data = await r.json();
+    const altre = (data.data || []).filter(c => c.id !== carta.id);
+    if (altre.length === 0) {
+      wrap.innerHTML = '';
+      return;
+    }
+    wrap.innerHTML = `<div class="card padded" style="margin-top:16px">
+      <h3 style="margin:0 0 4px">Carte collegate</h3>
+      <p class="section-note" style="text-align:left;margin-bottom:12px"><em>Altre ${altre.length} carte dell'archetipo <strong>${escapeHtml(arch)}</strong></em></p>
+      <div class="carte-grid">${altre.map(buildThumb).join('')}</div>
+    </div>`;
+  } catch(e) {
+    wrap.innerHTML = '';
   }
 }
 
