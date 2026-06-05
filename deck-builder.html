@@ -229,6 +229,8 @@
     display: inline-flex; align-items: center; justify-content: center; gap: 5px;
   }
   .mini-action:hover { background: var(--border); color: var(--text); }
+  .mini-action-trash { color: var(--red); padding: 8px 11px; }
+  .mini-action-trash:hover { background: var(--red-soft); color: var(--red); border-color: var(--red); }
   .builder-chart-wrap { display: flex; align-items: center; gap: 8px; }
   .builder-chart-wrap canvas { width: 56px !important; height: 56px !important; }
   .builder-chart-legend { display: flex; flex-direction: column; gap: 1px; }
@@ -299,8 +301,8 @@
   .search-panel { position: sticky; top: 12px; }
   .search-row { display: flex; gap: 8px; margin-bottom: 12px; }
   .search-results {
-    display: grid; grid-template-columns: repeat(auto-fill, minmax(92px, 1fr));
-    gap: 9px; max-height: 760px; overflow-y: auto;
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
+    gap: 7px; max-height: 760px; overflow-y: auto;
     -webkit-overflow-scrolling: touch;
   }
   .search-card {
@@ -335,7 +337,7 @@
     font-variant-numeric: tabular-nums;
   }
   .deck-zone-grid {
-    display: grid; grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); gap: 9px;
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(64px, 1fr)); gap: 7px;
   }
   .deck-zone-empty { color: var(--text-faint); font-size: 0.82rem; padding: 18px 8px; text-align: center; grid-column: 1/-1; }
   .deck-card {
@@ -524,13 +526,17 @@
           <canvas id="main-pie" width="80" height="80"></canvas>
           <div class="builder-chart-legend" id="main-pie-legend"></div>
         </div>
+        <div class="builder-chart-wrap" id="attr-chart-wrap" style="display:none">
+          <canvas id="attr-pie" width="80" height="80"></canvas>
+          <div class="builder-chart-legend" id="attr-pie-legend"></div>
+        </div>
       </div>
       <div class="builder-header-right">
         <button class="mini-action" onclick="manoDiProva()" title="Mano di prova">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 11V6a2 2 0 0 0-4 0v5"/><path d="M14 10V4a2 2 0 0 0-4 0v6"/><path d="M10 10.5V6a2 2 0 0 0-4 0v8"/><path d="M6 14a4 4 0 0 0 4 4h4a4 4 0 0 0 4-4v-2.5"/></svg>
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 11V5.5a1.5 1.5 0 0 1 3 0V10"/><path d="M9 10V4a1.5 1.5 0 0 1 3 0v6"/><path d="M12 10V4.5a1.5 1.5 0 0 1 3 0V10"/><path d="M15 10.5V6a1.5 1.5 0 0 1 3 0v6a6 6 0 0 1-6 6h-1.5a6 6 0 0 1-5-2.7l-2.1-3.1a1.5 1.5 0 0 1 2.4-1.8L6 12"/></svg>
         </button>
-        <button class="mini-action" onclick="nuovoMazzoVuoto()" title="Svuota il deck">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+        <button class="mini-action mini-action-trash" onclick="nuovoMazzoVuoto()" title="Svuota il deck">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
         </button>
         <button class="primary" onclick="salvaMazzo()">💾 Salva</button>
       </div>
@@ -886,7 +892,7 @@ function buildDeckListBody(dk) {
       const key = dk.docId + '_' + (c.uid || (titolo[0] + i));
       _dlCardCache[key] = c;
       return `
-      <div class="dl-card" title="${escapeHtml(c.name)}"
+      <div class="dl-card"
            onclick="dettaglioCartaDL('${key}')"
            onmouseenter="hoverPreviewDL(event,'${key}')"
            onmouseleave="hidePreview()"
@@ -940,8 +946,7 @@ function buildSearchCard(c) {
       ondragstart="dragStart(event,${c.id})"
       ondblclick="aggiungiAuto(${c.id})"
       onmouseenter="hoverPreview(event,${c.id})"
-      onmouseleave="hidePreview()"
-      title="${escapeHtml(c.name)}">
+      onmouseleave="hidePreview()">
     <img src="${img}" alt="${escapeHtml(c.name)}" loading="lazy">
     ${ptsBadge(pts, 'search-card-pts')}
     <span class="search-card-owned" data-owned="${c.id}" style="${owned > 0 ? '' : 'display:none'}">${owned}/3</span>
@@ -1185,8 +1190,7 @@ function renderBuilder() {
              ondragover="event.preventDefault()"
              onclick="rimuoviCartaUI(${c.uid},'${zona}')"
              onmouseenter="hoverPreviewDeck(event,${c.uid},'${zona}')"
-             onmouseleave="hidePreview()"
-             title="${escapeHtml(c.name)} — click per rimuovere, trascina per spostare">
+             onmouseleave="hidePreview()">
           <img src="${c.img}" alt="${escapeHtml(c.name)}" loading="lazy">
           ${ptsBadge(c.pts, 'deck-card-pts')}
           <button class="deck-card-dup" onclick="duplicaCarta(${c.uid},'${zona}',event)" title="Aggiungi un'altra copia">+</button>
@@ -1200,6 +1204,7 @@ function renderBuilder() {
   elP.textContent = punti;
   document.getElementById('cnt-punti-wrap').classList.toggle('over', punti > 100);
   aggiornaTortaMain();
+  aggiornaTortaAttributi();
   aggiornaBadgeOwned();
 }
 
@@ -1273,6 +1278,55 @@ function aggiornaTortaMain() {
   _pieChart = new Chart(ctx, {
     type: 'doughnut',
     data: { labels: ['Mostri','Magie','Trappole'], datasets: [{ data: [mostri, magie, trappole], backgroundColor: COL, borderWidth: 0 }] },
+    options: { responsive: false, plugins: { legend: { display: false }, tooltip: { enabled: true } }, cutout: '58%' }
+  });
+}
+
+// colori ufficiali attributi Yu-Gi-Oh
+const ATTR_COLORS = {
+  'DARK':  '#8e44c4',
+  'LIGHT': '#e8c84a',
+  'EARTH': '#9c7a4d',
+  'WATER': '#3a8fd0',
+  'FIRE':  '#d84a3a',
+  'WIND':  '#3aae6e',
+  'DIVINE':'#d8a93a'
+};
+const ATTR_LABEL = {
+  'DARK':'Oscurità','LIGHT':'Luce','EARTH':'Terra',
+  'WATER':'Acqua','FIRE':'Fuoco','WIND':'Vento','DIVINE':'Divino'
+};
+let _attrChart = null;
+function aggiornaTortaAttributi() {
+  const wrap = document.getElementById('attr-chart-wrap');
+  const legend = document.getElementById('attr-pie-legend');
+  // conta attributi dei mostri in Main + Extra
+  const conteggio = {};
+  [...buildDeck.main, ...buildDeck.extra].forEach(c => {
+    const t = c.type || '';
+    if (t.includes('Spell') || t.includes('Trap')) return; // solo mostri
+    const a = (c.attr || '').toUpperCase();
+    if (!a) return;
+    conteggio[a] = (conteggio[a] || 0) + 1;
+  });
+  const attrs = Object.keys(conteggio);
+  if (!attrs.length || typeof Chart === 'undefined') {
+    if (wrap) wrap.style.display = 'none';
+    if (_attrChart) { _attrChart.destroy(); _attrChart = null; }
+    return;
+  }
+  wrap.style.display = 'flex';
+  const labels = attrs.map(a => ATTR_LABEL[a] || a);
+  const data = attrs.map(a => conteggio[a]);
+  const cols = attrs.map(a => ATTR_COLORS[a] || '#999');
+  legend.innerHTML = attrs.map((a, i) =>
+    `<div class="bcl-item"><span class="bcl-dot" style="background:${cols[i]}"></span>${ATTR_LABEL[a] || a} <b>${conteggio[a]}</b></div>`
+  ).join('');
+  const ctx = document.getElementById('attr-pie').getContext('2d');
+  if (_attrChart) _attrChart.destroy();
+  _attrChart = new Chart(ctx, {
+    type: 'doughnut',
+    data: { labels, datasets: [{ data, backgroundColor: cols, borderWidth: 0 }] },
     options: { responsive: false, plugins: { legend: { display: false }, tooltip: { enabled: true } }, cutout: '58%' }
   });
 }
