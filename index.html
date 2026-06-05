@@ -745,6 +745,22 @@
   .h2h-row.few { background: #fff7ed; }
   .h2h-row.few .count strong { color: var(--orange); }
 
+  /* H2H espandibile */
+  .h2h-item { background: var(--bg-soft); border-radius: 10px; overflow: hidden; }
+  .h2h-btn {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 10px; width: 100%; padding: 10px 14px;
+    background: none; border: none; cursor: pointer; font-family: inherit;
+    text-align: left; color: var(--text);
+  }
+  .h2h-btn .pair { font-size: 0.95rem; font-weight: 500; flex: 1; }
+  .h2h-btn .pair .vs-small { color: var(--text-faint); font-weight: 400; margin: 0 6px; }
+  .h2h-btn .count { font-size: 0.9rem; color: var(--text-dim); font-variant-numeric: tabular-nums; }
+  .h2h-btn .count strong { color: var(--text); font-weight: 600; }
+  .h2h-btn.few { background: #fff7ed; }
+  .h2h-btn.few .count strong { color: var(--orange); }
+  .h2h-btn.open .deck-mu-arrow { transform: rotate(90deg); }
+
   /* Configurazione */
   .config-row {
     display: grid;
@@ -2394,6 +2410,7 @@
       <div id="riepilogo-h2h"></div>
     </div>
     <h3 class="subsection-title">Statistiche dado</h3>
+    <p class="section-note"><em>Espandi un giocatore per vedere le statistiche dado e primo/secondo.</em></p>
     <div id="stat-dado-wrap"></div>
   </section>
 
@@ -3109,19 +3126,40 @@ function renderRiepilogo() {
   for (let i = 0; i < giocatori.length; i++) {
     for (let j = i + 1; j < giocatori.length; j++) {
       const key = [giocatori[i], giocatori[j]].sort().join('|');
-      h2h[key] = { a: giocatori[i], b: giocatori[j], va: 0, vb: 0 };
+      h2h[key] = { a: giocatori[i], b: giocatori[j], va: 0, vb: 0,
+                   gamesA: 0, gamesB: 0, dadoA: 0, dadoB: 0,
+                   dueZeroA: 0, dueZeroB: 0, ultimo: null };
     }
   }
   dati.partite.forEach(p => {
     const [p1, p2] = PUNTI[p.risultato];
     const key = [p.g1, p.g2].sort().join('|');
     if (!h2h[key]) return;
+    const r = h2h[key];
     const win1 = p1 > p2;
-    if (h2h[key].a === p.g1) {
-      win1 ? h2h[key].va++ : h2h[key].vb++;
-    } else {
-      win1 ? h2h[key].vb++ : h2h[key].va++;
+    // chi è "a" e chi è "b" nello scontro
+    const g1isA = r.a === p.g1;
+    // match vinti
+    if (g1isA) { win1 ? r.va++ : r.vb++; } else { win1 ? r.vb++ : r.va++; }
+    // game vinti (dal punteggio del match: 2-0 → 2 game, 2-1 → 2 e 1)
+    const [gw, gl] = p.risultato.split('-').map(Number); // es "2-1" → vincitore 2, perdente 1
+    const g1games = win1 ? gw : gl;
+    const g2games = win1 ? gl : gw;
+    if (g1isA) { r.gamesA += g1games; r.gamesB += g2games; }
+    else       { r.gamesB += g1games; r.gamesA += g2games; }
+    // dadi vinti nello scontro
+    if (p.dado) {
+      if (p.dado === r.a) r.dadoA++;
+      else if (p.dado === r.b) r.dadoB++;
     }
+    // 2-0 (sweep)
+    if (p.risultato === '2-0' || p.risultato === '0-2') {
+      const vincitore = win1 ? p.g1 : p.g2;
+      if (vincitore === r.a) r.dueZeroA++; else if (vincitore === r.b) r.dueZeroB++;
+    }
+    // ultimo risultato (le partite sono in ordine cronologico)
+    const vincitore = win1 ? p.g1 : p.g2;
+    r.ultimo = { vincitore, risultato: p.risultato, data: p.data };
   });
 
   const arr = Object.values(h2h);
@@ -3129,12 +3167,32 @@ function renderRiepilogo() {
   const html = `
     <div class="riep-section-title">Scontri diretti</div>
     <div class="h2h-list">
-      ${arr.map(r => {
+      ${arr.map((r, idx) => {
         const tot = r.va + r.vb;
         const few = tot === minN && arr.some(x => (x.va + x.vb) > minN);
-        return `<div class="h2h-row ${few ? 'few' : ''}">
-          <div class="pair">${r.a}<span class="vs-small">vs</span>${r.b}</div>
-          <div class="count"><strong>${r.va} - ${r.vb}</strong></div>
+        const safeId = 'h2h-' + idx;
+        const leader = r.va > r.vb ? r.a : r.vb > r.va ? r.b : null;
+        const ultimoStr = r.ultimo
+          ? `${r.ultimo.vincitore} (${r.ultimo.risultato})`
+          : '—';
+        const bodyVuoto = tot === 0;
+        return `<div class="h2h-item">
+          <button class="h2h-btn ${few ? 'few' : ''}" onclick="toggleDeckMu('${safeId}')">
+            <div class="pair">${r.a}<span class="vs-small">vs</span>${r.b}</div>
+            <div class="count"><strong>${r.va} - ${r.vb}</strong></div>
+            <span class="deck-mu-arrow">▶</span>
+          </button>
+          <div class="deck-mu-body" id="${safeId}" style="display:none">
+            ${bodyVuoto ? '<div style="padding:12px 16px;font-size:0.85rem;color:var(--text-faint)">Nessuno scontro registrato.</div>' : `
+            <div class="deck-mu-stat-grid">
+              <div class="deck-mu-stat"><span class="deck-mu-stat-lbl">Match totali</span><span class="deck-mu-stat-val">${tot}</span></div>
+              <div class="deck-mu-stat"><span class="deck-mu-stat-lbl">Game vinti</span><span class="deck-mu-stat-val">${r.gamesA} - ${r.gamesB}</span></div>
+              <div class="deck-mu-stat"><span class="deck-mu-stat-lbl">Dadi vinti</span><span class="deck-mu-stat-val">${r.dadoA} - ${r.dadoB}</span></div>
+              <div class="deck-mu-stat"><span class="deck-mu-stat-lbl">Sweep 2-0</span><span class="deck-mu-stat-val">${r.dueZeroA} - ${r.dueZeroB}</span></div>
+              <div class="deck-mu-stat"><span class="deck-mu-stat-lbl">In testa</span><span class="deck-mu-stat-val">${leader || 'Pari'}</span></div>
+              <div class="deck-mu-stat"><span class="deck-mu-stat-lbl">Ultimo</span><span class="deck-mu-stat-val">${ultimoStr}</span></div>
+            </div>`}
+          </div>
         </div>`;
       }).join('')}
     </div>
@@ -3277,24 +3335,27 @@ function renderStatDado() {
   );
 
   const rows = ordine.map(g => {
-    const s = stat[g] || { primoV:0, primoT:0, secondoV:0, secondoT:0, dadoV:0, dadoT:0 };
-    const dadoVintoT = s.dadoV;
-    const dadoTotale = s.dadoT;
-    const dadoStr = dadoTotale > 0 ? `${dadoVintoT}/${dadoTotale} <span class="dado-pct">(${pct(dadoVintoT,dadoTotale)})</span>` : '—';
-    const wrDado  = (s.dadoWinV !== undefined && s.dadoV > 0) ? pct(s.dadoWinV, s.dadoV) : '—';
-    const primoStr = s.primoT > 0 ? `${s.primoT}` : '—';
-    const secondoStr = s.secondoT > 0 ? `${s.secondoT}` : '—';
-    const wrPrimo  = s.primoT > 0   ? pct(s.primoV, s.primoT)   : '—';
+    const s = stat[g] || { primoV:0, primoT:0, secondoV:0, secondoT:0, dadoV:0, dadoT:0, dadoWinV:0 };
+    const wrDado    = s.dadoV > 0 ? pct(s.dadoWinV, s.dadoV) : '—';
+    const wrPrimo   = s.primoT > 0   ? pct(s.primoV, s.primoT)     : '—';
     const wrSecondo = s.secondoT > 0 ? pct(s.secondoV, s.secondoT) : '—';
-    return `<tr>
-      <td>${g}</td>
-      <td>${dadoStr}</td>
-      <td>${wrDado}</td>
-      <td>${primoStr}</td>
-      <td>${secondoStr}</td>
-      <td>${wrPrimo}</td>
-      <td>${wrSecondo}</td>
-    </tr>`;
+    const safeId = 'dado-' + g.replace(/[^a-z0-9]/gi,'_');
+    return `<div class="deck-mu-item">
+      <button class="deck-mu-btn" onclick="toggleDeckMu('${safeId}')">
+        <span>${g}</span>
+        <span class="deck-mu-arrow">▶</span>
+      </button>
+      <div class="deck-mu-body" id="${safeId}" style="display:none">
+        <div class="deck-mu-stat-grid">
+          <div class="deck-mu-stat"><span class="deck-mu-stat-lbl">Dado vinto</span><span class="deck-mu-stat-val">${s.dadoV}/${s.dadoT} ${s.dadoT>0?'('+pct(s.dadoV,s.dadoT)+')':''}</span></div>
+          <div class="deck-mu-stat"><span class="deck-mu-stat-lbl">WR col dado</span><span class="deck-mu-stat-val">${wrDado}</span></div>
+          <div class="deck-mu-stat"><span class="deck-mu-stat-lbl">Volte 1°</span><span class="deck-mu-stat-val">${s.primoT}</span></div>
+          <div class="deck-mu-stat"><span class="deck-mu-stat-lbl">Volte 2°</span><span class="deck-mu-stat-val">${s.secondoT}</span></div>
+          <div class="deck-mu-stat"><span class="deck-mu-stat-lbl">WR da 1°</span><span class="deck-mu-stat-val">${wrPrimo}</span></div>
+          <div class="deck-mu-stat"><span class="deck-mu-stat-lbl">WR da 2°</span><span class="deck-mu-stat-val">${wrSecondo}</span></div>
+        </div>
+      </div>
+    </div>`;
   }).join('');
 
   if (partiteConInfo.length === 0) {
@@ -3302,20 +3363,7 @@ function renderStatDado() {
     return;
   }
 
-  wrap.innerHTML = `<div class="card dado-table-wrap">
-    <table class="dado-table">
-      <tr>
-        <th>Giocatore</th>
-        <th>Dado vinto</th>
-        <th>WR dado</th>
-        <th>Volte 1°</th>
-        <th>Volte 2°</th>
-        <th>WR da 1°</th>
-        <th>WR da 2°</th>
-      </tr>
-      ${rows}
-    </table>
-  </div>`;
+  wrap.innerHTML = rows;
 }
 
 function renderMazzi() {
