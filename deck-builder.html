@@ -981,54 +981,54 @@ async function cercaCarte() {
 
   await caricaGenesysCache();
 
-  const params = new URLSearchParams();
-  if (q)     params.append('fname', q);
-  if (tipo)  params.append('type', tipo);
-  if (attr)  params.append('attribute', attr);
-  if (race)  params.append('race', race);
-  if (level) params.append('level', level);
-  if (atk)   params.append('atk', atk);
-  if (def)   params.append('def', def);
-  params.append('misc', 'yes');
-  params.append('num', '50');
-  _searchOffset = 0;
-  _searchParams = params;
-  await eseguiRicerca(false);
-}
+  // filtri comuni (validi sia per nome sia per archetipo)
+  const filtri = new URLSearchParams();
+  if (tipo)  filtri.append('type', tipo);
+  if (attr)  filtri.append('attribute', attr);
+  if (race)  filtri.append('race', race);
+  if (level) filtri.append('level', level);
+  if (atk)   filtri.append('atk', atk);
+  if (def)   filtri.append('def', def);
+  filtri.append('misc', 'yes');
 
-async function eseguiRicerca(append) {
-  const cont = document.getElementById('search-results');
-  const params = new URLSearchParams(_searchParams);
-  params.append('offset', String(_searchOffset));
   try {
-    const r = await fetch(`https://db.ygoprodeck.com/api/v7/cardinfo.php?${params.toString()}`);
-    if (!r.ok) throw new Error();
-    const data = await r.json();
-    const cards = data.data || [];
-    _searchTotal = data.meta?.total_rows ?? cards.length;
-    if (!append && cards.length === 0) {
+    let risultati = [];
+    const visti = new Set();
+    const aggiungi = (arr) => {
+      (arr || []).forEach(c => { if (!visti.has(c.id)) { visti.add(c.id); risultati.push(c); } });
+    };
+
+    // 1) ricerca per nome
+    if (q) {
+      const pName = new URLSearchParams(filtri);
+      pName.append('fname', q);
+      try {
+        const r1 = await fetch(`https://db.ygoprodeck.com/api/v7/cardinfo.php?${pName.toString()}`);
+        if (r1.ok) { const d1 = await r1.json(); aggiungi(d1.data); }
+      } catch (e) {}
+
+      // 2) ricerca per archetipo (carte che appartengono all'archetipo anche senza il nome)
+      const pArch = new URLSearchParams(filtri);
+      pArch.append('archetype', q);
+      try {
+        const r2 = await fetch(`https://db.ygoprodeck.com/api/v7/cardinfo.php?${pArch.toString()}`);
+        if (r2.ok) { const d2 = await r2.json(); aggiungi(d2.data); }
+      } catch (e) {}
+    } else {
+      // solo filtri, nessun nome
+      const r = await fetch(`https://db.ygoprodeck.com/api/v7/cardinfo.php?${filtri.toString()}`);
+      if (r.ok) { const d = await r.json(); aggiungi(d.data); }
+    }
+
+    if (risultati.length === 0) {
       cont.innerHTML = '<div class="empty" style="grid-column:1/-1;padding:24px 8px">Nessun risultato.</div>';
       return;
     }
-    const html = cards.map(buildSearchCard).join('');
-    if (append) {
-      const oldBtn = cont.querySelector('.load-more');
-      if (oldBtn) oldBtn.remove();
-      cont.insertAdjacentHTML('beforeend', html);
-    } else {
-      cont.innerHTML = html;
-    }
-    _searchOffset += 50;
-    if (_searchOffset < _searchTotal) {
-      cont.insertAdjacentHTML('beforeend',
-        `<button class="load-more" onclick="caricaAltriRisultati()">Carica più risultati (${_searchTotal - _searchOffset} rimasti)</button>`);
-    }
+    cont.innerHTML = risultati.map(buildSearchCard).join('');
   } catch (e) {
-    if (!append) cont.innerHTML = '<div class="empty" style="grid-column:1/-1;padding:24px 8px">Errore nella ricerca.</div>';
+    cont.innerHTML = '<div class="empty" style="grid-column:1/-1;padding:24px 8px">Errore nella ricerca.</div>';
   }
 }
-
-function caricaAltriRisultati() { eseguiRicerca(true); }
 
 // ─────────── DRAG & DROP ───────────
 // _drag descrive l'origine: dalla ricerca {from:'search', id} o da una zona {from:'deck', uid, zona}
@@ -1734,7 +1734,6 @@ document.getElementById('search-input')?.addEventListener('keydown', e => {
 // ─────────── ESPORTA FUNZIONI ───────────
 window.switchTab = switchTab;
 window.cercaCarte = cercaCarte;
-window.caricaAltriRisultati = caricaAltriRisultati;
 window.toggleFiltri = toggleFiltri;
 window.resetFiltri = resetFiltri;
 window.dragStart = dragStart;
