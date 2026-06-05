@@ -187,50 +187,51 @@
   }
   .dl-card-pts.zero { background: var(--text-faint); }
 
-  /* ─── SEZIONE CREA MAZZO ─── */
-  .builder-topbar {
-    display: grid; grid-template-columns: 1fr 1fr auto; gap: 10px;
-    align-items: end; margin-bottom: 10px;
+  /* ─── SEZIONE CREA MAZZO — riga titolo compatta ─── */
+  .builder-header {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 14px; flex-wrap: wrap; margin-bottom: 14px;
   }
-  .builder-topbar label { font-size: 0.7rem; margin-bottom: 3px; }
-  .builder-topbar input, .builder-topbar select { padding: 8px 11px; font-size: 0.9rem; }
-  .builder-topbar > button { height: 38px; padding: 8px 14px; }
-  .builder-counters {
-    display: inline-flex; gap: 0; margin-bottom: 0;
-    border: 1px solid var(--border); border-radius: 10px; overflow: hidden;
+  .builder-header-main {
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap; flex: 1; min-width: 0;
   }
-  .builder-counter {
-    background: var(--bg-card);
-    border-right: 1px solid var(--border); padding: 8px 22px; text-align: center;
+  .builder-header-right { display: flex; align-items: center; gap: 12px; }
+  /* nome mazzo come grande titolo editabile, senza riquadro */
+  .bh-name {
+    width: auto; min-width: 180px; max-width: 360px;
+    border: none; background: transparent; padding: 2px 0;
+    font-size: 1.5rem; font-weight: 700; letter-spacing: -0.03em;
+    color: var(--text); border-bottom: 2px solid transparent; border-radius: 0;
   }
-  .builder-counter:last-child { border-right: none; }
-  .builder-counter-val {
-    font-size: 1.15rem; font-weight: 700; font-variant-numeric: tabular-nums;
-    display: block; line-height: 1; margin-bottom: 2px;
+  .bh-name::placeholder { color: var(--text-faint); font-weight: 700; }
+  .bh-name:focus { outline: none; border-bottom-color: var(--blue); box-shadow: none; }
+  .bh-by { color: var(--text-faint); font-size: 0.95rem; }
+  /* proprietario come testo-select discreto */
+  .bh-owner {
+    width: auto; border: none; background: transparent; padding: 2px 18px 2px 2px;
+    font-size: 1.05rem; font-weight: 600; color: var(--text-dim); border-radius: 0;
+    background-position: right 2px center;
   }
-  .builder-counter-val.over { color: var(--red); }
-  .builder-counter-lbl {
-    font-size: 0.55rem; text-transform: uppercase; letter-spacing: 0.04em;
-    color: var(--text-faint); font-weight: 600; white-space: nowrap;
+  .bh-owner:focus { outline: none; box-shadow: none; }
+  .bh-pts {
+    font-size: 0.95rem; color: var(--text-dim); font-weight: 500;
+    padding: 3px 10px; background: var(--bg-soft); border-radius: 8px;
+    white-space: nowrap;
   }
+  .bh-pts b { color: var(--text); font-weight: 700; font-variant-numeric: tabular-nums; }
+  .bh-pts.over b { color: var(--red); }
 
-  /* riga inferiore: contatore + azioni a sx, torta a dx */
-  .builder-bottom-row {
-    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
-  }
   .mini-action {
     background: var(--bg-soft); border: 1px solid var(--border-strong);
-    border-radius: 9px; padding: 8px 12px; font-family: inherit;
+    border-radius: 9px; padding: 7px 11px; font-family: inherit;
     font-size: 0.8rem; font-weight: 600; color: var(--text); cursor: pointer;
     white-space: nowrap; transition: background 0.15s;
   }
   .mini-action:hover { background: var(--border); }
-  .builder-chart-wrap {
-    margin-left: auto; display: flex; align-items: center; gap: 10px;
-  }
-  .builder-chart-wrap canvas { width: 64px !important; height: 64px !important; }
-  .builder-chart-legend { display: flex; flex-direction: column; gap: 2px; }
-  .bcl-item { display: flex; align-items: center; gap: 5px; font-size: 0.66rem; color: var(--text-dim); font-weight: 500; white-space: nowrap; }
+  .builder-chart-wrap { display: flex; align-items: center; gap: 10px; }
+  .builder-chart-wrap canvas { width: 56px !important; height: 56px !important; }
+  .builder-chart-legend { display: flex; flex-direction: column; gap: 1px; }
+  .bcl-item { display: flex; align-items: center; gap: 5px; font-size: 0.64rem; color: var(--text-dim); font-weight: 500; white-space: nowrap; }
   .bcl-dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
   .bcl-item b { color: var(--text); font-variant-numeric: tabular-nums; }
 
@@ -458,7 +459,6 @@
     .search-results { max-height: 320px; }
   }
   @media (max-width: 600px) {
-    .builder-topbar { grid-template-columns: 1fr; gap: 8px; }
     .filtri-panel { grid-template-columns: 1fr; }
     main { padding: 0 10px; }
     header { padding: 50px 16px 14px; }
@@ -467,23 +467,12 @@
     .search-card { cursor: pointer; }
     h2 { font-size: 1.2rem; }
 
-    /* ── Compatta sezione "Crea un Mazzo" su mobile ── */
+    /* riga titolo compatta su mobile */
     #crea .section-note { display: none; }
-    #crea .card.padded { padding: 12px; margin-bottom: 12px; }
-    /* campi nome + proprietario su una riga, etichette inline piccole */
-    .builder-topbar { grid-template-columns: 1fr 1fr; gap: 8px; align-items: end; }
-    .builder-topbar label { font-size: 0.62rem; margin-bottom: 2px; }
-    .builder-topbar input, .builder-topbar select { padding: 8px 10px; font-size: 0.85rem; border-radius: 8px; }
-    .builder-topbar > button { grid-column: 1 / -1; height: auto; padding: 8px; font-size: 0.82rem; }
-    /* contatori come riga di testo, non blocchi */
-    .builder-counters { gap: 0; margin: 10px 0 0; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
-    .builder-counter { padding: 7px 4px; border-right: 1px solid var(--border); border-radius: 0; }
-    .builder-counter:last-child { border-right: none; }
-    .builder-counter-val { font-size: 1rem; margin-bottom: 1px; }
-    .builder-counter-lbl { font-size: 0.48rem; white-space: nowrap; line-height: 1.2; }
-    /* riduce intestazione sezione */
-    #crea h2 { font-size: 1.05rem; }
-    #crea .primary { padding: 8px 14px; font-size: 0.85rem; }
+    .builder-header { gap: 8px; }
+    .bh-name { font-size: 1.2rem; min-width: 120px; max-width: 200px; }
+    .bh-owner { font-size: 0.92rem; }
+    .builder-chart-wrap canvas { width: 48px !important; height: 48px !important; }
   }
 </style>
 </head>
@@ -524,37 +513,21 @@
 
   <!-- ════ SEZIONE 2: CREA UN MAZZO ════ -->
   <section id="crea">
-    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:6px">
-      <h2 style="margin-bottom:0" id="crea-titolo">Crea un Mazzo</h2>
-      <button class="primary" onclick="salvaMazzo()">💾 Salva Deck</button>
-    </div>
-    <p class="section-note">Trascina le carte dalla ricerca alle zone, oppure doppio click per aggiungerle.</p>
-
-    <div class="card padded">
-      <div class="builder-topbar">
-        <div>
-          <label>Nome del mazzo</label>
-          <input type="text" id="nome-mazzo" placeholder="es. Sky Striker">
-        </div>
-        <div>
-          <label>Proprietario</label>
-          <select id="proprietario-mazzo"></select>
-        </div>
-        <button class="secondary" onclick="nuovoMazzoVuoto()" style="height:44px">🗑 Svuota</button>
+    <div class="builder-header">
+      <div class="builder-header-main">
+        <input type="text" id="nome-mazzo" class="bh-name" placeholder="Nome del mazzo…">
+        <span class="bh-by">di</span>
+        <select id="proprietario-mazzo" class="bh-owner"></select>
+        <span class="bh-pts" id="cnt-punti-wrap"><b id="cnt-punti">0</b> pt</span>
+        <button class="mini-action" onclick="manoDiProva()" title="Pesca 5 carte a caso dal Main">🎴 Mano</button>
+        <button class="mini-action" onclick="nuovoMazzoVuoto()" title="Svuota il deck">🗑</button>
       </div>
-
-      <div class="builder-bottom-row">
-        <div class="builder-counters">
-          <div class="builder-counter">
-            <span class="builder-counter-val" id="cnt-punti">0</span>
-            <span class="builder-counter-lbl">Punti Genesys</span>
-          </div>
-        </div>
-        <button class="mini-action" onclick="manoDiProva()" title="Pesca 5 carte a caso dal Main">🎴 Mano di prova</button>
+      <div class="builder-header-right">
         <div class="builder-chart-wrap" id="builder-chart-wrap" style="display:none">
           <canvas id="main-pie" width="80" height="80"></canvas>
           <div class="builder-chart-legend" id="main-pie-legend"></div>
         </div>
+        <button class="primary" onclick="salvaMazzo()">💾 Salva</button>
       </div>
     </div>
 
@@ -1036,11 +1009,20 @@ async function eseguiRicerca(append) {
 function caricaAltriRisultati() { eseguiRicerca(true); }
 
 // ─────────── DRAG & DROP ───────────
-let _dragId = null;
+// _drag descrive l'origine: dalla ricerca {from:'search', id} o da una zona {from:'deck', uid, zona}
+let _drag = null;
+let _justDragged = false;
+
 function dragStart(e, id) {
-  _dragId = id;
+  _drag = { from: 'search', id };
   e.dataTransfer.effectAllowed = 'copy';
-  e.dataTransfer.setData('text/plain', String(id));
+  e.dataTransfer.setData('text/plain', 'search:' + id);
+}
+function dragStartDeck(e, uid, zona) {
+  _drag = { from: 'deck', uid, zona };
+  _justDragged = true;
+  e.dataTransfer.effectAllowed = 'move';
+  e.dataTransfer.setData('text/plain', 'deck:' + zona + ':' + uid);
 }
 function allowDrop(e, zona) {
   e.preventDefault();
@@ -1049,13 +1031,76 @@ function allowDrop(e, zona) {
 function dragLeave(e, zona) {
   document.getElementById('zone-' + zona)?.classList.remove('dragover');
 }
-function dropCarta(e, zona) {
+
+// drop sulla ZONA (area vuota o generica)
+function dropCarta(e, zonaDest) {
   e.preventDefault();
-  document.getElementById('zone-' + zona)?.classList.remove('dragover');
-  const id = _dragId || parseInt(e.dataTransfer.getData('text/plain'));
-  if (!id) return;
-  aggiungiCarta(id, zona);
-  _dragId = null;
+  document.getElementById('zone-' + zonaDest)?.classList.remove('dragover');
+  if (!_drag) return;
+  if (_drag.from === 'search') {
+    aggiungiCarta(_drag.id, zonaDest);
+  } else if (_drag.from === 'deck') {
+    spostaTraZone(_drag.uid, _drag.zona, zonaDest);
+  }
+  _drag = null;
+}
+
+// drop SOPRA una carta specifica → scambio posizioni (o spostamento)
+function dropSuCarta(e, uidDest, zonaDest) {
+  e.preventDefault();
+  e.stopPropagation();
+  document.getElementById('zone-' + zonaDest)?.classList.remove('dragover');
+  if (!_drag) return;
+  if (_drag.from === 'search') {
+    // dalla ricerca: aggiungi semplicemente nella zona di destinazione
+    aggiungiCarta(_drag.id, zonaDest);
+  } else if (_drag.from === 'deck') {
+    scambiaCarte(_drag.uid, _drag.zona, uidDest, zonaDest);
+  }
+  _drag = null;
+}
+
+// sposta una carta da una zona a un'altra (su area vuota)
+function spostaTraZone(uid, zonaOrig, zonaDest) {
+  if (zonaOrig === zonaDest) return;
+  const idx = buildDeck[zonaOrig].findIndex(x => x.uid === uid);
+  if (idx === -1) return;
+  const carta = buildDeck[zonaOrig][idx];
+  // coerenza Extra: carte non-extra non possono entrare nell'Extra
+  if (zonaDest === 'extra' && !isExtraCard(carta.type)) {
+    toast('Solo Fusion/Synchro/XYZ/Link nell\'Extra', true); return;
+  }
+  if (zonaDest === 'main' && isExtraCard(carta.type)) {
+    toast('Le carte Extra non vanno nel Main', true); return;
+  }
+  const limiti = { main: 60, extra: 15, side: 15 };
+  if (contaCarte(buildDeck[zonaDest]) >= limiti[zonaDest]) {
+    toast(`Limite ${zonaDest} raggiunto (${limiti[zonaDest]})`, true); return;
+  }
+  buildDeck[zonaOrig].splice(idx, 1);
+  buildDeck[zonaDest].push(carta);
+  renderBuilder();
+}
+
+// scambia le posizioni esatte di due carte (anche tra zone diverse)
+function scambiaCarte(uidA, zonaA, uidB, zonaB) {
+  if (uidA === uidB) return;
+  const idxA = buildDeck[zonaA].findIndex(x => x.uid === uidA);
+  const idxB = buildDeck[zonaB].findIndex(x => x.uid === uidB);
+  if (idxA === -1 || idxB === -1) return;
+  const cartaA = buildDeck[zonaA][idxA];
+  const cartaB = buildDeck[zonaB][idxB];
+  // se zone diverse, verifica coerenza Extra per entrambe le destinazioni
+  if (zonaA !== zonaB) {
+    if (zonaB === 'extra' && !isExtraCard(cartaA.type)) { toast('Scambio non valido: solo carte Extra nell\'Extra', true); return; }
+    if (zonaA === 'extra' && !isExtraCard(cartaB.type)) { toast('Scambio non valido: solo carte Extra nell\'Extra', true); return; }
+    if (zonaB === 'main' && isExtraCard(cartaA.type)) { toast('Scambio non valido: carta Extra nel Main', true); return; }
+    if (zonaA === 'main' && isExtraCard(cartaB.type)) { toast('Scambio non valido: carta Extra nel Main', true); return; }
+  }
+  // scambio posizioni esatte
+  buildDeck[zonaA][idxA] = cartaB;
+  buildDeck[zonaB][idxB] = cartaA;
+  renderBuilder();
 }
 
 // doppio click: Main o Extra in automatico (mai side da dblclick)
@@ -1124,11 +1169,14 @@ function renderBuilder() {
       grid.innerHTML = `<div class="deck-zone-empty">${label}</div>`;
     } else {
       grid.innerHTML = arr.map(c => `
-        <div class="deck-card"
+        <div class="deck-card" draggable="true"
+             ondragstart="dragStartDeck(event,${c.uid},'${zona}')"
+             ondrop="dropSuCarta(event,${c.uid},'${zona}')"
+             ondragover="event.preventDefault()"
              onclick="rimuoviCartaUI(${c.uid},'${zona}')"
              onmouseenter="hoverPreviewDeck(event,${c.uid},'${zona}')"
              onmouseleave="hidePreview()"
-             title="${escapeHtml(c.name)} — click per rimuovere">
+             title="${escapeHtml(c.name)} — click per rimuovere, trascina per spostare">
           <img src="${c.img}" alt="${escapeHtml(c.name)}" loading="lazy">
           ${ptsBadge(c.pts, 'deck-card-pts')}
           <button class="deck-card-dup" onclick="duplicaCarta(${c.uid},'${zona}',event)" title="Aggiungi un'altra copia">+</button>
@@ -1140,7 +1188,7 @@ function renderBuilder() {
   const punti = calcolaPunti(buildDeck.main, buildDeck.extra);
   const elP = document.getElementById('cnt-punti');
   elP.textContent = punti;
-  elP.classList.toggle('over', punti > 100);
+  document.getElementById('cnt-punti-wrap').classList.toggle('over', punti > 100);
   aggiornaTortaMain();
   aggiornaBadgeOwned();
 }
@@ -1203,7 +1251,8 @@ function aggiornaTortaMain() {
     else mostri++;
   });
   wrap.style.display = 'flex';
-  const COL = ['#ff9500', '#34c759', '#ff3b30'];
+  // colori ufficiali tipi carte Yu-Gi-Oh: mostro (arancione), magia (verde acqua), trappola (magenta)
+  const COL = ['#d8954a', '#1d9e74', '#bc5a84'];
   legend.innerHTML = [
     `<div class="bcl-item"><span class="bcl-dot" style="background:${COL[0]}"></span>Mostri <b>${mostri}</b></div>`,
     `<div class="bcl-item"><span class="bcl-dot" style="background:${COL[1]}"></span>Magie <b>${magie}</b></div>`,
@@ -1321,7 +1370,7 @@ function modificaDeck(docId) {
   buildDeck = { main: espandi(dk.main), extra: espandi(dk.extra), side: espandi(dk.side) };
   // popola cache per anteprima e bottone side
   ['main','extra','side'].forEach(z => buildDeck[z].forEach(c => { _searchCache[c.id] = c; }));
-  document.getElementById('crea-titolo').textContent = 'Modifica: ' + dk.mazzo;
+
   renderBuilder();
   switchTab('crea');
 }
@@ -1347,12 +1396,15 @@ function nuovoMazzoVuoto() {
   editingDocId = null;
   buildDeck = { main: [], extra: [], side: [] };
   document.getElementById('nome-mazzo').value = '';
-  document.getElementById('crea-titolo').textContent = 'Crea un Mazzo';
+
   renderBuilder();
 }
 
 // wrapper UI
-function rimuoviCartaUI(uid, zona) { rimuoviCartaUid(uid, zona); }
+function rimuoviCartaUI(uid, zona) {
+  if (_justDragged) { _justDragged = false; return; }
+  rimuoviCartaUid(uid, zona);
+}
 function mandaAlSideUI(uid, zona, ev) { mandaAlSideUid(uid, zona, ev); }
 
 // ─────────── ANTEPRIMA CARTA (750ms) ───────────
@@ -1520,6 +1572,7 @@ document.addEventListener('mousemove', e => {
   if (tip && tip.classList.contains('visible')) _posizionaTip(e);
 });
 document.addEventListener('scroll', hidePreview, true);
+document.addEventListener('dragend', () => { setTimeout(() => { _justDragged = false; }, 50); });
 document.addEventListener('keydown', e => { if (e.key === 'Escape') chiudiDettaglioDL(null); });
 
 // ─────────── ENTER per ricerca ───────────
@@ -1534,9 +1587,11 @@ window.caricaAltriRisultati = caricaAltriRisultati;
 window.toggleFiltri = toggleFiltri;
 window.resetFiltri = resetFiltri;
 window.dragStart = dragStart;
+window.dragStartDeck = dragStartDeck;
 window.allowDrop = allowDrop;
 window.dragLeave = dragLeave;
 window.dropCarta = dropCarta;
+window.dropSuCarta = dropSuCarta;
 window.aggiungiAuto = aggiungiAuto;
 window.rimuoviCartaUI = rimuoviCartaUI;
 window.mandaAlSideUI = mandaAlSideUI;
