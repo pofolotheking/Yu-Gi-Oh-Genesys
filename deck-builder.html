@@ -1014,6 +1014,14 @@ async function cercaCarte() {
         const r2 = await fetch(`https://db.ygoprodeck.com/api/v7/cardinfo.php?${pArch.toString()}`);
         if (r2.ok) { const d2 = await r2.json(); aggiungi(d2.data); }
       } catch (e) {}
+
+      // 3) ricerca nel testo dell'effetto (carte che menzionano il termine)
+      const pDesc = new URLSearchParams(filtri);
+      pDesc.append('desc', q);
+      try {
+        const r3 = await fetch(`https://db.ygoprodeck.com/api/v7/cardinfo.php?${pDesc.toString()}`);
+        if (r3.ok) { const d3 = await r3.json(); aggiungi(d3.data); }
+      } catch (e) {}
     } else {
       // solo filtri, nessun nome
       const r = await fetch(`https://db.ygoprodeck.com/api/v7/cardinfo.php?${filtri.toString()}`);
@@ -1380,12 +1388,9 @@ function chiudiMano(e) {
 }
 
 // ─────────── SALVA DECKLIST COME IMMAGINE ───────────
-// Nuova versione con trucco Anti-Cache (Cache Buster)
 function _zonaImgHtml(titolo, arr) {
   if (!arr.length) return '';
-  // Genera un timestamp unico per far credere al browser che l'immagine sia nuova
-  const cacheBuster = Date.now(); 
-  const carte = arr.map(c => `<img src="${c.img}?v=${cacheBuster}" crossorigin="anonymous"
+  const carte = arr.map(c => `<img src="${c.img}" crossorigin="anonymous"
     style="width:78px;aspect-ratio:59/86;object-fit:cover;border-radius:5px;display:block">`).join('');
   return `<div style="margin-bottom:16px">
     <div style="font-size:13px;font-weight:700;color:#1d1d1f;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:8px">${titolo} · ${arr.length}</div>
@@ -1393,7 +1398,6 @@ function _zonaImgHtml(titolo, arr) {
   </div>`;
 }
 
-// Nuova versione aggiornata con protezioni
 async function scaricaDeckImmagine() {
   const tot = buildDeck.main.length + buildDeck.extra.length + buildDeck.side.length;
   if (tot === 0) { toast('Il deck è vuoto', true); return; }
@@ -1403,7 +1407,7 @@ async function scaricaDeckImmagine() {
   const owner = document.getElementById('proprietario-mazzo').value || '';
   const punti = calcolaPunti(buildDeck.main, buildDeck.extra, buildDeck.side);
 
-  // Costruisco un layout dedicato fuori schermo
+  // costruisco un layout dedicato fuori schermo
   const box = document.createElement('div');
   box.style.cssText = 'position:fixed;left:-9999px;top:0;width:680px;background:#fff;padding:28px;font-family:Inter,sans-serif';
   box.innerHTML = `
@@ -1420,45 +1424,23 @@ async function scaricaDeckImmagine() {
     <div style="text-align:right;font-size:11px;color:#a1a1a6;margin-top:10px">Yu-Gi-Oh! Genesys · Deck Builder</div>`;
   document.body.appendChild(box);
 
-  toast('Preparo l\'immagine... attendi qualche secondo');
-
+  toast('Genero l\'immagine…');
   try {
-    // 1. Aspetta che tutte le nuove immagini con permessi si carichino
-    const images = Array.from(box.querySelectorAll('img'));
-    await Promise.all(images.map(img => {
-      if (img.complete) return Promise.resolve();
-      return new Promise(resolve => {
-        img.onload = resolve;
-        img.onerror = resolve; // Procedi comunque se un'immagine salta
-      });
-    }));
-
-    // 2. Micro-pausa per far stabilizzare i bordi e il rendering al browser
-    await new Promise(r => setTimeout(r, 400));
-
-    // 3. Scatta la foto bloccando le immagini non autorizzate (allowTaint: false)
-    const canvas = await html2canvas(box, { 
-      backgroundColor: '#ffffff', 
-      scale: 2, 
-      useCORS: true, 
-      allowTaint: false, 
-      logging: false 
-    });
-    
+    const canvas = await html2canvas(box, { backgroundColor: '#ffffff', scale: 2, useCORS: true, logging: false });
     document.body.removeChild(box);
     const fileName = nome.replace(/[^a-zA-Z0-9]/g, '_') + '.png';
 
     canvas.toBlob(async (blob) => {
       if (!blob) { toast('Errore nella generazione', true); return; }
       const file = new File([blob], fileName, { type: 'image/png' });
-      // Se da smartphone: abilita condivisione nativa (WhatsApp, Galleria, ecc.)
+      // su mobile: condivisione nativa (Salva su Foto / WhatsApp ecc.)
       if (navigator.canShare && navigator.canShare({ files: [file] })) {
         try {
           await navigator.share({ files: [file], title: nome });
           return;
-        } catch (e) { /* L'utente ha annullato, fallback al download automatico */ }
+        } catch (e) { /* utente ha annullato: fallback al download */ }
       }
-      // Se da PC o fallback: download diretto
+      // desktop o fallback: download diretto
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url; a.download = fileName;
@@ -1472,6 +1454,7 @@ async function scaricaDeckImmagine() {
     toast('Errore nella generazione dell\'immagine', true);
   }
 }
+
 // ─────────── SALVA / MODIFICA / ELIMINA ───────────
 async function salvaMazzo() {
   const nome = document.getElementById('nome-mazzo').value.trim();
