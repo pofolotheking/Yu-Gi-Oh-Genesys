@@ -195,12 +195,12 @@
   .builder-topbar input, .builder-topbar select { padding: 8px 11px; font-size: 0.9rem; }
   .builder-topbar > button { height: 38px; padding: 8px 14px; }
   .builder-counters {
-    display: flex; gap: 0; margin-bottom: 0;
+    display: inline-flex; gap: 0; margin-bottom: 0;
     border: 1px solid var(--border); border-radius: 10px; overflow: hidden;
   }
   .builder-counter {
-    flex: 1; background: var(--bg-card);
-    border-right: 1px solid var(--border); padding: 8px 10px; text-align: center;
+    background: var(--bg-card);
+    border-right: 1px solid var(--border); padding: 8px 22px; text-align: center;
   }
   .builder-counter:last-child { border-right: none; }
   .builder-counter-val {
@@ -336,6 +336,42 @@
 
   @media (max-width: 600px) { .preview-tip { display: none !important; } }
 
+  /* ─── MODALE DETTAGLIO CARTA ─── */
+  .card-modal-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.45); backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px); z-index: 600;
+    align-items: center; justify-content: center; padding: 20px;
+  }
+  .card-modal-overlay.open { display: flex; animation: fadeTip 0.2s ease; }
+  .card-modal {
+    background: var(--bg); border-radius: 18px; width: 100%; max-width: 540px;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.2); overflow: hidden;
+    max-height: 90vh; overflow-y: auto;
+  }
+  .cm-wrap { display: grid; grid-template-columns: 180px 1fr; gap: 18px; padding: 20px; align-items: start; }
+  .cm-img { width: 180px; border-radius: 10px; border: 1px solid var(--border); display: block; }
+  .cm-info { display: flex; flex-direction: column; gap: 8px; }
+  .cm-name { font-size: 1.2rem; font-weight: 700; letter-spacing: -0.02em; }
+  .cm-type { font-size: 0.8rem; color: var(--text-dim); font-weight: 500; }
+  .cm-chips { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 2px; }
+  .cm-chip { background: var(--bg-soft); border-radius: 7px; padding: 4px 9px; font-size: 0.76rem; font-weight: 600; color: var(--text); }
+  .cm-chip.genesys { color: #fff; font-weight: 700; }
+  .cm-chip.genesys.high { background: var(--red); }
+  .cm-chip.genesys.mid { background: var(--orange); }
+  .cm-chip.genesys.low { background: var(--green); }
+  .cm-desc { font-size: 0.86rem; color: var(--text-dim); line-height: 1.6; margin-top: 4px; }
+  .cm-close {
+    width: 100%; border: none; background: var(--bg-soft);
+    padding: 13px; font-family: inherit; font-size: 0.92rem; font-weight: 600;
+    color: var(--text); cursor: pointer; border-top: 1px solid var(--border);
+  }
+  .cm-close:hover { background: var(--border); }
+  @media (max-width: 500px) {
+    .cm-wrap { grid-template-columns: 120px 1fr; gap: 14px; padding: 16px; }
+    .cm-img { width: 120px; }
+  }
+
   /* loading */
   .loading { text-align: center; padding: 36px; color: var(--text-faint); font-size: 0.92rem; }
 
@@ -434,18 +470,6 @@
         <div class="builder-counter">
           <span class="builder-counter-val" id="cnt-punti">0</span>
           <span class="builder-counter-lbl">Punti Genesys</span>
-        </div>
-        <div class="builder-counter">
-          <span class="builder-counter-val" id="cnt-main">0</span>
-          <span class="builder-counter-lbl">Main Deck</span>
-        </div>
-        <div class="builder-counter">
-          <span class="builder-counter-val" id="cnt-extra">0</span>
-          <span class="builder-counter-lbl">Extra Deck</span>
-        </div>
-        <div class="builder-counter">
-          <span class="builder-counter-val" id="cnt-side">0</span>
-          <span class="builder-counter-lbl">Side Deck</span>
         </div>
       </div>
     </div>
@@ -586,6 +610,9 @@
 </div>
 
 <div class="preview-tip" id="preview-tip"></div>
+<div class="card-modal-overlay" id="card-modal-overlay" onclick="chiudiDettaglioDL(event)">
+  <div class="card-modal" id="card-modal"></div>
+</div>
 <div class="toast" id="toast"></div>
 
 <script type="module">
@@ -665,6 +692,10 @@ function toast(msg, isError) {
   setTimeout(() => { t.className = 'toast'; }, 2600);
 }
 function ptsClass(pts) { return pts > 0 ? '' : 'zero'; }
+function ptsBadge(pts, cls) {
+  if (!pts || pts <= 0) return '';
+  return `<span class="${cls}">${pts}</span>`;
+}
 
 // ─────────── TABS ───────────
 function switchTab(id) {
@@ -776,11 +807,19 @@ function buildDeckListBody(dk) {
   const grp = (titolo, arr) => {
     const n = contaCarte(arr);
     if (n === 0) return '';
-    const cards = arr.map(c => `
-      <div class="dl-card" title="${escapeHtml(c.name)}">
+    const cards = arr.map((c, i) => {
+      const key = dk.docId + '_' + (c.uid || (titolo[0] + i));
+      _dlCardCache[key] = c;
+      return `
+      <div class="dl-card" title="${escapeHtml(c.name)}"
+           onclick="dettaglioCartaDL('${key}')"
+           onmouseenter="hoverPreviewDL(event,'${key}')"
+           onmouseleave="hidePreview()"
+           style="cursor:pointer">
         <img src="${c.img}" alt="${escapeHtml(c.name)}" loading="lazy">
-        <span class="dl-card-pts ${ptsClass(c.pts)}">${c.pts || 0}</span>
-      </div>`).join('');
+        ${ptsBadge(c.pts, 'dl-card-pts')}
+      </div>`;
+    }).join('');
     return `<div class="dl-group-title">${titolo} <span class="dl-group-count">${n}</span></div>
       <div class="dl-cards-grid">${cards}</div>`;
   };
@@ -861,7 +900,7 @@ async function cercaCarte() {
           onmouseleave="hidePreview()"
           title="${escapeHtml(c.name)}">
         <img src="${img}" alt="${escapeHtml(c.name)}" loading="lazy">
-        <span class="search-card-pts ${ptsClass(pts)}">${pts}</span>
+        ${ptsBadge(pts, 'search-card-pts')}
       </div>`;
     }).join('');
   } catch (e) {
@@ -964,7 +1003,7 @@ function renderBuilder() {
              onmouseleave="hidePreview()"
              title="${escapeHtml(c.name)} — click per rimuovere">
           <img src="${c.img}" alt="${escapeHtml(c.name)}" loading="lazy">
-          <span class="deck-card-pts ${ptsClass(c.pts)}">${c.pts || 0}</span>
+          ${ptsBadge(c.pts, 'deck-card-pts')}
           ${zona !== 'side' ? `<button class="deck-card-side" onclick="mandaAlSideUI(${c.uid},'${zona}',event)">→S</button>` : ''}
         </div>`).join('');
     }
@@ -974,9 +1013,6 @@ function renderBuilder() {
   const elP = document.getElementById('cnt-punti');
   elP.textContent = punti;
   elP.classList.toggle('over', punti > 100);
-  document.getElementById('cnt-main').textContent = contaCarte(buildDeck.main);
-  document.getElementById('cnt-extra').textContent = contaCarte(buildDeck.extra);
-  document.getElementById('cnt-side').textContent = contaCarte(buildDeck.side);
 }
 
 // ─────────── SALVA / MODIFICA / ELIMINA ───────────
@@ -1168,11 +1204,84 @@ function hidePreview() {
   document.getElementById('preview-tip').classList.remove('visible');
 }
 
+// ─────────── ANTEPRIMA + DETTAGLIO DECK COSTRUITI ───────────
+const _dlCardCache = {};
+
+function hoverPreviewDL(e, key) {
+  clearTimeout(_previewTimer);
+  const evt = { clientX: e.clientX, clientY: e.clientY };
+  _previewTimer = setTimeout(() => {
+    const c = _dlCardCache[key];
+    if (!c) return;
+    _renderTip(c, evt);
+    _arricchisciDesc(c, evt);
+  }, 1000);
+}
+
+async function dettaglioCartaDL(key) {
+  hidePreview();
+  const c = _dlCardCache[key];
+  if (!c) return;
+  const overlay = document.getElementById('card-modal-overlay');
+  const modal = document.getElementById('card-modal');
+  // mostra subito con quel che si ha, poi arricchisci
+  modal.innerHTML = _buildCardModal(c);
+  overlay.classList.add('open');
+  document.body.style.overflow = 'hidden';
+  if (!c.desc) {
+    try {
+      const r = await fetch('https://db.ygoprodeck.com/api/v7/cardinfo.php?id=' + c.id + '&misc=yes');
+      const data = await r.json();
+      const card = data.data?.[0];
+      if (card) {
+        c.desc = card.desc || '';
+        c.attr = c.attr || card.attribute || '';
+        c.level = c.level || card.level || null;
+        c.atk = (c.atk != null) ? c.atk : (card.atk ?? null);
+        c.def = (c.def != null) ? c.def : (card.def ?? null);
+        if (overlay.classList.contains('open')) modal.innerHTML = _buildCardModal(c);
+      }
+    } catch (err) {}
+  }
+}
+
+function _buildCardModal(c) {
+  const pts = c.pts || 0;
+  const ptsCls = pts >= 30 ? 'high' : pts >= 10 ? 'mid' : 'low';
+  const chips = [
+    c.attr ? `<span class="cm-chip">${escapeHtml(c.attr)}</span>` : '',
+    c.level ? `<span class="cm-chip">Livello ${c.level}</span>` : '',
+    (c.atk != null) ? `<span class="cm-chip">ATK ${c.atk}</span>` : '',
+    (c.def != null) ? `<span class="cm-chip">DEF ${c.def}</span>` : '',
+    pts > 0 ? `<span class="cm-chip genesys ${ptsCls}">⬡ ${pts} pt Genesys</span>` : ''
+  ].filter(Boolean).join('');
+  const imgBig = c.img ? c.img.replace('_small', '') : c.img;
+  return `
+    <div class="cm-wrap">
+      <img class="cm-img" src="${imgBig}" alt="${escapeHtml(c.name)}">
+      <div class="cm-info">
+        <div class="cm-name">${escapeHtml(c.name)}</div>
+        ${c.type ? `<div class="cm-type">${escapeHtml(c.type)}</div>` : ''}
+        <div class="cm-chips">${chips}</div>
+        <div class="cm-desc">${escapeHtml(c.desc || 'Caricamento descrizione…')}</div>
+      </div>
+    </div>
+    <button class="cm-close" onclick="chiudiDettaglioDL(null)">Chiudi</button>`;
+}
+
+function chiudiDettaglioDL(e) {
+  if (!e || e.target === document.getElementById('card-modal-overlay')) {
+    document.getElementById('card-modal-overlay').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+}
+
 document.addEventListener('mousemove', e => {
   const tip = document.getElementById('preview-tip');
   if (tip && tip.classList.contains('visible')) _posizionaTip(e);
 });
 document.addEventListener('scroll', hidePreview, true);
+document.addEventListener('keydown', e => { if (e.key === 'Escape') chiudiDettaglioDL(null); });
 
 // ─────────── ENTER per ricerca ───────────
 document.getElementById('search-input')?.addEventListener('keydown', e => {
@@ -1193,6 +1302,9 @@ window.rimuoviCartaUI = rimuoviCartaUI;
 window.mandaAlSideUI = mandaAlSideUI;
 window.hoverPreview = hoverPreview;
 window.hoverPreviewDeck = hoverPreviewDeck;
+window.hoverPreviewDL = hoverPreviewDL;
+window.dettaglioCartaDL = dettaglioCartaDL;
+window.chiudiDettaglioDL = chiudiDettaglioDL;
 window.hidePreview = hidePreview;
 window.salvaMazzo = salvaMazzo;
 window.toggleDeck = toggleDeck;
