@@ -934,6 +934,7 @@ function buildDeckListBody(dk) {
   return `
     <div class="deck-list-actions">
       <button class="secondary" onclick="modificaDeck('${dk.docId}')">✏️ Modifica</button>
+      <button class="secondary" onclick="associaDaCostruito('${dk.docId}')">🔗 Associa</button>
       <button class="danger" onclick="eliminaDeck('${dk.docId}')">🗑 Elimina</button>
     </div>
     ${corpo}`;
@@ -1469,20 +1470,30 @@ async function scaricaDeckImmagine() {
 }
 
 // ─────────── ASSOCIA DECKLIST A MAZZO CLASSIFICA ───────────
+// docId della decklist che stiamo associando; null = quella in costruzione
+let _associaDocId = null;
+
 function apriAssociaDecklist() {
   const nome = document.getElementById('nome-mazzo').value.trim();
-  const owner = document.getElementById('proprietario-mazzo').value;
   const totCarte = buildDeck.main.length + buildDeck.extra.length + buildDeck.side.length;
   if (totCarte === 0) { toast('Costruisci prima una decklist', true); return; }
   if (!nome) { toast('Dai un nome alla decklist e salvala', true); return; }
+  _associaDocId = null; // useremo la decklist in costruzione
+  mostraListaAssocia();
+}
 
-  // mazzi della classifica = dati_principali.mazzi (nome -> proprietario)
+// apre l'associazione partendo da un deck già salvato (sezione Deck Costruiti)
+function associaDaCostruito(docId) {
+  _associaDocId = docId;
+  mostraListaAssocia();
+}
+
+function mostraListaAssocia() {
   const mazzi = Object.entries(datiPrincipali.mazzi || {});
   const lista = document.getElementById('associa-lista');
   if (mazzi.length === 0) {
     lista.innerHTML = '<div class="empty" style="padding:20px">Nessun mazzo in classifica. Registra prima qualche partita.</div>';
   } else {
-    // ordino per proprietario poi nome
     mazzi.sort((a,b) => (a[1]||'').localeCompare(b[1]||'') || a[0].localeCompare(b[0]));
     const assoc = datiPrincipali.mazziDecklist || {};
     lista.innerHTML = mazzi.map(([m, prop]) => {
@@ -1501,20 +1512,21 @@ function apriAssociaDecklist() {
 }
 
 async function confermaAssocia(mazzoClassifica) {
-  const nome = document.getElementById('nome-mazzo').value.trim();
-  const owner = document.getElementById('proprietario-mazzo').value;
-  const docId = docIdFor(owner, nome);
+  let docId = _associaDocId;
+  // se stiamo associando la decklist in costruzione, prima la salvo
+  if (!docId) {
+    const nome = document.getElementById('nome-mazzo').value.trim();
+    const owner = document.getElementById('proprietario-mazzo').value;
+    docId = docIdFor(owner, nome);
+    try {
+      await setDoc(doc(db, 'liste_mazzi', docId), {
+        giocatore: owner, mazzo: nome,
+        main: buildDeck.main, extra: buildDeck.extra, side: buildDeck.side,
+        aggiornato: new Date().toISOString()
+      });
+    } catch (e) { console.error(e); toast('Errore nel salvataggio decklist', true); return; }
+  }
 
-  // prima assicuro che la decklist sia salvata in liste_mazzi
-  try {
-    await setDoc(doc(db, 'liste_mazzi', docId), {
-      giocatore: owner, mazzo: nome,
-      main: buildDeck.main, extra: buildDeck.extra, side: buildDeck.side,
-      aggiornato: new Date().toISOString()
-    });
-  } catch (e) { console.error(e); toast('Errore nel salvataggio decklist', true); return; }
-
-  // salvo l'associazione in dati_principali.mazziDecklist
   if (!datiPrincipali.mazziDecklist) datiPrincipali.mazziDecklist = {};
   datiPrincipali.mazziDecklist[mazzoClassifica] = docId;
   try {
@@ -1829,6 +1841,7 @@ window.ordinaZona = ordinaZona;
 window.manoDiProva = manoDiProva;
 window.scaricaDeckImmagine = scaricaDeckImmagine;
 window.apriAssociaDecklist = apriAssociaDecklist;
+window.associaDaCostruito = associaDaCostruito;
 window.confermaAssocia = confermaAssocia;
 window.chiudiAssocia = chiudiAssocia;
 window.ripescaMano = ripescaMano;
