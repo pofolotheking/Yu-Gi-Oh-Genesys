@@ -626,10 +626,11 @@
     transition: background 0.15s;
   }
   .decklist-info-btn:hover { background: var(--bg-soft); }
-  /* ─── MODALE DECKLIST ASSOCIATA (larga) ─── */
+  /* ─── MODALE DECKLIST ASSOCIATA (quasi schermo intero) ─── */
   .decklist-modal {
-    max-width: 1100px; width: 96vw; position: relative;
-    max-height: 90vh; display: flex; flex-direction: column;
+    max-width: 98vw !important; width: 98vw; position: relative;
+    max-height: 95vh; height: auto; display: flex; flex-direction: column;
+    border-radius: 16px;
   }
   .decklist-close {
     position: absolute; top: 12px; right: 12px;
@@ -641,11 +642,11 @@
     box-shadow: 0 2px 8px rgba(255,59,48,0.3);
   }
   .decklist-close:hover { background: #e0271c; transform: scale(1.08); }
-  .decklist-body-wrap { padding: 22px 24px 24px; overflow-y: auto; }
+  .decklist-body-wrap { padding: 20px 22px 22px; overflow-y: auto; }
   .dla-header {
     display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
     border-bottom: 2px solid var(--border); padding-bottom: 14px; margin-bottom: 16px;
-    padding-right: 40px;
+    padding-right: 44px;
   }
   .dla-name { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.03em; }
   .dla-owner { font-size: 0.95rem; color: var(--text-dim); }
@@ -666,14 +667,17 @@
   }
   .dla-group-title:first-of-type { margin-top: 0; }
   .dla-group-count { background: var(--border); color: var(--text-dim); padding: 1px 7px; border-radius: 6px; font-size: 0.68rem; }
-  .dla-grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 6px; }
+  /* griglie a numero fisso di colonne: le carte si dimensionano per riempire la larghezza */
+  .dla-grid { display: grid; gap: 5px; }
+  .dla-grid.main { grid-template-columns: repeat(15, 1fr); }
+  .dla-grid.extra, .dla-grid.side { grid-template-columns: repeat(15, 1fr); }
   .dla-card { position: relative; border-radius: 5px; overflow: hidden; border: 1px solid var(--border); }
   .dla-card img { width: 100%; aspect-ratio: 59/86; object-fit: cover; display: block; background: var(--bg-soft); }
-  .dla-pts-badge { position: absolute; top: 2px; right: 2px; background: #1d1d1f; color: #fff; font-size: 0.54rem; font-weight: 700; padding: 1px 4px; border-radius: 4px; }
+  .dla-pts-badge { position: absolute; top: 2px; right: 2px; background: #1d1d1f; color: #fff; font-size: 0.56rem; font-weight: 700; padding: 1px 4px; border-radius: 4px; }
   .dla-pts-badge.high { background: var(--red); } .dla-pts-badge.mid { background: var(--orange); } .dla-pts-badge.low { background: var(--green); }
   @media (max-width: 700px) {
-    .decklist-modal { width: 96vw; }
-    .dla-grid { grid-template-columns: repeat(5, 1fr); }
+    .decklist-modal { width: 100vw; max-width: 100vw !important; height: 100vh; max-height: 100vh; border-radius: 0; }
+    .dla-grid.main, .dla-grid.extra, .dla-grid.side { grid-template-columns: repeat(8, 1fr); }
     .dla-name { font-size: 1.2rem; }
     .dla-charts { margin-left: 0; width: 100%; }
   }
@@ -4069,17 +4073,17 @@ async function mostraDecklistAssociata(nomeMazzo) {
     const tutte = [...main, ...extra, ...side];
     const punti = tutte.reduce((s,c) => s + (c.pts || 0), 0);
 
-    const grp = (titolo, arr) => {
+    const grp = (titolo, arr, cls) => {
       if (!arr.length) return '';
       const cards = arr.map(c => {
         const pts = c.pts || 0;
-        const cls = pts >= 30 ? 'high' : pts >= 10 ? 'mid' : 'low';
-        const badge = pts > 0 ? `<span class="dla-pts-badge ${cls}">${pts}</span>` : '';
+        const cl = pts >= 30 ? 'high' : pts >= 10 ? 'mid' : 'low';
+        const badge = pts > 0 ? `<span class="dla-pts-badge ${cl}">${pts}</span>` : '';
         return `<div class="dla-card"><img src="${c.img}" alt="" loading="lazy">${badge}</div>`;
       }).join('');
-      return `<div class="dla-group-title">${titolo} <span class="dla-group-count">${arr.length}</span></div><div class="dla-grid">${cards}</div>`;
+      return `<div class="dla-group-title">${titolo} <span class="dla-group-count">${arr.length}</span></div><div class="dla-grid ${cls}">${cards}</div>`;
     };
-    const corpo = grp('🎴 Main Deck', main) + grp('⚡ Extra Deck', extra) + grp('🔄 Side Deck', side);
+    const corpo = grp('🎴 Main Deck', main, 'main') + grp('⚡ Extra Deck', extra, 'extra') + grp('🔄 Side Deck', side, 'side');
 
     body.innerHTML = `
       <div class="dla-header">
