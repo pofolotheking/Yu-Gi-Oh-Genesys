@@ -74,6 +74,10 @@
   }
 
   main { max-width: 1600px; margin: 0 auto; padding: 0 16px; }
+  /* la sezione Deck Costruiti non ha bisogno di tutta la larghezza */
+  #costruiti { max-width: 760px; margin: 0 auto; }
+  /* card info compatta (nome/proprietario/contatori) */
+  #crea > .card.padded { padding: 14px; }
   section { display: none; }
   section.active { display: block; animation: fade 0.25s ease; }
   @keyframes fade { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
@@ -184,24 +188,29 @@
 
   /* ─── SEZIONE CREA MAZZO ─── */
   .builder-topbar {
-    display: grid; grid-template-columns: 1fr 1fr auto; gap: 12px;
-    align-items: end; margin-bottom: 14px;
+    display: grid; grid-template-columns: 1fr 1fr auto; gap: 10px;
+    align-items: end; margin-bottom: 10px;
   }
+  .builder-topbar label { font-size: 0.7rem; margin-bottom: 3px; }
+  .builder-topbar input, .builder-topbar select { padding: 8px 11px; font-size: 0.9rem; }
+  .builder-topbar > button { height: 38px; padding: 8px 14px; }
   .builder-counters {
-    display: flex; gap: 10px; margin-bottom: 16px;
+    display: flex; gap: 0; margin-bottom: 0;
+    border: 1px solid var(--border); border-radius: 10px; overflow: hidden;
   }
   .builder-counter {
-    flex: 1; background: var(--bg-card); border: 1px solid var(--border);
-    border-radius: 12px; padding: 12px 14px; text-align: center;
+    flex: 1; background: var(--bg-card);
+    border-right: 1px solid var(--border); padding: 8px 10px; text-align: center;
   }
+  .builder-counter:last-child { border-right: none; }
   .builder-counter-val {
-    font-size: 1.4rem; font-weight: 700; font-variant-numeric: tabular-nums;
-    display: block; line-height: 1; margin-bottom: 3px;
+    font-size: 1.15rem; font-weight: 700; font-variant-numeric: tabular-nums;
+    display: block; line-height: 1; margin-bottom: 2px;
   }
   .builder-counter-val.over { color: var(--red); }
   .builder-counter-lbl {
-    font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.04em;
-    color: var(--text-faint); font-weight: 600;
+    font-size: 0.55rem; text-transform: uppercase; letter-spacing: 0.04em;
+    color: var(--text-faint); font-weight: 600; white-space: nowrap;
   }
 
   .builder-split {
@@ -336,7 +345,7 @@
     .search-results { max-height: 320px; }
   }
   @media (max-width: 600px) {
-    .builder-topbar { grid-template-columns: 1fr; }
+    .builder-topbar { grid-template-columns: 1fr; gap: 8px; }
     .filtri-panel { grid-template-columns: 1fr; }
     main { padding: 0 10px; }
     header { padding: 50px 16px 14px; }
@@ -344,6 +353,24 @@
     .deck-card-side { display: block; }
     .search-card { cursor: pointer; }
     h2 { font-size: 1.2rem; }
+
+    /* ── Compatta sezione "Crea un Mazzo" su mobile ── */
+    #crea .section-note { display: none; }
+    #crea .card.padded { padding: 12px; margin-bottom: 12px; }
+    /* campi nome + proprietario su una riga, etichette inline piccole */
+    .builder-topbar { grid-template-columns: 1fr 1fr; gap: 8px; align-items: end; }
+    .builder-topbar label { font-size: 0.62rem; margin-bottom: 2px; }
+    .builder-topbar input, .builder-topbar select { padding: 8px 10px; font-size: 0.85rem; border-radius: 8px; }
+    .builder-topbar > button { grid-column: 1 / -1; height: auto; padding: 8px; font-size: 0.82rem; }
+    /* contatori come riga di testo, non blocchi */
+    .builder-counters { gap: 0; margin: 10px 0 0; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+    .builder-counter { padding: 7px 4px; border-right: 1px solid var(--border); border-radius: 0; }
+    .builder-counter:last-child { border-right: none; }
+    .builder-counter-val { font-size: 1rem; margin-bottom: 1px; }
+    .builder-counter-lbl { font-size: 0.48rem; white-space: nowrap; line-height: 1.2; }
+    /* riduce intestazione sezione */
+    #crea h2 { font-size: 1.05rem; }
+    #crea .primary { padding: 8px 14px; font-size: 0.85rem; }
   }
 </style>
 </head>
