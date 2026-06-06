@@ -2051,41 +2051,55 @@
   .duel-lp-bar.critical { background: #ff3b30; }
 
   .duel-calc {
-    width: 100%; max-width: 250px;
-    display: flex; flex-direction: column; gap: 5px;
+    width: 100%; max-width: 340px;
+    display: flex; flex-direction: column; gap: 7px;
+    margin-top: auto;
   }
   .duel-calc-disp {
     background: #f6f6f8; border-radius: 12px;
-    padding: 9px 14px;
-    font-size: 1.25rem; font-weight: 700;
+    padding: 12px 16px;
+    font-size: 1.4rem; font-weight: 700;
     font-variant-numeric: tabular-nums;
     color: #1c1c1e; text-align: right;
-    letter-spacing: -0.02em; min-height: 42px;
+    letter-spacing: -0.02em; min-height: 48px;
     display: flex; align-items: center; justify-content: flex-end;
     border: 1px solid rgba(0,0,0,0.04);
   }
   .duel-calc-kb {
-    display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px;
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px;
   }
   .duel-key {
     background: #fff;
     border: 1px solid rgba(0,0,0,0.06);
-    border-radius: 10px; font-family: inherit;
-    font-size: 1.05rem; font-weight: 600;
+    border-radius: 12px; font-family: inherit;
+    font-size: 1.3rem; font-weight: 600;
     color: #1c1c1e; cursor: pointer;
-    padding: 10px 0;
+    padding: 16px 0;
     transition: background 0.1s, transform 0.05s;
   }
   .duel-key:active { transform: scale(0.93); background: #f2f2f7; }
   .duel-key:hover { background: #f8f8fa; }
   .duel-key.del { background: #fff5f4; color: #ff3b30; border-color: rgba(255,59,48,0.15); }
+  /* pulsanti valori rapidi */
+  .duel-calc-quick {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px;
+  }
+  .duel-quick {
+    border-radius: 10px; font-family: inherit;
+    font-size: 0.82rem; font-weight: 700; cursor: pointer;
+    padding: 9px 0; border: 1px solid transparent;
+    transition: transform 0.05s, opacity 0.1s;
+  }
+  .duel-quick:active { transform: scale(0.94); }
+  .duel-quick.minus { background: #fff0ef; color: #ff3b30; border-color: rgba(255,59,48,0.18); }
+  .duel-quick.plus  { background: #eefcf1; color: #1f9d4d; border-color: rgba(52,199,89,0.22); }
   .duel-calc-actions {
-    display: grid; grid-template-columns: 1fr 1fr; gap: 5px; margin-top: 2px;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 2px;
   }
   .duel-calc-apply {
-    border: none; border-radius: 10px;
-    font-family: inherit; font-size: 0.88rem; font-weight: 700;
-    padding: 11px 8px; cursor: pointer;
+    border: none; border-radius: 12px;
+    font-family: inherit; font-size: 0.95rem; font-weight: 700;
+    padding: 14px 8px; cursor: pointer;
     transition: background 0.1s, transform 0.05s;
   }
   .duel-calc-apply:active { transform: scale(0.96); }
@@ -2095,7 +2109,7 @@
   /* ── DUELLO MOBILE INPUT SHEET ── */
   .duel-lp-num { cursor: default; }
   @media (max-width: 600px) {
-    /* entrambe le metà ruotate 180° — leggibili da ogni lato del tavolo */
+    /* layout impilato: p1 sopra, p2 sotto */
     .duel-body {
       grid-template-columns: 1fr;
       grid-template-rows: 1fr 1fr;
@@ -2105,10 +2119,12 @@
       border-bottom: 1px solid rgba(0,0,0,0.06);
       padding: 0;
       justify-content: center;
-      transform: rotate(180deg);
     }
     .duel-player-col:last-child { border-bottom: none; }
-    /* nasconde calcolatrice su mobile — si apre toccando il numero */
+    /* il giocatore in alto (p1) ha il contenuto ruotato 180° così lo legge chi sta dall'altro lato del tavolo */
+    #duel-half-p1 .duel-lp-num,
+    #duel-half-p1 .duel-lp-bar-wrap { transform: rotate(180deg); }
+    /* nasconde calcolatrice desktop su mobile — si apre toccando il numero */
     .duel-calc { display: none; }
     /* LP numero grande, cliccabile */
     .duel-lp-num {
@@ -2116,10 +2132,6 @@
       cursor: pointer;
       user-select: none;
       -webkit-tap-highlight-color: transparent;
-      transform: rotate(180deg);
-    }
-    .duel-lp-num:active { opacity: 0.6; }
-    .duel-lp-bar-wrap { margin: 12px 0 0; max-width: 140px; height: 3px; transform: rotate(180deg); }
     }
     .duel-lp-num:active { opacity: 0.6; }
     .duel-lp-bar-wrap { margin: 12px 0 0; max-width: 140px; height: 3px; }
@@ -2304,6 +2316,12 @@
           <button class="duel-key" onclick="duelCalcKey(1,'0')">0</button>
           <button class="duel-key del" onclick="duelCalcDel(1)">⌫</button>
         </div>
+        <div class="duel-calc-quick">
+          <button class="duel-quick minus" onclick="duelQuick(1,-1000)">-1000</button>
+          <button class="duel-quick minus" onclick="duelQuick(1,-500)">-500</button>
+          <button class="duel-quick plus" onclick="duelQuick(1,500)">+500</button>
+          <button class="duel-quick plus" onclick="duelQuick(1,1000)">+1000</button>
+        </div>
         <div class="duel-calc-actions">
           <button class="duel-calc-apply minus" onclick="duelCalcApply(1,-1)">− Togli</button>
           <button class="duel-calc-apply plus" onclick="duelCalcApply(1,1)">+ Aggiungi</button>
@@ -2329,6 +2347,12 @@
           <button class="duel-key" onclick="duelCalcKey(2,'00')">00</button>
           <button class="duel-key" onclick="duelCalcKey(2,'0')">0</button>
           <button class="duel-key del" onclick="duelCalcDel(2)">⌫</button>
+        </div>
+        <div class="duel-calc-quick">
+          <button class="duel-quick minus" onclick="duelQuick(2,-1000)">-1000</button>
+          <button class="duel-quick minus" onclick="duelQuick(2,-500)">-500</button>
+          <button class="duel-quick plus" onclick="duelQuick(2,500)">+500</button>
+          <button class="duel-quick plus" onclick="duelQuick(2,1000)">+1000</button>
         </div>
         <div class="duel-calc-actions">
           <button class="duel-calc-apply minus" onclick="duelCalcApply(2,-1)">− Togli</button>
@@ -5273,6 +5297,13 @@ function duelCalcApply(player, sign) {
   _duelAggiornaBarre();
 }
 
+// applica un valore rapido (es. -1000) direttamente agli LP
+function duelQuick(player, delta) {
+  const i = player - 1;
+  _duelLP[i] = Math.max(0, _duelLP[i] + delta);
+  _duelAggiornaBarre();
+}
+
 let _chronoRunning = false;
 let _chronoSec = 0;
 let _chronoIv = null;
@@ -5420,6 +5451,7 @@ window.resetDuello = resetDuello;
 window.duelCalcKey = duelCalcKey;
 window.duelCalcDel = duelCalcDel;
 window.duelCalcApply = duelCalcApply;
+window.duelQuick = duelQuick;
 window.toggleChrono = toggleChrono;
 window.apriTimerSetup = apriTimerSetup;
 window.chiudiTimerSetup = chiudiTimerSetup;
