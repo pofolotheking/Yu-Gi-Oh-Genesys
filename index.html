@@ -2154,6 +2154,53 @@
     align-items: flex-end;
     justify-content: center;
   }
+  /* ── OVERLAY DADI ── */
+  .dadi-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.5); z-index: 600;
+    align-items: center; justify-content: center;
+    -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px);
+  }
+  .dadi-overlay.open { display: flex; }
+  .dadi-modal {
+    background: #fff; border-radius: 22px;
+    padding: 26px 24px 28px; position: relative;
+    width: 90%; max-width: 360px; text-align: center;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.25);
+    animation: modalIn 0.25s ease;
+  }
+  .dadi-close {
+    position: absolute; top: 12px; right: 12px;
+    width: 30px; height: 30px; border-radius: 50%;
+    background: var(--red); color: #fff; border: none;
+    font-size: 0.95rem; font-weight: 700; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .dadi-title { font-size: 1.05rem; font-weight: 700; color: var(--text); margin-bottom: 14px; }
+  .dadi-result {
+    font-size: 4rem; font-weight: 800; line-height: 1;
+    color: var(--blue); font-variant-numeric: tabular-nums;
+    letter-spacing: -0.03em; min-height: 70px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .dadi-result.roll { animation: dadiPop 0.35s ease; }
+  @keyframes dadiPop { 0% { transform: scale(0.6); opacity: 0.3; } 60% { transform: scale(1.15); } 100% { transform: scale(1); opacity: 1; } }
+  .dadi-result-label { font-size: 0.8rem; color: var(--text-faint); margin-bottom: 20px; font-weight: 500; }
+  .dadi-buttons { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .dadi-btn {
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+    padding: 14px 8px; border-radius: 14px; cursor: pointer;
+    background: var(--bg-soft); border: 1.5px solid var(--border);
+    font-family: inherit; font-size: 0.92rem; font-weight: 700; color: var(--text);
+    transition: transform 0.08s, border-color 0.15s, background 0.15s;
+  }
+  .dadi-btn:hover { border-color: var(--blue); background: #f0f6ff; }
+  .dadi-btn:active { transform: scale(0.94); }
+  .dadi-btn-shape { font-size: 1.6rem; line-height: 1; }
+  .dadi-btn-shape.d6 { color: #ff9500; }
+  .dadi-btn-shape.d12 { color: #af52de; }
+  .dadi-btn-shape.d20 { color: #34c759; }
+
   .duel-input-sheet.open { display: flex; }
   .duel-overlay:not(.open) ~ .duel-input-sheet { display: none !important; }
   .duel-input-inner {
@@ -2277,7 +2324,10 @@
       Home
     </button>
     <div class="duel-topbar-title">⚔️ Duello</div>
-    <button class="duel-reset-btn" onclick="resetDuello()">Reset</button>
+    <div style="display:flex;gap:8px;align-items:center">
+      <button class="duel-reset-btn" onclick="apriDadi()" title="Lancia un dado" style="font-size:1.1rem">🎲</button>
+      <button class="duel-reset-btn" onclick="resetDuello()">Reset</button>
+    </div>
   </div>
 
   <div class="duel-top-tools">
@@ -2292,6 +2342,10 @@
       <span class="duel-tool-val muted" id="duel-timer-val">—</span>
       <button class="duel-tool-btn" onclick="apriTimerSetup()" title="Imposta">⚙</button>
       <button class="duel-tool-btn go" id="duel-timer-btn" hidden onclick="toggleTimer()" title="Avvia">▶</button>
+    </div>
+    <div class="duel-tool" id="duel-dado-tool">
+      <span class="duel-tool-icon">🎲</span>
+      <button class="duel-tool-btn go" onclick="apriDadi()" title="Lancia un dado">Dadi</button>
     </div>
   </div>
 
@@ -2363,6 +2417,21 @@
 
   </div>
 
+</div>
+
+<!-- OVERLAY DADI -->
+<div class="dadi-overlay" id="dadi-overlay" onclick="chiudiDadi(event)">
+  <div class="dadi-modal">
+    <button class="dadi-close" onclick="chiudiDadiForce()" title="Chiudi">✕</button>
+    <div class="dadi-title">Lancia un dado</div>
+    <div class="dadi-result" id="dadi-result">—</div>
+    <div class="dadi-result-label" id="dadi-result-label">Scegli un dado</div>
+    <div class="dadi-buttons">
+      <button class="dadi-btn" onclick="lanciaDado(6)"><span class="dadi-btn-shape d6">◆</span>D6</button>
+      <button class="dadi-btn" onclick="lanciaDado(12)"><span class="dadi-btn-shape d12">⬠</span>D12</button>
+      <button class="dadi-btn" onclick="lanciaDado(20)"><span class="dadi-btn-shape d20">⬢</span>D20</button>
+    </div>
+  </div>
 </div>
 
 <!-- SHEET INPUT MOBILE -->
@@ -3161,7 +3230,7 @@ function buildProfiloInline(nome) {
       <div class="profile-inline-stat"><span class="pis-lbl">Classifica</span><span class="pis-val">${posLabel}</span></div>
       <div class="profile-inline-stat"><span class="pis-lbl">Win Rate</span><span class="pis-val">${wr}%</span></div>
       <div class="profile-inline-stat"><span class="pis-lbl">Media pts</span><span class="pis-val">${media}</span></div>
-      <div class="profile-inline-stat"><span class="pis-lbl">Mazzo top</span><span class="pis-val" style="font-size:0.7rem;line-height:1.2">${mazzoPreferitoGiocatore(nome)}</span></div>
+      <div class="profile-inline-stat"><span class="pis-lbl">Mazzo + usato</span><span class="pis-val" style="font-size:0.7rem;line-height:1.2">${mazzoPreferitoGiocatore(nome)}</span></div>
    </div>
     <div style="padding: 12px 14px 0; background: var(--bg-soft);">
       <div class="modal-section-title" style="margin-bottom: 0;">Achievements</div>
@@ -5444,6 +5513,34 @@ function _aggiornaDisplayTimer() {
   el.textContent = _fmtTime(_timerRemaining);
   el.className = 'duel-tool-val';
 }
+
+// ─────────── ROLLER DADI ───────────
+function apriDadi() {
+  document.getElementById('dadi-result').textContent = '—';
+  document.getElementById('dadi-result-label').textContent = 'Scegli un dado';
+  document.getElementById('dadi-overlay').classList.add('open');
+}
+function chiudiDadi(e) {
+  if (e.target === document.getElementById('dadi-overlay')) chiudiDadiForce();
+}
+function chiudiDadiForce() {
+  document.getElementById('dadi-overlay').classList.remove('open');
+}
+function lanciaDado(facce) {
+  const n = Math.floor(Math.random() * facce) + 1;
+  const res = document.getElementById('dadi-result');
+  const lbl = document.getElementById('dadi-result-label');
+  res.textContent = n;
+  lbl.textContent = 'D' + facce + ' (1–' + facce + ')';
+  // riavvia animazione
+  res.classList.remove('roll');
+  void res.offsetWidth;
+  res.classList.add('roll');
+}
+window.apriDadi = apriDadi;
+window.chiudiDadi = chiudiDadi;
+window.chiudiDadiForce = chiudiDadiForce;
+window.lanciaDado = lanciaDado;
 
 window.apriDuello = apriDuello;
 window.chiudiDuello = chiudiDuello;
