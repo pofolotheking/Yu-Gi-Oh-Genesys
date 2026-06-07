@@ -33,6 +33,24 @@
     --red-soft: #fef2f2;
     --orange: #ff9500;
   }
+  [data-theme="dark"] {
+    --bg: #000000;
+    --bg-soft: #1c1c1e;
+    --bg-card: #1c1c1e;
+    --border: #2c2c2e;
+    --border-strong: #3a3a3c;
+    --text: #f5f5f7;
+    --text-dim: #aeaeb2;
+    --text-faint: #8e8e93;
+    --green: #30d158;
+    --green-dark: #28a745;
+    --green-soft: #122a18;
+    --green-border: #1f5130;
+    --blue: #0a84ff;
+    --red: #ff453a;
+    --red-soft: #2a1413;
+    --orange: #ff9f0a;
+  }
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
   html, body {
     background: var(--bg);
@@ -134,6 +152,22 @@
     gap: 10px;
     margin-bottom: 4px;
   }
+  .theme-btn {
+    position: fixed;
+    top: 16px;
+    right: calc((100vw - min(720px, 100vw)) / 2 + 16px);
+    background: var(--bg-soft);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    width: 38px; height: 38px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; color: var(--text-dim);
+    transition: background 0.15s, color 0.15s;
+    z-index: 50;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  }
+  .theme-btn:hover { background: var(--border); color: var(--text); }
+  @media (max-width: 720px) { .theme-btn { right: 16px; } }
   .gear-btn {
     position: fixed;
     top: 16px;
@@ -1642,6 +1676,18 @@
     flex-wrap: wrap;
     margin-top: 4px;
   }
+  .match-note {
+    grid-column: 1 / -1;
+    margin-top: 6px;
+    padding: 8px 11px;
+    background: var(--bg-soft);
+    border-radius: 9px;
+    font-size: 0.82rem;
+    color: var(--text-dim);
+    line-height: 1.4;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
   .match-badge {
     font-size: 0.7rem;
     padding: 2px 8px;
@@ -2315,6 +2361,11 @@
 
 <button class="duel-btn" onclick="apriDuello()" title="Duello">⚔️</button>
 
+<button class="theme-btn" onclick="toggleTema()" title="Modalità scura/chiara" id="theme-btn">
+  <svg id="theme-icon-moon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+  <svg id="theme-icon-sun" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="display:none"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+</button>
+
 <!-- OVERLAY DUELLO -->
 <div class="duel-overlay" id="duel-overlay">
 
@@ -2588,6 +2639,10 @@
             <select id="primo"><option value="">— Non specificato —</option></select>
           </div>
         </div>
+        <div>
+          <label>Note (facoltative)</label>
+          <textarea id="note" rows="2" placeholder="Es. Richi ha brickato al turno 1, combo viste, ruling…" style="width:100%;resize:vertical;font-family:inherit;font-size:0.95rem;padding:10px 12px;border:1px solid var(--border-strong);border-radius:10px;background:var(--bg-card);color:var(--text)"></textarea>
+        </div>
         <button type="submit" class="primary">Registra Partita</button>
       </form>
       <div class="output-box" id="output">
@@ -2858,6 +2913,10 @@
       <div>
         <label>Chi è andato primo?</label>
         <select id="edit-primo"></select>
+      </div>
+      <div>
+        <label>Note</label>
+        <textarea id="edit-note" rows="2" placeholder="Note sulla partita…" style="width:100%;resize:vertical;font-family:inherit;font-size:0.95rem;padding:10px 12px;border:1px solid var(--border-strong);border-radius:10px;background:var(--bg-card);color:var(--text)"></textarea>
       </div>
     </div>
     <div class="edit-modal-footer">
@@ -3704,6 +3763,7 @@ function renderStorico() {
     const extraBadges = [];
     if (p.dado)  extraBadges.push(`<span class="match-badge">🎲 Dado: ${p.dado}</span>`);
     if (p.primo) extraBadges.push(`<span class="match-badge primo">▶ Primo: ${p.primo}</span>`);
+    const noteHtml = p.note ? `<div class="match-note">📝 ${escapeHtml(p.note)}</div>` : '';
     return `<div class="match-card">
       <div class="date">${formatData(p.data)}</div>
       <div>
@@ -3720,6 +3780,7 @@ function renderStorico() {
         <button class="del-btn" onclick="eliminaPartita(${idx})" title="Elimina questa partita">🗑</button>
       </div>
       ${extraBadges.length ? `<div class="match-extra">${extraBadges.join('')}</div>` : ''}
+      ${noteHtml}
     </div>`;
   }).join('');
 }
@@ -4099,6 +4160,7 @@ function apriModifica(idx) {
   });
   document.getElementById('edit-dado').value  = p.dado  || '';
   document.getElementById('edit-primo').value = p.primo || '';
+  const editNote = document.getElementById('edit-note'); if (editNote) editNote.value = p.note || '';
 
   document.getElementById('edit-overlay').classList.add('open');
   document.body.style.overflow = 'hidden';
@@ -4110,6 +4172,7 @@ async function salvaModifica() {
   p.risultato = document.getElementById('edit-risultato').value;
   p.dado      = document.getElementById('edit-dado').value;
   p.primo     = document.getElementById('edit-primo').value;
+  p.note      = document.getElementById('edit-note')?.value.trim() || '';
   chiudiModificaForce();
   await salvaDatiCloud();
   popolaTutto();
@@ -4192,7 +4255,8 @@ document.getElementById('form-partita').addEventListener('submit', async e => {
   if (!dati.mazzi[m2]) dati.mazzi[m2] = g2;
   const dado  = document.getElementById('dado')?.value  || '';
   const primo = document.getElementById('primo')?.value || '';
-  dati.partite.push({ data, g1, m1, g2, m2, risultato: ris, dado, primo });
+  const note  = document.getElementById('note')?.value.trim() || '';
+  dati.partite.push({ data, g1, m1, g2, m2, risultato: ris, dado, primo, note });
   await salvaDatiCloud();
   popolaTutto();
   const out = document.getElementById('output');
@@ -4203,6 +4267,7 @@ document.getElementById('form-partita').addEventListener('submit', async e => {
   document.getElementById('m2-custom').value = '';
   document.getElementById('m1-nuovo').style.display = 'none';
   document.getElementById('m2-nuovo').style.display = 'none';
+  const noteEl = document.getElementById('note'); if (noteEl) noteEl.value = '';
 });
 
 // ============ ACHIEVEMENTS ============
@@ -5537,6 +5602,36 @@ function lanciaDado(facce) {
   void res.offsetWidth;
   res.classList.add('roll');
 }
+// ─────────── MODALITÀ SCURA ───────────
+function applicaTema(tema) {
+  if (tema === 'dark') {
+    document.documentElement.setAttribute('data-theme', 'dark');
+    document.getElementById('theme-icon-moon').style.display = 'none';
+    document.getElementById('theme-icon-sun').style.display = 'block';
+  } else {
+    document.documentElement.removeAttribute('data-theme');
+    document.getElementById('theme-icon-moon').style.display = 'block';
+    document.getElementById('theme-icon-sun').style.display = 'none';
+  }
+}
+function toggleTema() {
+  const attuale = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+  const nuovo = attuale === 'dark' ? 'light' : 'dark';
+  applicaTema(nuovo);
+  try { localStorage.setItem('genesys-tema', nuovo); } catch(e) {}
+}
+function initTema() {
+  let tema = 'light';
+  try {
+    const salvato = localStorage.getItem('genesys-tema');
+    if (salvato) tema = salvato;
+    else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) tema = 'dark';
+  } catch(e) {}
+  applicaTema(tema);
+}
+window.toggleTema = toggleTema;
+initTema();
+
 window.apriDadi = apriDadi;
 window.chiudiDadi = chiudiDadi;
 window.chiudiDadiForce = chiudiDadiForce;
