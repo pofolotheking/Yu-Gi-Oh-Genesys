@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Deck Editing · Yu-Gi-Oh! Genesys</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -29,6 +28,34 @@
     --red-soft: #fef2f2;
     --orange: #ff9500;
   }
+  [data-theme="dark"] {
+    --bg: #000000;
+    --bg-soft: #1c1c1e;
+    --bg-card: #1c1c1e;
+    --border: #2c2c2e;
+    --border-strong: #3a3a3c;
+    --text: #f5f5f7;
+    --text-dim: #aeaeb2;
+    --text-faint: #8e8e93;
+    --green: #30d158;
+    --green-dark: #28a745;
+    --green-soft: #122a18;
+    --green-border: #1f5130;
+    --blue: #0a84ff;
+    --red: #ff453a;
+    --red-soft: #2a1413;
+    --orange: #ff9f0a;
+  }
+  .theme-btn {
+    position: fixed; top: 14px; right: 14px;
+    background: var(--bg-soft); border: 1px solid var(--border);
+    border-radius: 10px; width: 38px; height: 38px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; color: var(--text-dim);
+    transition: background 0.15s, color 0.15s; z-index: 50;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  }
+  .theme-btn:hover { background: var(--border); color: var(--text); }
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
   html, body {
     background: var(--bg);
@@ -504,6 +531,10 @@
 </a>
 
 <header>
+  <button class="theme-btn" onclick="toggleTema()" title="Modalità scura/chiara">
+    <svg id="theme-icon-moon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+    <svg id="theme-icon-sun" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="display:none"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+  </button>
   <h1><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#a1a1a6" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>Deck Editing</h1>
   <div class="subtitle">Costruisci, salva e gestisci le decklist Genesys</div>
 </header>
@@ -543,9 +574,6 @@
       <div class="builder-header-right">
         <button class="mini-action" onclick="manoDiProva()" title="Mano di prova">
           <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 11V5.5a1.5 1.5 0 0 1 3 0V10"/><path d="M9 10V4a1.5 1.5 0 0 1 3 0v6"/><path d="M12 10V4.5a1.5 1.5 0 0 1 3 0V10"/><path d="M15 10.5V6a1.5 1.5 0 0 1 3 0v6a6 6 0 0 1-6 6h-1.5a6 6 0 0 1-5-2.7l-2.1-3.1a1.5 1.5 0 0 1 2.4-1.8L6 12"/></svg>
-        </button>
-        <button class="mini-action" onclick="scaricaDeckImmagine()" title="Salva la decklist come immagine">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>
         </button>
         <button class="mini-action mini-action-trash" onclick="nuovoMazzoVuoto()" title="Svuota il deck">
           <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
@@ -726,6 +754,32 @@ import { getFirestore, doc, getDoc, setDoc, deleteDoc, collection, getDocs }
   from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { getAuth, onAuthStateChanged }
   from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+// ── modalità scura (condivide la preferenza con la home) ──
+function applicaTema(tema) {
+  if (tema === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+  else document.documentElement.removeAttribute('data-theme');
+  const moon = document.getElementById('theme-icon-moon');
+  const sun = document.getElementById('theme-icon-sun');
+  if (moon && sun) { moon.style.display = tema === 'dark' ? 'none' : 'block'; sun.style.display = tema === 'dark' ? 'block' : 'none'; }
+}
+function toggleTema() {
+  const attuale = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+  const nuovo = attuale === 'dark' ? 'light' : 'dark';
+  applicaTema(nuovo);
+  try { localStorage.setItem('genesys-tema', nuovo); } catch(e) {}
+}
+function initTema() {
+  let tema = 'light';
+  try {
+    const salvato = localStorage.getItem('genesys-tema');
+    if (salvato) tema = salvato;
+    else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) tema = 'dark';
+  } catch(e) {}
+  applicaTema(tema);
+}
+window.toggleTema = toggleTema;
+initTema();
 
 const firebaseConfig = {
   apiKey: "AIzaSyDwDhaoUOpNPKO-0RMfVjvf4S-h_sI0qx0",
@@ -1415,74 +1469,6 @@ function chiudiMano(e) {
   }
 }
 
-// ─────────── SALVA DECKLIST COME IMMAGINE ───────────
-function _zonaImgHtml(titolo, arr) {
-  if (!arr.length) return '';
-  const carte = arr.map(c => `<img src="${c.img}" crossorigin="anonymous"
-    style="width:78px;aspect-ratio:59/86;object-fit:cover;border-radius:5px;display:block">`).join('');
-  return `<div style="margin-bottom:16px">
-    <div style="font-size:13px;font-weight:700;color:#1d1d1f;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:8px">${titolo} · ${arr.length}</div>
-    <div style="display:flex;flex-wrap:wrap;gap:6px">${carte}</div>
-  </div>`;
-}
-
-async function scaricaDeckImmagine() {
-  const tot = buildDeck.main.length + buildDeck.extra.length + buildDeck.side.length;
-  if (tot === 0) { toast('Il deck è vuoto', true); return; }
-  if (typeof html2canvas === 'undefined') { toast('Libreria non caricata, riprova', true); return; }
-
-  const nome = document.getElementById('nome-mazzo').value.trim() || 'Deck senza nome';
-  const owner = document.getElementById('proprietario-mazzo').value || '';
-  const punti = calcolaPunti(buildDeck.main, buildDeck.extra, buildDeck.side);
-
-  // costruisco un layout dedicato fuori schermo
-  const box = document.createElement('div');
-  box.style.cssText = 'position:fixed;left:-9999px;top:0;width:680px;background:#fff;padding:28px;font-family:Inter,sans-serif';
-  box.innerHTML = `
-    <div style="display:flex;align-items:baseline;justify-content:space-between;border-bottom:2px solid #e5e5ea;padding-bottom:12px;margin-bottom:18px">
-      <div>
-        <div style="font-size:26px;font-weight:700;letter-spacing:-0.02em;color:#1d1d1f">${escapeHtml(nome)}</div>
-        <div style="font-size:14px;color:#6e6e73;margin-top:2px">di ${escapeHtml(owner)}</div>
-      </div>
-      <div style="font-size:15px;font-weight:700;color:${punti > 100 ? '#ff3b30' : '#1d1d1f'};background:#f5f5f7;padding:6px 14px;border-radius:10px">${punti} pt Genesys</div>
-    </div>
-    ${_zonaImgHtml('🎴 Main Deck', buildDeck.main)}
-    ${_zonaImgHtml('⚡ Extra Deck', buildDeck.extra)}
-    ${_zonaImgHtml('🔄 Side Deck', buildDeck.side)}
-    <div style="text-align:right;font-size:11px;color:#a1a1a6;margin-top:10px">Yu-Gi-Oh! Genesys · Deck Builder</div>`;
-  document.body.appendChild(box);
-
-  toast('Genero l\'immagine…');
-  try {
-    const canvas = await html2canvas(box, { backgroundColor: '#ffffff', scale: 2, useCORS: true, logging: false });
-    document.body.removeChild(box);
-    const fileName = nome.replace(/[^a-zA-Z0-9]/g, '_') + '.png';
-
-    canvas.toBlob(async (blob) => {
-      if (!blob) { toast('Errore nella generazione', true); return; }
-      const file = new File([blob], fileName, { type: 'image/png' });
-      // su mobile: condivisione nativa (Salva su Foto / WhatsApp ecc.)
-      if (navigator.canShare && navigator.canShare({ files: [file] })) {
-        try {
-          await navigator.share({ files: [file], title: nome });
-          return;
-        } catch (e) { /* utente ha annullato: fallback al download */ }
-      }
-      // desktop o fallback: download diretto
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url; a.download = fileName;
-      a.click();
-      URL.revokeObjectURL(url);
-      toast('Immagine salvata!');
-    }, 'image/png');
-  } catch (e) {
-    if (box.parentNode) document.body.removeChild(box);
-    console.error('Errore export immagine:', e);
-    toast('Errore nella generazione dell\'immagine', true);
-  }
-}
-
 // ─────────── ASSOCIA DECKLIST A MAZZO CLASSIFICA ───────────
 // docId della decklist che stiamo associando; null = quella in costruzione
 let _associaDocId = null;
@@ -1853,7 +1839,6 @@ window.mandaAlSideUI = mandaAlSideUI;
 window.duplicaCarta = duplicaCarta;
 window.ordinaZona = ordinaZona;
 window.manoDiProva = manoDiProva;
-window.scaricaDeckImmagine = scaricaDeckImmagine;
 window.apriAssociaDecklist = apriAssociaDecklist;
 window.associaDaCostruito = associaDaCostruito;
 window.confermaAssocia = confermaAssocia;
