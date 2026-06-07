@@ -51,6 +51,33 @@
     --red-soft: #2a1413;
     --orange: #ff9f0a;
   }
+  /* override dark per sezione duello (usa colori fissi) */
+  [data-theme="dark"] .duel-overlay { background: #000; }
+  [data-theme="dark"] .duel-topbar,
+  [data-theme="dark"] .duel-top-tools { background: #1c1c1e; border-color: #2c2c2e; }
+  [data-theme="dark"] .duel-player-col { border-color: #2c2c2e; }
+  [data-theme="dark"] .duel-tool { background: #2c2c2e; }
+  [data-theme="dark"] .duel-tool-btn:hover { background: rgba(255,255,255,0.08); color: #f5f5f7; }
+  [data-theme="dark"] .duel-calc-disp { background: #2c2c2e; color: #f5f5f7; border-color: #3a3a3c; }
+  [data-theme="dark"] .duel-key { background: #2c2c2e; color: #f5f5f7; border-color: #3a3a3c; }
+  [data-theme="dark"] .duel-key:active { background: #3a3a3c; }
+  [data-theme="dark"] .duel-key:hover { background: #3a3a3c; }
+  [data-theme="dark"] .duel-key.del { background: #2a1413; }
+  [data-theme="dark"] .duel-lp-num { color: #f5f5f7; }
+  [data-theme="dark"] .duel-quick.minus { background: #2a1413; }
+  [data-theme="dark"] .duel-quick.plus { background: #122a18; color: #30d158; }
+  [data-theme="dark"] .duel-timer-setup-modal,
+  [data-theme="dark"] .duel-input-sheet-inner,
+  [data-theme="dark"] .dadi-modal { background: #1c1c1e; color: #f5f5f7; }
+  [data-theme="dark"] .duel-tsp-btn { background: #2c2c2e; color: #f5f5f7; border-color: #3a3a3c; }
+  [data-theme="dark"] .duel-tsp-btn:hover { background: #3a3a3c; }
+  [data-theme="dark"] .duel-tsp-inp { background: #2c2c2e; color: #f5f5f7; border-color: #3a3a3c; }
+  [data-theme="dark"] .duel-tsp-action.primary { background: #f5f5f7; color: #1c1c1e; }
+  [data-theme="dark"] .duel-tsp-action { color: #f5f5f7; }
+  [data-theme="dark"] .duel-input-field { background: #2c2c2e; color: #f5f5f7; }
+  [data-theme="dark"] .duel-input-cancel { color: #f5f5f7; }
+  [data-theme="dark"] .duel-input-cancel:hover { background: #3a3a3c; }
+  [data-theme="dark"] .duel-tool-val { color: #f5f5f7; }
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
   html, body {
     background: var(--bg);
@@ -794,8 +821,6 @@
   .h2h-pname { font-size: 0.98rem; font-weight: 500; min-width: 60px; text-align: center; }
   .h2h-score { font-size: 1rem; color: var(--text-dim); font-variant-numeric: tabular-nums; }
   .h2h-score strong { color: var(--text); font-weight: 700; font-size: 1.1rem; }
-  .h2h-btn.few { background: #fff7ed; }
-  .h2h-btn.few .h2h-score strong { color: var(--orange); }
   .h2h-arrow { font-size: 0.62rem; }
   .h2h-btn.open .h2h-arrow { transform: rotate(180deg); }
 
@@ -3349,7 +3374,7 @@ function renderRiepilogo() {
         const ultimoStr = r.ultimo ? `Vittoria ${r.ultimo.vincitore}` : '—';
         const bodyVuoto = tot === 0;
         return `<div class="h2h-item">
-          <button class="h2h-btn ${few ? 'few' : ''}" onclick="toggleDeckMu('${safeId}')">
+          <button class="h2h-btn" onclick="toggleDeckMu('${safeId}')">
             <div class="h2h-score-line">
               <span class="h2h-pname">${r.a}</span>
               <span class="h2h-score"><strong>${r.va}</strong> - <strong>${r.vb}</strong></span>
