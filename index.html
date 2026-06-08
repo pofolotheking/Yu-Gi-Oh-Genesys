@@ -5296,26 +5296,71 @@ async function caricaNotizie() {
   const c = document.getElementById('news-list');
   if (!c) return;
   c.innerHTML = '<div class="news-loading">Caricamento notizie…</div>';
-  const RSS_URL = 'https://ygorganization.com/category/events/yu-gi-oh-genesys/feed/';
 
-  const PROXIES = [
-    `https://api.allorigins.win/get?url=${encodeURIComponent(RSS_URL)}`,
-    `https://corsproxy.io/?${encodeURIComponent(RSS_URL)}`,
-  ];
+  // notizia ufficiale Konami sempre in cima
+  const KONAMI_PINNED = {
+    title: '📌 GENESYS June Points Update (Konami ufficiale)',
+    date: '01/06/26',
+    url: 'https://yugiohblog.konami.com/2026/genesys/genesys-june-points-update/',
+    source: 'Konami'
+  };
+  const cardHtml = (a) => `
+    <a class="news-card" href="${a.url}" target="_blank" rel="noopener">
+      <div class="news-title">${a.title}</div>
+      <div class="news-meta">
+        <span class="news-date">${a.dateStr || a.date}</span>
+        <span class="news-source">${a.source || 'YGOrganization'}</span>
+      </div>
+    </a>`;
 
-  let xml = null;
-  for (const proxy of PROXIES) {
+  // scarica e parsa un feed RSS via proxy → array di {title, url, ts, dateStr, source}
+  async function caricaFeed(rssUrl, source) {
+    const proxies = [
+      `https://api.allorigins.win/get?url=${encodeURIComponent(rssUrl)}`,
+      `https://corsproxy.io/?${encodeURIComponent(rssUrl)}`,
+    ];
+    let xml = null;
+    for (const proxy of proxies) {
+      try {
+        const r = await fetch(proxy);
+        if (!r.ok) continue;
+        let raw = '';
+        try { const data = await r.json(); raw = data.contents || ''; }
+        catch(e) { raw = ''; }
+        if (!raw) { try { raw = await r.text(); } catch(e) {} }
+        if (raw.includes('<item>') || raw.includes('<entry>')) { xml = raw; break; }
+      } catch(e) { continue; }
+    }
+    if (!xml) return [];
     try {
-      const r = await fetch(proxy);
-      if (!r.ok) continue;
-      const data = await r.json();
-      const raw = data.contents || await r.text?.() || '';
-      if (raw.includes('<item>') || raw.includes('<entry>')) { xml = raw; break; }
-    } catch(e) { continue; }
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(xml, 'text/xml');
+      const items = [...doc.querySelectorAll('item')];
+      return items.map(item => {
+        const title = (item.querySelector('title')?.textContent || '')
+          .replace(/&amp;/g,'&').replace(/&#8211;/g,'–').replace(/<!\[CDATA\[|\]\]>/g,'').trim();
+        const link  = item.querySelector('link')?.textContent?.trim() ||
+                      item.querySelector('guid')?.textContent?.trim() || '#';
+        const pub   = item.querySelector('pubDate')?.textContent || '';
+        const d     = pub ? new Date(pub) : null;
+        const ts    = d && !isNaN(d) ? d.getTime() : 0;
+        const dateStr = d && !isNaN(d) ? d.toLocaleDateString('it-IT', { day:'2-digit', month:'2-digit', year:'2-digit' }) : '';
+        return { title, url: link, ts, dateStr, source };
+      });
+    } catch(e) { return []; }
   }
 
-  if (!xml) {
-    _newsLoaded = true;
+  // scarico entrambi i feed in parallelo
+  const [ygorg, ygopro] = await Promise.all([
+    caricaFeed('https://ygorganization.com/category/events/yu-gi-oh-genesys/feed/', 'YGOrganization'),
+    caricaFeed('https://ygoprodeck.com/feed_rss.xml', 'YGOProDeck'),
+  ]);
+
+  _newsLoaded = true;
+  let tutte = [...ygorg, ...ygopro].filter(a => a.title);
+
+  if (tutte.length === 0) {
+    // fallback statico se entrambi i feed falliscono
     const articoli = [
       { title: 'GENESYS Points List (June 1st 2026 Onwards)', date: '15/05/26', url: 'https://ygorganization.com/genesys-points-list-june-1st-2026-onwards-ocg/' },
       { title: 'Genesys April Points Update', date: '30/04/26', url: 'https://ygorganization.com/genesysapril2026/' },
@@ -5328,41 +5373,14 @@ async function caricaNotizie() {
       { title: 'GENESYS Roadmap for 2026', date: '23/01/26', url: 'https://ygorganization.com/genesys2026roadmap/' },
       { title: '[YGOrg Tourneys] Genesys 1 Top 8 Decklists', date: '21/01/26', url: 'https://ygorganization.com/hankowins/' },
     ];
-    c.innerHTML = articoli.map(a => `
-      <a class="news-card" href="${a.url}" target="_blank" rel="noopener">
-        <div class="news-title">${a.title}</div>
-        <div class="news-meta">
-          <span class="news-date">${a.date}</span>
-          <span class="news-source">YGOrganization</span>
-        </div>
-      </a>`).join('');
+    c.innerHTML = cardHtml(KONAMI_PINNED) + articoli.map(a => cardHtml({ ...a, source: 'YGOrganization' })).join('');
     return;
   }
 
-  try {
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(xml, 'text/xml');
-    const items = [...doc.querySelectorAll('item')];
-    if (!items.length) throw new Error();
-    _newsLoaded = true;
-    c.innerHTML = items.slice(0, 20).map(item => {
-      const title = (item.querySelector('title')?.textContent || '')
-        .replace(/&amp;/g,'&').replace(/&#8211;/g,'–').replace(/<!\[CDATA\[|\]\]>/g,'').trim();
-      const link  = item.querySelector('link')?.textContent?.trim() ||
-                    item.querySelector('guid')?.textContent?.trim() || '#';
-      const pub   = item.querySelector('pubDate')?.textContent || '';
-      const date  = pub ? new Date(pub).toLocaleDateString('it-IT', { day:'2-digit', month:'2-digit', year:'2-digit' }) : '';
-      return `<a class="news-card" href="${link}" target="_blank" rel="noopener">
-        <div class="news-title">${title}</div>
-        <div class="news-meta">
-          <span class="news-date">${date}</span>
-          <span class="news-source">YGOrganization</span>
-        </div>
-      </a>`;
-    }).join('');
-  } catch(e) {
-    c.innerHTML = '<div class="news-empty">Errore nel parsing delle notizie.</div>';
-  }
+  // ordino per data decrescente e taglio a 25
+  tutte.sort((a, b) => b.ts - a.ts);
+  tutte = tutte.slice(0, 25);
+  c.innerHTML = cardHtml(KONAMI_PINNED) + tutte.map(cardHtml).join('');
 }
 
 window.caricaNotizie = caricaNotizie;
