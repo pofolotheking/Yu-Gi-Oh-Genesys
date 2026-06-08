@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Carta del Giorno · Yu-Gi-Oh! Genesys</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<meta name="theme-color" content="#1d1d1f">
+<style>
+  :root {
+    --bg: #ffffff;
+    --bg-soft: #f5f5f7;
+    --bg-card: #ffffff;
+    --border: #e5e5ea;
+    --border-strong: #d2d2d7;
+    --text: #1d1d1f;
+    --text-dim: #6e6e73;
+    --text-faint: #a1a1a6;
+    --green: #34c759;
+    --green-dark: #28a745;
+    --blue: #007aff;
+    --red: #ff3b30;
+    --orange: #ff9500;
+    --yellow: #ffcc00;
+  }
+  [data-theme="dark"] {
+    --bg: #000000;
+    --bg-soft: #1c1c1e;
+    --bg-card: #1c1c1e;
+    --border: #2c2c2e;
+    --border-strong: #3a3a3c;
+    --text: #f5f5f7;
+    --text-dim: #aeaeb2;
+    --text-faint: #8e8e93;
+    --green: #30d158;
+    --green-dark: #28a745;
+    --blue: #0a84ff;
+    --red: #ff453a;
+    --orange: #ff9f0a;
+    --yellow: #ffd60a;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body {
+    background: var(--bg); color: var(--text);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 16px; line-height: 1.5; min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+  main { max-width: 720px; margin: 0 auto; padding: 0 16px 60px; }
+
+  /* header */
+  header { text-align: center; padding: 56px 20px 16px; position: relative; }
+  header h1 { font-size: 1.6rem; font-weight: 700; letter-spacing: -0.03em; }
+  header .subtitle { font-size: 0.9rem; color: var(--text-dim); margin-top: 4px; }
+  .home-btn {
+    position: fixed; top: 14px; left: 14px;
+    background: var(--bg-soft); border: 1px solid var(--border);
+    border-radius: 10px; padding: 8px 14px; cursor: pointer;
+    color: var(--text); font-family: inherit; font-size: 0.88rem; font-weight: 600;
+    display: inline-flex; align-items: center; gap: 6px; text-decoration: none;
+    z-index: 50; box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    transition: background 0.15s;
+  }
+  .home-btn:hover { background: var(--border); }
+  .theme-btn {
+    position: fixed; top: 14px; right: 14px;
+    background: var(--bg-soft); border: 1px solid var(--border);
+    border-radius: 10px; width: 38px; height: 38px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; color: var(--text-dim);
+    transition: background 0.15s, color 0.15s; z-index: 50;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  }
+  .theme-btn:hover { background: var(--border); color: var(--text); }
+
+  /* input ricerca */
+  .guess-area { position: relative; margin-bottom: 18px; }
+  .guess-row { display: flex; gap: 8px; }
+  .guess-input {
+    flex: 1; padding: 13px 15px; font-size: 1rem; font-family: inherit;
+    border: 1px solid var(--border-strong); border-radius: 12px;
+    background: var(--bg-card); color: var(--text);
+  }
+  .guess-input:focus { outline: none; border-color: var(--blue); }
+  .guess-input:disabled { opacity: 0.5; }
+  .guess-submit {
+    padding: 0 20px; border: none; border-radius: 12px; cursor: pointer;
+    background: var(--blue); color: #fff; font-family: inherit;
+    font-size: 0.95rem; font-weight: 700; transition: opacity 0.15s;
+  }
+  .guess-submit:disabled { opacity: 0.4; cursor: default; }
+  .autocomplete {
+    position: absolute; top: 100%; left: 0; right: 0; margin-top: 4px;
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: 12px; box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+    max-height: 280px; overflow-y: auto; z-index: 20; display: none;
+  }
+  .autocomplete.show { display: block; }
+  .ac-item {
+    display: flex; align-items: center; gap: 10px; padding: 8px 12px;
+    cursor: pointer; border-bottom: 1px solid var(--border);
+  }
+  .ac-item:last-child { border-bottom: none; }
+  .ac-item:hover, .ac-item.active { background: var(--bg-soft); }
+  .ac-item img { width: 30px; height: 44px; object-fit: cover; border-radius: 3px; flex-shrink: 0; }
+  .ac-name { font-size: 0.88rem; font-weight: 500; }
+
+  /* contatore tentativi */
+  .tries-info { text-align: center; font-size: 0.85rem; color: var(--text-dim); margin-bottom: 16px; }
+  .tries-info b { color: var(--text); }
+
+  /* intestazione colonne */
+  .grid-head, .guess-line {
+    display: grid;
+    grid-template-columns: 1.6fr 1fr 1fr 0.7fr 0.8fr 0.8fr;
+    gap: 5px;
+  }
+  .grid-head { margin-bottom: 6px; }
+  .grid-head div {
+    font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.03em;
+    color: var(--text-faint); font-weight: 700; text-align: center;
+    padding: 0 2px;
+  }
+  .guesses { display: flex; flex-direction: column; gap: 5px; }
+  .guess-line { animation: revealLine 0.3s ease; }
+  @keyframes revealLine { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
+  .cell {
+    border-radius: 8px; padding: 8px 4px; text-align: center;
+    font-size: 0.78rem; font-weight: 600; color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    min-height: 52px; word-break: break-word; line-height: 1.15;
+  }
+  .cell.name {
+    background: var(--bg-soft); color: var(--text);
+    font-size: 0.74rem; flex-direction: column; gap: 3px;
+  }
+  .cell.name img { width: 26px; height: 38px; object-fit: cover; border-radius: 3px; }
+  .cell.match { background: var(--green); }
+  .cell.close { background: var(--orange); }
+  .cell.miss  { background: #8e8e93; }
+  [data-theme="dark"] .cell.miss { background: #48484a; }
+  .cell .arrow { font-size: 0.7rem; margin-left: 2px; }
+
+  /* messaggi esito */
+  .result-box {
+    text-align: center; padding: 20px; border-radius: 14px;
+    margin-bottom: 18px; animation: revealLine 0.3s ease;
+  }
+  .result-box.win { background: var(--green); color: #fff; }
+  .result-box.lose { background: var(--red); color: #fff; }
+  .result-box h2 { font-size: 1.2rem; margin-bottom: 6px; }
+  .result-box .ans { font-weight: 700; }
+  .result-box img { width: 90px; border-radius: 6px; margin: 10px auto 4px; display: block; }
+  .replay-btn {
+    margin-top: 12px; background: rgba(255,255,255,0.25); border: 1px solid rgba(255,255,255,0.4);
+    color: #fff; padding: 10px 24px; border-radius: 10px; cursor: pointer;
+    font-family: inherit; font-size: 0.95rem; font-weight: 700;
+  }
+  .replay-btn:hover { background: rgba(255,255,255,0.35); }
+
+  .loading { text-align: center; padding: 40px; color: var(--text-faint); }
+  .hint-note { text-align: center; font-size: 0.78rem; color: var(--text-faint); margin-top: 18px; line-height: 1.5; }
+
+  @media (max-width: 600px) {
+    .grid-head, .guess-line { grid-template-columns: 1.4fr 0.9fr 0.9fr 0.6fr 0.7fr 0.7fr; gap: 3px; }
+    .cell { font-size: 0.66rem; padding: 6px 2px; min-height: 46px; }
+    .cell.name { font-size: 0.62rem; }
+    .grid-head div { font-size: 0.5rem; }
+    header { padding: 52px 12px 14px; }
+  }
+</style>
+</head>
+<body>
+<a href="index.html" class="home-btn">← Home</a>
+<button class="theme-btn" onclick="toggleTema()" title="Modalità scura/chiara">
+  <svg id="theme-icon-moon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+  <svg id="theme-icon-sun" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="display:none"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+</button>
+
+<header>
+  <h1>🃏 Carta del Giorno</h1>
+  <div class="subtitle">Indovina la carta Yu-Gi-Oh misteriosa</div>
+</header>
+
+<main>
+  <div id="game-area">
+    <div class="loading">Caricamento carte…</div>
+  </div>
+  <div class="hint-note">
+    Hai 8 tentativi. Per ogni carta che provi, le colonne ti dicono cosa hai indovinato:<br>
+    <b style="color:var(--green)">verde</b> = esatto · <b style="color:var(--orange)">arancione</b> = vicino (per Livello/ATK/DEF la freccia indica se la carta segreta è più alta ▲ o più bassa ▼) · grigio = sbagliato.
+  </div>
+</main>
+
+<script>
+// ─────────── MODALITÀ SCURA (condivisa con la home) ───────────
+function applicaTema(tema) {
+  if (tema === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+  else document.documentElement.removeAttribute('data-theme');
+  const moon = document.getElementById('theme-icon-moon');
+  const sun = document.getElementById('theme-icon-sun');
+  if (moon && sun) { moon.style.display = tema === 'dark' ? 'none' : 'block'; sun.style.display = tema === 'dark' ? 'block' : 'none'; }
+}
+function toggleTema() {
+  const attuale = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+  const nuovo = attuale === 'dark' ? 'light' : 'dark';
+  applicaTema(nuovo);
+  try { localStorage.setItem('genesys-tema', nuovo); } catch(e) {}
+}
+function initTema() {
+  let tema = 'light';
+  try {
+    const salvato = localStorage.getItem('genesys-tema');
+    if (salvato) tema = salvato;
+    else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) tema = 'dark';
+  } catch(e) {}
+  applicaTema(tema);
+}
+initTema();
+
+// ─────────── GIOCO ───────────
+const MAX_TENTATIVI = 8;
+let TUTTE = [];          // tutte le carte (id, name, ...)
+let NOMI = [];           // per autocomplete
+let segreta = null;      // carta misteriosa
+let tentativi = [];      // carte già provate
+let finito = false;
+let acIndex = -1;        // indice selezione autocomplete
+
+const escapeHtml = (s) => (s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+// categoria "macro" del tipo (Mostro / Magia / Trappola)
+function macroTipo(t) {
+  if (!t) return '—';
+  if (t.includes('Spell')) return 'Magia';
+  if (t.includes('Trap')) return 'Trappola';
+  return 'Mostro';
+}
+function imgSmall(c) { return c.card_images?.[0]?.image_url_small || c.card_images?.[0]?.image_url || ''; }
+
+async function caricaCarte() {
+  try {
+    const r = await fetch('https://db.ygoprodeck.com/api/v7/cardinfo.php');
+    if (!r.ok) throw new Error();
+    const data = await r.json();
+    TUTTE = data.data || [];
+    NOMI = TUTTE.map(c => ({ id: c.id, name: c.name, img: imgSmall(c) }));
+    nuovaPartita();
+  } catch(e) {
+    document.getElementById('game-area').innerHTML = '<div class="loading">Errore nel caricamento delle carte. Ricarica la pagina.</div>';
+  }
+}
+
+function nuovaPartita() {
+  segreta = TUTTE[Math.floor(Math.random() * TUTTE.length)];
+  tentativi = [];
+  finito = false;
+  renderGioco();
+}
+
+function renderGioco() {
+  const area = document.getElementById('game-area');
+  area.innerHTML = `
+    <div class="guess-area">
+      <div class="guess-row">
+        <input type="text" class="guess-input" id="guess-input" placeholder="Scrivi il nome di una carta…" autocomplete="off" ${finito ? 'disabled' : ''}>
+        <button class="guess-submit" id="guess-submit" ${finito ? 'disabled' : ''}>Prova</button>
+      </div>
+      <div class="autocomplete" id="autocomplete"></div>
+    </div>
+    <div class="tries-info">Tentativo <b>${tentativi.length}</b> di <b>${MAX_TENTATIVI}</b></div>
+    <div id="result-slot"></div>
+    ${tentativi.length ? `
+    <div class="grid-head">
+      <div>Carta</div><div>Tipo</div><div>Razza</div><div>Attr.</div><div>Liv.</div><div>ATK</div>
+    </div>` : ''}
+    <div class="guesses" id="guesses"></div>
+  `;
+  // render tentativi (dal più recente in alto)
+  const g = document.getElementById('guesses');
+  g.innerHTML = tentativi.slice().reverse().map(rigaConfronto).join('');
+
+  if (!finito) {
+    const inp = document.getElementById('guess-input');
+    const btn = document.getElementById('guess-submit');
+    inp.addEventListener('input', onInput);
+    inp.addEventListener('keydown', onKey);
+    btn.addEventListener('click', () => provaTesto(inp.value));
+    inp.focus();
+  }
+  if (finito) renderEsito();
+}
+
+// confronto colonne tra carta provata e segreta
+function rigaConfronto(c) {
+  const macroG = macroTipo(c.type), macroS = macroTipo(segreta.type);
+  const cellTipo = `<div class="cell ${macroG === macroS ? 'match' : 'miss'}">${macroG}</div>`;
+
+  const razzaG = c.race || '—', razzaS = segreta.race || '—';
+  const cellRazza = `<div class="cell ${razzaG === razzaS ? 'match' : 'miss'}">${escapeHtml(razzaG)}</div>`;
+
+  const attrG = c.attribute || '—', attrS = segreta.attribute || '—';
+  const cellAttr = `<div class="cell ${attrG === attrS ? 'match' : (attrG !== '—' && attrS !== '—' ? 'miss' : 'miss')}">${escapeHtml(attrG)}</div>`;
+
+  const cellLiv = cellNumerica(c.level, segreta.level);
+  const cellAtk = cellNumerica(c.atk, segreta.atk);
+
+  const img = imgSmall(c);
+  return `<div class="guess-line">
+    <div class="cell name"><img src="${img}" alt="">${escapeHtml(c.name)}</div>
+    ${cellTipo}${cellRazza}${cellAttr}${cellLiv}${cellAtk}
+  </div>`;
+}
+
+// cella numerica con frecce (livello/atk/def)
+function cellNumerica(val, target) {
+  const v = (val === undefined || val === null) ? null : val;
+  const t = (target === undefined || target === null) ? null : target;
+  if (v === null && t === null) return `<div class="cell match">—</div>`;
+  if (v === null || t === null) return `<div class="cell miss">${v === null ? '—' : v}</div>`;
+  if (v === t) return `<div class="cell match">${v}</div>`;
+  const vicino = Math.abs(v - t) <= 1; // entro 1 di differenza = "vicino"
+  const arrow = t > v ? '▲' : '▼';
+  return `<div class="cell ${vicino ? 'close' : 'miss'}">${v}<span class="arrow">${arrow}</span></div>`;
+}
+
+function provaTesto(testo) {
+  if (finito) return;
+  const nome = (testo || '').trim().toLowerCase();
+  if (!nome) return;
+  // trova match esatto, altrimenti il primo che inizia con il testo
+  let carta = TUTTE.find(c => c.name.toLowerCase() === nome)
+           || TUTTE.find(c => c.name.toLowerCase().startsWith(nome));
+  if (!carta) { alert('Carta non trovata. Controlla il nome (in inglese).'); return; }
+  registraTentativo(carta);
+}
+
+function registraTentativo(carta) {
+  if (finito) return;
+  // evita doppioni
+  if (tentativi.some(t => t.id === carta.id)) { alert('Hai già provato questa carta.'); return; }
+  tentativi.push(carta);
+  if (carta.id === segreta.id) { finito = 'win'; }
+  else if (tentativi.length >= MAX_TENTATIVI) { finito = 'lose'; }
+  renderGioco();
+}
+
+function renderEsito() {
+  const slot = document.getElementById('result-slot');
+  if (!slot) return;
+  const img = imgSmall(segreta);
+  if (finito === 'win') {
+    slot.innerHTML = `<div class="result-box win">
+      <h2>🎉 Indovinata!</h2>
+      <div>Era <span class="ans">${escapeHtml(segreta.name)}</span> in ${tentativi.length} tentativ${tentativi.length === 1 ? 'o' : 'i'}</div>
+      <img src="${img}" alt="">
+      <button class="replay-btn" onclick="nuovaPartita()">Gioca ancora</button>
+    </div>`;
+  } else {
+    slot.innerHTML = `<div class="result-box lose">
+      <h2>😖 Tentativi finiti!</h2>
+      <div>La carta era <span class="ans">${escapeHtml(segreta.name)}</span></div>
+      <img src="${img}" alt="">
+      <button class="replay-btn" onclick="nuovaPartita()">Riprova</button>
+    </div>`;
+  }
+}
+
+// ── autocomplete ──
+function onInput(e) {
+  const q = e.target.value.trim().toLowerCase();
+  const ac = document.getElementById('autocomplete');
+  acIndex = -1;
+  if (q.length < 2) { ac.classList.remove('show'); ac.innerHTML = ''; return; }
+  const risultati = NOMI.filter(n => n.name.toLowerCase().includes(q)).slice(0, 8);
+  if (!risultati.length) { ac.classList.remove('show'); ac.innerHTML = ''; return; }
+  ac.innerHTML = risultati.map((n, i) => `
+    <div class="ac-item" data-id="${n.id}" data-i="${i}">
+      <img src="${n.img}" alt="">
+      <span class="ac-name">${escapeHtml(n.name)}</span>
+    </div>`).join('');
+  ac.classList.add('show');
+  ac.querySelectorAll('.ac-item').forEach(el => {
+    el.addEventListener('click', () => {
+      const carta = TUTTE.find(c => c.id === parseInt(el.dataset.id));
+      if (carta) registraTentativo(carta);
+    });
+  });
+}
+function onKey(e) {
+  const ac = document.getElementById('autocomplete');
+  const items = [...ac.querySelectorAll('.ac-item')];
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    if (acIndex >= 0 && items[acIndex]) {
+      const carta = TUTTE.find(c => c.id === parseInt(items[acIndex].dataset.id));
+      if (carta) { registraTentativo(carta); return; }
+    }
+    provaTesto(e.target.value);
+    return;
+  }
+  if (!items.length) return;
+  if (e.key === 'ArrowDown') { e.preventDefault(); acIndex = Math.min(acIndex + 1, items.length - 1); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); acIndex = Math.max(acIndex - 1, 0); }
+  else return;
+  items.forEach((el, i) => el.classList.toggle('active', i === acIndex));
+}
+
+window.nuovaPartita = nuovaPartita;
+window.toggleTema = toggleTema;
+caricaCarte();
+</script>
+</body>
+</html>
