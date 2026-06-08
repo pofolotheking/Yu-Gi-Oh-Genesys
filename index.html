@@ -195,6 +195,22 @@
   }
   .theme-btn:hover { background: var(--border); color: var(--text); }
   @media (max-width: 720px) { .theme-btn { right: 16px; } }
+  .cdg-btn {
+    position: fixed;
+    top: 62px;
+    right: calc((100vw - min(720px, 100vw)) / 2 + 16px);
+    background: var(--bg-soft);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    width: 38px; height: 38px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; text-decoration: none; font-size: 1.05rem;
+    transition: background 0.15s; z-index: 50;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  }
+  .cdg-btn:hover { background: var(--border); }
+  @media (max-width: 720px) { .cdg-btn { right: 16px; } }
+  @media (max-width: 600px) { .cdg-btn { top: 56px; } }
   .gear-btn {
     position: fixed;
     top: 16px;
@@ -2390,6 +2406,8 @@
   <svg id="theme-icon-moon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
   <svg id="theme-icon-sun" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="display:none"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
 </button>
+
+<a href="ygordle.html" class="cdg-btn" title="Carta del Giorno - indovina la carta">🃏</a>
 
 <!-- OVERLAY DUELLO -->
 <div class="duel-overlay" id="duel-overlay">
@@ -5376,11 +5394,11 @@ async function caricaNotizie() {
     } catch(e) { return []; }
   }
 
-  // scarico entrambi i feed in parallelo
-  const [ygorg, ygopro] = await Promise.all([
+  // scarico i feed in parallelo (YGOProDeck non ha un feed news aggiornato accessibile, quindi solo YGOrganization)
+  const [ygorg] = await Promise.all([
     caricaFeed('https://ygorganization.com/category/events/yu-gi-oh-genesys/feed/', 'YGOrganization'),
-    caricaFeed('https://ygoprodeck.com/category/format-article/news/feed/', 'YGOProDeck'),
   ]);
+  const ygopro = [];
 
   _newsLoaded = true;
   let tutte = [...ygorg, ...ygopro].filter(a => a.title);
