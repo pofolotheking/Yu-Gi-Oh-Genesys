@@ -5379,7 +5379,7 @@ async function caricaNotizie() {
   // scarico entrambi i feed in parallelo
   const [ygorg, ygopro] = await Promise.all([
     caricaFeed('https://ygorganization.com/category/events/yu-gi-oh-genesys/feed/', 'YGOrganization'),
-    caricaFeed('https://ygoprodeck.com/feed_rss.xml', 'YGOProDeck'),
+    caricaFeed('https://ygoprodeck.com/category/format-article/news/feed/', 'YGOProDeck'),
   ]);
 
   _newsLoaded = true;
