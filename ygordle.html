@@ -114,7 +114,7 @@
   /* intestazione colonne */
   .grid-head, .guess-line {
     display: grid;
-    grid-template-columns: 1.6fr 1fr 1fr 0.7fr 0.8fr 0.8fr;
+    grid-template-columns: 1.5fr 1fr 1fr 0.7fr 0.6fr 0.7fr 0.7fr;
     gap: 5px;
   }
   .grid-head { margin-bottom: 6px; }
@@ -164,7 +164,7 @@
   .hint-note { text-align: center; font-size: 0.78rem; color: var(--text-faint); margin-top: 18px; line-height: 1.5; }
 
   @media (max-width: 600px) {
-    .grid-head, .guess-line { grid-template-columns: 1.4fr 0.9fr 0.9fr 0.6fr 0.7fr 0.7fr; gap: 3px; }
+    .grid-head, .guess-line { grid-template-columns: 1.3fr 0.9fr 0.9fr 0.6fr 0.5fr 0.6fr 0.6fr; gap: 3px; }
     .cell { font-size: 0.66rem; padding: 6px 2px; min-height: 46px; }
     .cell.name { font-size: 0.62rem; }
     .grid-head div { font-size: 0.5rem; }
@@ -231,22 +231,43 @@ let acIndex = -1;        // indice selezione autocomplete
 
 const escapeHtml = (s) => (s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
-// categoria "macro" del tipo (Mostro / Magia / Trappola)
+// categoria del tipo: distingue Magia/Trappola e i tipi di mostro (Normale/Effetto/Fusion/Synchro/XYZ/Link/Pendulum/Ritual)
 function macroTipo(t) {
   if (!t) return '—';
   if (t.includes('Spell')) return 'Magia';
   if (t.includes('Trap')) return 'Trappola';
-  return 'Mostro';
+  if (t.includes('Fusion')) return 'Fusion';
+  if (t.includes('Synchro')) return 'Synchro';
+  if (t.includes('XYZ') || t.includes('Xyz')) return 'XYZ';
+  if (t.includes('Link')) return 'Link';
+  if (t.includes('Pendulum')) return 'Pendulum';
+  if (t.includes('Ritual')) return 'Ritual';
+  if (t.includes('Normal')) return 'Normale';
+  return 'Effetto';
 }
 function imgSmall(c) { return c.card_images?.[0]?.image_url_small || c.card_images?.[0]?.image_url || ''; }
 
+let POPOLARI = [];       // sottoinsieme di carte "note" da cui pescare la segreta
+
 async function caricaCarte() {
   try {
-    const r = await fetch('https://db.ygoprodeck.com/api/v7/cardinfo.php');
+    // misc=yes restituisce anche le statistiche di visualizzazione (proxy di popolarità)
+    const r = await fetch('https://db.ygoprodeck.com/api/v7/cardinfo.php?misc=yes');
     if (!r.ok) throw new Error();
     const data = await r.json();
     TUTTE = data.data || [];
     NOMI = TUTTE.map(c => ({ id: c.id, name: c.name, img: imgSmall(c) }));
+
+    // costruisco il pool di carte "note": le più viste su YGOProDeck
+    const conViews = TUTTE
+      .map(c => ({ c, views: c.misc_info?.[0]?.views || 0 }))
+      .filter(x => x.views > 0)
+      .sort((a, b) => b.views - a.views);
+    // prendo le prime ~2500 carte più viste (carte ampiamente conosciute)
+    POPOLARI = conViews.slice(0, 2500).map(x => x.c);
+    // fallback: se per qualche motivo views non c'è, uso tutte
+    if (POPOLARI.length < 100) POPOLARI = TUTTE;
+
     nuovaPartita();
   } catch(e) {
     document.getElementById('game-area').innerHTML = '<div class="loading">Errore nel caricamento delle carte. Ricarica la pagina.</div>';
@@ -254,7 +275,8 @@ async function caricaCarte() {
 }
 
 function nuovaPartita() {
-  segreta = TUTTE[Math.floor(Math.random() * TUTTE.length)];
+  const pool = (POPOLARI && POPOLARI.length) ? POPOLARI : TUTTE;
+  segreta = pool[Math.floor(Math.random() * pool.length)];
   tentativi = [];
   finito = false;
   renderGioco();
@@ -274,7 +296,7 @@ function renderGioco() {
     <div id="result-slot"></div>
     ${tentativi.length ? `
     <div class="grid-head">
-      <div>Carta</div><div>Tipo</div><div>Razza</div><div>Attr.</div><div>Liv.</div><div>ATK</div>
+      <div>Carta</div><div>Tipo</div><div>Razza</div><div>Attr.</div><div>Liv.</div><div>ATK</div><div>DEF</div>
     </div>` : ''}
     <div class="guesses" id="guesses"></div>
   `;
@@ -306,11 +328,12 @@ function rigaConfronto(c) {
 
   const cellLiv = cellNumerica(c.level, segreta.level);
   const cellAtk = cellNumerica(c.atk, segreta.atk);
+  const cellDef = cellNumerica(c.def, segreta.def);
 
   const img = imgSmall(c);
   return `<div class="guess-line">
     <div class="cell name"><img src="${img}" alt="">${escapeHtml(c.name)}</div>
-    ${cellTipo}${cellRazza}${cellAttr}${cellLiv}${cellAtk}
+    ${cellTipo}${cellRazza}${cellAttr}${cellLiv}${cellAtk}${cellDef}
   </div>`;
 }
 
