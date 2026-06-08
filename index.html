@@ -5313,37 +5313,63 @@ async function caricaNotizie() {
       </div>
     </a>`;
 
-  // scarica e parsa un feed RSS via proxy → array di {title, url, ts, dateStr, source}
+  // scarica e parsa un feed RSS/Atom via proxy → array di {title, url, ts, dateStr, source}
   async function caricaFeed(rssUrl, source) {
+    // 1) prima provo rss2json: fa il parsing lato server e torna JSON pulito (gestisce RSS/Atom/date)
+    try {
+      const r = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`);
+      if (r.ok) {
+        const j = await r.json();
+        if (j.status === 'ok' && Array.isArray(j.items) && j.items.length) {
+          return j.items.map(it => {
+            const d  = it.pubDate ? new Date(it.pubDate.replace(' ', 'T')) : null;
+            const ts = d && !isNaN(d) ? d.getTime() : 0;
+            const dateStr = d && !isNaN(d) ? d.toLocaleDateString('it-IT', { day:'2-digit', month:'2-digit', year:'2-digit' }) : '';
+            return {
+              title: (it.title || '').replace(/&amp;/g,'&').trim(),
+              url: it.link || '#',
+              ts, dateStr, source
+            };
+          });
+        }
+      }
+    } catch(e) { /* passo al fallback */ }
+
+    // 2) fallback: proxy CORS generici + parsing manuale (RSS o Atom)
     const proxies = [
+      `https://corsproxy.io/?url=${encodeURIComponent(rssUrl)}`,
+      `https://api.allorigins.win/raw?url=${encodeURIComponent(rssUrl)}`,
       `https://api.allorigins.win/get?url=${encodeURIComponent(rssUrl)}`,
-      `https://corsproxy.io/?${encodeURIComponent(rssUrl)}`,
     ];
     let xml = null;
     for (const proxy of proxies) {
       try {
         const r = await fetch(proxy);
         if (!r.ok) continue;
-        let raw = '';
-        try { const data = await r.json(); raw = data.contents || ''; }
-        catch(e) { raw = ''; }
-        if (!raw) { try { raw = await r.text(); } catch(e) {} }
-        if (raw.includes('<item>') || raw.includes('<entry>')) { xml = raw; break; }
+        let raw = await r.text();
+        if (raw.trim().startsWith('{')) {
+          try { const jj = JSON.parse(raw); raw = jj.contents || raw; } catch(e) {}
+        }
+        if (raw && (raw.includes('<item') || raw.includes('<entry'))) { xml = raw; break; }
       } catch(e) { continue; }
     }
     if (!xml) return [];
     try {
       const parser = new DOMParser();
       const doc = parser.parseFromString(xml, 'text/xml');
-      const items = [...doc.querySelectorAll('item')];
-      return items.map(item => {
+      let nodes = [...doc.querySelectorAll('item')];
+      if (!nodes.length) nodes = [...doc.querySelectorAll('entry')];
+      return nodes.map(item => {
         const title = (item.querySelector('title')?.textContent || '')
           .replace(/&amp;/g,'&').replace(/&#8211;/g,'–').replace(/<!\[CDATA\[|\]\]>/g,'').trim();
-        const link  = item.querySelector('link')?.textContent?.trim() ||
-                      item.querySelector('guid')?.textContent?.trim() || '#';
-        const pub   = item.querySelector('pubDate')?.textContent || '';
-        const d     = pub ? new Date(pub) : null;
-        const ts    = d && !isNaN(d) ? d.getTime() : 0;
+        let link = item.querySelector('link')?.textContent?.trim() || '';
+        if (!link) { const l = item.querySelector('link'); link = l?.getAttribute('href') || ''; }
+        if (!link) link = item.querySelector('guid')?.textContent?.trim() || '#';
+        const pub = item.querySelector('pubDate')?.textContent
+                 || item.querySelector('published')?.textContent
+                 || item.querySelector('updated')?.textContent || '';
+        const d  = pub ? new Date(pub) : null;
+        const ts = d && !isNaN(d) ? d.getTime() : 0;
         const dateStr = d && !isNaN(d) ? d.toLocaleDateString('it-IT', { day:'2-digit', month:'2-digit', year:'2-digit' }) : '';
         return { title, url: link, ts, dateStr, source };
       });
