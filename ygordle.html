@@ -114,7 +114,7 @@
   /* intestazione colonne */
   .grid-head, .guess-line {
     display: grid;
-    grid-template-columns: 1.5fr 1fr 1fr 0.7fr 0.6fr 0.7fr 0.7fr;
+    grid-template-columns: 1.5fr 1fr 1fr 0.7fr 0.6fr 0.7fr 0.7fr 0.7fr;
     gap: 5px;
   }
   .grid-head { margin-bottom: 6px; }
@@ -164,7 +164,7 @@
   .hint-note { text-align: center; font-size: 0.78rem; color: var(--text-faint); margin-top: 18px; line-height: 1.5; }
 
   @media (max-width: 600px) {
-    .grid-head, .guess-line { grid-template-columns: 1.3fr 0.9fr 0.9fr 0.6fr 0.5fr 0.6fr 0.6fr; gap: 3px; }
+    .grid-head, .guess-line { grid-template-columns: 1.2fr 0.85fr 0.85fr 0.6fr 0.5fr 0.6fr 0.6fr 0.6fr; gap: 3px; }
     .cell { font-size: 0.66rem; padding: 6px 2px; min-height: 46px; }
     .cell.name { font-size: 0.62rem; }
     .grid-head div { font-size: 0.5rem; }
@@ -190,7 +190,7 @@
   </div>
   <div class="hint-note">
     Hai 8 tentativi. Per ogni carta che provi, le colonne ti dicono cosa hai indovinato:<br>
-    <b style="color:var(--green)">verde</b> = esatto · <b style="color:var(--orange)">arancione</b> = vicino (per Livello/ATK/DEF la freccia indica se la carta segreta è più alta ▲ o più bassa ▼) · grigio = sbagliato.
+    <b style="color:var(--green)">verde</b> = esatto · <b style="color:var(--orange)">arancione</b> = vicino (per Livello/ATK/DEF/Anno la freccia indica se la carta segreta è più alta ▲ o più bassa ▼) · grigio = sbagliato.
   </div>
 </main>
 
@@ -246,6 +246,13 @@ function macroTipo(t) {
   return 'Effetto';
 }
 function imgSmall(c) { return c.card_images?.[0]?.image_url_small || c.card_images?.[0]?.image_url || ''; }
+// anno di prima uscita (TCG, fallback OCG) come numero, o null
+function annoCarta(c) {
+  const d = c.misc_info?.[0]?.tcg_date || c.misc_info?.[0]?.ocg_date || '';
+  if (!d) return null;
+  const y = parseInt(d.slice(0, 4));
+  return isNaN(y) ? null : y;
+}
 
 let POPOLARI = [];       // sottoinsieme di carte "note" da cui pescare la segreta
 
@@ -296,7 +303,7 @@ function renderGioco() {
     <div id="result-slot"></div>
     ${tentativi.length ? `
     <div class="grid-head">
-      <div>Carta</div><div>Tipo</div><div>Razza</div><div>Attr.</div><div>Liv.</div><div>ATK</div><div>DEF</div>
+      <div>Carta</div><div>Tipo</div><div>Razza</div><div>Attr.</div><div>Liv.</div><div>ATK</div><div>DEF</div><div>Anno</div>
     </div>` : ''}
     <div class="guesses" id="guesses"></div>
   `;
@@ -329,12 +336,23 @@ function rigaConfronto(c) {
   const cellLiv = cellNumerica(c.level, segreta.level);
   const cellAtk = cellNumerica(c.atk, segreta.atk);
   const cellDef = cellNumerica(c.def, segreta.def);
+  const cellAnno = cellAnnoFn(annoCarta(c), annoCarta(segreta));
 
   const img = imgSmall(c);
   return `<div class="guess-line">
     <div class="cell name"><img src="${img}" alt="">${escapeHtml(c.name)}</div>
-    ${cellTipo}${cellRazza}${cellAttr}${cellLiv}${cellAtk}${cellDef}
+    ${cellTipo}${cellRazza}${cellAttr}${cellLiv}${cellAtk}${cellDef}${cellAnno}
   </div>`;
+}
+
+// cella anno: verde se uguale, arancione con freccia se entro 2 anni, grigio altrimenti
+function cellAnnoFn(v, t) {
+  if (v === null && t === null) return `<div class="cell match">—</div>`;
+  if (v === null || t === null) return `<div class="cell miss">${v === null ? '—' : v}</div>`;
+  if (v === t) return `<div class="cell match">${v}</div>`;
+  const vicino = Math.abs(v - t) <= 2;
+  const arrow = t > v ? '▲' : '▼';
+  return `<div class="cell ${vicino ? 'close' : 'miss'}">${v}<span class="arrow">${arrow}</span></div>`;
 }
 
 // cella numerica con frecce (livello/atk/def)
