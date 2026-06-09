@@ -4,7 +4,6 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Yu-Gi-Oh! Genesys</title>
-<link rel="icon" type="image/png" href="icon-192.png">
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#1d1d1f">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -206,11 +205,10 @@
     width: 38px; height: 38px;
     display: flex; align-items: center; justify-content: center;
     cursor: pointer; text-decoration: none; font-size: 1.05rem;
-    color: var(--text-dim);
-    transition: background 0.15s, color 0.15s; z-index: 50;
+    transition: background 0.15s; z-index: 50;
     box-shadow: 0 1px 4px rgba(0,0,0,0.08);
   }
-  .cdg-btn:hover { background: var(--border); color: var(--text); }
+  .cdg-btn:hover { background: var(--border); }
   @media (max-width: 720px) { .cdg-btn { right: 16px; } }
   @media (max-width: 600px) { .cdg-btn { top: 56px; } }
   .gear-btn {
@@ -2409,7 +2407,7 @@
   <svg id="theme-icon-sun" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="display:none"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
 </button>
 
-<a href="ygordle.html" class="cdg-btn" title="Carta del Giorno - indovina la carta"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M4 5a1 1 0 0 1 1-1h4v1.5a1.5 1.5 0 0 0 3 0V4h4a1 1 0 0 1 1 1v4h-1.5a1.5 1.5 0 0 0 0 3H17v4a1 1 0 0 1-1 1h-4v-1.5a1.5 1.5 0 0 0-3 0V17H5a1 1 0 0 1-1-1v-4h1.5a1.5 1.5 0 0 0 0-3H4V5z"/></svg></a>
+<a href="ygordle.html" class="cdg-btn" title="Carta del Giorno - indovina la carta">🃏</a>
 
 <!-- OVERLAY DUELLO -->
 <div class="duel-overlay" id="duel-overlay">
@@ -4675,11 +4673,21 @@ async function mostraDecklistAssociata(nomeMazzo) {
   body.innerHTML = '<div class="empty">Caricamento decklist…</div>';
   document.getElementById('decklist-overlay').classList.add('open');
   document.body.style.overflow = 'hidden';
+  if (!genesysCache) { try { await apriListaGenesys(true); } catch(e) {} }
   try {
     const snap = await getDoc(doc(db, 'liste_mazzi', docId));
     if (!snap.exists()) { body.innerHTML = '<div class="empty">Decklist non trovata.</div>'; return; }
     const d = snap.data();
-    const main = d.main || [], extra = d.extra || [], side = d.side || [];
+    // ricalcola i punti dalla lista Genesys attuale (i punti salvati potrebbero essere vecchi)
+    const ptsLista = (c) => {
+      if (genesysCache) {
+        const hit = genesysCache.find(x => x.id === c.id);
+        if (hit) return hit.points;
+      }
+      return c.pts || 0;
+    };
+    const agg = (arr) => (arr || []).map(c => ({ ...c, pts: ptsLista(c) }));
+    const main = agg(d.main), extra = agg(d.extra), side = agg(d.side);
     const tutte = [...main, ...extra, ...side];
     const punti = tutte.reduce((s,c) => s + (c.pts || 0), 0);
 
