@@ -4,7 +4,6 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Deck Editing · Yu-Gi-Oh! Genesys</title>
-<link rel="icon" type="image/png" href="icon-192.png">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -889,14 +888,20 @@ function popolaProprietari() {
 async function caricaDeckCostruiti() {
   const cont = document.getElementById('lista-deck-costruiti');
   cont.innerHTML = '<div class="loading">Caricamento deck…</div>';
+  await caricaGenesysCache();
+  // ricalcola i punti di una carta dalla lista Genesys attuale (fallback ai punti salvati)
+  const aggiornaPts = (c) => {
+    const fromList = genesysCache ? genesysCache[c.id] : undefined;
+    return { ...c, pts: fromList !== undefined ? fromList : (c.pts || 0) };
+  };
   try {
     const snaps = await getDocs(collection(db, 'liste_mazzi'));
     deckCostruiti = [];
     snaps.forEach(s => {
       const d = s.data();
-      const main = d.main || [];
-      const extra = d.extra || [];
-      const side = d.side || [];
+      const main = (d.main || []).map(aggiornaPts);
+      const extra = (d.extra || []).map(aggiornaPts);
+      const side = (d.side || []).map(aggiornaPts);
       const punti = calcolaPunti(main, extra, side);
       deckCostruiti.push({
         docId: s.id,
@@ -1581,13 +1586,20 @@ async function salvaMazzo() {
   }
 }
 
-function modificaDeck(docId) {
+async function modificaDeck(docId) {
   const dk = deckCostruiti.find(d => d.docId === docId);
   if (!dk) return;
   editingDocId = docId;
   document.getElementById('nome-mazzo').value = dk.mazzo;
   popolaProprietari();
   document.getElementById('proprietario-mazzo').value = dk.giocatore;
+  // assicuro la lista Genesys aggiornata per ricalcolare i punti
+  await caricaGenesysCache();
+  // ricalcola i punti dalla lista Genesys attuale (i punti salvati nel mazzo potrebbero essere vecchi)
+  const puntiAggiornati = (c) => {
+    const fromList = genesysCache ? genesysCache[c.id] : undefined;
+    return fromList !== undefined ? fromList : (c.pts || 0);
+  };
   // espandi eventuali vecchi formati con qty in copie singole + assegna uid
   const espandi = arr => {
     const out = [];
@@ -1596,7 +1608,7 @@ function modificaDeck(docId) {
       for (let i = 0; i < n; i++) {
         out.push({
           uid: _uidCounter++, id: c.id, name: c.name, img: c.img,
-          pts: c.pts, type: c.type, desc: c.desc || '', attr: c.attr || '',
+          pts: puntiAggiornati(c), type: c.type, desc: c.desc || '', attr: c.attr || '',
           level: c.level || null, atk: c.atk ?? null, def: c.def ?? null
         });
       }
