@@ -839,8 +839,11 @@ async function caricaGenesysCache() {
   }
 }
 
-// punti corretti: prima la lista ufficiale, poi il misc_info della ricerca
+// punti corretti: override manuale > lista ufficiale > misc_info della ricerca
 function puntiGenesys(card) {
+  // override manuale ha la precedenza assoluta
+  const corr = datiPrincipali.correzioniPunti;
+  if (corr && card.name in corr) return corr[card.name];
   const fromList = genesysCache ? genesysCache[card.id] : undefined;
   if (fromList !== undefined) return fromList;
   return card.misc_info?.[0]?.genesys_points ?? 0;
@@ -885,6 +888,7 @@ async function caricaDatiPrincipali() {
       datiPrincipali.giocatori = d.giocatori || [];
       datiPrincipali.mazzi = d.mazzi || {};
       datiPrincipali.mazziDecklist = d.mazziDecklist || {};
+      datiPrincipali.correzioniPunti = d.correzioniPunti || {};
     }
   } catch (e) { console.error('Errore dati principali:', e); }
   popolaProprietari();
@@ -899,8 +903,10 @@ async function caricaDeckCostruiti() {
   const cont = document.getElementById('lista-deck-costruiti');
   cont.innerHTML = '<div class="loading">Caricamento deck…</div>';
   await caricaGenesysCache();
-  // ricalcola i punti di una carta dalla lista Genesys attuale (fallback ai punti salvati)
+  // ricalcola i punti di una carta: override manuale > lista Genesys > salvato
   const aggiornaPts = (c) => {
+    const corr = datiPrincipali.correzioniPunti;
+    if (corr && c.name in corr) return { ...c, pts: corr[c.name] };
     const fromList = genesysCache ? genesysCache[c.id] : undefined;
     return { ...c, pts: fromList !== undefined ? fromList : (c.pts || 0) };
   };
@@ -951,7 +957,7 @@ function renderDeckCostruiti() {
     return `<div class="deck-list-item">
       <button class="deck-list-btn" onclick="toggleDeck('${safe}')">
         <div class="deck-list-info">
-          <span class="deck-list-name">${dk.password ? '🔒 ' : ''}${escapeHtml(dk.mazzo)}</span>
+          <span class="deck-list-name">${escapeHtml(dk.mazzo)}</span>
           <span class="deck-list-owner">${escapeHtml(dk.giocatore)}</span>
         </div>
         <div class="deck-list-meta">
@@ -1658,6 +1664,8 @@ async function modificaDeck(docId) {
   await caricaGenesysCache();
   // ricalcola i punti dalla lista Genesys attuale (i punti salvati nel mazzo potrebbero essere vecchi)
   const puntiAggiornati = (c) => {
+    const corr = datiPrincipali.correzioniPunti;
+    if (corr && c.name in corr) return corr[c.name];
     const fromList = genesysCache ? genesysCache[c.id] : undefined;
     return fromList !== undefined ? fromList : (c.pts || 0);
   };
