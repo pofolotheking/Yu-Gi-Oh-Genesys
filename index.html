@@ -841,6 +841,39 @@
   .h2h-btn.open .h2h-arrow { transform: rotate(180deg); }
 
   /* Configurazione */
+  /* ricerca correzioni punti */
+  .corr-search-wrap { position: relative; margin-bottom: 6px; }
+  .corr-search-wrap label { display: block; font-size: 0.72rem; color: var(--text-dim); font-weight: 600; margin-bottom: 4px; }
+  #corr-search {
+    width: 100%; padding: 11px 13px; font-size: 0.95rem; font-family: inherit;
+    border: 1px solid var(--border-strong); border-radius: 10px;
+    background: var(--bg-card); color: var(--text);
+  }
+  #corr-search:focus { outline: none; border-color: var(--blue); }
+  .corr-autocomplete {
+    position: absolute; top: 100%; left: 0; right: 0; margin-top: 4px;
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: 10px; box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+    max-height: 260px; overflow-y: auto; z-index: 30; display: none;
+  }
+  .corr-autocomplete.show { display: block; }
+  .corr-ac-item {
+    display: flex; align-items: center; gap: 10px; padding: 8px 12px;
+    cursor: pointer; border-bottom: 1px solid var(--border);
+  }
+  .corr-ac-item:last-child { border-bottom: none; }
+  .corr-ac-item:hover { background: var(--bg-soft); }
+  .corr-ac-item img { width: 28px; height: 41px; object-fit: cover; border-radius: 3px; flex-shrink: 0; }
+  .corr-ac-name { font-size: 0.85rem; font-weight: 500; flex: 1; }
+  .corr-ac-pts { font-size: 0.72rem; color: var(--text-dim); background: var(--bg-soft); padding: 2px 8px; border-radius: 6px; white-space: nowrap; }
+  .corr-selected-card {
+    display: flex; align-items: center; gap: 12px; padding: 10px 12px;
+    background: var(--bg-soft); border-radius: 10px;
+  }
+  .corr-selected-card img { width: 36px; height: 53px; object-fit: cover; border-radius: 4px; }
+  .corr-selected-card .csc-name { font-size: 0.92rem; font-weight: 600; }
+  .corr-selected-card .csc-cur { font-size: 0.75rem; color: var(--text-dim); }
+
   .config-row {
     display: grid;
     grid-template-columns: 1fr auto;
@@ -2932,18 +2965,22 @@
       <div class="accordion-body" id="acc-correzioni" style="display:none">
         <div class="card padded">
           <p class="section-note" style="text-align:left;margin:0 0 12px">
-            Forza il punteggio Genesys di una carta quando YGOProDeck non è ancora aggiornato. La correzione ha la precedenza ovunque (lista, ricerca, deck builder) ed è condivisa con tutti i giocatori. Usa il nome esatto della carta in inglese.
+            Forza il punteggio Genesys di una carta quando YGOProDeck non è ancora aggiornato. La correzione ha la precedenza ovunque (lista, ricerca, deck builder) ed è condivisa con tutti i giocatori.
           </p>
-          <div class="add-form">
-            <div>
-              <label>Nome carta (inglese)</label>
-              <input type="text" id="corr-nome" placeholder="es. Nibiru, the Primal Being">
+          <div class="corr-search-wrap">
+            <label>Cerca la carta</label>
+            <input type="text" id="corr-search" placeholder="Scrivi il nome della carta…" autocomplete="off">
+            <div class="corr-autocomplete" id="corr-autocomplete"></div>
+          </div>
+          <div id="corr-selezionata" style="display:none">
+            <div class="corr-selected-card" id="corr-selected-card"></div>
+            <div class="add-form" style="margin-top:10px">
+              <div>
+                <label>Punti corretti</label>
+                <input type="number" id="corr-punti" placeholder="es. 8" min="0">
+              </div>
+              <button onclick="aggiungiCorrezione()">Salva correzione</button>
             </div>
-            <div>
-              <label>Punti corretti</label>
-              <input type="number" id="corr-punti" placeholder="es. 8" min="0">
-            </div>
-            <button onclick="aggiungiCorrezione()">Aggiungi</button>
           </div>
         </div>
         <div class="card" id="lista-correzioni"></div>
@@ -4165,19 +4202,70 @@ async function aggiungiMazzo() {
 }
 
 // ─────────── CORREZIONI PUNTI GENESYS ───────────
+let _corrSelezionata = null;     // carta scelta { id, name, img, pts }
+let _corrSearchTimer = null;
+
+function initCorrSearch() {
+  const inp = document.getElementById('corr-search');
+  if (!inp || inp._wired) return;
+  inp._wired = true;
+  inp.addEventListener('input', () => {
+    clearTimeout(_corrSearchTimer);
+    const q = inp.value.trim();
+    if (q.length < 2) { document.getElementById('corr-autocomplete').classList.remove('show'); return; }
+    _corrSearchTimer = setTimeout(() => corrCerca(q), 300);
+  });
+}
+
+async function corrCerca(q) {
+  const ac = document.getElementById('corr-autocomplete');
+  try {
+    const r = await fetch(`https://db.ygoprodeck.com/api/v7/cardinfo.php?fname=${encodeURIComponent(q)}&misc=yes`);
+    if (!r.ok) { ac.classList.remove('show'); return; }
+    const data = await r.json();
+    const cards = (data.data || []).slice(0, 10);
+    if (!cards.length) { ac.innerHTML = '<div class="corr-ac-item">Nessun risultato</div>'; ac.classList.add('show'); return; }
+    ac.innerHTML = cards.map(c => {
+      const img = c.card_images?.[0]?.image_url_small || '';
+      let pts = c.misc_info?.[0]?.genesys_points ?? 0;
+      pts = puntiConCorrezione(c.name, pts);
+      return `<div class="corr-ac-item" onclick='corrSeleziona(${JSON.stringify({id:c.id,name:c.name,img,pts}).replace(/'/g,"&#39;")})'>
+        <img src="${img}" alt="">
+        <span class="corr-ac-name">${escapeHtml(c.name)}</span>
+        <span class="corr-ac-pts">${pts} pt</span>
+      </div>`;
+    }).join('');
+    ac.classList.add('show');
+  } catch(e) { ac.classList.remove('show'); }
+}
+
+function corrSeleziona(carta) {
+  _corrSelezionata = carta;
+  document.getElementById('corr-autocomplete').classList.remove('show');
+  document.getElementById('corr-search').value = carta.name;
+  document.getElementById('corr-selected-card').innerHTML = `
+    <img src="${carta.img}" alt="">
+    <div>
+      <div class="csc-name">${escapeHtml(carta.name)}</div>
+      <div class="csc-cur">Punti attuali: ${carta.pts}</div>
+    </div>`;
+  document.getElementById('corr-selezionata').style.display = 'block';
+  document.getElementById('corr-punti').value = '';
+  document.getElementById('corr-punti').focus();
+}
+
 async function aggiungiCorrezione() {
-  const nomeEl = document.getElementById('corr-nome');
-  const puntiEl = document.getElementById('corr-punti');
-  const nome = nomeEl.value.trim();
-  const punti = parseInt(puntiEl.value);
-  if (!nome) { alert('Scrivi il nome esatto della carta (in inglese).'); return; }
+  if (!_corrSelezionata) { alert('Cerca e seleziona prima una carta.'); return; }
+  const punti = parseInt(document.getElementById('corr-punti').value);
   if (isNaN(punti) || punti < 0) { alert('Inserisci un numero di punti valido.'); return; }
   if (!dati.correzioniPunti) dati.correzioniPunti = {};
-  dati.correzioniPunti[nome] = punti;
-  nomeEl.value = ''; puntiEl.value = '';
+  dati.correzioniPunti[_corrSelezionata.name] = punti;
+  // reset form
+  _corrSelezionata = null;
+  document.getElementById('corr-search').value = '';
+  document.getElementById('corr-selezionata').style.display = 'none';
   await salvaDatiCloud();
   renderCorrezioni();
-  // ricarico la lista Genesys e ri-renderizzo tutto per applicare subito
   genesysCache = null;
   popolaTutto();
 }
@@ -4193,6 +4281,7 @@ async function rimuoviCorrezione(nome) {
 }
 
 function renderCorrezioni() {
+  initCorrSearch();
   const cont = document.getElementById('lista-correzioni');
   if (!cont) return;
   const entries = Object.entries(dati.correzioniPunti || {});
@@ -4218,6 +4307,7 @@ function puntiConCorrezione(nome, puntiDefault) {
 }
 window.aggiungiCorrezione = aggiungiCorrezione;
 window.rimuoviCorrezione = rimuoviCorrezione;
+window.corrSeleziona = corrSeleziona;
 
 async function rinominaMazzo(vecchio) {
   const nuovo = prompt(`Rinomina "${vecchio}" in:`, vecchio);
