@@ -389,8 +389,8 @@
 
   .toast {
     position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px);
-    background: var(--text); color: #fff; padding: 12px 22px; border-radius: 12px;
-    font-size: 0.9rem; font-weight: 500; z-index: 500; opacity: 0;
+    background: var(--green); color: #fff; padding: 12px 22px; border-radius: 12px;
+    font-size: 0.9rem; font-weight: 600; z-index: 500; opacity: 0;
     transition: transform 0.3s ease, opacity 0.3s ease; box-shadow: 0 8px 24px rgba(0,0,0,0.2);
   }
   .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
@@ -572,6 +572,10 @@
         </div>
       </div>
       <div class="builder-header-right">
+        <button class="mini-action" id="btn-lock" onclick="gestisciPassword()" title="Imposta una password per il deck">
+          <svg id="icon-key" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.5" cy="15.5" r="4.5"/><path d="M10.5 12.5 19 4"/><path d="M16 7l3 3"/><path d="M14 9l2 2"/></svg>
+          <svg id="icon-planet" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="display:none"><circle cx="12" cy="12" r="7"/><path d="M3.5 9c5 2 12 2 17 0M3.5 15c5-2 12-2 17 0"/><ellipse cx="12" cy="12" rx="11" ry="4" transform="rotate(-30 12 12)"/></svg>
+        </button>
         <button class="mini-action" onclick="manoDiProva()" title="Mano di prova">
           <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 11V5.5a1.5 1.5 0 0 1 3 0V10"/><path d="M9 10V4a1.5 1.5 0 0 1 3 0v6"/><path d="M12 10V4.5a1.5 1.5 0 0 1 3 0V10"/><path d="M15 10.5V6a1.5 1.5 0 0 1 3 0v6a6 6 0 0 1-6 6h-1.5a6 6 0 0 1-5-2.7l-2.1-3.1a1.5 1.5 0 0 1 2.4-1.8L6 12"/></svg>
         </button>
@@ -804,6 +808,7 @@ let genesysCache = null;  // lista ufficiale punti Genesys (fonte di verità)
 let buildDeck = { main: [], extra: [], side: [] };
 let editingDocId = null;  // se stiamo modificando un deck esistente
 let _uidCounter = 1;      // id univoco per ogni istanza-carta nel deck
+let _deckPassword = null;  // password del deck in costruzione (null = nessuna)
 
 const EXTRA_TYPES = ['Fusion', 'Synchro', 'XYZ', 'Xyz', 'Link'];
 function isExtraCard(type) {
@@ -907,6 +912,7 @@ async function caricaDeckCostruiti() {
         docId: s.id,
         giocatore: d.giocatore || '?',
         mazzo: d.mazzo || s.id,
+        password: d.password || null,
         main, extra, side, punti
       });
     });
@@ -1554,6 +1560,35 @@ function chiudiAssocia(e) {
 }
 
 // ─────────── SALVA / MODIFICA / ELIMINA ───────────
+// ── PASSWORD DECK ──
+function aggiornaIconaLock() {
+  const haPwd = !!_deckPassword;
+  document.getElementById('icon-key').style.display = haPwd ? 'none' : 'block';
+  document.getElementById('icon-planet').style.display = haPwd ? 'block' : 'none';
+  const btn = document.getElementById('btn-lock');
+  if (btn) btn.title = haPwd ? 'Rendi pubblico il deck (rimuovi password)' : 'Imposta una password per il deck';
+}
+
+function gestisciPassword() {
+  if (_deckPassword) {
+    // il deck è protetto → il bottone-pianeta lo rende pubblico
+    if (confirm('Vuoi rendere pubblico questo deck rimuovendo la password?')) {
+      _deckPassword = null;
+      aggiornaIconaLock();
+      toast('Deck reso pubblico. Ricordati di salvare.');
+    }
+  } else {
+    // imposta una nuova password
+    const p = prompt('Imposta una password per proteggere la visualizzazione di questo deck:');
+    if (p === null) return;            // annullato
+    const pwd = p.trim();
+    if (!pwd) { toast('Password vuota, non impostata', true); return; }
+    _deckPassword = pwd;
+    aggiornaIconaLock();
+    toast('Password impostata. Ricordati di salvare.');
+  }
+}
+
 async function salvaMazzo() {
   const nome = document.getElementById('nome-mazzo').value.trim();
   const owner = document.getElementById('proprietario-mazzo').value;
@@ -1574,6 +1609,7 @@ async function salvaMazzo() {
       main: buildDeck.main,
       extra: buildDeck.extra,
       side: buildDeck.side,
+      password: _deckPassword || null,
       aggiornato: new Date().toISOString()
     });
     editingDocId = null;
@@ -1589,7 +1625,14 @@ async function salvaMazzo() {
 async function modificaDeck(docId) {
   const dk = deckCostruiti.find(d => d.docId === docId);
   if (!dk) return;
+  // se il deck è protetto, chiedi la password
+  if (dk.password) {
+    const p = prompt('Questo deck è protetto. Inserisci la password per modificarlo:');
+    if (p === null) return;
+    if (p.trim() !== dk.password) { toast('Password errata', true); return; }
+  }
   editingDocId = docId;
+  _deckPassword = dk.password || null;
   document.getElementById('nome-mazzo').value = dk.mazzo;
   popolaProprietari();
   document.getElementById('proprietario-mazzo').value = dk.giocatore;
@@ -1619,6 +1662,7 @@ async function modificaDeck(docId) {
   // popola cache per anteprima e bottone side
   ['main','extra','side'].forEach(z => buildDeck[z].forEach(c => { _searchCache[c.id] = c; }));
 
+  aggiornaIconaLock();
   renderBuilder();
   switchTab('crea');
 }
@@ -1626,7 +1670,7 @@ async function modificaDeck(docId) {
 async function eliminaDeck(docId) {
   const dk = deckCostruiti.find(d => d.docId === docId);
   if (!dk) return;
-  if (!confirm(`Eliminare il deck "${dk.mazzo}" di ${dk.giocatore}?`)) return;
+  if (!confirm(`Sei sicuro di voler eliminare il deck "${dk.mazzo}" di ${dk.giocatore}? L'azione è irreversibile.`)) return;
   try {
     await deleteDoc(doc(db, 'liste_mazzi', docId));
     toast('Deck eliminato');
@@ -1642,9 +1686,10 @@ function nuovoMazzoVuoto() {
     if (!confirm('Svuotare il deck in costruzione?')) return;
   }
   editingDocId = null;
+  _deckPassword = null;
   buildDeck = { main: [], extra: [], side: [] };
   document.getElementById('nome-mazzo').value = '';
-
+  aggiornaIconaLock();
   renderBuilder();
 }
 
@@ -1866,6 +1911,7 @@ window.dettaglioCartaDL = dettaglioCartaDL;
 window.chiudiDettaglioDL = chiudiDettaglioDL;
 window.hidePreview = hidePreview;
 window.salvaMazzo = salvaMazzo;
+window.gestisciPassword = gestisciPassword;
 window.toggleDeck = toggleDeck;
 window.modificaDeck = modificaDeck;
 window.eliminaDeck = eliminaDeck;
