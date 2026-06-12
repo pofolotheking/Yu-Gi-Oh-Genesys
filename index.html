@@ -4678,6 +4678,15 @@ async function mostraDecklistAssociata(nomeMazzo) {
     const snap = await getDoc(doc(db, 'liste_mazzi', docId));
     if (!snap.exists()) { body.innerHTML = '<div class="empty">Decklist non trovata.</div>'; return; }
     const d = snap.data();
+    // se il deck è protetto da password, chiedila prima di mostrarlo
+    if (d.password) {
+      const p = prompt('Questo deck è protetto. Inserisci la password per visualizzarlo:');
+      if (p === null || p.trim() !== d.password) {
+        chiudiDecklistForce();
+        if (p !== null) alert('Password errata.');
+        return;
+      }
+    }
     // ricalcola i punti dalla lista Genesys attuale (i punti salvati potrebbero essere vecchi)
     const ptsLista = (c) => {
       if (genesysCache) {
