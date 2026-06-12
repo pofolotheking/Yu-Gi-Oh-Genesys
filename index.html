@@ -2924,6 +2924,31 @@
         <div class="card" id="lista-mazzi-config"></div>
       </div>
     </div>
+
+    <div class="accordion-item">
+      <button class="accordion-btn" onclick="toggleAccordion('acc-correzioni')">
+        <span>🎯 Correzioni Punti Genesys</span><span class="accordion-arrow">▶</span>
+      </button>
+      <div class="accordion-body" id="acc-correzioni" style="display:none">
+        <div class="card padded">
+          <p class="section-note" style="text-align:left;margin:0 0 12px">
+            Forza il punteggio Genesys di una carta quando YGOProDeck non è ancora aggiornato. La correzione ha la precedenza ovunque (lista, ricerca, deck builder) ed è condivisa con tutti i giocatori. Usa il nome esatto della carta in inglese.
+          </p>
+          <div class="add-form">
+            <div>
+              <label>Nome carta (inglese)</label>
+              <input type="text" id="corr-nome" placeholder="es. Nibiru, the Primal Being">
+            </div>
+            <div>
+              <label>Punti corretti</label>
+              <input type="number" id="corr-punti" placeholder="es. 8" min="0">
+            </div>
+            <button onclick="aggiungiCorrezione()">Aggiungi</button>
+          </div>
+        </div>
+        <div class="card" id="lista-correzioni"></div>
+      </div>
+    </div>
   </section>
 
   <section id="news">
@@ -3092,7 +3117,8 @@ async function caricaDati() {
         profili: j.profili || {},
         mazzi: j.mazzi || {},
         partite: j.partite || [],
-        mazziDecklist: j.mazziDecklist || {}
+        mazziDecklist: j.mazziDecklist || {},
+        correzioniPunti: j.correzioniPunti || {}
       };
     } else {
       dati = JSON.parse(JSON.stringify(DATI_INIZIALI));
@@ -3183,6 +3209,7 @@ function popolaTutto() {
   renderConfigGiocatori();
   renderConfigMazzi();
   renderProfiliConfig();
+  renderCorrezioni();
   popolaSelectOwnerNuovoMazzo();
   if (!document.getElementById('data').value)
     document.getElementById('data').value = new Date().toISOString().slice(0, 10);
@@ -4137,6 +4164,61 @@ async function aggiungiMazzo() {
   popolaTutto();
 }
 
+// ─────────── CORREZIONI PUNTI GENESYS ───────────
+async function aggiungiCorrezione() {
+  const nomeEl = document.getElementById('corr-nome');
+  const puntiEl = document.getElementById('corr-punti');
+  const nome = nomeEl.value.trim();
+  const punti = parseInt(puntiEl.value);
+  if (!nome) { alert('Scrivi il nome esatto della carta (in inglese).'); return; }
+  if (isNaN(punti) || punti < 0) { alert('Inserisci un numero di punti valido.'); return; }
+  if (!dati.correzioniPunti) dati.correzioniPunti = {};
+  dati.correzioniPunti[nome] = punti;
+  nomeEl.value = ''; puntiEl.value = '';
+  await salvaDatiCloud();
+  renderCorrezioni();
+  // ricarico la lista Genesys e ri-renderizzo tutto per applicare subito
+  genesysCache = null;
+  popolaTutto();
+}
+
+async function rimuoviCorrezione(nome) {
+  if (!dati.correzioniPunti || !(nome in dati.correzioniPunti)) return;
+  if (!confirm(`Rimuovere la correzione per "${nome}"? Tornerà a usare il valore di YGOProDeck.`)) return;
+  delete dati.correzioniPunti[nome];
+  await salvaDatiCloud();
+  renderCorrezioni();
+  genesysCache = null;
+  popolaTutto();
+}
+
+function renderCorrezioni() {
+  const cont = document.getElementById('lista-correzioni');
+  if (!cont) return;
+  const entries = Object.entries(dati.correzioniPunti || {});
+  if (entries.length === 0) {
+    cont.innerHTML = '<div class="empty" style="padding:16px">Nessuna correzione attiva.</div>';
+    return;
+  }
+  entries.sort((a, b) => a[0].localeCompare(b[0]));
+  cont.innerHTML = entries.map(([nome, punti]) => `
+    <div class="config-row">
+      <span class="config-row-name">${escapeHtml(nome)}</span>
+      <span class="config-row-meta"><b>${punti} pt</b></span>
+      <button class="config-del" onclick="rimuoviCorrezione('${nome.replace(/'/g, "\\'")}')" title="Rimuovi">✕</button>
+    </div>`).join('');
+}
+
+// restituisce i punti corretti per una carta (override manuale > lista Genesys)
+function puntiConCorrezione(nome, puntiDefault) {
+  if (dati.correzioniPunti && nome in dati.correzioniPunti) {
+    return dati.correzioniPunti[nome];
+  }
+  return puntiDefault;
+}
+window.aggiungiCorrezione = aggiungiCorrezione;
+window.rimuoviCorrezione = rimuoviCorrezione;
+
 async function rinominaMazzo(vecchio) {
   const nuovo = prompt(`Rinomina "${vecchio}" in:`, vecchio);
   if (!nuovo || nuovo.trim() === '' || nuovo === vecchio) return;
@@ -4919,6 +5001,8 @@ function buildThumb(c) {
     if (cached) pts = cached.points;
   }
   pts = pts ?? 0;
+  // override manuale ha la precedenza
+  pts = puntiConCorrezione(c.name, pts);
   const badgeCls = pts >= 30 ? 'high' : pts >= 10 ? 'mid' : 'low';
   const badge = pts > 0
     ? `<div class="genesys-thumb-badge ${badgeCls}" title="${pts} punti Genesys">${pts}</div>`
@@ -5003,6 +5087,7 @@ async function mostraDettaglioCarta(id) {
       const cached = genesysCache.find(x => x.id === c.id);
       if (cached) genesysPoints = cached.points;
     }
+    genesysPoints = puntiConCorrezione(c.name, genesysPoints ?? 0); // override manuale
     const genesysBadgeHtml = (genesysPoints !== undefined && genesysPoints !== null && genesysPoints > 0)
       ? `<div class="genesys-detail-badge ${genesysPoints >= 30 ? 'high' : genesysPoints >= 10 ? 'mid' : 'low'}">
            <span class="genesys-detail-icon">⬡</span>
@@ -5129,7 +5214,11 @@ async function apriListaGenesys(silent = false) {
     if (!r.ok) throw new Error();
     const data = await r.json();
     const cards = (data.data || [])
-      .map(c => ({ id: c.id, name: c.name, type: c.type || '', attr: c.attribute || '', img: c.card_images?.[0]?.image_url_small || '', points: c.misc_info?.[0]?.genesys_points ?? 0 }))
+      .map(c => {
+        let pts = c.misc_info?.[0]?.genesys_points ?? 0;
+        pts = puntiConCorrezione(c.name, pts); // override manuale
+        return { id: c.id, name: c.name, type: c.type || '', attr: c.attribute || '', img: c.card_images?.[0]?.image_url_small || '', points: pts };
+      })
       .filter(c => c.points > 0)
       .sort((a, b) => b.points - a.points);
     genesysCache = cards;
