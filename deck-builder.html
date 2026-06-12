@@ -191,6 +191,11 @@
     padding: 16px; overflow: hidden;
   }
   .deck-list-actions { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+  .deck-protected-note {
+    display: flex; align-items: center; justify-content: center;
+    padding: 18px 16px; color: var(--text-dim); font-size: 0.85rem;
+    background: var(--bg-soft); border-radius: 10px; text-align: center;
+  }
 
   .dl-group-title {
     font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em;
@@ -946,7 +951,7 @@ function renderDeckCostruiti() {
     return `<div class="deck-list-item">
       <button class="deck-list-btn" onclick="toggleDeck('${safe}')">
         <div class="deck-list-info">
-          <span class="deck-list-name">${escapeHtml(dk.mazzo)}</span>
+          <span class="deck-list-name">${dk.password ? '🔒 ' : ''}${escapeHtml(dk.mazzo)}</span>
           <span class="deck-list-owner">${escapeHtml(dk.giocatore)}</span>
         </div>
         <div class="deck-list-meta">
@@ -976,6 +981,19 @@ function toggleDeck(docId) {
 }
 
 function buildDeckListBody(dk) {
+  // se il deck è protetto da password, non mostrare le carte: solo i bottoni
+  if (dk.password) {
+    return `
+    <div class="deck-list-actions">
+      <button class="secondary" onclick="modificaDeck('${dk.docId}')">✏️ Modifica</button>
+      <button class="secondary" onclick="associaDaCostruito('${dk.docId}')">🔗 Associa</button>
+      <button class="danger" onclick="eliminaDeck('${dk.docId}')">🗑 Elimina</button>
+    </div>
+    <div class="deck-protected-note">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:5px"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      Deck protetto da password. Apri con "Modifica" per visualizzarlo.
+    </div>`;
+  }
   const grp = (titolo, arr) => {
     const n = contaCarte(arr);
     if (n === 0) return '';
