@@ -523,11 +523,12 @@
   
   .match-card {
     display: grid;
-    grid-template-columns: 1fr auto 1fr auto;
+    grid-template-columns: 1fr auto 1fr;
     gap: 12px;
     align-items: center;
     padding: 14px 16px;
     border-bottom: 1px solid var(--border);
+    position: relative;
   }
   .match-card:last-child { border-bottom: none; }
   .match-card .date {
@@ -540,6 +541,9 @@
   .match-card .player { font-weight: 500; font-size: 0.95rem; }
   .match-card .player.win { color: var(--green-dark); font-weight: 600; }
   .match-card .deck { color: var(--text-dim); font-size: 0.82rem; display: block; margin-top: 2px; }
+  /* giocatore di sinistra: allineato verso il punteggio (destra); destro: verso sinistra */
+  .match-card .side-left { text-align: right; }
+  .match-card .side-right { text-align: left; }
   .match-card .score {
     font-weight: 600;
     font-variant-numeric: tabular-nums;
@@ -547,6 +551,8 @@
     padding: 4px 10px;
     background: var(--bg-soft);
     border-radius: 6px;
+    text-align: center;
+    white-space: nowrap;
   }
   .match-card .del-btn {
     background: transparent;
@@ -572,6 +578,9 @@
     display: flex;
     gap: 2px;
     align-items: center;
+    position: absolute;
+    top: 10px;
+    right: 12px;
   }
 
   /* ── MODAL MODIFICA PARTITA ── */
@@ -3874,15 +3883,15 @@ function renderStorico() {
     const extraBadges = [];
     if (p.dado)  extraBadges.push(`<span class="match-badge">🎲 Dado: ${p.dado}</span>`);
     if (p.primo) extraBadges.push(`<span class="match-badge primo">▶ Primo: ${p.primo}</span>`);
-    const noteHtml = p.note ? `<div class="match-note">📝 ${escapeHtml(p.note)}</div>` : '';
+    const noteHtml = p.note ? `<div class="match-note">${escapeHtml(p.note)}</div>` : '';
     return `<div class="match-card">
       <div class="date">${formatData(p.data)}</div>
-      <div>
+      <div class="side-left">
         <span class="player ${g1win ? 'win' : ''}">${p.g1}</span>
         <span class="deck">${p.m1}</span>
       </div>
       <div class="score">${p.risultato}</div>
-      <div>
+      <div class="side-right">
         <span class="player ${!g1win ? 'win' : ''}">${p.g2}</span>
         <span class="deck">${p.m2}</span>
       </div>
