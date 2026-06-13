@@ -1,11 +1,9 @@
 <!DOCTYPE html>
-
 <html lang="it">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Carta del Giorno · Yu-Gi-Oh! Genesys</title>
-<link rel="icon" type="image/png" href="icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -52,128 +50,128 @@
   }
   main { max-width: 720px; margin: 0 auto; padding: 0 16px 60px; }
 
-/* header */
-header { text-align: center; padding: 56px 20px 16px; position: relative; }
-header h1 { font-size: 1.6rem; font-weight: 700; letter-spacing: -0.03em; }
-header .subtitle { font-size: 0.9rem; color: var(–text-dim); margin-top: 4px; }
-.home-btn {
-position: fixed; top: 14px; left: 14px;
-background: var(–bg-soft); border: 1px solid var(–border);
-border-radius: 10px; padding: 8px 14px; cursor: pointer;
-color: var(–text); font-family: inherit; font-size: 0.88rem; font-weight: 600;
-display: inline-flex; align-items: center; gap: 6px; text-decoration: none;
-z-index: 50; box-shadow: 0 1px 4px rgba(0,0,0,0.08);
-transition: background 0.15s;
-}
-.home-btn:hover { background: var(–border); }
-.theme-btn {
-position: fixed; top: 14px; right: 14px;
-background: var(–bg-soft); border: 1px solid var(–border);
-border-radius: 10px; width: 38px; height: 38px;
-display: flex; align-items: center; justify-content: center;
-cursor: pointer; color: var(–text-dim);
-transition: background 0.15s, color 0.15s; z-index: 50;
-box-shadow: 0 1px 4px rgba(0,0,0,0.08);
-}
-.theme-btn:hover { background: var(–border); color: var(–text); }
+  /* header */
+  header { text-align: center; padding: 56px 20px 16px; position: relative; }
+  header h1 { font-size: 1.6rem; font-weight: 700; letter-spacing: -0.03em; }
+  header .subtitle { font-size: 0.9rem; color: var(--text-dim); margin-top: 4px; }
+  .home-btn {
+    position: fixed; top: 14px; left: 14px;
+    background: var(--bg-soft); border: 1px solid var(--border);
+    border-radius: 10px; padding: 8px 14px; cursor: pointer;
+    color: var(--text); font-family: inherit; font-size: 0.88rem; font-weight: 600;
+    display: inline-flex; align-items: center; gap: 6px; text-decoration: none;
+    z-index: 50; box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    transition: background 0.15s;
+  }
+  .home-btn:hover { background: var(--border); }
+  .theme-btn {
+    position: fixed; top: 14px; right: 14px;
+    background: var(--bg-soft); border: 1px solid var(--border);
+    border-radius: 10px; width: 38px; height: 38px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; color: var(--text-dim);
+    transition: background 0.15s, color 0.15s; z-index: 50;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  }
+  .theme-btn:hover { background: var(--border); color: var(--text); }
 
-/* input ricerca */
-.guess-area { position: relative; margin-bottom: 18px; }
-.guess-row { display: flex; gap: 8px; }
-.guess-input {
-flex: 1; padding: 13px 15px; font-size: 1rem; font-family: inherit;
-border: 1px solid var(–border-strong); border-radius: 12px;
-background: var(–bg-card); color: var(–text);
-}
-.guess-input:focus { outline: none; border-color: var(–blue); }
-.guess-input:disabled { opacity: 0.5; }
-.guess-submit {
-padding: 0 20px; border: none; border-radius: 12px; cursor: pointer;
-background: var(–blue); color: #fff; font-family: inherit;
-font-size: 0.95rem; font-weight: 700; transition: opacity 0.15s;
-}
-.guess-submit:disabled { opacity: 0.4; cursor: default; }
-.autocomplete {
-position: absolute; top: 100%; left: 0; right: 0; margin-top: 4px;
-background: var(–bg-card); border: 1px solid var(–border);
-border-radius: 12px; box-shadow: 0 8px 30px rgba(0,0,0,0.15);
-max-height: 280px; overflow-y: auto; z-index: 20; display: none;
-}
-.autocomplete.show { display: block; }
-.ac-item {
-display: flex; align-items: center; gap: 10px; padding: 8px 12px;
-cursor: pointer; border-bottom: 1px solid var(–border);
-}
-.ac-item:last-child { border-bottom: none; }
-.ac-item:hover, .ac-item.active { background: var(–bg-soft); }
-.ac-item img { width: 30px; height: 44px; object-fit: cover; border-radius: 3px; flex-shrink: 0; }
-.ac-name { font-size: 0.88rem; font-weight: 500; }
+  /* input ricerca */
+  .guess-area { position: relative; margin-bottom: 18px; z-index: 100; }
+  .guess-row { display: flex; gap: 8px; }
+  .guess-input {
+    flex: 1; padding: 13px 15px; font-size: 1rem; font-family: inherit;
+    border: 1px solid var(--border-strong); border-radius: 12px;
+    background: var(--bg-card); color: var(--text);
+  }
+  .guess-input:focus { outline: none; border-color: var(--blue); }
+  .guess-input:disabled { opacity: 0.5; }
+  .guess-submit {
+    padding: 0 20px; border: none; border-radius: 12px; cursor: pointer;
+    background: var(--blue); color: #fff; font-family: inherit;
+    font-size: 0.95rem; font-weight: 700; transition: opacity 0.15s;
+  }
+  .guess-submit:disabled { opacity: 0.4; cursor: default; }
+  .autocomplete {
+    position: absolute; top: 100%; left: 0; right: 0; margin-top: 4px;
+    background: var(--bg-card); border: 1px solid var(--border-strong);
+    border-radius: 12px; box-shadow: 0 12px 40px rgba(0,0,0,0.28);
+    max-height: 320px; overflow-y: auto; z-index: 200; display: none;
+  }
+  .autocomplete.show { display: block; }
+  .ac-item {
+    display: flex; align-items: center; gap: 10px; padding: 8px 12px;
+    cursor: pointer; border-bottom: 1px solid var(--border);
+    background: var(--bg-card);
+  }
+  .ac-item:last-child { border-bottom: none; }
+  .ac-item:hover, .ac-item.active { background: var(--bg-soft); }
+  .ac-item img { width: 30px; height: 44px; object-fit: cover; border-radius: 3px; flex-shrink: 0; }
+  .ac-name { font-size: 0.88rem; font-weight: 500; }
 
-/* contatore tentativi */
-.tries-info { text-align: center; font-size: 0.85rem; color: var(–text-dim); margin-bottom: 16px; }
-.tries-info b { color: var(–text); }
+  /* contatore tentativi */
+  .tries-info { text-align: center; font-size: 0.85rem; color: var(--text-dim); margin-bottom: 16px; }
+  .tries-info b { color: var(--text); }
 
-/* intestazione colonne */
-.grid-head, .guess-line {
-display: grid;
-grid-template-columns: 1.5fr 1fr 1fr 0.7fr 0.6fr 0.7fr 0.7fr 0.7fr;
-gap: 5px;
-}
-.grid-head { margin-bottom: 6px; }
-.grid-head div {
-font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.03em;
-color: var(–text-faint); font-weight: 700; text-align: center;
-padding: 0 2px;
-}
-.guesses { display: flex; flex-direction: column; gap: 5px; }
-.guess-line { animation: revealLine 0.3s ease; }
-@keyframes revealLine { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
-.cell {
-border-radius: 8px; padding: 8px 4px; text-align: center;
-font-size: 0.78rem; font-weight: 600; color: #fff;
-display: flex; align-items: center; justify-content: center;
-min-height: 52px; word-break: break-word; line-height: 1.15;
-}
-.cell.name {
-background: var(–bg-soft); color: var(–text);
-font-size: 0.74rem; flex-direction: column; gap: 3px;
-}
-.cell.name img { width: 26px; height: 38px; object-fit: cover; border-radius: 3px; }
-.cell.match { background: var(–green); }
-.cell.close { background: var(–orange); }
-.cell.miss  { background: #8e8e93; }
-[data-theme=“dark”] .cell.miss { background: #48484a; }
-.cell .arrow { font-size: 0.7rem; margin-left: 2px; }
+  /* intestazione colonne */
+  .grid-head, .guess-line {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr 1fr 0.7fr 0.6fr 0.7fr 0.7fr 0.7fr;
+    gap: 5px;
+  }
+  .grid-head { margin-bottom: 6px; }
+  .grid-head div {
+    font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.03em;
+    color: var(--text-faint); font-weight: 700; text-align: center;
+    padding: 0 2px;
+  }
+  .guesses { display: flex; flex-direction: column; gap: 5px; }
+  .guess-line { animation: revealLine 0.3s ease; }
+  @keyframes revealLine { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
+  .cell {
+    border-radius: 8px; padding: 8px 4px; text-align: center;
+    font-size: 0.78rem; font-weight: 600; color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    min-height: 52px; word-break: break-word; line-height: 1.15;
+  }
+  .cell.name {
+    background: var(--bg-soft); color: var(--text);
+    font-size: 0.74rem; flex-direction: column; gap: 3px;
+  }
+  .cell.name img { width: 26px; height: 38px; object-fit: cover; border-radius: 3px; }
+  .cell.match { background: var(--green); }
+  .cell.close { background: var(--orange); }
+  .cell.miss  { background: #8e8e93; }
+  [data-theme="dark"] .cell.miss { background: #48484a; }
+  .cell .arrow { font-size: 0.7rem; margin-left: 2px; }
 
-/* messaggi esito */
-.result-box {
-text-align: center; padding: 20px; border-radius: 14px;
-margin-bottom: 18px; animation: revealLine 0.3s ease;
-}
-.result-box.win { background: var(–green); color: #fff; }
-.result-box.lose { background: var(–red); color: #fff; }
-.result-box h2 { font-size: 1.2rem; margin-bottom: 6px; }
-.result-box .ans { font-weight: 700; }
-.result-box img { width: 90px; border-radius: 6px; margin: 10px auto 4px; display: block; }
-.replay-btn {
-margin-top: 12px; background: rgba(255,255,255,0.25); border: 1px solid rgba(255,255,255,0.4);
-color: #fff; padding: 10px 24px; border-radius: 10px; cursor: pointer;
-font-family: inherit; font-size: 0.95rem; font-weight: 700;
-}
-.replay-btn:hover { background: rgba(255,255,255,0.35); }
+  /* messaggi esito */
+  .result-box {
+    text-align: center; padding: 20px; border-radius: 14px;
+    margin-bottom: 18px; animation: revealLine 0.3s ease;
+  }
+  .result-box.win { background: var(--green); color: #fff; }
+  .result-box.lose { background: var(--red); color: #fff; }
+  .result-box h2 { font-size: 1.2rem; margin-bottom: 6px; }
+  .result-box .ans { font-weight: 700; }
+  .result-box img { width: 90px; border-radius: 6px; margin: 10px auto 4px; display: block; }
+  .replay-btn {
+    margin-top: 12px; background: rgba(255,255,255,0.25); border: 1px solid rgba(255,255,255,0.4);
+    color: #fff; padding: 10px 24px; border-radius: 10px; cursor: pointer;
+    font-family: inherit; font-size: 0.95rem; font-weight: 700;
+  }
+  .replay-btn:hover { background: rgba(255,255,255,0.35); }
 
-.loading { text-align: center; padding: 40px; color: var(–text-faint); }
-.hint-note { text-align: center; font-size: 0.78rem; color: var(–text-faint); margin-top: 18px; line-height: 1.5; }
+  .loading { text-align: center; padding: 40px; color: var(--text-faint); }
+  .hint-note { text-align: center; font-size: 0.78rem; color: var(--text-faint); margin-top: 18px; line-height: 1.5; }
 
-@media (max-width: 600px) {
-.grid-head, .guess-line { grid-template-columns: 1.2fr 0.85fr 0.85fr 0.6fr 0.5fr 0.6fr 0.6fr 0.6fr; gap: 3px; }
-.cell { font-size: 0.66rem; padding: 6px 2px; min-height: 46px; }
-.cell.name { font-size: 0.62rem; }
-.grid-head div { font-size: 0.5rem; }
-header { padding: 52px 12px 14px; }
-}
+  @media (max-width: 600px) {
+    .grid-head, .guess-line { grid-template-columns: 1.2fr 0.85fr 0.85fr 0.6fr 0.5fr 0.6fr 0.6fr 0.6fr; gap: 3px; }
+    .cell { font-size: 0.66rem; padding: 6px 2px; min-height: 46px; }
+    .cell.name { font-size: 0.62rem; }
+    .grid-head div { font-size: 0.5rem; }
+    header { padding: 52px 12px 14px; }
+  }
 </style>
-
 </head>
 <body>
 <a href="index.html" class="home-btn">← Home</a>
@@ -286,45 +284,70 @@ async function caricaCarte() {
   }
 }
 
+let _strutturaPronta = false;
 function nuovaPartita() {
   const pool = (POPOLARI && POPOLARI.length) ? POPOLARI : TUTTE;
   segreta = pool[Math.floor(Math.random() * pool.length)];
   tentativi = [];
   finito = false;
-  renderGioco();
+  acIndex = -1;
+  if (!_strutturaPronta) { renderGioco(); _strutturaPronta = true; }
+  else {
+    const inp = document.getElementById('guess-input');
+    const ac = document.getElementById('autocomplete');
+    if (inp) inp.value = '';
+    if (ac) { ac.classList.remove('show'); ac.innerHTML = ''; }
+    aggiornaVista();
+  }
 }
 
 function renderGioco() {
   const area = document.getElementById('game-area');
+  // costruisco la struttura fissa UNA volta sola
   area.innerHTML = `
     <div class="guess-area">
       <div class="guess-row">
-        <input type="text" class="guess-input" id="guess-input" placeholder="Scrivi il nome di una carta…" autocomplete="off" ${finito ? 'disabled' : ''}>
-        <button class="guess-submit" id="guess-submit" ${finito ? 'disabled' : ''}>Prova</button>
+        <input type="text" class="guess-input" id="guess-input" placeholder="Scrivi il nome di una carta…" autocomplete="off">
+        <button class="guess-submit" id="guess-submit">Prova</button>
       </div>
       <div class="autocomplete" id="autocomplete"></div>
     </div>
-    <div class="tries-info">Tentativo <b>${tentativi.length}</b> di <b>${MAX_TENTATIVI}</b></div>
+    <div class="tries-info" id="tries-info"></div>
     <div id="result-slot"></div>
-    ${tentativi.length ? `
-    <div class="grid-head">
+    <div class="grid-head" id="grid-head" style="display:none">
       <div>Carta</div><div>Tipo</div><div>Razza</div><div>Attr.</div><div>Liv.</div><div>ATK</div><div>DEF</div><div>Anno</div>
-    </div>` : ''}
+    </div>
     <div class="guesses" id="guesses"></div>
   `;
-  // render tentativi (dal più recente in alto)
-  const g = document.getElementById('guesses');
-  g.innerHTML = tentativi.slice().reverse().map(rigaConfronto).join('');
+  const inp = document.getElementById('guess-input');
+  const btn = document.getElementById('guess-submit');
+  inp.addEventListener('input', onInput);
+  inp.addEventListener('keydown', onKey);
+  btn.addEventListener('click', () => provaTesto(inp.value));
+  // chiudi autocomplete cliccando fuori
+  document.addEventListener('click', (e) => {
+    const ac = document.getElementById('autocomplete');
+    const ga = document.querySelector('.guess-area');
+    if (ac && ga && !ga.contains(e.target)) ac.classList.remove('show');
+  });
+  aggiornaVista();
+}
 
-  if (!finito) {
-    const inp = document.getElementById('guess-input');
-    const btn = document.getElementById('guess-submit');
-    inp.addEventListener('input', onInput);
-    inp.addEventListener('keydown', onKey);
-    btn.addEventListener('click', () => provaTesto(inp.value));
-    inp.focus();
-  }
+// aggiorna solo le parti dinamiche, senza toccare input/autocomplete
+function aggiornaVista() {
+  const info = document.getElementById('tries-info');
+  const head = document.getElementById('grid-head');
+  const g = document.getElementById('guesses');
+  const inp = document.getElementById('guess-input');
+  const btn = document.getElementById('guess-submit');
+  if (info) info.innerHTML = `Tentativo <b>${tentativi.length}</b> di <b>${MAX_TENTATIVI}</b>`;
+  if (head) head.style.display = tentativi.length ? 'grid' : 'none';
+  if (g) g.innerHTML = tentativi.slice().reverse().map(rigaConfronto).join('');
+  if (inp) inp.disabled = !!finito;
+  if (btn) btn.disabled = !!finito;
   if (finito) renderEsito();
+  else { const slot = document.getElementById('result-slot'); if (slot) slot.innerHTML = ''; }
+  if (!finito && inp) inp.focus();
 }
 
 // confronto colonne tra carta provata e segreta
@@ -390,7 +413,13 @@ function registraTentativo(carta) {
   tentativi.push(carta);
   if (carta.id === segreta.id) { finito = 'win'; }
   else if (tentativi.length >= MAX_TENTATIVI) { finito = 'lose'; }
-  renderGioco();
+  // pulisci input e autocomplete
+  const inp = document.getElementById('guess-input');
+  const ac = document.getElementById('autocomplete');
+  if (inp) inp.value = '';
+  if (ac) { ac.classList.remove('show'); ac.innerHTML = ''; }
+  acIndex = -1;
+  aggiornaVista();
 }
 
 function renderEsito() {
@@ -420,7 +449,15 @@ function onInput(e) {
   const ac = document.getElementById('autocomplete');
   acIndex = -1;
   if (q.length < 2) { ac.classList.remove('show'); ac.innerHTML = ''; return; }
-  const risultati = NOMI.filter(n => n.name.toLowerCase().includes(q)).slice(0, 8);
+  // priorità a chi inizia col testo, poi chi lo contiene
+  const starts = [], contains = [];
+  for (const n of NOMI) {
+    const nl = n.name.toLowerCase();
+    if (nl.startsWith(q)) starts.push(n);
+    else if (nl.includes(q)) contains.push(n);
+    if (starts.length >= 8) break;
+  }
+  const risultati = [...starts, ...contains].slice(0, 8);
   if (!risultati.length) { ac.classList.remove('show'); ac.innerHTML = ''; return; }
   ac.innerHTML = risultati.map((n, i) => `
     <div class="ac-item" data-id="${n.id}" data-i="${i}">
@@ -458,6 +495,5 @@ window.nuovaPartita = nuovaPartita;
 window.toggleTema = toggleTema;
 caricaCarte();
 </script>
-
 </body>
 </html>
