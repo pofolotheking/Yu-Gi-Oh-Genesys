@@ -662,9 +662,8 @@
   .deck-mu-stat-list { display: flex; flex-direction: column; padding: 4px 0 10px; max-width: 480px; margin: 0 auto; width: 100%; }
   .deck-mu-stat-line {
     display: flex; align-items: baseline; gap: 8px;
-    padding: 7px 2px; border-bottom: 1px solid var(--border);
+    padding: 7px 2px;
   }
-  .deck-mu-stat-line:last-child { border-bottom: none; }
   .deck-mu-stat-line .deck-mu-stat-lbl {
     font-size: 0.92rem; text-transform: none; letter-spacing: 0; margin-bottom: 0;
     display: inline; font-weight: 600; color: var(--text-soft, var(--text-faint));
@@ -672,11 +671,11 @@
   .deck-mu-stat-line .deck-mu-stat-val {
     font-size: 1.05rem; display: inline; margin-left: auto;
   }
+  .deck-mu-vs-list { max-width: 480px; margin: 0 auto; width: 100%; }
   .deck-mu-vs-row {
     display: flex; align-items: center; justify-content: space-between;
-    padding: 10px 16px; border-bottom: 1px solid var(--border); font-size: 0.88rem;
+    padding: 10px 16px; font-size: 0.88rem;
   }
-  .deck-mu-vs-row:last-child { border-bottom: none; }
   .deck-mu-vs-name { font-weight: 500; color: var(--text); flex: 1; }
   .deck-mu-vs-score { font-weight: 700; font-variant-numeric: tabular-nums; color: var(--text); min-width: 40px; text-align: center; }
   .deck-mu-vs-wr { color: var(--text-dim); font-size: 0.8rem; min-width: 44px; text-align: right; }
@@ -2638,13 +2637,13 @@
     z-index: 2;
   }
   .detail-close:hover { background: #d9342b; }
-  .detail-head { margin-bottom: 14px; padding-right: 36px; }
+  .detail-head { margin-bottom: 14px; padding: 0 36px; text-align: center; }
   .detail-head .dh-name { font-size: 1.3rem; font-weight: 700; letter-spacing: -0.01em; }
   .detail-head .dh-sub { font-size: 0.85rem; color: var(--text-dim); margin-top: 2px; }
   .detail-chart-wrap { position: relative; height: 180px; margin-bottom: 14px; }
   .detail-section-title {
     font-size: 0.78rem; font-weight: 700; text-transform: uppercase;
-    letter-spacing: 0.04em; color: var(--text-dim); margin: 14px 0 8px;
+    letter-spacing: 0.04em; color: var(--text-dim); margin: 14px 0 8px; text-align: center;
   }
 
 </style>
@@ -4151,7 +4150,7 @@ async function apriDettaglioMazzo(mazzo) {
       <div class="deck-mu-stat-line"><span class="deck-mu-stat-lbl">WR da 2°:</span><span class="deck-mu-stat-val">${pct(s.secondoV,s.secondoT)}</span></div>
     </div>
     <div class="detail-section-title">Match-up</div>
-    ${noVs}
+    <div class="deck-mu-vs-list">${noVs}</div>
     <div class="detail-section-title">Decklist</div>
     <div id="ddm-decklist-body"><div class="empty">Caricamento decklist…</div></div>
   `;
