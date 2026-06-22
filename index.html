@@ -2518,29 +2518,42 @@
     padding: 4px 18px;
   }
   .h2h-united { display: flex; flex-direction: column; }
-  .h2h-u-item {
-    display: flex; align-items: center; justify-content: space-between;
-    gap: 18px; padding: 16px 0; border-bottom: 1px solid var(--border);
-    flex-wrap: wrap;
-  }
+  /* MOBILE-FIRST: ogni scontro è un menu a tendina (details/summary) */
+  .h2h-u-item { border-bottom: 1px solid var(--border); }
   .h2h-u-item:last-child { border-bottom: none; }
   .h2h-u-head {
     display: flex; align-items: center;
-    gap: 14px; flex-shrink: 0;
+    gap: 14px; padding: 14px 0; cursor: pointer;
+    list-style: none; user-select: none;
   }
+  .h2h-u-head::-webkit-details-marker { display: none; }
+  .h2h-u-arrow {
+    margin-left: auto; color: var(--text-faint);
+    font-size: 0.8rem; transition: transform 0.2s;
+  }
+  .h2h-u-item[open] .h2h-u-arrow { transform: rotate(90deg); }
   .h2h-u-name { font-size: 1.02rem; font-weight: 600; min-width: 64px; text-align: center; }
   .h2h-u-score { font-size: 1.05rem; color: var(--text-dim); font-variant-numeric: tabular-nums; }
   .h2h-u-score strong { color: var(--text); font-weight: 800; font-size: 1.25rem; margin: 0 2px; }
   .h2h-u-stats {
-    display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px 16px;
-    text-align: center;
-    flex: 1; min-width: 220px;
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px 8px;
+    text-align: center; padding: 4px 0 16px;
   }
   .h2h-u-stat { display: flex; flex-direction: column; gap: 2px; }
   .h2h-u-stat .lbl { font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-faint); font-weight: 600; }
   .h2h-u-stat .val { font-size: 0.92rem; font-weight: 700; color: var(--text); font-variant-numeric: tabular-nums; }
-  @media (max-width: 480px) {
-    .h2h-u-stats { grid-template-columns: repeat(2, 1fr); gap: 10px 8px; }
+  /* DESKTOP: riquadro unico, righe sempre aperte (niente tendina) */
+  @media (min-width: 1000px) {
+    .h2h-u-item {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 18px; padding: 16px 0; flex-wrap: wrap;
+    }
+    .h2h-u-head { padding: 0; cursor: default; flex-shrink: 0; pointer-events: none; }
+    .h2h-u-arrow { display: none; }
+    .h2h-u-stats {
+      display: grid !important; grid-template-columns: repeat(4, 1fr); gap: 8px 16px;
+      padding: 0; flex: 1; min-width: 220px;
+    }
   }
 
   /* ── MODALE DETTAGLIO (deck / giocatore) ── */
@@ -2553,10 +2566,14 @@
   .detail-modal {
     background: var(--bg-card); border-radius: 20px;
     width: 100%; max-width: 480px;
-    aspect-ratio: 1 / 1; max-height: 86vh;
+    max-height: 86vh;
     overflow-y: auto; position: relative;
     padding: 22px 22px 26px;
     background-size: cover; background-position: center;
+  }
+  /* su PC il popup è quadrato; su mobile resta a scorrimento (altezza naturale) */
+  @media (min-width: 1000px) {
+    .detail-modal { aspect-ratio: 1 / 1; }
   }
   /* popup con immagine di sfondo: testo bianco e leggibile */
   .detail-modal.has-bg-img,
@@ -2571,8 +2588,26 @@
     color: #fff !important;
     text-shadow: 0 1px 4px rgba(0,0,0,0.7);
   }
+  /* match-up vincenti in verde, perdenti in rosso (anche su sfondo immagine) */
+  .deck-mu-vs-row.win .deck-mu-vs-name,
+  .deck-mu-vs-row.win .deck-mu-vs-score,
+  .detail-modal.has-bg-img .deck-mu-vs-row.win .deck-mu-vs-name,
+  .detail-modal.has-bg-img .deck-mu-vs-row.win .deck-mu-vs-score {
+    color: #4ade80 !important;
+  }
+  .deck-mu-vs-row.lose .deck-mu-vs-name,
+  .deck-mu-vs-row.lose .deck-mu-vs-score,
+  .detail-modal.has-bg-img .deck-mu-vs-row.lose .deck-mu-vs-name,
+  .detail-modal.has-bg-img .deck-mu-vs-row.lose .deck-mu-vs-score {
+    color: #f87171 !important;
+  }
   .detail-modal.has-bg-img .deck-mu-stat {
     background: rgba(0,0,0,0.32);
+  }
+  .detail-modal.has-bg-img .detail-chart-wrap {
+    background: rgba(255,255,255,0.92);
+    border-radius: 12px;
+    padding: 8px;
   }
   .detail-close {
     position: absolute; top: 14px; right: 14px;
@@ -3644,7 +3679,8 @@ function renderRiepilogo() {
     r.ultimo = { vincitore, risultato: p.risultato, data: p.data };
   });
 
-  const arr = Object.values(h2h);
+  // ordinati per numero di scontri (match totali) decrescente
+  const arr = Object.values(h2h).sort((x, y) => (y.va + y.vb) - (x.va + x.vb));
   const card = document.getElementById('riepilogo-card');
   if (card) card.classList.add('h2h-united-card');
   const html = `
@@ -3652,19 +3688,20 @@ function renderRiepilogo() {
       ${arr.map(r => {
         const tot = r.va + r.vb;
         const ultimoStr = r.ultimo ? `${r.ultimo.vincitore}` : '—';
-        return `<div class="h2h-u-item">
-          <div class="h2h-u-head">
+        return `<details class="h2h-u-item">
+          <summary class="h2h-u-head">
             <span class="h2h-u-name">${r.a}</span>
             <span class="h2h-u-score"><strong>${r.va}</strong>-<strong>${r.vb}</strong></span>
             <span class="h2h-u-name">${r.b}</span>
-          </div>
+            <span class="h2h-u-arrow">▶</span>
+          </summary>
           <div class="h2h-u-stats">
             <div class="h2h-u-stat"><span class="lbl">Match</span><span class="val">${tot}</span></div>
             <div class="h2h-u-stat"><span class="lbl">Game vinti</span><span class="val">${r.gamesA} - ${r.gamesB}</span></div>
             <div class="h2h-u-stat"><span class="lbl">Dadi vinti</span><span class="val">${r.dadoA} - ${r.dadoB}</span></div>
             <div class="h2h-u-stat"><span class="lbl">Ultimo</span><span class="val">${ultimoStr}</span></div>
           </div>
-        </div>`;
+        </details>`;
       }).join('')}
     </div>
   `;
@@ -3985,7 +4022,7 @@ const MAZZI_IMG = {
   'Fire King': 'img/fireking.png',
   'Barriera di Ghiaccio': 'img/icebarrier.png',
   'Chimera Hecamani': 'img/chimerahecamani.png',
-  'JurracGMX': 'img/jurracGMX.png',
+  'Jurrac GMX': 'img/jurracGMX.png',
   'Magidolce': 'img/magidolce.png',
   'Dragon Ruler': 'img/dragonruler.png'
 };
@@ -4056,7 +4093,7 @@ function apriDettaglioMazzo(mazzo) {
   const imgUrl = MAZZI_IMG[mazzo] || (dati.mazziSfondi && dati.mazziSfondi[mazzo]);
   if (modal) {
     if (imgUrl) {
-      modal.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.45), rgba(0,0,0,0.45)), url('${imgUrl}')`;
+      modal.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.60), rgba(0,0,0,0.60)), url('${imgUrl}')`;
       modal.classList.add('has-bg-img');
     } else {
       modal.style.backgroundImage = '';
