@@ -14,7 +14,6 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=SF+Mono&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
 <style>
   :root {
     --bg: #ffffff;
@@ -642,24 +641,6 @@
   .matchup-wrap table { min-width: 480px; }
   .matchup-wrap td.diag { background: var(--bg-soft); color: var(--text-faint); }
 
-  .deck-mu-item { margin-bottom: 8px; }
-  .deck-mu-btn {
-    width: 100%; background: var(--bg-card);
-    border: 1px solid var(--border); border-radius: 12px;
-    padding: 13px 16px; font-family: inherit;
-    font-size: 0.95rem; font-weight: 600; color: var(--text);
-    cursor: pointer; display: flex; align-items: center;
-    justify-content: space-between; text-align: left;
-    transition: background 0.15s;
-  }
-  .deck-mu-btn:hover { background: var(--bg-soft); }
-  .deck-mu-btn.open { border-radius: 12px 12px 0 0; background: var(--bg-soft); border-color: var(--border-strong); }
-  .deck-mu-arrow { font-size: 0.7rem; color: var(--text-faint); transition: transform 0.2s; }
-  .deck-mu-btn.open .deck-mu-arrow { transform: rotate(90deg); }
-  .deck-mu-body {
-    border: 1px solid var(--border-strong); border-top: none;
-    border-radius: 0 0 12px 12px; background: var(--bg-soft); overflow: hidden;
-  }
   .deck-mu-stat-grid {
     display: grid; grid-template-columns: repeat(4, 1fr);
     border-bottom: 1px solid var(--border); background: var(--bg);
@@ -2411,13 +2392,6 @@
     }
     .desktop-split > .desktop-col-left,
     .desktop-split > .desktop-col-right { min-width: 0; }
-    /* Statistiche (e grafici mazzi, anche se spostati in Deck): tutto aperto e visibile di default */
-    #statistiche .deck-mu-body,
-    #statistiche .h2h-item .deck-mu-body,
-    #mazzi .deck-mu-body { display: block !important; }
-    #statistiche .deck-mu-btn .deck-mu-arrow,
-    #statistiche .h2h-btn .h2h-arrow,
-    #mazzi .deck-mu-btn .deck-mu-arrow { transform: rotate(90deg); }
     /* grafico punti a sx con la stessa altezza del riquadro scontri diretti */
     .stat-top { align-items: stretch; }
     .stat-top .desktop-col-left { display: flex; flex-direction: column; }
@@ -2855,18 +2829,6 @@
           <div class="chart-wrap"><canvas id="chart-andamento"></canvas></div>
           <div class="chart-legend" id="chart-legend"></div>
         </div>
-        <div id="grafici-mazzi-anchor"></div>
-        <div id="grafici-mazzi-block">
-          <h3 class="subsection-title">Grafici sui mazzi</h3>
-          <div class="card" id="chart-mazzi-bar-card" style="margin-top:12px">
-            <div class="chart-wrap"><canvas id="chart-mazzi-bar"></canvas></div>
-            <div class="chart-legend" id="chart-mazzi-bar-legend"></div>
-          </div>
-          <div class="card" id="chart-mazzi-pie-card" style="margin-top:12px">
-            <div class="chart-wrap"><canvas id="chart-mazzi-pie"></canvas></div>
-            <div class="chart-legend" id="chart-mazzi-pie-legend"></div>
-          </div>
-        </div>
       </div>
       <div class="desktop-col-right">
         <h3 class="subsection-title">Scontri diretti</h3>
@@ -2875,9 +2837,6 @@
           <div id="riepilogo-h2h"></div>
         </div>
       </div>
-    </div>
-    <div id="matchup-deck-section">
-      <div id="grid-matchup"></div>
     </div>
     <h3 class="subsection-title">Statistiche dado</h3>
     <p class="section-note"><em>Espandi un giocatore per vedere le statistiche dado e primo/secondo.</em></p>
@@ -2891,7 +2850,10 @@
         <p class="section-note"><em>Ordinati per win rate. I mazzi con meno di 3 partite sono In prova.</em></p>
         <div class="card"><table id="tabella-mazzi"></table></div>
       </div>
-      <div class="desktop-col-right" id="mazzi-right-col"></div>
+      <div class="desktop-col-right">
+        <div id="mazzi-right-col"></div>
+        <div id="grid-matchup"></div>
+      </div>
     </div>
   </section>
 
@@ -3453,35 +3415,10 @@ function calcolaStatMazzi() {
 }
 
 // ============ RENDER ============
-function isDesktopLayout() {
-  return window.matchMedia('(min-width: 1000px)').matches;
-}
-// su desktop i grafici mazzi vivono nella colonna destra della sezione Deck,
-// su mobile restano dove sono sempre stati (sezione Statistiche)
-function posizionaGraficiMazzi() {
-  const block = document.getElementById('grafici-mazzi-block');
-  const anchor = document.getElementById('grafici-mazzi-anchor');
-  const rightCol = document.getElementById('mazzi-right-col');
-  if (!block || !anchor || !rightCol) return;
-  if (isDesktopLayout()) {
-    if (block.parentElement !== rightCol) rightCol.appendChild(block);
-  } else {
-    if (block.parentElement !== anchor.parentElement) anchor.after(block);
-  }
-}
-window.addEventListener('resize', () => {
-  posizionaGraficiMazzi();
-  renderGraficoBarMazzi();
-  renderGraficoPieMazzi();
-});
-
 function popolaTutto() {
   renderGiocatori();
   renderRiepilogo();
   renderGrafico();
-  posizionaGraficiMazzi();
-  renderGraficoBarMazzi();
-  renderGraficoPieMazzi();
   renderStatDado();
   renderMazzi();
   renderStorico();
@@ -3720,8 +3657,6 @@ function renderRiepilogo() {
 // ============ GRAFICO ANDAMENTO PUNTI ============
 let _chartInstance = null;
 const COLORS = ['#007aff', '#34c759', '#ff9500', '#ff3b30'];
-let _chartMazziInstance = null;
-const COLORS_MAZZI = ['#007aff','#34c759','#ff9500','#ff3b30','#af52de','#5ac8fa','#ff2d55','#ffcc00','#5856d6','#a2845e','#34aadc','#8e8e93','#00c7be','#ff6482'];
 
 function renderGrafico() {
   if (typeof Chart === 'undefined') return;
@@ -3813,154 +3748,6 @@ function renderGrafico() {
   });
 }
 
-function renderGraficoBarMazzi() {
-  if (typeof Chart === 'undefined') return;
-  const card = document.getElementById('chart-mazzi-bar-card');
-  if (!dati.partite.length) { if (card) card.style.display = 'none'; return; }
-
-  const mazziSet = new Set();
-  dati.partite.forEach(p => { mazziSet.add(p.m1); mazziSet.add(p.m2); });
-
-  // per ogni mazzo: partite giocate e vittorie, per calcolare il win rate %
-  const stat = {};
-  [...mazziSet].forEach(m => stat[m] = { partite: 0, vittorie: 0 });
-  dati.partite.forEach(p => {
-    const [p1, p2] = PUNTI[p.risultato];
-    const g1win = p1 > p2;
-    if (stat[p.m1]) { stat[p.m1].partite++; if (g1win) stat[p.m1].vittorie++; }
-    if (stat[p.m2]) { stat[p.m2].partite++; if (!g1win) stat[p.m2].vittorie++; }
-  });
-
-  // solo mazzi con almeno una partita giocata, ordinati per win rate decrescente
-  const mazzi = [...mazziSet]
-    .filter(m => stat[m].partite > 0)
-    .sort((a, b) => (stat[b].vittorie / stat[b].partite) - (stat[a].vittorie / stat[a].partite));
-
-  if (!mazzi.length) { card.style.display = 'none'; return; }
-  card.style.display = 'block';
-
-  const winrate = mazzi.map(m => Math.round((stat[m].vittorie / stat[m].partite) * 1000) / 10);
-  const colori = mazzi.map((m, i) => COLORS_MAZZI[i % COLORS_MAZZI.length]);
-
-  document.getElementById('chart-mazzi-bar-legend').innerHTML = '';
-
-  const ctx = document.getElementById('chart-mazzi-bar').getContext('2d');
-  if (_chartMazziInstance) _chartMazziInstance.destroy();
-  _chartMazziInstance = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels: mazzi,
-      datasets: [{
-        label: 'Win rate',
-        data: winrate,
-        backgroundColor: colori,
-        borderRadius: 6,
-        maxBarThickness: 44
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          callbacks: {
-            label: (item) => `${item.formattedValue}% (${stat[mazzi[item.dataIndex]].vittorie}/${stat[mazzi[item.dataIndex]].partite} partite)`
-          }
-        }
-      },
-      scales: {
-        x: {
-          grid: { display: false },
-          ticks: { font: { size: 10 }, color: '#a1a1a6', autoSkip: false, maxRotation: 40, minRotation: 0 }
-        },
-        y: {
-          beginAtZero: true, max: 100,
-          title: { display: true, text: 'Win rate %', font: { size: 10 }, color: '#a1a1a6' },
-          grid: { color: 'rgba(0,0,0,0.05)' },
-          ticks: { font: { size: 10 }, color: '#a1a1a6', callback: (v) => v + '%' }
-        }
-      }
-    }
-  });
-}
-
-let _chartMazziPieInstance = null;
-function renderGraficoPieMazzi() {
-  if (typeof Chart === 'undefined') return;
-  const card = document.getElementById('chart-mazzi-pie-card');
-  if (!dati.partite.length) { if (card) card.style.display = 'none'; return; }
-
-  const mazziSet = new Set();
-  dati.partite.forEach(p => { mazziSet.add(p.m1); mazziSet.add(p.m2); });
-
-  // quante partite ha giocato ciascun mazzo, per vedere quanto è "popolare" nella lega
-  const partiteGiocate = {};
-  [...mazziSet].forEach(m => partiteGiocate[m] = 0);
-  dati.partite.forEach(p => {
-    if (partiteGiocate[p.m1] !== undefined) partiteGiocate[p.m1]++;
-    if (partiteGiocate[p.m2] !== undefined) partiteGiocate[p.m2]++;
-  });
-
-  const mazzi = [...mazziSet].filter(m => partiteGiocate[m] > 0).sort((a, b) => partiteGiocate[b] - partiteGiocate[a]);
-  if (!mazzi.length) { card.style.display = 'none'; return; }
-  card.style.display = 'block';
-
-  const totale = mazzi.reduce((s, m) => s + partiteGiocate[m], 0);
-  const colori = mazzi.map((m, i) => COLORS_MAZZI[i % COLORS_MAZZI.length]);
-
-  const legendEl = document.getElementById('chart-mazzi-pie-legend');
-  legendEl.innerHTML = mazzi.map((m, i) => {
-    const pct = Math.round((partiteGiocate[m] / totale) * 1000) / 10;
-    return `
-    <div class="chart-legend-item">
-      <div class="chart-legend-dot" style="background:${colori[i]}"></div>
-      ${m} <span style="color:var(--text-faint)">(${pct}%)</span>
-    </div>`;
-  }).join('');
-
-  const ctx = document.getElementById('chart-mazzi-pie').getContext('2d');
-  if (_chartMazziPieInstance) _chartMazziPieInstance.destroy();
-  _chartMazziPieInstance = new Chart(ctx, {
-    type: 'pie',
-    data: {
-      labels: mazzi,
-      datasets: [{
-        data: mazzi.map(m => partiteGiocate[m]),
-        backgroundColor: colori,
-        borderColor: 'var(--bg-card)',
-        borderWidth: 2
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          callbacks: {
-            label: (item) => {
-              const pct = Math.round((item.parsed / totale) * 1000) / 10;
-              return `${item.label}: ${item.parsed} partite (${pct}%)`;
-            }
-          }
-        },
-        datalabels: {
-          color: '#fff',
-          font: { size: 11, weight: '700' },
-          textStrokeColor: 'rgba(0,0,0,0.4)',
-          textStrokeWidth: 2,
-          formatter: (value, ctx) => {
-            const label = ctx.chart.data.labels[ctx.dataIndex];
-            const pct = Math.round((value / totale) * 1000) / 10;
-            return `${label}\n${pct}%`;
-          }
-        }
-      }
-    },
-    plugins: (typeof ChartDataLabels !== 'undefined') ? [ChartDataLabels] : []
-  });
-}
 
 // ============ STATISTICHE DADO/PRIMO ============
 function renderStatDado() {
@@ -4175,7 +3962,11 @@ function renderMatchup() {
 
 // mappa nome-mazzo → immagine di sfondo (compilala a mano quando aggiungi un'immagine in img/)
 const MAZZI_IMG = {
-  'Darklord': 'img/darklord.png'
+  'Darklord': 'img/darklord.png',
+  'Naturia': 'img/naturia.png',
+  'Mimighoul': 'img/mimighoul.png',
+  'Fire King': 'img/fireking.png',
+  'Barriera di Ghiaccio': 'img/barrieradighiaccio.png'
 };
 
 // ============ POPUP DETTAGLIO DECK / GIOCATORE ============
