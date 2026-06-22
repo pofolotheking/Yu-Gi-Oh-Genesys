@@ -2421,7 +2421,8 @@
     .stat-top { align-items: stretch; }
     .stat-top .desktop-col-left { display: flex; flex-direction: column; }
     .stat-top .desktop-col-left #chart-card { flex: 1; display: flex; flex-direction: column; }
-    .stat-top .desktop-col-left #chart-card .chart-wrap { flex: 1; height: auto; min-height: 320px; }
+    .stat-top .desktop-col-left #chart-card .chart-wrap { flex: 1; height: auto; min-height: 300px; }
+    .stat-top .desktop-col-left #chart-card .chart-legend { margin-top: auto; }
     .stat-top .desktop-col-right { display: flex; flex-direction: column; }
     .stat-top .desktop-col-right #riepilogo-card { flex: 1; }
   }
@@ -2492,47 +2493,73 @@
   }
   .mu-deck-stats b { font-weight: 700; }
 
-  /* ── BOTTONI GIOCATORE (statistiche dado) ── */
+  /* ── RIQUADRI GIOCATORE (statistiche dado) ── */
   #stat-dado-wrap {
     display: flex;
-    gap: 14px;
+    gap: 16px;
     flex-wrap: wrap;
   }
-  .dado-player-btn {
+  .dado-player-card {
     position: relative;
-    flex: 1 1 240px;
-    height: 160px;
-    border: none;
-    border-radius: 18px;
-    cursor: pointer;
+    flex: 1 1 280px;
+    min-height: 400px;
+    border-radius: 20px;
     overflow: hidden;
-    background: var(--bg-soft);
     color: #fff;
-    font-family: inherit;
     text-align: left;
-    padding: 14px 16px;
+    padding: 18px 20px;
     display: flex;
     flex-direction: column;
-    justify-content: flex-end;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-    transition: transform 0.15s, box-shadow 0.15s;
+    justify-content: space-between;
+    box-shadow: 0 3px 14px rgba(0,0,0,0.12);
     background-size: cover;
-    background-position: center;
+    background-position: center top;
   }
-  .dado-player-btn:hover { transform: translateY(-3px); box-shadow: 0 6px 18px rgba(0,0,0,0.16); }
-  .dado-player-btn::after {
+  /* foto giocatore al 70% di intensità → velo scuro del 30% (più marcato in basso per leggibilità) */
+  .dado-player-card::after {
     content: '';
     position: absolute; inset: 0;
-    background: linear-gradient(180deg, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.55) 100%);
+    background: linear-gradient(180deg, rgba(0,0,0,0.30) 0%, rgba(0,0,0,0.30) 45%, rgba(0,0,0,0.72) 100%);
     pointer-events: none;
   }
   .dado-player-name {
     position: relative; z-index: 1;
-    font-weight: 700; font-size: 1.2rem;
+    font-weight: 800; font-size: 1.7rem; letter-spacing: -0.01em;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.5);
   }
-  .dado-player-sub {
+  .dado-player-stats {
     position: relative; z-index: 1;
-    font-size: 0.78rem; opacity: 0.9;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 8px 14px;
+  }
+  .dps-item { display: flex; flex-direction: column; }
+  .dps-lbl { font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.04em; opacity: 0.85; font-weight: 600; }
+  .dps-val { font-size: 1.05rem; font-weight: 700; font-variant-numeric: tabular-nums; text-shadow: 0 1px 4px rgba(0,0,0,0.5); }
+
+  /* ── SCONTRI DIRETTI: riquadro unico colorato ── */
+  #riepilogo-card.h2h-united-card {
+    background: linear-gradient(160deg, rgba(0,122,255,0.10), rgba(88,86,214,0.10));
+    border: 1px solid rgba(0,122,255,0.18);
+    padding: 4px 18px;
+  }
+  .h2h-united { display: flex; flex-direction: column; }
+  .h2h-u-item { padding: 16px 0; border-bottom: 1px solid rgba(0,122,255,0.18); }
+  .h2h-u-item:last-child { border-bottom: none; }
+  .h2h-u-head {
+    display: flex; align-items: center; justify-content: center;
+    gap: 18px; margin-bottom: 12px;
+  }
+  .h2h-u-name { font-size: 1.02rem; font-weight: 600; min-width: 64px; text-align: center; }
+  .h2h-u-score { font-size: 1.05rem; color: var(--text-dim); font-variant-numeric: tabular-nums; }
+  .h2h-u-score strong { color: var(--text); font-weight: 800; font-size: 1.25rem; margin: 0 2px; }
+  .h2h-u-stats {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;
+    text-align: center;
+  }
+  .h2h-u-stat { display: flex; flex-direction: column; gap: 2px; }
+  .h2h-u-stat .lbl { font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-faint); font-weight: 600; }
+  .h2h-u-stat .val { font-size: 0.92rem; font-weight: 700; color: var(--text); font-variant-numeric: tabular-nums; }
+  @media (max-width: 480px) {
+    .h2h-u-stats { grid-template-columns: repeat(2, 1fr); gap: 10px 8px; }
   }
 
   /* ── MODALE DETTAGLIO (deck / giocatore) ── */
@@ -3672,32 +3699,24 @@ function renderRiepilogo() {
   });
 
   const arr = Object.values(h2h);
-  const minN = Math.min(...arr.map(r => r.va + r.vb));
+  const card = document.getElementById('riepilogo-card');
+  if (card) card.classList.add('h2h-united-card');
   const html = `
-    <div class="h2h-list">
-      ${arr.map((r, idx) => {
+    <div class="h2h-united">
+      ${arr.map(r => {
         const tot = r.va + r.vb;
-        const few = tot === minN && arr.some(x => (x.va + x.vb) > minN);
-        const safeId = 'h2h-' + idx;
-        const ultimoStr = r.ultimo ? `Vittoria ${r.ultimo.vincitore}` : '—';
-        const bodyVuoto = tot === 0;
-        return `<div class="h2h-item">
-          <button class="h2h-btn" onclick="toggleDeckMu('${safeId}')">
-            <div class="h2h-score-line">
-              <span class="h2h-pname">${r.a}</span>
-              <span class="h2h-score"><strong>${r.va}</strong> - <strong>${r.vb}</strong></span>
-              <span class="h2h-pname">${r.b}</span>
-            </div>
-            <span class="deck-mu-arrow h2h-arrow">▼</span>
-          </button>
-          <div class="deck-mu-body" id="${safeId}" style="display:none">
-            ${bodyVuoto ? '<div style="padding:12px 16px;font-size:0.85rem;color:var(--text-faint)">Nessuno scontro registrato.</div>' : `
-            <div class="deck-mu-stat-grid">
-              <div class="deck-mu-stat"><span class="deck-mu-stat-lbl">Match totali</span><span class="deck-mu-stat-val">${tot}</span></div>
-              <div class="deck-mu-stat"><span class="deck-mu-stat-lbl">Game vinti</span><span class="deck-mu-stat-val">${r.gamesA} - ${r.gamesB}</span></div>
-              <div class="deck-mu-stat"><span class="deck-mu-stat-lbl">Dadi vinti</span><span class="deck-mu-stat-val">${r.dadoA} - ${r.dadoB}</span></div>
-              <div class="deck-mu-stat"><span class="deck-mu-stat-lbl">Last game</span><span class="deck-mu-stat-val">${ultimoStr}</span></div>
-            </div>`}
+        const ultimoStr = r.ultimo ? `${r.ultimo.vincitore}` : '—';
+        return `<div class="h2h-u-item">
+          <div class="h2h-u-head">
+            <span class="h2h-u-name">${r.a}</span>
+            <span class="h2h-u-score"><strong>${r.va}</strong>-<strong>${r.vb}</strong></span>
+            <span class="h2h-u-name">${r.b}</span>
+          </div>
+          <div class="h2h-u-stats">
+            <div class="h2h-u-stat"><span class="lbl">Match</span><span class="val">${tot}</span></div>
+            <div class="h2h-u-stat"><span class="lbl">Game vinti</span><span class="val">${r.gamesA} - ${r.gamesB}</span></div>
+            <div class="h2h-u-stat"><span class="lbl">Dadi vinti</span><span class="val">${r.dadoA} - ${r.dadoB}</span></div>
+            <div class="h2h-u-stat"><span class="lbl">Ultimo</span><span class="val">${ultimoStr}</span></div>
           </div>
         </div>`;
       }).join('')}
@@ -3985,14 +4004,22 @@ function renderStatDado() {
 
   const rows = ordine.map(g => {
     const s = stat[g] || { primoV:0, primoT:0, secondoV:0, secondoT:0, dadoV:0, dadoT:0, dadoWinV:0 };
-    const wrDado = s.dadoV > 0 ? pct(s.dadoWinV, s.dadoV) : '—';
-    const safe = g.replace(/'/g, "\\'");
+    const wrDado    = s.dadoV > 0 ? pct(s.dadoWinV, s.dadoV) : '—';
+    const wrPrimo   = s.primoT > 0   ? pct(s.primoV, s.primoT)     : '—';
+    const wrSecondo = s.secondoT > 0 ? pct(s.secondoV, s.secondoT) : '—';
     const img = GIOCATORI_IMG[g];
     const bg = img ? `background-image:url('${img}')` : '';
-    return `<button class="dado-player-btn" style="${bg}" onclick="apriDettaglioGiocatoreDado('${safe}')">
+    return `<div class="dado-player-card" style="${bg}">
       <span class="dado-player-name">${g}</span>
-      <span class="dado-player-sub">Dado: ${wrDado} WR · 1°: ${s.primoT}× · 2°: ${s.secondoT}×</span>
-    </button>`;
+      <div class="dado-player-stats">
+        <div class="dps-item"><span class="dps-lbl">Dado vinto</span><span class="dps-val">${s.dadoV}/${s.dadoT}${s.dadoT>0?' ('+pct(s.dadoV,s.dadoT)+')':''}</span></div>
+        <div class="dps-item"><span class="dps-lbl">WR col dado</span><span class="dps-val">${wrDado}</span></div>
+        <div class="dps-item"><span class="dps-lbl">Volte 1°</span><span class="dps-val">${s.primoT}</span></div>
+        <div class="dps-item"><span class="dps-lbl">Volte 2°</span><span class="dps-val">${s.secondoT}</span></div>
+        <div class="dps-item"><span class="dps-lbl">WR da 1°</span><span class="dps-val">${wrPrimo}</span></div>
+        <div class="dps-item"><span class="dps-lbl">WR da 2°</span><span class="dps-val">${wrSecondo}</span></div>
+      </div>
+    </div>`;
   }).join('');
 
   if (partiteConInfo.length === 0) {
