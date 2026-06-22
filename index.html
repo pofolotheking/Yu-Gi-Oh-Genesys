@@ -2552,9 +2552,27 @@
   .detail-overlay.open { display: flex; }
   .detail-modal {
     background: var(--bg-card); border-radius: 20px;
-    width: 100%; max-width: 480px; max-height: 86vh;
+    width: 100%; max-width: 480px;
+    aspect-ratio: 1 / 1; max-height: 86vh;
     overflow-y: auto; position: relative;
     padding: 22px 22px 26px;
+    background-size: cover; background-position: center;
+  }
+  /* popup con immagine di sfondo: testo bianco e leggibile */
+  .detail-modal.has-bg-img,
+  .detail-modal.has-bg-img .dh-name,
+  .detail-modal.has-bg-img .dh-sub,
+  .detail-modal.has-bg-img .detail-section-title,
+  .detail-modal.has-bg-img .deck-mu-stat-lbl,
+  .detail-modal.has-bg-img .deck-mu-stat-val,
+  .detail-modal.has-bg-img .deck-mu-vs-name,
+  .detail-modal.has-bg-img .deck-mu-vs-score,
+  .detail-modal.has-bg-img .deck-mu-vs-wr {
+    color: #fff !important;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.7);
+  }
+  .detail-modal.has-bg-img .deck-mu-stat {
+    background: rgba(0,0,0,0.32);
   }
   .detail-close {
     position: absolute; top: 14px; right: 14px;
@@ -3977,7 +3995,7 @@ function chiudiDettaglio() {
   document.getElementById('detail-overlay').classList.remove('open');
   if (_chartDetailInstance) { _chartDetailInstance.destroy(); _chartDetailInstance = null; }
   const modal = document.getElementById('detail-modal');
-  if (modal) { modal.style.backgroundImage = ''; modal.style.backgroundSize = ''; modal.style.backgroundPosition = ''; }
+  if (modal) { modal.style.backgroundImage = ''; modal.classList.remove('has-bg-img'); }
 }
 
 function apriDettaglioMazzo(mazzo) {
@@ -4035,13 +4053,11 @@ function apriDettaglioMazzo(mazzo) {
   const imgUrl = MAZZI_IMG[mazzo] || (dati.mazziSfondi && dati.mazziSfondi[mazzo]);
   if (modal) {
     if (imgUrl) {
-      modal.style.backgroundImage = `linear-gradient(rgba(18,18,20,0.93), rgba(18,18,20,0.93)), url('${imgUrl}')`;
-      modal.style.backgroundSize = 'cover';
-      modal.style.backgroundPosition = 'center';
+      modal.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.45), rgba(0,0,0,0.45)), url('${imgUrl}')`;
+      modal.classList.add('has-bg-img');
     } else {
       modal.style.backgroundImage = '';
-      modal.style.backgroundSize = '';
-      modal.style.backgroundPosition = '';
+      modal.classList.remove('has-bg-img');
     }
   }
   document.getElementById('detail-overlay').classList.add('open');
