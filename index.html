@@ -2417,8 +2417,81 @@
     #statistiche .deck-mu-btn .deck-mu-arrow,
     #statistiche .h2h-btn .h2h-arrow,
     #mazzi .deck-mu-btn .deck-mu-arrow { transform: rotate(90deg); }
-    #statistiche #grid-matchup,
     #statistiche #stat-dado-wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start; }
+  }
+
+  /* ── BOTTONI MATCH-UP DECK (sparsi, dimensione variabile) ── */
+  #grid-matchup {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-top: 8px;
+    align-items: stretch;
+  }
+  .mu-deck-btn {
+    position: relative;
+    flex: 1 1 auto;
+    border: none;
+    border-radius: 18px;
+    cursor: pointer;
+    overflow: hidden;
+    background: var(--bg-soft);
+    color: var(--text);
+    font-family: inherit;
+    text-align: left;
+    padding: 16px 18px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: 6px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    transition: transform 0.15s, box-shadow 0.15s;
+    background-size: cover;
+    background-position: center;
+  }
+  .mu-deck-btn:hover { transform: translateY(-3px); box-shadow: 0 6px 18px rgba(0,0,0,0.16); }
+  .mu-deck-btn::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(180deg, rgba(0,0,0,0) 30%, rgba(0,0,0,0.35) 100%);
+    pointer-events: none;
+    opacity: 0;
+  }
+  .mu-deck-btn.has-bg::after { opacity: 1; }
+  .mu-deck-btn.has-bg { color: #fff; }
+  .mu-deck-name {
+    position: relative;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    line-height: 1.1;
+    z-index: 1;
+  }
+  .mu-deck-stats {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 12px;
+    font-size: 0.8rem;
+    opacity: 0.92;
+    z-index: 1;
+  }
+  .mu-deck-stats b { font-weight: 700; }
+  .mu-deck-prop { position: relative; font-size: 0.72rem; opacity: 0.7; z-index: 1; }
+  #matchup-detail {
+    margin-top: 16px;
+    background: var(--bg-soft);
+    border-radius: 14px;
+    padding: 16px 18px;
+    animation: fade 0.2s ease;
+  }
+  #matchup-detail .md-head {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 12px;
+  }
+  #matchup-detail .md-head strong { font-size: 1.1rem; }
+  #matchup-detail .md-close {
+    border: none; background: var(--bg-card); border-radius: 8px;
+    width: 30px; height: 30px; cursor: pointer; font-size: 1rem; color: var(--text-dim);
   }
 
 </style>
@@ -2660,47 +2733,54 @@
   </section>
   <section id="statistiche">
     <h2 class="section-title-centered">Statistiche</h2>
-    <p class="section-note"><em>Andamento punti per partite giocate</em></p>
-    <div class="card" id="chart-card">
-      <div class="chart-wrap"><canvas id="chart-andamento"></canvas></div>
-      <div class="chart-legend" id="chart-legend"></div>
-    </div>
-    <div id="grafici-mazzi-anchor"></div>
-    <div id="grafici-mazzi-block">
-      <h3 class="subsection-title">Grafici sui mazzi</h3>
-      <div class="deck-mu-item">
-        <button class="deck-mu-btn" onclick="toggleGraficoMazzi('graf-mazzi-bar')">
-          <span>📊 Win rate dei mazzi</span>
-          <span class="deck-mu-arrow">▶</span>
-        </button>
-        <div class="deck-mu-body" id="graf-mazzi-bar" style="display:none">
-          <div class="card" id="chart-mazzi-bar-card" style="box-shadow:none;margin:0">
-            <div class="chart-wrap"><canvas id="chart-mazzi-bar"></canvas></div>
-            <div class="chart-legend" id="chart-mazzi-bar-legend"></div>
+    <div class="desktop-split stat-top">
+      <div class="desktop-col-left">
+        <p class="section-note"><em>Andamento punti per partite giocate</em></p>
+        <div class="card" id="chart-card">
+          <div class="chart-wrap"><canvas id="chart-andamento"></canvas></div>
+          <div class="chart-legend" id="chart-legend"></div>
+        </div>
+        <div id="grafici-mazzi-anchor"></div>
+        <div id="grafici-mazzi-block">
+          <h3 class="subsection-title">Grafici sui mazzi</h3>
+          <div class="deck-mu-item">
+            <button class="deck-mu-btn" onclick="toggleGraficoMazzi('graf-mazzi-bar')">
+              <span>📊 Win rate dei mazzi</span>
+              <span class="deck-mu-arrow">▶</span>
+            </button>
+            <div class="deck-mu-body" id="graf-mazzi-bar" style="display:none">
+              <div class="card" id="chart-mazzi-bar-card" style="box-shadow:none;margin:0">
+                <div class="chart-wrap"><canvas id="chart-mazzi-bar"></canvas></div>
+                <div class="chart-legend" id="chart-mazzi-bar-legend"></div>
+              </div>
+            </div>
+          </div>
+          <div class="deck-mu-item" style="margin-top:8px">
+            <button class="deck-mu-btn" onclick="toggleGraficoMazzi('graf-mazzi-pie')">
+              <span>🥧 Quota di utilizzo dei mazzi</span>
+              <span class="deck-mu-arrow">▶</span>
+            </button>
+            <div class="deck-mu-body" id="graf-mazzi-pie" style="display:none">
+              <div class="card" id="chart-mazzi-pie-card" style="box-shadow:none;margin:0">
+                <div class="chart-wrap"><canvas id="chart-mazzi-pie"></canvas></div>
+                <div class="chart-legend" id="chart-mazzi-pie-legend"></div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-      <div class="deck-mu-item" style="margin-top:8px">
-        <button class="deck-mu-btn" onclick="toggleGraficoMazzi('graf-mazzi-pie')">
-          <span>🥧 Quota di utilizzo dei mazzi</span>
-          <span class="deck-mu-arrow">▶</span>
-        </button>
-        <div class="deck-mu-body" id="graf-mazzi-pie" style="display:none">
-          <div class="card" id="chart-mazzi-pie-card" style="box-shadow:none;margin:0">
-            <div class="chart-wrap"><canvas id="chart-mazzi-pie"></canvas></div>
-            <div class="chart-legend" id="chart-mazzi-pie-legend"></div>
-          </div>
+      <div class="desktop-col-right">
+        <h3 class="subsection-title">Scontri diretti</h3>
+        <div class="card padded" id="riepilogo-card">
+          <div id="riepilogo-totali"></div>
+          <div id="riepilogo-h2h"></div>
         </div>
       </div>
     </div>
-    <h3 class="subsection-title">Scontri diretti</h3>
-    <div class="card padded" id="riepilogo-card">
-      <div id="riepilogo-totali"></div>
-      <div id="riepilogo-h2h"></div>
+    <div id="matchup-deck-section">
+      <div id="grid-matchup"></div>
+      <div id="matchup-detail" style="display:none"></div>
     </div>
-    <h3 class="subsection-title">Match-up tra Deck</h3>
-    <p class="section-note"><em>Espandi un mazzo per vedere le statistiche dettagliate.</em></p>
-    <div id="grid-matchup"></div>
     <h3 class="subsection-title">Statistiche dado</h3>
     <p class="section-note"><em>Espandi un giocatore per vedere le statistiche dado e primo/secondo.</em></p>
     <div id="stat-dado-wrap"></div>
@@ -3971,42 +4051,69 @@ function renderMatchup() {
     }
   });
   const pct = (v,t) => t > 0 ? Math.round(100*v/t)+'%' : '—';
+  _matchupStat = stat;
+  // dimensioni "casuali" ma stabili per ogni deck (seed dal nome) così non saltano ad ogni render
+  const seed = (str) => { let h = 0; for (let i = 0; i < str.length; i++) h = (h*31 + str.charCodeAt(i)) >>> 0; return h; };
   c.innerHTML = lista.map(mazzo => {
     const s = stat[mazzo];
     const tot = s.v + s.p;
     const wr = pct(s.v, tot);
-    const prop = dati.mazzi[mazzo] ? `<span style="font-size:0.78rem;color:var(--text-dim);font-weight:400;margin-left:6px">${dati.mazzi[mazzo]}</span>` : '';
-    const vsRows = Object.entries(s.vs)
-      .filter(([_, r]) => r.v + r.p > 0)
-      .sort((a,b) => (b[1].v+b[1].p) - (a[1].v+a[1].p))
-      .map(([avv, r]) => {
-        const rtot = r.v + r.p;
-        const rwr = pct(r.v, rtot);
-        const cls = r.v > r.p ? 'win' : r.v < r.p ? 'lose' : '';
-        return `<div class="deck-mu-vs-row ${cls}">
-          <span class="deck-mu-vs-name">vs ${avv}</span>
-          <span class="deck-mu-vs-score">${r.v}–${r.p}</span>
-          <span class="deck-mu-vs-wr">${rwr}</span>
-        </div>`;
-      }).join('');
-    const noVs = vsRows === '' ? '<div style="padding:12px 16px;font-size:0.85rem;color:var(--text-faint)">Nessuno scontro registrato.</div>' : vsRows;
-    const safeId = 'dmu-' + mazzo.replace(/[^a-z0-9]/gi,'_');
-    return `<div class="deck-mu-item">
-      <button class="deck-mu-btn" onclick="toggleDeckMu('${safeId}')">
-        <span>${mazzo}${prop}</span>
-        <span class="deck-mu-arrow">▶</span>
-      </button>
-      <div class="deck-mu-body" id="${safeId}" style="display:none">
-        <div class="deck-mu-stat-grid">
-          <div class="deck-mu-stat"><span class="deck-mu-stat-lbl">V / P</span><span class="deck-mu-stat-val">${s.v} / ${s.p}</span></div>
-          <div class="deck-mu-stat"><span class="deck-mu-stat-lbl">Win Rate</span><span class="deck-mu-stat-val">${wr}</span></div>
-          <div class="deck-mu-stat"><span class="deck-mu-stat-lbl">WR da 1°</span><span class="deck-mu-stat-val">${pct(s.primoV,s.primoT)}</span></div>
-          <div class="deck-mu-stat"><span class="deck-mu-stat-lbl">WR da 2°</span><span class="deck-mu-stat-val">${pct(s.secondoV,s.secondoT)}</span></div>
-        </div>
-        ${noVs}
-      </div>
-    </div>`;
+    const h = seed(mazzo);
+    const minW = 200 + (h % 170);          // 200–369px larghezza base
+    const grow = 1 + ((h >> 8) % 3);       // peso flessibile 1–3
+    const minH = 120 + ((h >> 4) % 110);   // 120–229px altezza
+    const fs = 1.15 + ((h >> 12) % 60) / 100; // 1.15–1.74rem nome
+    const prop = dati.mazzi[mazzo] ? `<span class="mu-deck-prop">${dati.mazzi[mazzo]}</span>` : '';
+    const safe = mazzo.replace(/'/g, "\\'");
+    const bg = dati.mazziSfondi && dati.mazziSfondi[mazzo]
+      ? ` has-bg" style="flex:${grow} 1 ${minW}px;min-height:${minH}px;background-image:url('${dati.mazziSfondi[mazzo]}')`
+      : `" style="flex:${grow} 1 ${minW}px;min-height:${minH}px`;
+    return `<button class="mu-deck-btn${bg}" onclick="mostraMatchupDeck('${safe}')">
+      <span class="mu-deck-name" style="font-size:${fs.toFixed(2)}rem">${mazzo}</span>
+      ${prop}
+      <span class="mu-deck-stats">
+        <span><b>${wr}</b> WR</span>
+        <span><b>${s.v}</b>V · <b>${s.p}</b>P</span>
+        <span>${tot} match</span>
+      </span>
+    </button>`;
   }).join('');
+}
+
+// dettaglio match-up di un singolo deck (vs tutti gli altri)
+let _matchupStat = {};
+function mostraMatchupDeck(mazzo) {
+  const det = document.getElementById('matchup-detail');
+  const s = _matchupStat[mazzo];
+  if (!det || !s) return;
+  const pct = (v,t) => t > 0 ? Math.round(100*v/t)+'%' : '—';
+  const tot = s.v + s.p;
+  const vsRows = Object.entries(s.vs)
+    .filter(([_, r]) => r.v + r.p > 0)
+    .sort((a,b) => (b[1].v+b[1].p) - (a[1].v+a[1].p))
+    .map(([avv, r]) => {
+      const cls = r.v > r.p ? 'win' : r.v < r.p ? 'lose' : '';
+      return `<div class="deck-mu-vs-row ${cls}">
+        <span class="deck-mu-vs-name">vs ${avv}</span>
+        <span class="deck-mu-vs-score">${r.v}–${r.p}</span>
+        <span class="deck-mu-vs-wr">${pct(r.v, r.v + r.p)}</span>
+      </div>`;
+    }).join('');
+  const noVs = vsRows === '' ? '<div style="padding:12px 0;font-size:0.85rem;color:var(--text-faint)">Nessuno scontro registrato.</div>' : vsRows;
+  det.innerHTML = `
+    <div class="md-head">
+      <strong>${mazzo}</strong>
+      <button class="md-close" onclick="document.getElementById('matchup-detail').style.display='none'" title="Chiudi">✕</button>
+    </div>
+    <div class="deck-mu-stat-grid">
+      <div class="deck-mu-stat"><span class="deck-mu-stat-lbl">V / P</span><span class="deck-mu-stat-val">${s.v} / ${s.p}</span></div>
+      <div class="deck-mu-stat"><span class="deck-mu-stat-lbl">Win Rate</span><span class="deck-mu-stat-val">${pct(s.v, tot)}</span></div>
+      <div class="deck-mu-stat"><span class="deck-mu-stat-lbl">WR da 1°</span><span class="deck-mu-stat-val">${pct(s.primoV,s.primoT)}</span></div>
+      <div class="deck-mu-stat"><span class="deck-mu-stat-lbl">WR da 2°</span><span class="deck-mu-stat-val">${pct(s.secondoV,s.secondoT)}</span></div>
+    </div>
+    ${noVs}`;
+  det.style.display = 'block';
+  det.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 function toggleDeckMu(id) {
   const body = document.getElementById(id);
@@ -6015,6 +6122,7 @@ window.mostraDettaglioCarta = mostraDettaglioCarta;
 window.mostraDettaglioCartaDaGenesys = mostraDettaglioCartaDaGenesys;
 window.toggleDeckMu = toggleDeckMu;
 window.toggleGraficoMazzi = toggleGraficoMazzi;
+window.mostraMatchupDeck = mostraMatchupDeck;
 
 // ============ AVVIO CON AUTH ============
 onAuthStateChanged(auth, user => {
