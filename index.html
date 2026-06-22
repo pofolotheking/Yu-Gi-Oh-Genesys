@@ -2519,7 +2519,7 @@
   .dado-player-card::after {
     content: '';
     position: absolute; inset: 0;
-    background: linear-gradient(180deg, rgba(0,0,0,0.30) 0%, rgba(0,0,0,0.30) 45%, rgba(0,0,0,0.72) 100%);
+    background: linear-gradient(180deg, rgba(0,0,0,0.30) 0%, rgba(0,0,0,0.30) 25%, rgba(0,0,0,0.55) 55%, rgba(0,0,0,0.88) 100%);
     pointer-events: none;
   }
   .dado-player-name {
@@ -4175,7 +4175,9 @@ function renderMatchup() {
 }
 
 // mappa nome-mazzo → immagine di sfondo (compilala a mano quando aggiungi un'immagine in img/)
-const MAZZI_IMG = {};
+const MAZZI_IMG = {
+  'Darklord': 'img/darklord.png'
+};
 
 // ============ POPUP DETTAGLIO DECK / GIOCATORE ============
 let _matchupStat = {};
