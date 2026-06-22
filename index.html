@@ -14,6 +14,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=SF+Mono&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
 <style>
   :root {
     --bg: #ffffff;
@@ -2437,7 +2438,9 @@
   }
   .mu-deck-btn {
     position: relative;
-    flex: 1 1 auto;
+    flex: 1 1 260px;
+    width: 260px;
+    min-height: 200px;
     border: none;
     border-radius: 18px;
     cursor: pointer;
@@ -2484,10 +2487,10 @@
   .mu-deck-stats {
     position: relative;
     display: flex;
-    flex-wrap: wrap;
-    gap: 4px 12px;
-    font-size: 0.8rem;
-    opacity: 0.92;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 0.92rem;
+    opacity: 0.95;
     z-index: 1;
     margin-top: auto;
   }
@@ -2537,23 +2540,28 @@
 
   /* ── SCONTRI DIRETTI: riquadro unico colorato ── */
   #riepilogo-card.h2h-united-card {
-    background: linear-gradient(160deg, rgba(0,122,255,0.10), rgba(88,86,214,0.10));
-    border: 1px solid rgba(0,122,255,0.18);
+    background: #fff;
+    border: 1px solid var(--border);
     padding: 4px 18px;
   }
   .h2h-united { display: flex; flex-direction: column; }
-  .h2h-u-item { padding: 16px 0; border-bottom: 1px solid rgba(0,122,255,0.18); }
+  .h2h-u-item {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 18px; padding: 16px 0; border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+  }
   .h2h-u-item:last-child { border-bottom: none; }
   .h2h-u-head {
-    display: flex; align-items: center; justify-content: center;
-    gap: 18px; margin-bottom: 12px;
+    display: flex; align-items: center;
+    gap: 14px; flex-shrink: 0;
   }
   .h2h-u-name { font-size: 1.02rem; font-weight: 600; min-width: 64px; text-align: center; }
   .h2h-u-score { font-size: 1.05rem; color: var(--text-dim); font-variant-numeric: tabular-nums; }
   .h2h-u-score strong { color: var(--text); font-weight: 800; font-size: 1.25rem; margin: 0 2px; }
   .h2h-u-stats {
-    display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px 16px;
     text-align: center;
+    flex: 1; min-width: 220px;
   }
   .h2h-u-stat { display: flex; flex-direction: column; gap: 2px; }
   .h2h-u-stat .lbl { font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-faint); font-weight: 600; }
@@ -2850,29 +2858,13 @@
         <div id="grafici-mazzi-anchor"></div>
         <div id="grafici-mazzi-block">
           <h3 class="subsection-title">Grafici sui mazzi</h3>
-          <div class="deck-mu-item">
-            <button class="deck-mu-btn" onclick="toggleGraficoMazzi('graf-mazzi-bar')">
-              <span>📊 Win rate dei mazzi</span>
-              <span class="deck-mu-arrow">▶</span>
-            </button>
-            <div class="deck-mu-body" id="graf-mazzi-bar" style="display:none">
-              <div class="card" id="chart-mazzi-bar-card" style="box-shadow:none;margin:0">
-                <div class="chart-wrap"><canvas id="chart-mazzi-bar"></canvas></div>
-                <div class="chart-legend" id="chart-mazzi-bar-legend"></div>
-              </div>
-            </div>
+          <div class="card" id="chart-mazzi-bar-card" style="margin-top:12px">
+            <div class="chart-wrap"><canvas id="chart-mazzi-bar"></canvas></div>
+            <div class="chart-legend" id="chart-mazzi-bar-legend"></div>
           </div>
-          <div class="deck-mu-item" style="margin-top:8px">
-            <button class="deck-mu-btn" onclick="toggleGraficoMazzi('graf-mazzi-pie')">
-              <span>🥧 Quota di utilizzo dei mazzi</span>
-              <span class="deck-mu-arrow">▶</span>
-            </button>
-            <div class="deck-mu-body" id="graf-mazzi-pie" style="display:none">
-              <div class="card" id="chart-mazzi-pie-card" style="box-shadow:none;margin:0">
-                <div class="chart-wrap"><canvas id="chart-mazzi-pie"></canvas></div>
-                <div class="chart-legend" id="chart-mazzi-pie-legend"></div>
-              </div>
-            </div>
+          <div class="card" id="chart-mazzi-pie-card" style="margin-top:12px">
+            <div class="chart-wrap"><canvas id="chart-mazzi-pie"></canvas></div>
+            <div class="chart-legend" id="chart-mazzi-pie-legend"></div>
           </div>
         </div>
       </div>
@@ -3479,7 +3471,8 @@ function posizionaGraficiMazzi() {
 }
 window.addEventListener('resize', () => {
   posizionaGraficiMazzi();
-  if (isDesktopLayout()) { renderGraficoBarMazzi(); renderGraficoPieMazzi(); }
+  renderGraficoBarMazzi();
+  renderGraficoPieMazzi();
 });
 
 function popolaTutto() {
@@ -3487,9 +3480,8 @@ function popolaTutto() {
   renderRiepilogo();
   renderGrafico();
   posizionaGraficiMazzi();
-  // ridisegna i grafici mazzi solo se la loro sezione è aperta (o sempre su desktop, dove sono forzati visibili)
-  if (isDesktopLayout() || document.getElementById('graf-mazzi-bar')?.style.display === 'block') renderGraficoBarMazzi();
-  if (isDesktopLayout() || document.getElementById('graf-mazzi-pie')?.style.display === 'block') renderGraficoPieMazzi();
+  renderGraficoBarMazzi();
+  renderGraficoPieMazzi();
   renderStatDado();
   renderMazzi();
   renderStorico();
@@ -3952,9 +3944,21 @@ function renderGraficoPieMazzi() {
               return `${item.label}: ${item.parsed} partite (${pct}%)`;
             }
           }
+        },
+        datalabels: {
+          color: '#fff',
+          font: { size: 11, weight: '700' },
+          textStrokeColor: 'rgba(0,0,0,0.4)',
+          textStrokeWidth: 2,
+          formatter: (value, ctx) => {
+            const label = ctx.chart.data.labels[ctx.dataIndex];
+            const pct = Math.round((value / totale) * 1000) / 10;
+            return `${label}\n${pct}%`;
+          }
         }
       }
-    }
+    },
+    plugins: (typeof ChartDataLabels !== 'undefined') ? [ChartDataLabels] : []
   });
 }
 
@@ -4146,29 +4150,24 @@ function renderMatchup() {
   });
   const pct = (v,t) => t > 0 ? Math.round(100*v/t)+'%' : '—';
   _matchupStat = stat;
-  // dimensioni "casuali" ma stabili per ogni deck (seed dal nome) così non saltano ad ogni render
-  const seed = (str) => { let h = 0; for (let i = 0; i < str.length; i++) h = (h*31 + str.charCodeAt(i)) >>> 0; return h; };
   c.innerHTML = lista.map(mazzo => {
     const s = stat[mazzo];
     const tot = s.v + s.p;
     const wr = pct(s.v, tot);
-    const h = seed(mazzo);
-    const minW = 200 + (h % 170);          // 200–369px larghezza base
-    const grow = 1 + ((h >> 8) % 3);       // peso flessibile 1–3
-    const minH = 120 + ((h >> 4) % 110);   // 120–229px altezza
     const prop = dati.mazzi[mazzo] ? `<span class="mu-deck-prop">${dati.mazzi[mazzo]}</span>` : '';
     const safe = mazzo.replace(/'/g, "\\'");
     const imgUrl = MAZZI_IMG[mazzo] || (dati.mazziSfondi && dati.mazziSfondi[mazzo]);
     const bg = imgUrl
-      ? ` has-bg" style="flex:${grow} 1 ${minW}px;min-height:${minH}px;background-image:url('${imgUrl}')`
-      : `" style="flex:${grow} 1 ${minW}px;min-height:${minH}px`;
+      ? ` has-bg" style="background-image:url('${imgUrl}')`
+      : `"`;
     return `<button class="mu-deck-btn${bg}" onclick="apriDettaglioMazzo('${safe}')">
       <span class="mu-deck-name">${mazzo}</span>
       ${prop}
       <span class="mu-deck-stats">
-        <span><b>${wr}</b> WR</span>
-        <span><b>${s.v}</b>V · <b>${s.p}</b>P</span>
-        <span>${tot} match</span>
+        <span>Vittorie: <b>${s.v}</b></span>
+        <span>Sconfitte: <b>${s.p}</b></span>
+        <span>Win rate: <b>${wr}</b></span>
+        <span>Partite giocate: <b>${tot}</b></span>
       </span>
     </button>`;
   }).join('');
@@ -4324,23 +4323,6 @@ function toggleDeckMu(id) {
   const open = body.style.display !== 'none';
   body.style.display = open ? 'none' : 'block';
   btn?.classList.toggle('open', !open);
-}
-
-// apre/chiude una sezione grafico e ridisegna il chart (Chart.js non disegna se nascosto)
-function toggleGraficoMazzi(id) {
-  const body = document.getElementById(id);
-  const btn = body?.previousElementSibling;
-  if (!body) return;
-  const open = body.style.display !== 'none';
-  body.style.display = open ? 'none' : 'block';
-  btn?.classList.toggle('open', !open);
-  if (!open) {
-    // appena visibile, (ri)disegno il grafico corretto
-    setTimeout(() => {
-      if (id === 'graf-mazzi-bar') renderGraficoBarMazzi();
-      else if (id === 'graf-mazzi-pie') renderGraficoPieMazzi();
-    }, 30);
-  }
 }
 
 function popolaSelectGiocatori() {
@@ -6323,7 +6305,6 @@ window.tornaRisultati = tornaRisultati;
 window.mostraDettaglioCarta = mostraDettaglioCarta;
 window.mostraDettaglioCartaDaGenesys = mostraDettaglioCartaDaGenesys;
 window.toggleDeckMu = toggleDeckMu;
-window.toggleGraficoMazzi = toggleGraficoMazzi;
 window.apriDettaglioMazzo = apriDettaglioMazzo;
 window.apriDettaglioGiocatoreDado = apriDettaglioGiocatoreDado;
 window.chiudiDettaglio = chiudiDettaglio;
