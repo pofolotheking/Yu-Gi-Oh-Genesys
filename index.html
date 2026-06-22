@@ -2399,6 +2399,28 @@
   }
   .duel-input-cancel:hover { background: #e5e5ea; }
 
+  /* ── DESKTOP LAYOUT (≥1000px): full-width, due colonne, statistiche aperte ── */
+  @media (min-width: 1000px) {
+    main { max-width: 1400px; padding: 0 32px; }
+    .desktop-split {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 28px;
+      align-items: start;
+    }
+    .desktop-split > .desktop-col-left,
+    .desktop-split > .desktop-col-right { min-width: 0; }
+    /* Statistiche (e grafici mazzi, anche se spostati in Deck): tutto aperto e visibile di default */
+    #statistiche .deck-mu-body,
+    #statistiche .h2h-item .deck-mu-body,
+    #mazzi .deck-mu-body { display: block !important; }
+    #statistiche .deck-mu-btn .deck-mu-arrow,
+    #statistiche .h2h-btn .h2h-arrow,
+    #mazzi .deck-mu-btn .deck-mu-arrow { transform: rotate(90deg); }
+    #statistiche #grid-matchup,
+    #statistiche #stat-dado-wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start; }
+  }
+
 </style>
 </head>
 <body>
@@ -2625,10 +2647,16 @@
 <main>
   <section id="giocatori">
     <h2 class="section-title-centered">Classifica</h2>
-    <div class="card"><table id="tabella-giocatori"></table></div>
-    <h3 class="subsection-title">Storico Partite</h3>
-    <p class="section-note">Tocca ✏️ per modificare o 🗑 per eliminare.</p>
-    <div class="card" id="lista-partite"></div>
+    <div class="desktop-split">
+      <div class="desktop-col-left">
+        <div class="card"><table id="tabella-giocatori"></table></div>
+      </div>
+      <div class="desktop-col-right">
+        <h3 class="subsection-title">Storico Partite</h3>
+        <p class="section-note">Tocca ✏️ per modificare o 🗑 per eliminare.</p>
+        <div class="card" id="lista-partite"></div>
+      </div>
+    </div>
   </section>
   <section id="statistiche">
     <h2 class="section-title-centered">Statistiche</h2>
@@ -2637,28 +2665,31 @@
       <div class="chart-wrap"><canvas id="chart-andamento"></canvas></div>
       <div class="chart-legend" id="chart-legend"></div>
     </div>
-    <h3 class="subsection-title">Grafici sui mazzi</h3>
-    <div class="deck-mu-item">
-      <button class="deck-mu-btn" onclick="toggleGraficoMazzi('graf-mazzi-bar')">
-        <span>📊 Win rate dei mazzi</span>
-        <span class="deck-mu-arrow">▶</span>
-      </button>
-      <div class="deck-mu-body" id="graf-mazzi-bar" style="display:none">
-        <div class="card" id="chart-mazzi-bar-card" style="box-shadow:none;margin:0">
-          <div class="chart-wrap"><canvas id="chart-mazzi-bar"></canvas></div>
-          <div class="chart-legend" id="chart-mazzi-bar-legend"></div>
+    <div id="grafici-mazzi-anchor"></div>
+    <div id="grafici-mazzi-block">
+      <h3 class="subsection-title">Grafici sui mazzi</h3>
+      <div class="deck-mu-item">
+        <button class="deck-mu-btn" onclick="toggleGraficoMazzi('graf-mazzi-bar')">
+          <span>📊 Win rate dei mazzi</span>
+          <span class="deck-mu-arrow">▶</span>
+        </button>
+        <div class="deck-mu-body" id="graf-mazzi-bar" style="display:none">
+          <div class="card" id="chart-mazzi-bar-card" style="box-shadow:none;margin:0">
+            <div class="chart-wrap"><canvas id="chart-mazzi-bar"></canvas></div>
+            <div class="chart-legend" id="chart-mazzi-bar-legend"></div>
+          </div>
         </div>
       </div>
-    </div>
-    <div class="deck-mu-item" style="margin-top:8px">
-      <button class="deck-mu-btn" onclick="toggleGraficoMazzi('graf-mazzi-pie')">
-        <span>🥧 Quota di utilizzo dei mazzi</span>
-        <span class="deck-mu-arrow">▶</span>
-      </button>
-      <div class="deck-mu-body" id="graf-mazzi-pie" style="display:none">
-        <div class="card" id="chart-mazzi-pie-card" style="box-shadow:none;margin:0">
-          <div class="chart-wrap"><canvas id="chart-mazzi-pie"></canvas></div>
-          <div class="chart-legend" id="chart-mazzi-pie-legend"></div>
+      <div class="deck-mu-item" style="margin-top:8px">
+        <button class="deck-mu-btn" onclick="toggleGraficoMazzi('graf-mazzi-pie')">
+          <span>🥧 Quota di utilizzo dei mazzi</span>
+          <span class="deck-mu-arrow">▶</span>
+        </button>
+        <div class="deck-mu-body" id="graf-mazzi-pie" style="display:none">
+          <div class="card" id="chart-mazzi-pie-card" style="box-shadow:none;margin:0">
+            <div class="chart-wrap"><canvas id="chart-mazzi-pie"></canvas></div>
+            <div class="chart-legend" id="chart-mazzi-pie-legend"></div>
+          </div>
         </div>
       </div>
     </div>
@@ -2677,8 +2708,13 @@
 
   <section id="mazzi">
     <h2 class="section-title-centered">Deck</h2>
-    <p class="section-note"><em>Ordinati per win rate. I mazzi con meno di 3 partite sono In prova.</em></p>
-    <div class="card"><table id="tabella-mazzi"></table></div>
+    <div class="desktop-split">
+      <div class="desktop-col-left">
+        <p class="section-note"><em>Ordinati per win rate. I mazzi con meno di 3 partite sono In prova.</em></p>
+        <div class="card"><table id="tabella-mazzi"></table></div>
+      </div>
+      <div class="desktop-col-right" id="mazzi-right-col"></div>
+    </div>
   </section>
 
   <section id="storico" style="display:none"></section>
@@ -3239,13 +3275,35 @@ function calcolaStatMazzi() {
 }
 
 // ============ RENDER ============
+function isDesktopLayout() {
+  return window.matchMedia('(min-width: 1000px)').matches;
+}
+// su desktop i grafici mazzi vivono nella colonna destra della sezione Deck,
+// su mobile restano dove sono sempre stati (sezione Statistiche)
+function posizionaGraficiMazzi() {
+  const block = document.getElementById('grafici-mazzi-block');
+  const anchor = document.getElementById('grafici-mazzi-anchor');
+  const rightCol = document.getElementById('mazzi-right-col');
+  if (!block || !anchor || !rightCol) return;
+  if (isDesktopLayout()) {
+    if (block.parentElement !== rightCol) rightCol.appendChild(block);
+  } else {
+    if (block.parentElement !== anchor.parentElement) anchor.after(block);
+  }
+}
+window.addEventListener('resize', () => {
+  posizionaGraficiMazzi();
+  if (isDesktopLayout()) { renderGraficoBarMazzi(); renderGraficoPieMazzi(); }
+});
+
 function popolaTutto() {
   renderGiocatori();
   renderRiepilogo();
   renderGrafico();
-  // ridisegna i grafici mazzi solo se la loro sezione è aperta
-  if (document.getElementById('graf-mazzi-bar')?.style.display === 'block') renderGraficoBarMazzi();
-  if (document.getElementById('graf-mazzi-pie')?.style.display === 'block') renderGraficoPieMazzi();
+  posizionaGraficiMazzi();
+  // ridisegna i grafici mazzi solo se la loro sezione è aperta (o sempre su desktop, dove sono forzati visibili)
+  if (isDesktopLayout() || document.getElementById('graf-mazzi-bar')?.style.display === 'block') renderGraficoBarMazzi();
+  if (isDesktopLayout() || document.getElementById('graf-mazzi-pie')?.style.display === 'block') renderGraficoPieMazzi();
   renderStatDado();
   renderMazzi();
   renderStorico();
