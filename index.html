@@ -2417,7 +2417,13 @@
     #statistiche .deck-mu-btn .deck-mu-arrow,
     #statistiche .h2h-btn .h2h-arrow,
     #mazzi .deck-mu-btn .deck-mu-arrow { transform: rotate(90deg); }
-    #statistiche #stat-dado-wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start; }
+    /* grafico punti a sx con la stessa altezza del riquadro scontri diretti */
+    .stat-top { align-items: stretch; }
+    .stat-top .desktop-col-left { display: flex; flex-direction: column; }
+    .stat-top .desktop-col-left #chart-card { flex: 1; display: flex; flex-direction: column; }
+    .stat-top .desktop-col-left #chart-card .chart-wrap { flex: 1; height: auto; min-height: 320px; }
+    .stat-top .desktop-col-right { display: flex; flex-direction: column; }
+    .stat-top .desktop-col-right #riepilogo-card { flex: 1; }
   }
 
   /* ── BOTTONI MATCH-UP DECK (sparsi, dimensione variabile) ── */
@@ -2439,11 +2445,12 @@
     color: var(--text);
     font-family: inherit;
     text-align: left;
-    padding: 16px 18px;
+    padding: 14px 16px;
     display: flex;
     flex-direction: column;
-    justify-content: flex-end;
-    gap: 6px;
+    align-items: flex-start;
+    justify-content: flex-start;
+    gap: 2px;
     box-shadow: 0 2px 10px rgba(0,0,0,0.08);
     transition: transform 0.15s, box-shadow 0.15s;
     background-size: cover;
@@ -2453,7 +2460,7 @@
   .mu-deck-btn::after {
     content: '';
     position: absolute; inset: 0;
-    background: linear-gradient(180deg, rgba(0,0,0,0) 30%, rgba(0,0,0,0.35) 100%);
+    background: linear-gradient(180deg, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.45) 100%);
     pointer-events: none;
     opacity: 0;
   }
@@ -2462,8 +2469,15 @@
   .mu-deck-name {
     position: relative;
     font-weight: 700;
+    font-size: 1.05rem;
     letter-spacing: -0.01em;
-    line-height: 1.1;
+    line-height: 1.15;
+    z-index: 1;
+  }
+  .mu-deck-prop {
+    position: relative;
+    font-size: 0.74rem;
+    opacity: 0.75;
     z-index: 1;
   }
   .mu-deck-stats {
@@ -2474,24 +2488,82 @@
     font-size: 0.8rem;
     opacity: 0.92;
     z-index: 1;
+    margin-top: auto;
   }
   .mu-deck-stats b { font-weight: 700; }
-  .mu-deck-prop { position: relative; font-size: 0.72rem; opacity: 0.7; z-index: 1; }
-  #matchup-detail {
-    margin-top: 16px;
+
+  /* ── BOTTONI GIOCATORE (statistiche dado) ── */
+  #stat-dado-wrap {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+  .dado-player-btn {
+    position: relative;
+    flex: 1 1 240px;
+    height: 160px;
+    border: none;
+    border-radius: 18px;
+    cursor: pointer;
+    overflow: hidden;
     background: var(--bg-soft);
-    border-radius: 14px;
-    padding: 16px 18px;
-    animation: fade 0.2s ease;
+    color: #fff;
+    font-family: inherit;
+    text-align: left;
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    transition: transform 0.15s, box-shadow 0.15s;
+    background-size: cover;
+    background-position: center;
   }
-  #matchup-detail .md-head {
-    display: flex; align-items: center; justify-content: space-between;
-    margin-bottom: 12px;
+  .dado-player-btn:hover { transform: translateY(-3px); box-shadow: 0 6px 18px rgba(0,0,0,0.16); }
+  .dado-player-btn::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(180deg, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.55) 100%);
+    pointer-events: none;
   }
-  #matchup-detail .md-head strong { font-size: 1.1rem; }
-  #matchup-detail .md-close {
-    border: none; background: var(--bg-card); border-radius: 8px;
-    width: 30px; height: 30px; cursor: pointer; font-size: 1rem; color: var(--text-dim);
+  .dado-player-name {
+    position: relative; z-index: 1;
+    font-weight: 700; font-size: 1.2rem;
+  }
+  .dado-player-sub {
+    position: relative; z-index: 1;
+    font-size: 0.78rem; opacity: 0.9;
+  }
+
+  /* ── MODALE DETTAGLIO (deck / giocatore) ── */
+  .detail-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.45); z-index: 400;
+    align-items: center; justify-content: center; padding: 20px;
+  }
+  .detail-overlay.open { display: flex; }
+  .detail-modal {
+    background: var(--bg-card); border-radius: 20px;
+    width: 100%; max-width: 480px; max-height: 86vh;
+    overflow-y: auto; position: relative;
+    padding: 22px 22px 26px;
+  }
+  .detail-close {
+    position: absolute; top: 14px; right: 14px;
+    border: none; background: #ff3b30; color: #fff;
+    width: 32px; height: 32px; border-radius: 50%;
+    font-size: 1.05rem; font-weight: 700; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    z-index: 2;
+  }
+  .detail-close:hover { background: #d9342b; }
+  .detail-head { margin-bottom: 14px; padding-right: 36px; }
+  .detail-head .dh-name { font-size: 1.3rem; font-weight: 700; letter-spacing: -0.01em; }
+  .detail-head .dh-sub { font-size: 0.85rem; color: var(--text-dim); margin-top: 2px; }
+  .detail-chart-wrap { position: relative; height: 180px; margin-bottom: 14px; }
+  .detail-section-title {
+    font-size: 0.78rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.04em; color: var(--text-dim); margin: 14px 0 8px;
   }
 
 </style>
@@ -2709,6 +2781,14 @@
 </div>
 
 
+<!-- DETTAGLIO DECK / GIOCATORE (popup) -->
+<div class="detail-overlay" id="detail-overlay" onclick="if(event.target===this) chiudiDettaglio()">
+  <div class="detail-modal">
+    <button class="detail-close" onclick="chiudiDettaglio()" title="Chiudi">✕</button>
+    <div id="detail-content"></div>
+  </div>
+</div>
+
 <nav>
   <button class="tab-btn active" data-tab="carte"><svg width="13" height="13" viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:-1px;margin-right:4px"><circle cx="5.5" cy="5.5" r="4" stroke="currentColor" stroke-width="1.6"/><line x1="8.7" y1="8.7" x2="12" y2="12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>Ricerca</button>
   <button class="tab-btn" data-tab="giocatori"><svg width="13" height="13" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:-1px;margin-right:4px"><path d="M7 9.5c-2.5 0-4-1.8-4-4V2h8v3.5c0 2.2-1.5 4-4 4z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M5 9.8v1.7M9 9.8v1.7M4.5 11.5h5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M3 2H1.5v1.5C1.5 4.9 2.3 6 3.5 6.5M11 2h1.5v1.5C12.5 4.9 11.7 6 10.5 6.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>Classifica</button>
@@ -2779,7 +2859,6 @@
     </div>
     <div id="matchup-deck-section">
       <div id="grid-matchup"></div>
-      <div id="matchup-detail" style="display:none"></div>
     </div>
     <h3 class="subsection-title">Statistiche dado</h3>
     <p class="section-note"><em>Espandi un giocatore per vedere le statistiche dado e primo/secondo.</em></p>
@@ -3906,26 +3985,14 @@ function renderStatDado() {
 
   const rows = ordine.map(g => {
     const s = stat[g] || { primoV:0, primoT:0, secondoV:0, secondoT:0, dadoV:0, dadoT:0, dadoWinV:0 };
-    const wrDado    = s.dadoV > 0 ? pct(s.dadoWinV, s.dadoV) : '—';
-    const wrPrimo   = s.primoT > 0   ? pct(s.primoV, s.primoT)     : '—';
-    const wrSecondo = s.secondoT > 0 ? pct(s.secondoV, s.secondoT) : '—';
-    const safeId = 'dado-' + g.replace(/[^a-z0-9]/gi,'_');
-    return `<div class="deck-mu-item">
-      <button class="deck-mu-btn" onclick="toggleDeckMu('${safeId}')">
-        <span>${g}</span>
-        <span class="deck-mu-arrow">▶</span>
-      </button>
-      <div class="deck-mu-body" id="${safeId}" style="display:none">
-        <div class="deck-mu-stat-grid">
-          <div class="deck-mu-stat"><span class="deck-mu-stat-lbl">Dado vinto</span><span class="deck-mu-stat-val">${s.dadoV}/${s.dadoT} ${s.dadoT>0?'('+pct(s.dadoV,s.dadoT)+')':''}</span></div>
-          <div class="deck-mu-stat"><span class="deck-mu-stat-lbl">WR col dado</span><span class="deck-mu-stat-val">${wrDado}</span></div>
-          <div class="deck-mu-stat"><span class="deck-mu-stat-lbl">Volte 1°</span><span class="deck-mu-stat-val">${s.primoT}</span></div>
-          <div class="deck-mu-stat"><span class="deck-mu-stat-lbl">Volte 2°</span><span class="deck-mu-stat-val">${s.secondoT}</span></div>
-          <div class="deck-mu-stat"><span class="deck-mu-stat-lbl">WR da 1°</span><span class="deck-mu-stat-val">${wrPrimo}</span></div>
-          <div class="deck-mu-stat"><span class="deck-mu-stat-lbl">WR da 2°</span><span class="deck-mu-stat-val">${wrSecondo}</span></div>
-        </div>
-      </div>
-    </div>`;
+    const wrDado = s.dadoV > 0 ? pct(s.dadoWinV, s.dadoV) : '—';
+    const safe = g.replace(/'/g, "\\'");
+    const img = GIOCATORI_IMG[g];
+    const bg = img ? `background-image:url('${img}')` : '';
+    return `<button class="dado-player-btn" style="${bg}" onclick="apriDettaglioGiocatoreDado('${safe}')">
+      <span class="dado-player-name">${g}</span>
+      <span class="dado-player-sub">Dado: ${wrDado} WR · 1°: ${s.primoT}× · 2°: ${s.secondoT}×</span>
+    </button>`;
   }).join('');
 
   if (partiteConInfo.length === 0) {
@@ -4062,14 +4129,14 @@ function renderMatchup() {
     const minW = 200 + (h % 170);          // 200–369px larghezza base
     const grow = 1 + ((h >> 8) % 3);       // peso flessibile 1–3
     const minH = 120 + ((h >> 4) % 110);   // 120–229px altezza
-    const fs = 1.15 + ((h >> 12) % 60) / 100; // 1.15–1.74rem nome
     const prop = dati.mazzi[mazzo] ? `<span class="mu-deck-prop">${dati.mazzi[mazzo]}</span>` : '';
     const safe = mazzo.replace(/'/g, "\\'");
-    const bg = dati.mazziSfondi && dati.mazziSfondi[mazzo]
-      ? ` has-bg" style="flex:${grow} 1 ${minW}px;min-height:${minH}px;background-image:url('${dati.mazziSfondi[mazzo]}')`
+    const imgUrl = MAZZI_IMG[mazzo] || (dati.mazziSfondi && dati.mazziSfondi[mazzo]);
+    const bg = imgUrl
+      ? ` has-bg" style="flex:${grow} 1 ${minW}px;min-height:${minH}px;background-image:url('${imgUrl}')`
       : `" style="flex:${grow} 1 ${minW}px;min-height:${minH}px`;
-    return `<button class="mu-deck-btn${bg}" onclick="mostraMatchupDeck('${safe}')">
-      <span class="mu-deck-name" style="font-size:${fs.toFixed(2)}rem">${mazzo}</span>
+    return `<button class="mu-deck-btn${bg}" onclick="apriDettaglioMazzo('${safe}')">
+      <span class="mu-deck-name">${mazzo}</span>
       ${prop}
       <span class="mu-deck-stats">
         <span><b>${wr}</b> WR</span>
@@ -4080,14 +4147,37 @@ function renderMatchup() {
   }).join('');
 }
 
-// dettaglio match-up di un singolo deck (vs tutti gli altri)
+// mappa nome-mazzo → immagine di sfondo (compilala a mano quando aggiungi un'immagine in img/)
+const MAZZI_IMG = {};
+
+// ============ POPUP DETTAGLIO DECK / GIOCATORE ============
 let _matchupStat = {};
-function mostraMatchupDeck(mazzo) {
-  const det = document.getElementById('matchup-detail');
+let _chartDetailInstance = null;
+
+function chiudiDettaglio() {
+  document.getElementById('detail-overlay').classList.remove('open');
+  if (_chartDetailInstance) { _chartDetailInstance.destroy(); _chartDetailInstance = null; }
+}
+
+function apriDettaglioMazzo(mazzo) {
   const s = _matchupStat[mazzo];
-  if (!det || !s) return;
+  if (!s) return;
   const pct = (v,t) => t > 0 ? Math.round(100*v/t)+'%' : '—';
   const tot = s.v + s.p;
+
+  // posizione in classifica deck e % di utilizzo
+  const statMazzi = calcolaStatMazzi();
+  const ordineMazzi = Object.entries(statMazzi).sort((a, b) => {
+    const ua = a[1].partite >= SOGLIA_MAZZO ? 1 : 0;
+    const ub = b[1].partite >= SOGLIA_MAZZO ? 1 : 0;
+    if (ua !== ub) return ub - ua;
+    if (b[1].wr !== a[1].wr) return b[1].wr - a[1].wr;
+    return b[1].partite - a[1].partite;
+  }).map(([nome]) => nome);
+  const posizione = ordineMazzi.indexOf(mazzo) + 1;
+  const totPartiteLega = dati.partite.length;
+  const utilizzo = totPartiteLega > 0 ? Math.round(100 * tot / totPartiteLega) + '%' : '—';
+
   const vsRows = Object.entries(s.vs)
     .filter(([_, r]) => r.v + r.p > 0)
     .sort((a,b) => (b[1].v+b[1].p) - (a[1].v+a[1].p))
@@ -4099,21 +4189,104 @@ function mostraMatchupDeck(mazzo) {
         <span class="deck-mu-vs-wr">${pct(r.v, r.v + r.p)}</span>
       </div>`;
     }).join('');
-  const noVs = vsRows === '' ? '<div style="padding:12px 0;font-size:0.85rem;color:var(--text-faint)">Nessuno scontro registrato.</div>' : vsRows;
-  det.innerHTML = `
-    <div class="md-head">
-      <strong>${mazzo}</strong>
-      <button class="md-close" onclick="document.getElementById('matchup-detail').style.display='none'" title="Chiudi">✕</button>
+  const noVs = vsRows === '' ? '<div style="padding:8px 0;font-size:0.85rem;color:var(--text-faint)">Nessuno scontro registrato.</div>' : vsRows;
+  const prop = dati.mazzi[mazzo] || '';
+
+  document.getElementById('detail-content').innerHTML = `
+    <div class="detail-head">
+      <div class="dh-name">${mazzo}</div>
+      ${prop ? `<div class="dh-sub">Proprietario: ${prop}</div>` : ''}
     </div>
+    <div class="detail-chart-wrap"><canvas id="chart-detail-mazzo"></canvas></div>
     <div class="deck-mu-stat-grid">
-      <div class="deck-mu-stat"><span class="deck-mu-stat-lbl">V / P</span><span class="deck-mu-stat-val">${s.v} / ${s.p}</span></div>
+      <div class="deck-mu-stat"><span class="deck-mu-stat-lbl">Posizione classifica</span><span class="deck-mu-stat-val">#${posizione || '—'}</span></div>
+      <div class="deck-mu-stat"><span class="deck-mu-stat-lbl">% Utilizzo</span><span class="deck-mu-stat-val">${utilizzo}</span></div>
       <div class="deck-mu-stat"><span class="deck-mu-stat-lbl">Win Rate</span><span class="deck-mu-stat-val">${pct(s.v, tot)}</span></div>
+      <div class="deck-mu-stat"><span class="deck-mu-stat-lbl">V / P</span><span class="deck-mu-stat-val">${s.v} / ${s.p}</span></div>
       <div class="deck-mu-stat"><span class="deck-mu-stat-lbl">WR da 1°</span><span class="deck-mu-stat-val">${pct(s.primoV,s.primoT)}</span></div>
       <div class="deck-mu-stat"><span class="deck-mu-stat-lbl">WR da 2°</span><span class="deck-mu-stat-val">${pct(s.secondoV,s.secondoT)}</span></div>
     </div>
-    ${noVs}`;
-  det.style.display = 'block';
-  det.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    <div class="detail-section-title">Match-up</div>
+    ${noVs}
+  `;
+
+  document.getElementById('detail-overlay').classList.add('open');
+
+  // mini grafico: punti accumulati nel tempo da questo mazzo (stile vincita/sconfitta cumulata)
+  const partiteDelMazzo = dati.partite
+    .filter(p => p.m1 === mazzo || p.m2 === mazzo)
+    .slice()
+    .sort((a,b) => a.data.localeCompare(b.data));
+  let cum = 0;
+  const punti = partiteDelMazzo.map(p => {
+    const [p1, p2] = PUNTI[p.risultato];
+    const isM1 = p.m1 === mazzo;
+    cum += isM1 ? p1 : p2;
+    return cum;
+  });
+  if (_chartDetailInstance) { _chartDetailInstance.destroy(); _chartDetailInstance = null; }
+  if (typeof Chart !== 'undefined' && punti.length) {
+    const ctx = document.getElementById('chart-detail-mazzo').getContext('2d');
+    _chartDetailInstance = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: punti.map((_, i) => i + 1),
+        datasets: [{ label: 'Punti accumulati', data: punti, borderColor: '#007aff', backgroundColor: 'rgba(0,122,255,0.12)', fill: true, tension: 0.25, pointRadius: 2 }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { title: { display: true, text: 'Partite', font: { size: 10 }, color: '#a1a1a6' }, ticks: { font: { size: 9 } }, grid: { display: false } },
+          y: { beginAtZero: true, ticks: { font: { size: 9 } }, grid: { color: 'rgba(0,0,0,0.05)' } }
+        }
+      }
+    });
+  } else {
+    document.querySelector('.detail-chart-wrap').style.display = 'none';
+  }
+}
+
+// mappa nome-giocatore → immagine di sfondo per i bottoni "Statistiche dado"
+const GIOCATORI_IMG = { Tia: 'img/tia.jpg', Gio: 'img/gio.jpg', Richi: 'img/richi.jpg' };
+
+function apriDettaglioGiocatoreDado(g) {
+  const partiteConInfo = dati.partite.filter(p => p.primo);
+  const stat = { primoV: 0, primoT: 0, secondoV: 0, secondoT: 0, dadoV: 0, dadoT: 0, dadoWinV: 0 };
+  dati.partite.forEach(p => {
+    const [p1, p2] = PUNTI[p.risultato];
+    const g1win = p1 > p2;
+    if (p.g1 !== g && p.g2 !== g) return;
+    if (p.primo) {
+      const isPrimo = p.primo === g;
+      const vinto = (p.g1 === g && g1win) || (p.g2 === g && !g1win);
+      if (isPrimo) { stat.primoT++; if (vinto) stat.primoV++; }
+      else          { stat.secondoT++; if (vinto) stat.secondoV++; }
+    }
+    if (p.dado) {
+      const hadDado = p.dado === g;
+      const vinto = (p.g1 === g && g1win) || (p.g2 === g && !g1win);
+      stat.dadoT++;
+      if (hadDado) stat.dadoV++;
+      if (hadDado && vinto) stat.dadoWinV++;
+    }
+  });
+  const pct = (v, t) => t > 0 ? Math.round(100 * v / t) + '%' : '—';
+  document.getElementById('detail-content').innerHTML = `
+    <div class="detail-head">
+      <div class="dh-name">${g}</div>
+      <div class="dh-sub">Statistiche dado e turno</div>
+    </div>
+    <div class="deck-mu-stat-grid">
+      <div class="deck-mu-stat"><span class="deck-mu-stat-lbl">Dado vinto</span><span class="deck-mu-stat-val">${stat.dadoV}/${stat.dadoT} ${stat.dadoT>0?'('+pct(stat.dadoV,stat.dadoT)+')':''}</span></div>
+      <div class="deck-mu-stat"><span class="deck-mu-stat-lbl">WR col dado</span><span class="deck-mu-stat-val">${stat.dadoV > 0 ? pct(stat.dadoWinV, stat.dadoV) : '—'}</span></div>
+      <div class="deck-mu-stat"><span class="deck-mu-stat-lbl">Volte 1°</span><span class="deck-mu-stat-val">${stat.primoT}</span></div>
+      <div class="deck-mu-stat"><span class="deck-mu-stat-lbl">Volte 2°</span><span class="deck-mu-stat-val">${stat.secondoT}</span></div>
+      <div class="deck-mu-stat"><span class="deck-mu-stat-lbl">WR da 1°</span><span class="deck-mu-stat-val">${pct(stat.primoV,stat.primoT)}</span></div>
+      <div class="deck-mu-stat"><span class="deck-mu-stat-lbl">WR da 2°</span><span class="deck-mu-stat-val">${pct(stat.secondoV,stat.secondoT)}</span></div>
+    </div>
+  `;
+  document.getElementById('detail-overlay').classList.add('open');
 }
 function toggleDeckMu(id) {
   const body = document.getElementById(id);
@@ -6122,7 +6295,9 @@ window.mostraDettaglioCarta = mostraDettaglioCarta;
 window.mostraDettaglioCartaDaGenesys = mostraDettaglioCartaDaGenesys;
 window.toggleDeckMu = toggleDeckMu;
 window.toggleGraficoMazzi = toggleGraficoMazzi;
-window.mostraMatchupDeck = mostraMatchupDeck;
+window.apriDettaglioMazzo = apriDettaglioMazzo;
+window.apriDettaglioGiocatoreDado = apriDettaglioGiocatoreDado;
+window.chiudiDettaglio = chiudiDettaglio;
 
 // ============ AVVIO CON AUTH ============
 onAuthStateChanged(auth, user => {
