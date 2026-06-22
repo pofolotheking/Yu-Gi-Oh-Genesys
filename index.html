@@ -2639,26 +2639,26 @@
     </div>
     <h3 class="subsection-title">Grafici sui mazzi</h3>
     <div class="deck-mu-item">
-      <button class="deck-mu-btn" onclick="toggleGraficoMazzi('graf-mazzi-linea')">
-        <span>📈 Vittorie dei mazzi nel tempo</span>
+      <button class="deck-mu-btn" onclick="toggleGraficoMazzi('graf-mazzi-bar')">
+        <span>📊 Win rate dei mazzi</span>
         <span class="deck-mu-arrow">▶</span>
       </button>
-      <div class="deck-mu-body" id="graf-mazzi-linea" style="display:none">
-        <div class="card" id="chart-mazzi-card" style="box-shadow:none;margin:0">
-          <div class="chart-wrap"><canvas id="chart-mazzi"></canvas></div>
-          <div class="chart-legend" id="chart-mazzi-legend"></div>
+      <div class="deck-mu-body" id="graf-mazzi-bar" style="display:none">
+        <div class="card" id="chart-mazzi-bar-card" style="box-shadow:none;margin:0">
+          <div class="chart-wrap"><canvas id="chart-mazzi-bar"></canvas></div>
+          <div class="chart-legend" id="chart-mazzi-bar-legend"></div>
         </div>
       </div>
     </div>
     <div class="deck-mu-item" style="margin-top:8px">
-      <button class="deck-mu-btn" onclick="toggleGraficoMazzi('graf-mazzi-scatter')">
-        <span>🎯 Vittorie su partite giocate</span>
+      <button class="deck-mu-btn" onclick="toggleGraficoMazzi('graf-mazzi-pie')">
+        <span>🥧 Quota di utilizzo dei mazzi</span>
         <span class="deck-mu-arrow">▶</span>
       </button>
-      <div class="deck-mu-body" id="graf-mazzi-scatter" style="display:none">
-        <div class="card" id="chart-scatter-card" style="box-shadow:none;margin:0">
-          <div class="chart-wrap"><canvas id="chart-scatter"></canvas></div>
-          <div class="chart-legend" id="chart-scatter-legend"></div>
+      <div class="deck-mu-body" id="graf-mazzi-pie" style="display:none">
+        <div class="card" id="chart-mazzi-pie-card" style="box-shadow:none;margin:0">
+          <div class="chart-wrap"><canvas id="chart-mazzi-pie"></canvas></div>
+          <div class="chart-legend" id="chart-mazzi-pie-legend"></div>
         </div>
       </div>
     </div>
@@ -3244,8 +3244,8 @@ function popolaTutto() {
   renderRiepilogo();
   renderGrafico();
   // ridisegna i grafici mazzi solo se la loro sezione è aperta
-  if (document.getElementById('graf-mazzi-linea')?.style.display === 'block') renderGraficoMazzi();
-  if (document.getElementById('graf-mazzi-scatter')?.style.display === 'block') renderGraficoScatterMazzi();
+  if (document.getElementById('graf-mazzi-bar')?.style.display === 'block') renderGraficoBarMazzi();
+  if (document.getElementById('graf-mazzi-pie')?.style.display === 'block') renderGraficoPieMazzi();
   renderStatDado();
   renderMazzi();
   renderStorico();
@@ -3585,68 +3585,50 @@ function renderGrafico() {
   });
 }
 
-function renderGraficoMazzi() {
+function renderGraficoBarMazzi() {
   if (typeof Chart === 'undefined') return;
-  const card = document.getElementById('chart-mazzi-card');
+  const card = document.getElementById('chart-mazzi-bar-card');
   if (!dati.partite.length) { if (card) card.style.display = 'none'; return; }
 
-  // raccolgo, in ordine cronologico, l'esito di ogni partita per ciascun mazzo
-  const partiteOrd = [...dati.partite].sort((a,b) => a.data.localeCompare(b.data));
   const mazziSet = new Set();
   dati.partite.forEach(p => { mazziSet.add(p.m1); mazziSet.add(p.m2); });
-  const mazzi = [...mazziSet].sort();
 
-  // per ogni mazzo: array di vittorie cumulate, indicizzato per n-esima partita giocata da quel mazzo
-  const vittorieCum = {};
-  const partiteGiocate = {};
-  mazzi.forEach(m => { vittorieCum[m] = [0]; partiteGiocate[m] = 0; });
-
-  partiteOrd.forEach(p => {
+  // per ogni mazzo: partite giocate e vittorie, per calcolare il win rate %
+  const stat = {};
+  [...mazziSet].forEach(m => stat[m] = { partite: 0, vittorie: 0 });
+  dati.partite.forEach(p => {
     const [p1, p2] = PUNTI[p.risultato];
     const g1win = p1 > p2;
-    // mazzo di g1
-    if (vittorieCum[p.m1]) {
-      partiteGiocate[p.m1]++;
-      const last = vittorieCum[p.m1][vittorieCum[p.m1].length - 1];
-      vittorieCum[p.m1].push(last + (g1win ? 1 : 0));
-    }
-    // mazzo di g2
-    if (vittorieCum[p.m2]) {
-      partiteGiocate[p.m2]++;
-      const last = vittorieCum[p.m2][vittorieCum[p.m2].length - 1];
-      vittorieCum[p.m2].push(last + (g1win ? 0 : 1));
-    }
+    if (stat[p.m1]) { stat[p.m1].partite++; if (g1win) stat[p.m1].vittorie++; }
+    if (stat[p.m2]) { stat[p.m2].partite++; if (!g1win) stat[p.m2].vittorie++; }
   });
 
+  // solo mazzi con almeno una partita giocata, ordinati per win rate decrescente
+  const mazzi = [...mazziSet]
+    .filter(m => stat[m].partite > 0)
+    .sort((a, b) => (stat[b].vittorie / stat[b].partite) - (stat[a].vittorie / stat[a].partite));
+
+  if (!mazzi.length) { card.style.display = 'none'; return; }
   card.style.display = 'block';
-  const maxPartite = Math.max(...mazzi.map(m => partiteGiocate[m]), 0);
-  const labels = Array.from({ length: maxPartite + 1 }, (_, i) => i === 0 ? 'Start' : `${i}`);
 
-  const legendEl = document.getElementById('chart-mazzi-legend');
-  legendEl.innerHTML = mazzi.map((m, i) => `
-    <div class="chart-legend-item">
-      <div class="chart-legend-dot" style="background:${COLORS_MAZZI[i % COLORS_MAZZI.length]}"></div>
-      ${m}
-    </div>`).join('');
+  const winrate = mazzi.map(m => Math.round((stat[m].vittorie / stat[m].partite) * 1000) / 10);
+  const colori = mazzi.map((m, i) => COLORS_MAZZI[i % COLORS_MAZZI.length]);
 
-  const ctx = document.getElementById('chart-mazzi').getContext('2d');
+  document.getElementById('chart-mazzi-bar-legend').innerHTML = '';
+
+  const ctx = document.getElementById('chart-mazzi-bar').getContext('2d');
   if (_chartMazziInstance) _chartMazziInstance.destroy();
   _chartMazziInstance = new Chart(ctx, {
-    type: 'line',
+    type: 'bar',
     data: {
-      labels,
-      datasets: mazzi.map((m, i) => ({
-        label: m,
-        data: vittorieCum[m],
-        borderColor: COLORS_MAZZI[i % COLORS_MAZZI.length],
-        backgroundColor: COLORS_MAZZI[i % COLORS_MAZZI.length] + '18',
-        borderWidth: 2.5,
-        pointRadius: 3,
-        pointHoverRadius: 6,
-        tension: 0.3,
-        fill: false,
-        spanGaps: true,
-      }))
+      labels: mazzi,
+      datasets: [{
+        label: 'Win rate',
+        data: winrate,
+        backgroundColor: colori,
+        borderRadius: 6,
+        maxBarThickness: 44
+      }]
     },
     options: {
       responsive: true,
@@ -3655,77 +3637,73 @@ function renderGraficoMazzi() {
         legend: { display: false },
         tooltip: {
           callbacks: {
-            title: (items) => {
-              const idx = items[0].dataIndex;
-              return idx === 0 ? 'Inizio' : `Dopo ${idx} partite`;
-            }
+            label: (item) => `${item.formattedValue}% (${stat[mazzi[item.dataIndex]].vittorie}/${stat[mazzi[item.dataIndex]].partite} partite)`
           }
         }
       },
       scales: {
         x: {
-          title: { display: true, text: 'Partite giocate', font: { size: 10 }, color: '#a1a1a6' },
-          grid: { color: 'rgba(0,0,0,0.05)' },
-          ticks: { font: { size: 10 }, color: '#a1a1a6' }
+          grid: { display: false },
+          ticks: { font: { size: 10 }, color: '#a1a1a6', autoSkip: false, maxRotation: 40, minRotation: 0 }
         },
         y: {
-          beginAtZero: true,
-          title: { display: true, text: 'Vittorie', font: { size: 10 }, color: '#a1a1a6' },
+          beginAtZero: true, max: 100,
+          title: { display: true, text: 'Win rate %', font: { size: 10 }, color: '#a1a1a6' },
           grid: { color: 'rgba(0,0,0,0.05)' },
-          ticks: { font: { size: 10 }, color: '#a1a1a6', stepSize: 1, precision: 0 }
+          ticks: { font: { size: 10 }, color: '#a1a1a6', callback: (v) => v + '%' }
         }
       }
     }
   });
 }
 
-let _chartScatterInstance = null;
-function renderGraficoScatterMazzi() {
+let _chartMazziPieInstance = null;
+function renderGraficoPieMazzi() {
   if (typeof Chart === 'undefined') return;
-  const card = document.getElementById('chart-scatter-card');
+  const card = document.getElementById('chart-mazzi-pie-card');
   if (!dati.partite.length) { if (card) card.style.display = 'none'; return; }
 
   const mazziSet = new Set();
   dati.partite.forEach(p => { mazziSet.add(p.m1); mazziSet.add(p.m2); });
-  const mazzi = [...mazziSet].sort();
 
-  // per ogni mazzo: partite giocate e vittorie
-  const stat = {};
-  mazzi.forEach(m => stat[m] = { partite: 0, vittorie: 0 });
+  // quante partite ha giocato ciascun mazzo, per vedere quanto è "popolare" nella lega
+  const partiteGiocate = {};
+  [...mazziSet].forEach(m => partiteGiocate[m] = 0);
   dati.partite.forEach(p => {
-    const [p1, p2] = PUNTI[p.risultato];
-    const g1win = p1 > p2;
-    if (stat[p.m1]) { stat[p.m1].partite++; if (g1win) stat[p.m1].vittorie++; }
-    if (stat[p.m2]) { stat[p.m2].partite++; if (!g1win) stat[p.m2].vittorie++; }
+    if (partiteGiocate[p.m1] !== undefined) partiteGiocate[p.m1]++;
+    if (partiteGiocate[p.m2] !== undefined) partiteGiocate[p.m2]++;
   });
 
+  const mazzi = [...mazziSet].filter(m => partiteGiocate[m] > 0).sort((a, b) => partiteGiocate[b] - partiteGiocate[a]);
+  if (!mazzi.length) { card.style.display = 'none'; return; }
   card.style.display = 'block';
 
-  // ogni mazzo = un dataset con un solo punto (così ha colore e legenda propri)
-  const datasets = mazzi.map((m, i) => ({
-    label: m,
-    data: [{ x: stat[m].partite, y: stat[m].vittorie }],
-    backgroundColor: COLORS_MAZZI[i % COLORS_MAZZI.length],
-    borderColor: COLORS_MAZZI[i % COLORS_MAZZI.length],
-    pointRadius: 7,
-    pointHoverRadius: 9,
-  }));
+  const totale = mazzi.reduce((s, m) => s + partiteGiocate[m], 0);
+  const colori = mazzi.map((m, i) => COLORS_MAZZI[i % COLORS_MAZZI.length]);
 
-  const legendEl = document.getElementById('chart-scatter-legend');
-  legendEl.innerHTML = mazzi.map((m, i) => `
+  const legendEl = document.getElementById('chart-mazzi-pie-legend');
+  legendEl.innerHTML = mazzi.map((m, i) => {
+    const pct = Math.round((partiteGiocate[m] / totale) * 1000) / 10;
+    return `
     <div class="chart-legend-item">
-      <div class="chart-legend-dot" style="background:${COLORS_MAZZI[i % COLORS_MAZZI.length]}"></div>
-      ${m}
-    </div>`).join('');
+      <div class="chart-legend-dot" style="background:${colori[i]}"></div>
+      ${m} <span style="color:var(--text-faint)">(${pct}%)</span>
+    </div>`;
+  }).join('');
 
-  const maxX = Math.max(...mazzi.map(m => stat[m].partite), 1);
-  const maxY = Math.max(...mazzi.map(m => stat[m].vittorie), 1);
-
-  const ctx = document.getElementById('chart-scatter').getContext('2d');
-  if (_chartScatterInstance) _chartScatterInstance.destroy();
-  _chartScatterInstance = new Chart(ctx, {
-    type: 'scatter',
-    data: { datasets },
+  const ctx = document.getElementById('chart-mazzi-pie').getContext('2d');
+  if (_chartMazziPieInstance) _chartMazziPieInstance.destroy();
+  _chartMazziPieInstance = new Chart(ctx, {
+    type: 'pie',
+    data: {
+      labels: mazzi,
+      datasets: [{
+        data: mazzi.map(m => partiteGiocate[m]),
+        backgroundColor: colori,
+        borderColor: 'var(--bg-card)',
+        borderWidth: 2
+      }]
+    },
     options: {
       responsive: true,
       maintainAspectRatio: false,
@@ -3733,22 +3711,11 @@ function renderGraficoScatterMazzi() {
         legend: { display: false },
         tooltip: {
           callbacks: {
-            label: (item) => `${item.dataset.label}: ${item.parsed.y} vittorie su ${item.parsed.x} partite`
+            label: (item) => {
+              const pct = Math.round((item.parsed / totale) * 1000) / 10;
+              return `${item.label}: ${item.parsed} partite (${pct}%)`;
+            }
           }
-        }
-      },
-      scales: {
-        x: {
-          title: { display: true, text: 'Partite giocate', font: { size: 10 }, color: '#a1a1a6' },
-          beginAtZero: true, max: maxX + 1,
-          grid: { color: 'rgba(0,0,0,0.05)' },
-          ticks: { font: { size: 10 }, color: '#a1a1a6', stepSize: 1, precision: 0 }
-        },
-        y: {
-          title: { display: true, text: 'Vittorie', font: { size: 10 }, color: '#a1a1a6' },
-          beginAtZero: true, max: maxY + 1,
-          grid: { color: 'rgba(0,0,0,0.05)' },
-          ticks: { font: { size: 10 }, color: '#a1a1a6', stepSize: 1, precision: 0 }
         }
       }
     }
@@ -4003,8 +3970,8 @@ function toggleGraficoMazzi(id) {
   if (!open) {
     // appena visibile, (ri)disegno il grafico corretto
     setTimeout(() => {
-      if (id === 'graf-mazzi-linea') renderGraficoMazzi();
-      else if (id === 'graf-mazzi-scatter') renderGraficoScatterMazzi();
+      if (id === 'graf-mazzi-bar') renderGraficoBarMazzi();
+      else if (id === 'graf-mazzi-pie') renderGraficoPieMazzi();
     }, 30);
   }
 }
