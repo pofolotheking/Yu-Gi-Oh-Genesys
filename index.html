@@ -3997,7 +3997,7 @@ function renderMatchup() {
     const wr = pct(s.v, tot);
     const prop = dati.mazzi[mazzo] ? `<span class="mu-deck-prop">${dati.mazzi[mazzo]}</span>` : '';
     const safe = mazzo.replace(/'/g, "\\'");
-    const imgUrl = MAZZI_IMG[mazzo] || (dati.mazziSfondi && dati.mazziSfondi[mazzo]);
+    const imgUrl = imgMazzo(mazzo);
     const bg = imgUrl
       ? ` has-bg" style="background-image:url('${imgUrl}')`
       : `"`;
@@ -4026,6 +4026,22 @@ const MAZZI_IMG = {
   'Magidolce': 'img/magidolce.png',
   'Dragon Ruler': 'img/dragonruler.png'
 };
+
+// ricerca tollerante: ignora maiuscole/minuscole, spazi e accenti
+function normNome(s) {
+  return (s || '').toString().toLowerCase()
+    .normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .replace(/\s+/g, ' ').trim();
+}
+const MAZZI_IMG_NORM = Object.fromEntries(
+  Object.entries(MAZZI_IMG).map(([k, v]) => [normNome(k), v])
+);
+function imgMazzo(mazzo) {
+  return MAZZI_IMG[mazzo]
+    || MAZZI_IMG_NORM[normNome(mazzo)]
+    || (dati.mazziSfondi && dati.mazziSfondi[mazzo])
+    || null;
+}
 
 // ============ POPUP DETTAGLIO DECK / GIOCATORE ============
 let _matchupStat = {};
@@ -4090,7 +4106,7 @@ function apriDettaglioMazzo(mazzo) {
   `;
 
   const modal = document.getElementById('detail-modal');
-  const imgUrl = MAZZI_IMG[mazzo] || (dati.mazziSfondi && dati.mazziSfondi[mazzo]);
+  const imgUrl = imgMazzo(mazzo);
   if (modal) {
     if (imgUrl) {
       modal.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.60), rgba(0,0,0,0.60)), url('${imgUrl}')`;
