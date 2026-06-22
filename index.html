@@ -659,7 +659,7 @@
   .deck-mu-stat-lbl { font-size: 0.52rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-faint); font-weight: 600; display: block; margin-bottom: 3px; }
   .deck-mu-stat-val { font-size: 0.88rem; font-weight: 700; color: var(--text); display: block; font-variant-numeric: tabular-nums; }
   /* statistiche popup deck come elenco verticale */
-  .deck-mu-stat-list { display: flex; flex-direction: column; padding: 4px 0 10px; }
+  .deck-mu-stat-list { display: flex; flex-direction: column; padding: 4px 0 10px; max-width: 480px; margin: 0 auto; width: 100%; }
   .deck-mu-stat-line {
     display: flex; align-items: baseline; gap: 8px;
     padding: 7px 2px; border-bottom: 1px solid var(--border);
@@ -2459,6 +2459,7 @@
   }
   .mu-deck-btn.has-bg::after { opacity: 1; }
   .mu-deck-btn.has-bg { color: #fff; }
+  .mu-deck-medal { margin-right: 4px; }
   .mu-deck-name {
     position: relative;
     font-weight: 700;
@@ -3485,6 +3486,26 @@ function calcolaStatMazzi() {
   return stat;
 }
 
+// mappa mazzo -> medaglia (oro/argento/bronzo) secondo la classifica deck ufficiale
+function getMedalMap() {
+  const stat = calcolaStatMazzi();
+  const arr = Object.entries(stat).sort((a, b) => {
+    const ua = a[1].partite >= SOGLIA_MAZZO ? 1 : 0;
+    const ub = b[1].partite >= SOGLIA_MAZZO ? 1 : 0;
+    if (ua !== ub) return ub - ua;
+    if (b[1].wr !== a[1].wr) return b[1].wr - a[1].wr;
+    return b[1].partite - a[1].partite;
+  });
+  const medals = ['🥇', '🥈', '🥉'];
+  const ufficiali = arr.filter(([_, s]) => s.partite >= SOGLIA_MAZZO).length;
+  const map = {};
+  arr.forEach(([nome, s], i) => {
+    const provv = s.partite < SOGLIA_MAZZO;
+    if (i < 3 && !provv && i < ufficiali) map[nome] = medals[i];
+  });
+  return map;
+}
+
 // ============ RENDER ============
 function popolaTutto() {
   renderGiocatori();
@@ -4010,6 +4031,7 @@ function renderMatchup() {
   });
   const pct = (v,t) => t > 0 ? Math.round(100*v/t)+'%' : '—';
   _matchupStat = stat;
+  const medalMap = getMedalMap();
   c.innerHTML = lista.map(mazzo => {
     const s = stat[mazzo];
     const tot = s.v + s.p;
@@ -4020,8 +4042,9 @@ function renderMatchup() {
     const bg = imgUrl
       ? ` has-bg" style="background-image:url('${imgUrl}')`
       : `"`;
+    const medal = medalMap[mazzo] ? `<span class="mu-deck-medal">${medalMap[mazzo]}</span>` : '';
     return `<button class="mu-deck-btn${bg}" onclick="apriDettaglioMazzo('${safe}')">
-      <span class="mu-deck-name">${mazzo}</span>
+      <span class="mu-deck-name">${medal}${mazzo}</span>
       ${prop}
       <span class="mu-deck-stats">
         <span>Vittorie: <b>${s.v}</b></span>
@@ -4095,7 +4118,12 @@ async function apriDettaglioMazzo(mazzo) {
 
   const vsRows = Object.entries(s.vs)
     .filter(([_, r]) => r.v + r.p > 0)
-    .sort((a,b) => (b[1].v+b[1].p) - (a[1].v+a[1].p))
+    .sort((a,b) => {
+      const ca = a[1].v > a[1].p ? 0 : a[1].v < a[1].p ? 1 : 2;
+      const cb = b[1].v > b[1].p ? 0 : b[1].v < b[1].p ? 1 : 2;
+      if (ca !== cb) return ca - cb;
+      return (b[1].v+b[1].p) - (a[1].v+a[1].p);
+    })
     .map(([avv, r]) => {
       const cls = r.v > r.p ? 'win' : r.v < r.p ? 'lose' : '';
       return `<div class="deck-mu-vs-row ${cls}">
@@ -4106,10 +4134,12 @@ async function apriDettaglioMazzo(mazzo) {
     }).join('');
   const noVs = vsRows === '' ? '<div style="padding:8px 0;font-size:0.85rem;color:var(--text-faint)">Nessuno scontro registrato.</div>' : vsRows;
   const prop = dati.mazzi[mazzo] || '';
+  const medalMap = getMedalMap();
+  const medal = medalMap[mazzo] ? `${medalMap[mazzo]} ` : '';
 
   document.getElementById('detail-content').innerHTML = `
     <div class="detail-head">
-      <div class="dh-name">${mazzo}</div>
+      <div class="dh-name">${medal}${mazzo}</div>
       ${prop ? `<div class="dh-sub">Proprietario: ${prop}</div>` : ''}
     </div>
     <div class="deck-mu-stat-list">
