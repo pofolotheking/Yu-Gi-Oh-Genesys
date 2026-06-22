@@ -2399,7 +2399,6 @@
     .stat-top .desktop-col-left #chart-card .chart-wrap { flex: 1; height: auto; min-height: 300px; }
     .stat-top .desktop-col-left #chart-card .chart-legend { margin-top: auto; }
     .stat-top .desktop-col-right { display: flex; flex-direction: column; }
-    .stat-top .desktop-col-right #riepilogo-card { flex: 1; }
   }
 
   /* ── BOTTONI MATCH-UP DECK (sparsi, dimensione variabile) ── */
@@ -2414,7 +2413,7 @@
     position: relative;
     flex: 1 1 260px;
     width: 260px;
-    min-height: 200px;
+    height: 200px;
     border: none;
     border-radius: 18px;
     cursor: pointer;
@@ -2438,7 +2437,7 @@
   .mu-deck-btn::after {
     content: '';
     position: absolute; inset: 0;
-    background: linear-gradient(180deg, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.45) 100%);
+    background: linear-gradient(180deg, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0.30) 25%, rgba(0,0,0,0.55) 55%, rgba(0,0,0,0.88) 100%);
     pointer-events: none;
     opacity: 0;
   }
@@ -2792,7 +2791,7 @@
 
 <!-- DETTAGLIO DECK / GIOCATORE (popup) -->
 <div class="detail-overlay" id="detail-overlay" onclick="if(event.target===this) chiudiDettaglio()">
-  <div class="detail-modal">
+  <div class="detail-modal" id="detail-modal">
     <button class="detail-close" onclick="chiudiDettaglio()" title="Chiudi">✕</button>
     <div id="detail-content"></div>
   </div>
@@ -3977,6 +3976,8 @@ let _chartDetailInstance = null;
 function chiudiDettaglio() {
   document.getElementById('detail-overlay').classList.remove('open');
   if (_chartDetailInstance) { _chartDetailInstance.destroy(); _chartDetailInstance = null; }
+  const modal = document.getElementById('detail-modal');
+  if (modal) { modal.style.backgroundImage = ''; modal.style.backgroundSize = ''; modal.style.backgroundPosition = ''; }
 }
 
 function apriDettaglioMazzo(mazzo) {
@@ -4030,6 +4031,19 @@ function apriDettaglioMazzo(mazzo) {
     ${noVs}
   `;
 
+  const modal = document.getElementById('detail-modal');
+  const imgUrl = MAZZI_IMG[mazzo] || (dati.mazziSfondi && dati.mazziSfondi[mazzo]);
+  if (modal) {
+    if (imgUrl) {
+      modal.style.backgroundImage = `linear-gradient(rgba(18,18,20,0.93), rgba(18,18,20,0.93)), url('${imgUrl}')`;
+      modal.style.backgroundSize = 'cover';
+      modal.style.backgroundPosition = 'center';
+    } else {
+      modal.style.backgroundImage = '';
+      modal.style.backgroundSize = '';
+      modal.style.backgroundPosition = '';
+    }
+  }
   document.getElementById('detail-overlay').classList.add('open');
 
   // mini grafico: punti accumulati nel tempo da questo mazzo (stile vincita/sconfitta cumulata)
