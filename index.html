@@ -439,6 +439,15 @@
   .wr-bar > span { display: block; height: 100%; background: var(--green); transition: width 0.3s; }
   .empty { text-align: center; color: var(--text-faint); padding: 40px 20px; font-size: 0.95rem; }
 
+  /* striscia immagine mazzo in classifica deck, sfumata ai lati */
+  .deck-strip-cell { padding: 4px !important; width: 80px; }
+  .deck-strip {
+    width: 100%; height: 34px; border-radius: 8px;
+    background-size: cover; background-position: center;
+    -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 25%, #000 75%, transparent 100%);
+    mask-image: linear-gradient(90deg, transparent 0%, #000 25%, #000 75%, transparent 100%);
+  }
+
   form { display: flex; flex-direction: column; gap: 16px; }
   label { font-size: 0.85rem; font-weight: 500; color: var(--text-dim); margin-bottom: 6px; display: block; }
   input, select {
@@ -687,13 +696,6 @@
     margin-left: 6px;
     vertical-align: middle;
   }
-  .decklist-info-btn {
-    background: none; border: none; cursor: pointer;
-    color: var(--blue); padding: 2px 4px; vertical-align: middle;
-    display: inline-flex; align-items: center; border-radius: 5px;
-    transition: background 0.15s;
-  }
-  .decklist-info-btn:hover { background: var(--bg-soft); }
   /* ─── MODALE DECKLIST ASSOCIATA (quasi schermo intero) ─── */
   .decklist-modal {
     max-width: 98vw !important; width: 98vw; position: relative;
@@ -2571,10 +2573,13 @@
     padding: 22px 22px 26px;
     background-size: cover; background-position: center;
   }
-  /* su PC il popup è quadrato; su mobile resta a scorrimento (altezza naturale) */
-  @media (min-width: 1000px) {
-    .detail-modal { aspect-ratio: 1 / 1; }
+  /* popup dettaglio deck: riempie tutta la pagina (PC e mobile) */
+  .detail-modal.deck-full {
+    width: 100vw; height: 100vh;
+    max-width: 100vw; max-height: 100vh;
+    border-radius: 0;
   }
+  .detail-overlay:has(.deck-full) { padding: 0; }
   /* popup con immagine di sfondo: testo bianco e leggibile */
   .detail-modal.has-bg-img,
   .detail-modal.has-bg-img .dh-name,
@@ -3891,7 +3896,7 @@ function renderMazzi() {
   }
   const medals = ['🥇', '🥈', '🥉'];
   const ufficiali = arr.filter(([_, s]) => s.partite >= SOGLIA_MAZZO).length;
-  let html = '<tr><th>#</th><th>Mazzo</th><th>Prop.</th><th>V</th><th>P</th><th>Win Rate</th></tr>';
+  let html = '<tr><th>#</th><th>Mazzo</th><th></th><th>V</th><th>P</th><th>Win Rate</th></tr>';
   arr.forEach(([nome, s], i) => {
     const wr = Math.round(100 * s.wr);
     const provv = s.partite < SOGLIA_MAZZO;
@@ -3899,14 +3904,14 @@ function renderMazzi() {
     const rankCell = hasMedal
       ? `<td class="rank"><span class="medal">${medals[i]}</span></td>`
       : `<td class="rank">${i + 1}</td>`;
-    const hasDecklist = dati.mazziDecklist && dati.mazziDecklist[nome];
-    const infoIcon = hasDecklist
-      ? ` <button class="decklist-info-btn" onclick="mostraDecklistAssociata('${nome.replace(/'/g, "\\'")}')" title="Vedi la decklist"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg></button>`
-      : '';
+    const imgUrl = imgMazzo(nome);
+    const stripCell = imgUrl
+      ? `<td class="deck-strip-cell"><div class="deck-strip" style="background-image:url('${imgUrl}')"></div></td>`
+      : `<td></td>`;
     html += `<tr class="${i === 0 && !provv ? 'top-1' : ''}">
       ${rankCell}
-      <td>${nome}${provv ? '<span class="pill">In prova</span>' : ''}${infoIcon}</td>
-      <td style="color:var(--text-dim)">${s.proprietario}</td>
+      <td>${nome}${provv ? '<span class="pill">In prova</span>' : ''}</td>
+      ${stripCell}
       <td class="num">${s.v}</td><td class="num">${s.p}</td>
       <td><div class="wr-cell"><span class="wr-text">${wr}%</span><span class="wr-bar"><span style="width:${wr}%"></span></span></div></td>
     </tr>`;
@@ -4052,10 +4057,10 @@ function chiudiDettaglio() {
   document.getElementById('detail-overlay').classList.remove('open');
   if (_chartDetailInstance) { _chartDetailInstance.destroy(); _chartDetailInstance = null; }
   const modal = document.getElementById('detail-modal');
-  if (modal) { modal.style.backgroundImage = ''; modal.classList.remove('has-bg-img'); }
+  if (modal) { modal.style.backgroundImage = ''; modal.classList.remove('has-bg-img'); modal.classList.remove('deck-full'); }
 }
 
-function apriDettaglioMazzo(mazzo) {
+async function apriDettaglioMazzo(mazzo) {
   const s = _matchupStat[mazzo];
   if (!s) return;
   const pct = (v,t) => t > 0 ? Math.round(100*v/t)+'%' : '—';
@@ -4093,7 +4098,6 @@ function apriDettaglioMazzo(mazzo) {
       <div class="dh-name">${mazzo}</div>
       ${prop ? `<div class="dh-sub">Proprietario: ${prop}</div>` : ''}
     </div>
-    <div class="detail-chart-wrap"><canvas id="chart-detail-mazzo"></canvas></div>
     <div class="deck-mu-stat-grid">
       <div class="deck-mu-stat"><span class="deck-mu-stat-lbl">Posizione classifica</span><span class="deck-mu-stat-val">#${posizione || '—'}</span></div>
       <div class="deck-mu-stat"><span class="deck-mu-stat-lbl">% Utilizzo</span><span class="deck-mu-stat-val">${utilizzo}</span></div>
@@ -4104,11 +4108,14 @@ function apriDettaglioMazzo(mazzo) {
     </div>
     <div class="detail-section-title">Match-up</div>
     ${noVs}
+    <div class="detail-section-title">Decklist</div>
+    <div id="ddm-decklist-body"><div class="empty">Caricamento decklist…</div></div>
   `;
 
   const modal = document.getElementById('detail-modal');
   const imgUrl = imgMazzo(mazzo);
   if (modal) {
+    modal.classList.add('deck-full');
     if (imgUrl) {
       modal.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.60), rgba(0,0,0,0.60)), url('${imgUrl}')`;
       modal.classList.add('has-bg-img');
@@ -4119,38 +4126,55 @@ function apriDettaglioMazzo(mazzo) {
   }
   document.getElementById('detail-overlay').classList.add('open');
 
-  // mini grafico: punti accumulati nel tempo da questo mazzo (stile vincita/sconfitta cumulata)
-  const partiteDelMazzo = dati.partite
-    .filter(p => p.m1 === mazzo || p.m2 === mazzo)
-    .slice()
-    .sort((a,b) => a.data.localeCompare(b.data));
-  let cum = 0;
-  const punti = partiteDelMazzo.map(p => {
-    const [p1, p2] = PUNTI[p.risultato];
-    const isM1 = p.m1 === mazzo;
-    cum += isM1 ? p1 : p2;
-    return cum;
-  });
-  if (_chartDetailInstance) { _chartDetailInstance.destroy(); _chartDetailInstance = null; }
-  if (typeof Chart !== 'undefined' && punti.length) {
-    const ctx = document.getElementById('chart-detail-mazzo').getContext('2d');
-    _chartDetailInstance = new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels: punti.map((_, i) => i + 1),
-        datasets: [{ label: 'Punti accumulati', data: punti, borderColor: '#007aff', backgroundColor: 'rgba(0,122,255,0.12)', fill: true, tension: 0.25, pointRadius: 2 }]
-      },
-      options: {
-        responsive: true, maintainAspectRatio: false,
-        plugins: { legend: { display: false } },
-        scales: {
-          x: { title: { display: true, text: 'Partite', font: { size: 10 }, color: '#a1a1a6' }, ticks: { font: { size: 9 } }, grid: { display: false } },
-          y: { beginAtZero: true, ticks: { font: { size: 9 } }, grid: { color: 'rgba(0,0,0,0.05)' } }
-        }
+  await caricaDecklistInline('ddm-decklist-body', mazzo);
+}
+
+// carica e disegna la decklist associata a un mazzo dentro un contenitore qualsiasi
+async function caricaDecklistInline(containerId, nomeMazzo) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  const docId = dati.mazziDecklist && dati.mazziDecklist[nomeMazzo];
+  if (!docId) {
+    container.innerHTML = '<div class="empty">Nessuna decklist associata a questo mazzo.</div>';
+    return;
+  }
+  if (!genesysCache) { try { await apriListaGenesys(true); } catch(e) {} }
+  try {
+    const snap = await getDoc(doc(db, 'liste_mazzi', docId));
+    if (!snap.exists()) { container.innerHTML = '<div class="empty">Decklist non trovata.</div>'; return; }
+    const d = snap.data();
+    if (d.password) {
+      const p = prompt('Questo deck è protetto. Inserisci la password per visualizzarlo:');
+      if (p === null || p.trim() !== d.password) {
+        container.innerHTML = '<div class="empty">Decklist protetta.</div>';
+        return;
       }
-    });
-  } else {
-    document.querySelector('.detail-chart-wrap').style.display = 'none';
+    }
+    const ptsLista = (c) => {
+      if (genesysCache) {
+        const hit = genesysCache.find(x => x.id === c.id);
+        if (hit) return hit.points;
+      }
+      return c.pts || 0;
+    };
+    const agg = (arr) => (arr || []).map(c => ({ ...c, pts: ptsLista(c) }));
+    const main = agg(d.main), extra = agg(d.extra), side = agg(d.side);
+
+    const grp = (titolo, arr, cls) => {
+      if (!arr.length) return '';
+      const cards = arr.map(c => {
+        const pts = c.pts || 0;
+        const cl = pts >= 30 ? 'high' : pts >= 10 ? 'mid' : 'low';
+        const badge = pts > 0 ? `<span class="dla-pts-badge ${cl}">${pts}</span>` : '';
+        return `<div class="dla-card"><img src="${c.img}" alt="" loading="lazy">${badge}</div>`;
+      }).join('');
+      return `<div class="dla-group-title">${titolo} <span class="dla-group-count">${arr.length}</span></div><div class="dla-grid ${cls}">${cards}</div>`;
+    };
+    const corpo = grp('🎴 Main Deck', main, 'main') + grp('⚡ Extra Deck', extra, 'extra') + grp('🔄 Side Deck', side, 'side');
+
+    container.innerHTML = corpo || '<div class="empty">Decklist vuota.</div>';
+  } catch (e) {
+    container.innerHTML = '<div class="empty">Errore nel caricamento.</div>';
   }
 }
 
