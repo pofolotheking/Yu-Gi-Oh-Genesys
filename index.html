@@ -531,38 +531,50 @@
   .output-box p { color: #166534; font-size: 0.92rem; margin-bottom: 0; }
   
   .match-card {
-    display: grid;
-    grid-template-columns: 1fr auto 1fr;
-    gap: 12px;
+    display: flex;
     align-items: center;
-    padding: 14px 16px;
+    gap: 16px;
+    padding: 16px 16px;
     border-bottom: 1px solid var(--border);
     position: relative;
   }
   .match-card:last-child { border-bottom: none; }
+  .match-card .mc-main { flex: 1; min-width: 0; }
   .match-card .date {
     font-size: 0.78rem;
     color: var(--text-faint);
     font-variant-numeric: tabular-nums;
-    grid-column: 1 / -1;
-    margin-bottom: 2px;
+    margin-bottom: 6px;
   }
-  .match-card .player { font-weight: 500; font-size: 0.95rem; }
-  .match-card .player.win { color: var(--green-dark); font-weight: 600; }
-  .match-card .deck { color: var(--text-dim); font-size: 0.82rem; display: block; margin-top: 2px; }
+  .match-card .mc-versus {
+    display: flex; align-items: center; gap: 16px; justify-content: flex-start;
+  }
+  .match-card .player { font-weight: 600; font-size: 1.1rem; }
+  .match-card .player.win { color: var(--green-dark); font-weight: 700; }
+  .match-card .deck { color: var(--text-dim); font-size: 0.9rem; display: block; margin-top: 2px; }
   /* giocatore di sinistra: allineato verso il punteggio (destra); destro: verso sinistra */
-  .match-card .side-left { text-align: right; }
-  .match-card .side-right { text-align: left; }
+  .match-card .side-left { text-align: right; flex: 1; }
+  .match-card .side-right { text-align: left; flex: 1; }
   .match-card .score {
-    font-weight: 600;
+    font-weight: 700;
     font-variant-numeric: tabular-nums;
-    font-size: 0.95rem;
-    padding: 4px 10px;
+    font-size: 1.1rem;
+    padding: 5px 12px;
     background: var(--bg-soft);
     border-radius: 6px;
     text-align: center;
     white-space: nowrap;
   }
+  .match-card .mc-side {
+    flex-shrink: 0;
+    text-align: right;
+    font-size: 0.72rem;
+    color: var(--text-faint);
+    max-width: 130px;
+    padding-right: 32px;
+  }
+  .match-card .mc-side .match-badge { font-size: 0.7rem; }
+  .match-card .mc-side .match-note { font-size: 0.7rem; margin-top: 4px; }
   .match-card .del-btn {
     background: transparent;
     border: none;
@@ -1750,14 +1762,13 @@
 
   /* ── STORICO: badge dado/primo ── */
   .match-extra {
-    grid-column: 1 / -1;
     display: flex;
     gap: 8px;
     flex-wrap: wrap;
+    justify-content: flex-end;
     margin-top: 4px;
   }
   .match-note {
-    grid-column: 1 / -1;
     margin-top: 6px;
     padding: 8px 11px;
     background: var(--bg-soft);
@@ -1783,6 +1794,10 @@
     .chart-wrap { height: 200px; }
     .stat-cards-grid { grid-template-columns: repeat(2, 1fr); }
     .stat-card-val { font-size: 1.1rem; }
+    .match-card { flex-direction: column; align-items: stretch; gap: 8px; }
+    .match-card .mc-side { text-align: left; max-width: none; padding-right: 0; }
+    .match-card .match-extra { justify-content: flex-start; }
+    .match-card .player { font-size: 1rem; }
   }
 
   /* ── NOTIZIE ── */
@@ -2396,6 +2411,9 @@
   }
   .duel-input-cancel:hover { background: #e5e5ea; }
 
+  /* classifica giocatori centrata in alto, storico partite sotto */
+  .classifica-top { max-width: 640px; margin: 0 auto 24px; }
+
   /* ── DESKTOP LAYOUT (≥1000px): full-width, due colonne, statistiche aperte ── */
   @media (min-width: 1000px) {
     main { max-width: 1400px; padding: 0 32px; }
@@ -2561,16 +2579,19 @@
   /* DESKTOP: riquadro unico, righe sempre aperte (niente tendina) */
   @media (min-width: 1000px) {
     .h2h-u-item {
-      display: flex; align-items: center; justify-content: space-between;
-      gap: 18px; padding: 16px 0; flex-wrap: wrap;
+      display: flex; align-items: center; justify-content: flex-start;
+      gap: 28px; padding: 16px 0; flex-wrap: nowrap;
     }
     .h2h-u-head { padding: 0; cursor: default; flex-shrink: 0; pointer-events: none; }
     .h2h-u-arrow { display: none; }
     .h2h-u-stats {
-      display: grid !important; grid-template-columns: repeat(4, 1fr); gap: 8px 16px;
-      padding: 0; flex: 1; min-width: 220px;
+      display: flex !important; flex-direction: column; gap: 4px;
+      padding: 0; flex: 1; min-width: 0; text-align: left;
     }
+    .h2h-u-stat { flex-direction: row; align-items: baseline; gap: 6px; }
+    .h2h-u-stat .lbl { margin-bottom: 0; }
   }
+
 
   /* ── MODALE DETTAGLIO (deck / giocatore) ── */
   .detail-overlay {
@@ -2880,16 +2901,12 @@
 <main>
   <section id="giocatori">
     <h2 class="section-title-centered">Classifica</h2>
-    <div class="desktop-split">
-      <div class="desktop-col-left">
-        <div class="card"><table id="tabella-giocatori"></table></div>
-      </div>
-      <div class="desktop-col-right">
-        <h3 class="subsection-title">Storico Partite</h3>
-        <p class="section-note">Tocca ✏️ per modificare o 🗑 per eliminare.</p>
-        <div class="card" id="lista-partite"></div>
-      </div>
+    <div class="classifica-top">
+      <div class="card"><table id="tabella-giocatori"></table></div>
     </div>
+    <h3 class="subsection-title">Storico Partite</h3>
+    <p class="section-note">Tocca ✏️ per modificare o 🗑 per eliminare.</p>
+    <div class="card" id="lista-partite"></div>
   </section>
   <section id="statistiche">
     <h2 class="section-title-centered">Statistiche</h2>
@@ -3964,26 +3981,31 @@ function renderStorico() {
     const [p1, p2] = PUNTI[p.risultato];
     const g1win = p1 > p2;
     const extraBadges = [];
-    if (p.dado)  extraBadges.push(`<span class="match-badge">🎲 Dado: ${p.dado}</span>`);
-    if (p.primo) extraBadges.push(`<span class="match-badge primo">▶ Primo: ${p.primo}</span>`);
+    if (p.dado) extraBadges.push(`<span class="match-badge">🎲 Dado: ${p.dado}</span>`);
     const noteHtml = p.note ? `<div class="match-note">${escapeHtml(p.note)}</div>` : '';
     return `<div class="match-card">
-      <div class="date">${formatData(p.data)}</div>
-      <div class="side-left">
-        <span class="player ${g1win ? 'win' : ''}">${p.g1}</span>
-        <span class="deck">${p.m1}</span>
+      <div class="mc-main">
+        <div class="date">${formatData(p.data)}</div>
+        <div class="mc-versus">
+          <div class="side-left">
+            <span class="player ${g1win ? 'win' : ''}">${p.g1}</span>
+            <span class="deck">${p.m1}</span>
+          </div>
+          <div class="score">${p.risultato}</div>
+          <div class="side-right">
+            <span class="player ${!g1win ? 'win' : ''}">${p.g2}</span>
+            <span class="deck">${p.m2}</span>
+          </div>
+        </div>
       </div>
-      <div class="score">${p.risultato}</div>
-      <div class="side-right">
-        <span class="player ${!g1win ? 'win' : ''}">${p.g2}</span>
-        <span class="deck">${p.m2}</span>
+      <div class="mc-side">
+        ${extraBadges.length ? `<div class="match-extra">${extraBadges.join('')}</div>` : ''}
+        ${noteHtml}
       </div>
       <div class="btn-group">
         <button class="edit-btn" onclick="apriModifica(${idx})" title="Modifica partita">✏️</button>
         <button class="del-btn" onclick="eliminaPartita(${idx})" title="Elimina questa partita">🗑</button>
       </div>
-      ${extraBadges.length ? `<div class="match-extra">${extraBadges.join('')}</div>` : ''}
-      ${noteHtml}
     </div>`;
   }).join('');
 }
