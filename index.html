@@ -570,11 +570,17 @@
     text-align: right;
     font-size: 0.72rem;
     color: var(--text-faint);
-    max-width: 130px;
-    padding-right: 32px;
+    max-width: 220px;
+    min-width: 120px;
+    padding-right: 4px;
+    padding-top: 30px;
   }
-  .match-card .mc-side .match-badge { font-size: 0.7rem; }
-  .match-card .mc-side .match-note { font-size: 0.7rem; margin-top: 4px; }
+  .match-card .mc-side .match-badge {
+    font-size: 0.7rem; background: none; border: none; padding: 0; color: var(--text-dim);
+  }
+  .match-card .mc-side .match-note {
+    font-size: 0.7rem; margin-top: 4px; background: none; border-radius: 0; padding: 0; color: var(--text-faint);
+  }
   .match-card .del-btn {
     background: transparent;
     border: none;
