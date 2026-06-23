@@ -439,13 +439,14 @@
   .wr-bar > span { display: block; height: 100%; background: var(--green); transition: width 0.3s; }
   .empty { text-align: center; color: var(--text-faint); padding: 40px 20px; font-size: 0.95rem; }
 
-  /* striscia immagine mazzo in classifica deck, sfumata ai lati */
-  .deck-strip-cell { padding: 2px 0 2px 2px !important; width: 170px; }
+  /* striscia immagine mazzo in classifica deck, sfumata ai lati, forma a parallelogramma */
+  .deck-strip-cell { padding: 0 !important; width: 280px; }
   .deck-strip {
-    width: 100%; height: 38px;
+    width: 100%; height: 100%; min-height: 56px;
     background-size: cover; background-position: center;
-    -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 12%, #000 88%, transparent 100%);
-    mask-image: linear-gradient(90deg, transparent 0%, #000 12%, #000 88%, transparent 100%);
+    clip-path: polygon(12% 0, 100% 0, 88% 100%, 0% 100%);
+    -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 22%, #000 78%, transparent 100%);
+    mask-image: linear-gradient(90deg, transparent 0%, #000 22%, #000 78%, transparent 100%);
   }
 
   form { display: flex; flex-direction: column; gap: 16px; }
@@ -1944,6 +1945,7 @@
     #tabella-mazzi td:nth-child(4),
     #tabella-mazzi th:nth-child(5),
     #tabella-mazzi td:nth-child(5) { display: none; }
+    .deck-strip-cell { width: 110px; }
 
     .profile-inline-body {
       grid-template-columns: 100px 1fr;
@@ -3741,7 +3743,7 @@ function renderRiepilogo() {
             <div class="h2h-u-stat"><span class="lbl">Match</span><span class="val">${tot}</span></div>
             <div class="h2h-u-stat"><span class="lbl">Game vinti</span><span class="val">${r.gamesA} - ${r.gamesB}</span></div>
             <div class="h2h-u-stat"><span class="lbl">Dadi vinti</span><span class="val">${r.dadoA} - ${r.dadoB}</span></div>
-            <div class="h2h-u-stat"><span class="lbl">Ultimo</span><span class="val">${ultimoStr}</span></div>
+            <div class="h2h-u-stat"><span class="lbl">Ultima vittoria</span><span class="val">${ultimoStr}</span></div>
           </div>
         </div>`;
       }).join('')}
