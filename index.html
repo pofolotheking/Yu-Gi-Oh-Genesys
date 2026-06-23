@@ -547,14 +547,14 @@
     margin-bottom: 6px;
   }
   .match-card .mc-versus {
-    display: flex; align-items: center; gap: 16px; justify-content: flex-start;
+    display: grid; grid-template-columns: minmax(0,1fr) auto minmax(0,1fr); align-items: center; gap: 16px;
   }
   .match-card .player { font-weight: 600; font-size: 1.1rem; }
   .match-card .player.win { color: var(--green-dark); font-weight: 700; }
   .match-card .deck { color: var(--text-dim); font-size: 0.9rem; display: block; margin-top: 2px; }
   /* giocatore di sinistra: allineato verso il punteggio (destra); destro: verso sinistra */
-  .match-card .side-left { text-align: right; flex: 1; }
-  .match-card .side-right { text-align: left; flex: 1; }
+  .match-card .side-left { text-align: right; }
+  .match-card .side-right { text-align: left; }
   .match-card .score {
     font-weight: 700;
     font-variant-numeric: tabular-nums;
@@ -2558,46 +2558,26 @@
     padding: 4px 18px;
   }
   .h2h-united { display: flex; flex-direction: column; }
-  /* MOBILE-FIRST: ogni scontro è un menu a tendina (details/summary) */
-  .h2h-u-item { border-bottom: 1px solid var(--border); }
+  /* ogni scontro: nomi + risultato a sx, statistiche in elenco a fianco */
+  .h2h-u-item {
+    display: flex; align-items: center; flex-wrap: wrap;
+    gap: 16px; padding: 14px 0; border-bottom: 1px solid var(--border);
+  }
   .h2h-u-item:last-child { border-bottom: none; }
   .h2h-u-head {
     display: flex; align-items: center;
-    gap: 14px; padding: 14px 0; cursor: pointer;
-    list-style: none; user-select: none;
+    gap: 14px; flex-shrink: 0; user-select: none;
   }
-  .h2h-u-head::-webkit-details-marker { display: none; }
-  .h2h-u-arrow {
-    margin-left: auto; color: var(--text-faint);
-    font-size: 0.8rem; transition: transform 0.2s;
-  }
-  .h2h-u-item[open] .h2h-u-arrow { transform: rotate(90deg); }
   .h2h-u-name { font-size: 1.02rem; font-weight: 600; min-width: 64px; text-align: center; }
   .h2h-u-score { font-size: 1.05rem; color: var(--text-dim); font-variant-numeric: tabular-nums; }
   .h2h-u-score strong { color: var(--text); font-weight: 800; font-size: 1.25rem; margin: 0 2px; }
   .h2h-u-stats {
-    display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px 8px;
-    text-align: center; padding: 4px 0 16px;
+    display: flex; flex-direction: column; gap: 4px;
+    text-align: left; padding: 0; flex: 1; min-width: 0;
   }
-  .h2h-u-stat { display: flex; flex-direction: column; gap: 2px; }
-  .h2h-u-stat .lbl { font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-faint); font-weight: 600; }
-  .h2h-u-stat .val { font-size: 0.92rem; font-weight: 700; color: var(--text); font-variant-numeric: tabular-nums; }
-  /* DESKTOP: riquadro unico, righe sempre aperte (niente tendina) */
-  @media (min-width: 1000px) {
-    .h2h-u-item {
-      display: flex; align-items: center; justify-content: flex-start;
-      gap: 28px; padding: 16px 0; flex-wrap: nowrap;
-    }
-    .h2h-u-head { padding: 0; cursor: default; flex-shrink: 0; pointer-events: none; }
-    .h2h-u-arrow { display: none; }
-    .h2h-u-stats {
-      display: flex !important; flex-direction: column; gap: 4px;
-      padding: 0; flex: 1; min-width: 0; text-align: left;
-    }
-    .h2h-u-stat { flex-direction: row; align-items: baseline; gap: 6px; }
-    .h2h-u-stat .lbl { margin-bottom: 0; }
-  }
-
+  .h2h-u-stat { display: flex; flex-direction: row; align-items: baseline; gap: 6px; }
+  .h2h-u-stat .lbl { font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-faint); font-weight: 600; margin-bottom: 0; }
+  .h2h-u-stat .val { font-size: 0.9rem; font-weight: 700; color: var(--text); font-variant-numeric: tabular-nums; }
 
   /* ── MODALE DETTAGLIO (deck / giocatore) ── */
   .detail-overlay {
@@ -3752,20 +3732,19 @@ function renderRiepilogo() {
       ${arr.map(r => {
         const tot = r.va + r.vb;
         const ultimoStr = r.ultimo ? `${r.ultimo.vincitore}` : '—';
-        return `<details class="h2h-u-item">
-          <summary class="h2h-u-head">
+        return `<div class="h2h-u-item">
+          <div class="h2h-u-head">
             <span class="h2h-u-name">${r.a}</span>
             <span class="h2h-u-score"><strong>${r.va}</strong>-<strong>${r.vb}</strong></span>
             <span class="h2h-u-name">${r.b}</span>
-            <span class="h2h-u-arrow">▶</span>
-          </summary>
+          </div>
           <div class="h2h-u-stats">
             <div class="h2h-u-stat"><span class="lbl">Match</span><span class="val">${tot}</span></div>
             <div class="h2h-u-stat"><span class="lbl">Game vinti</span><span class="val">${r.gamesA} - ${r.gamesB}</span></div>
             <div class="h2h-u-stat"><span class="lbl">Dadi vinti</span><span class="val">${r.dadoA} - ${r.dadoB}</span></div>
             <div class="h2h-u-stat"><span class="lbl">Ultimo</span><span class="val">${ultimoStr}</span></div>
           </div>
-        </details>`;
+        </div>`;
       }).join('')}
     </div>
   `;
