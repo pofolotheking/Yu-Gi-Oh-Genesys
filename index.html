@@ -867,38 +867,6 @@
   .h2h-btn.open .h2h-arrow { transform: rotate(180deg); }
 
   /* Configurazione */
-  /* ricerca correzioni punti */
-  .corr-search-wrap { position: relative; margin-bottom: 6px; }
-  .corr-search-wrap label { display: block; font-size: 0.72rem; color: var(--text-dim); font-weight: 600; margin-bottom: 4px; }
-  #corr-search {
-    width: 100%; padding: 11px 13px; font-size: 0.95rem; font-family: inherit;
-    border: 1px solid var(--border-strong); border-radius: 10px;
-    background: var(--bg-card); color: var(--text);
-  }
-  #corr-search:focus { outline: none; border-color: var(--blue); }
-  .corr-autocomplete {
-    position: absolute; top: 100%; left: 0; right: 0; margin-top: 4px;
-    background: var(--bg-card); border: 1px solid var(--border);
-    border-radius: 10px; box-shadow: 0 8px 30px rgba(0,0,0,0.15);
-    max-height: 260px; overflow-y: auto; z-index: 30; display: none;
-  }
-  .corr-autocomplete.show { display: block; }
-  .corr-ac-item {
-    display: flex; align-items: center; gap: 10px; padding: 8px 12px;
-    cursor: pointer; border-bottom: 1px solid var(--border);
-  }
-  .corr-ac-item:last-child { border-bottom: none; }
-  .corr-ac-item:hover { background: var(--bg-soft); }
-  .corr-ac-item img { width: 28px; height: 41px; object-fit: cover; border-radius: 3px; flex-shrink: 0; }
-  .corr-ac-name { font-size: 0.85rem; font-weight: 500; flex: 1; }
-  .corr-ac-pts { font-size: 0.72rem; color: var(--text-dim); background: var(--bg-soft); padding: 2px 8px; border-radius: 6px; white-space: nowrap; }
-  .corr-selected-card {
-    display: flex; align-items: center; gap: 12px; padding: 10px 12px;
-    background: var(--bg-soft); border-radius: 10px;
-  }
-  .corr-selected-card img { width: 36px; height: 53px; object-fit: cover; border-radius: 4px; }
-  .corr-selected-card .csc-name { font-size: 0.92rem; font-weight: 600; }
-  .corr-selected-card .csc-cur { font-size: 0.75rem; color: var(--text-dim); }
 
   .config-row {
     display: grid;
@@ -1398,12 +1366,6 @@
     flex-shrink: 0;
   }
   .genesys-refresh-btn:hover { color: var(--text); background: var(--border); }
-  .genesys-override-warn {
-    padding: 10px 16px; border-bottom: 1px solid var(--border);
-    background: var(--orange-soft); color: var(--orange);
-    font-size: 0.78rem; line-height: 1.45;
-  }
-  .genesys-ov-tag { color: var(--orange); font-weight: 600; }
   .genesys-arch-tag { color: var(--blue); font-weight: 600; }
   .genesys-list-card:last-child { border-bottom: none; }
   .genesys-list-card:hover { background: var(--bg-soft); }
@@ -3248,34 +3210,6 @@
       </div>
     </div>
 
-    <div class="accordion-item">
-      <button class="accordion-btn" onclick="toggleAccordion('acc-correzioni')">
-        <span>🎯 Correzioni Punti Genesys</span><span class="accordion-arrow">▶</span>
-      </button>
-      <div class="accordion-body" id="acc-correzioni" style="display:none">
-        <div class="card padded">
-          <p class="section-note" style="text-align:left;margin:0 0 12px">
-            Forza il punteggio Genesys di una carta quando YGOProDeck non è ancora aggiornato. La correzione ha la precedenza ovunque (lista, ricerca, deck builder) ed è condivisa con tutti i giocatori.
-          </p>
-          <div class="corr-search-wrap">
-            <label>Cerca la carta</label>
-            <input type="text" id="corr-search" placeholder="Scrivi il nome della carta…" autocomplete="off">
-            <div class="corr-autocomplete" id="corr-autocomplete"></div>
-          </div>
-          <div id="corr-selezionata" style="display:none">
-            <div class="corr-selected-card" id="corr-selected-card"></div>
-            <div class="add-form" style="margin-top:10px">
-              <div>
-                <label>Punti corretti</label>
-                <input type="number" id="corr-punti" placeholder="es. 8" min="0">
-              </div>
-              <button onclick="aggiungiCorrezione()">Salva correzione</button>
-            </div>
-          </div>
-        </div>
-        <div class="card" id="lista-correzioni"></div>
-      </div>
-    </div>
   </section>
 
   <section id="news">
@@ -3444,8 +3378,7 @@ async function caricaDati() {
         profili: j.profili || {},
         mazzi: j.mazzi || {},
         partite: j.partite || [],
-        mazziDecklist: j.mazziDecklist || {},
-        correzioniPunti: j.correzioniPunti || {}
+        mazziDecklist: j.mazziDecklist || {}
       };
     } else {
       dati = JSON.parse(JSON.stringify(DATI_INIZIALI));
@@ -3553,7 +3486,6 @@ function popolaTutto() {
   renderConfigGiocatori();
   renderConfigMazzi();
   renderProfiliConfig();
-  renderCorrezioni();
   popolaSelectOwnerNuovoMazzo();
   if (!document.getElementById('data').value)
     document.getElementById('data').value = new Date().toISOString().slice(0, 10);
@@ -4516,113 +4448,6 @@ async function aggiungiMazzo() {
   popolaTutto();
 }
 
-// ─────────── CORREZIONI PUNTI GENESYS ───────────
-let _corrSelezionata = null;     // carta scelta { id, name, img, pts }
-let _corrSearchTimer = null;
-
-function initCorrSearch() {
-  const inp = document.getElementById('corr-search');
-  if (!inp || inp._wired) return;
-  inp._wired = true;
-  inp.addEventListener('input', () => {
-    clearTimeout(_corrSearchTimer);
-    const q = inp.value.trim();
-    if (q.length < 2) { document.getElementById('corr-autocomplete').classList.remove('show'); return; }
-    _corrSearchTimer = setTimeout(() => corrCerca(q), 300);
-  });
-}
-
-async function corrCerca(q) {
-  const ac = document.getElementById('corr-autocomplete');
-  try {
-    const r = await fetch(`https://db.ygoprodeck.com/api/v7/cardinfo.php?fname=${encodeURIComponent(q)}&misc=yes`);
-    if (!r.ok) { ac.classList.remove('show'); return; }
-    const data = await r.json();
-    const cards = (data.data || []).slice(0, 10);
-    if (!cards.length) { ac.innerHTML = '<div class="corr-ac-item">Nessun risultato</div>'; ac.classList.add('show'); return; }
-    ac.innerHTML = cards.map(c => {
-      const img = c.card_images?.[0]?.image_url_small || '';
-      let pts = c.misc_info?.[0]?.genesys_points ?? 0;
-      pts = puntiConCorrezione(c.name, pts);
-      return `<div class="corr-ac-item" onclick='corrSeleziona(${JSON.stringify({id:c.id,name:c.name,img,pts}).replace(/'/g,"&#39;")})'>
-        <img src="${img}" alt="">
-        <span class="corr-ac-name">${escapeHtml(c.name)}</span>
-        <span class="corr-ac-pts">${pts} pt</span>
-      </div>`;
-    }).join('');
-    ac.classList.add('show');
-  } catch(e) { ac.classList.remove('show'); }
-}
-
-function corrSeleziona(carta) {
-  _corrSelezionata = carta;
-  document.getElementById('corr-autocomplete').classList.remove('show');
-  document.getElementById('corr-search').value = carta.name;
-  document.getElementById('corr-selected-card').innerHTML = `
-    <img src="${carta.img}" alt="">
-    <div>
-      <div class="csc-name">${escapeHtml(carta.name)}</div>
-      <div class="csc-cur">Punti attuali: ${carta.pts}</div>
-    </div>`;
-  document.getElementById('corr-selezionata').style.display = 'block';
-  document.getElementById('corr-punti').value = '';
-  document.getElementById('corr-punti').focus();
-}
-
-async function aggiungiCorrezione() {
-  if (!_corrSelezionata) { alert('Cerca e seleziona prima una carta.'); return; }
-  const punti = parseInt(document.getElementById('corr-punti').value);
-  if (isNaN(punti) || punti < 0) { alert('Inserisci un numero di punti valido.'); return; }
-  if (!dati.correzioniPunti) dati.correzioniPunti = {};
-  dati.correzioniPunti[_corrSelezionata.name] = punti;
-  // reset form
-  _corrSelezionata = null;
-  document.getElementById('corr-search').value = '';
-  document.getElementById('corr-selezionata').style.display = 'none';
-  await salvaDatiCloud();
-  renderCorrezioni();
-  genesysCache = null;
-  popolaTutto();
-}
-
-async function rimuoviCorrezione(nome) {
-  if (!dati.correzioniPunti || !(nome in dati.correzioniPunti)) return;
-  if (!confirm(`Rimuovere la correzione per "${nome}"? Tornerà a usare il valore di YGOProDeck.`)) return;
-  delete dati.correzioniPunti[nome];
-  await salvaDatiCloud();
-  renderCorrezioni();
-  genesysCache = null;
-  popolaTutto();
-}
-
-function renderCorrezioni() {
-  initCorrSearch();
-  const cont = document.getElementById('lista-correzioni');
-  if (!cont) return;
-  const entries = Object.entries(dati.correzioniPunti || {});
-  if (entries.length === 0) {
-    cont.innerHTML = '<div class="empty" style="padding:16px">Nessuna correzione attiva.</div>';
-    return;
-  }
-  entries.sort((a, b) => a[0].localeCompare(b[0]));
-  cont.innerHTML = entries.map(([nome, punti]) => `
-    <div class="config-row">
-      <span class="config-row-name">${escapeHtml(nome)}</span>
-      <span class="config-row-meta"><b>${punti} pt</b></span>
-      <button class="config-del" onclick="rimuoviCorrezione('${nome.replace(/'/g, "\\'")}')" title="Rimuovi">✕</button>
-    </div>`).join('');
-}
-
-// restituisce i punti corretti per una carta (override manuale > lista Genesys)
-function puntiConCorrezione(nome, puntiDefault) {
-  if (dati.correzioniPunti && nome in dati.correzioniPunti) {
-    return dati.correzioniPunti[nome];
-  }
-  return puntiDefault;
-}
-window.aggiungiCorrezione = aggiungiCorrezione;
-window.rimuoviCorrezione = rimuoviCorrezione;
-window.corrSeleziona = corrSeleziona;
 
 async function rinominaMazzo(vecchio) {
   const nuovo = prompt(`Rinomina "${vecchio}" in:`, vecchio);
@@ -5407,8 +5232,6 @@ function buildThumb(c) {
     if (cached) pts = cached.points;
   }
   pts = pts ?? 0;
-  // override manuale ha la precedenza
-  pts = puntiConCorrezione(c.name, pts);
   const badgeCls = pts >= 30 ? 'high' : pts >= 10 ? 'mid' : 'low';
   const badge = pts > 0
     ? `<div class="genesys-thumb-badge ${badgeCls}" title="${pts} punti Genesys">${pts}</div>`
@@ -5493,7 +5316,7 @@ async function mostraDettaglioCarta(id) {
       const cached = genesysCache.find(x => x.id === c.id);
       if (cached) genesysPoints = cached.points;
     }
-    genesysPoints = puntiConCorrezione(c.name, genesysPoints ?? 0); // override manuale
+    genesysPoints = genesysPoints ?? 0;
     const genesysBadgeHtml = (genesysPoints !== undefined && genesysPoints !== null && genesysPoints > 0)
       ? `<div class="genesys-detail-badge ${genesysPoints >= 30 ? 'high' : genesysPoints >= 10 ? 'mid' : 'low'}">
            <span class="genesys-detail-icon">⬡</span>
@@ -5618,14 +5441,14 @@ async function apriListaGenesys(silent = false, forza = false) {
   try {
     // 'no-cache' obbliga il browser a rivalidare con il server: senza questo una
     // risposta vecchia in cache HTTP può restare per giorni e mostrare punti superati.
-    const r = await fetch('https://db.ygoprodeck.com/api/v7/cardinfo.php?format=genesys&misc=yes', { cache: 'no-cache' });
+    const r = await fetch('https://db.ygoprodeck.com/api/v7/cardinfo.php?format=genesys&misc=yes',
+                          { cache: forza ? 'reload' : 'no-cache' });
     if (!r.ok) throw new Error();
     const data = await r.json();
     const cards = (data.data || [])
       .map(c => {
-        const ptsUfficiali = c.misc_info?.[0]?.genesys_points ?? 0;
-        const pts = puntiConCorrezione(c.name, ptsUfficiali); // override manuale
-        return { id: c.id, name: c.name, type: c.type || '', attr: c.attribute || '', arch: c.archetype || '', img: c.card_images?.[0]?.image_url_small || '', points: pts, ptsUfficiali };
+        const pts = c.misc_info?.[0]?.genesys_points ?? 0;
+        return { id: c.id, name: c.name, type: c.type || '', attr: c.attribute || '', arch: c.archetype || '', img: c.card_images?.[0]?.image_url_small || '', points: pts };
       })
       .filter(c => c.points > 0)
       .sort((a, b) => b.points - a.points);
@@ -5646,7 +5469,6 @@ window.aggiornaListaGenesys = aggiornaListaGenesys;
 function renderListaGenesys(cards) {
   const cont = document.getElementById('genesys-list');
   if (cards.length === 0) { cont.innerHTML = '<div class="carte-empty">Nessuna carta trovata.</div>'; return; }
-  const nOverride = cards.filter(c => c.ptsUfficiali !== undefined && c.points !== c.ptsUfficiali).length;
   const ora = _genesysAggiornata
     ? _genesysAggiornata.toLocaleString('it-IT', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
     : '—';
@@ -5656,17 +5478,15 @@ function renderListaGenesys(cards) {
         <span>${cards.length} carte con punti Genesys · scaricata il ${ora}</span>
         <button class="genesys-refresh-btn" onclick="aggiornaListaGenesys()">↻ Aggiorna</button>
       </div>
-      ${nOverride > 0 ? `<div class="genesys-override-warn">⚠️ ${nOverride} cart${nOverride === 1 ? 'a ha un valore corretto manualmente che sovrascrive' : 'e hanno un valore corretto manualmente che sovrascrive'} la lista ufficiale. Rimuovi le correzioni da Impostazioni → Correzioni punti per tornare ai punti ufficiali.</div>` : ''}
       ${cards.map(c => {
         const cls = c.points >= 30 ? 'high' : (c.points >= 10 ? 'mid' : 'low');
         _cardRegistry[c.id] = { name: c.name, img: c.img, type: c.type || '', pts: c.points, desc: '' };
-        const isOv = c.ptsUfficiali !== undefined && c.points !== c.ptsUfficiali;
         return `<div class="genesys-list-card"
           onclick="mostraDettaglioCartaDaGenesys(${c.id})"
           onmouseenter="mostraPreviewGenesys(event, ${c.id})"
           onmouseleave="nascondiPreview()">
           <img src="${c.img}" alt="${escapeHtml(c.name)}" loading="lazy">
-          <div><div class="genesys-list-name">${escapeHtml(c.name)}</div><div class="genesys-list-type">${escapeHtml(c.type || '')}${c.arch ? ` · <span class="genesys-arch-tag">${escapeHtml(c.arch)}</span>` : ''}${isOv ? ` · <span class="genesys-ov-tag">override, ufficiale ${c.ptsUfficiali}</span>` : ''}</div></div>
+          <div><div class="genesys-list-name">${escapeHtml(c.name)}</div><div class="genesys-list-type">${escapeHtml(c.type || '')}${c.arch ? ` · <span class="genesys-arch-tag">${escapeHtml(c.arch)}</span>` : ''}</div></div>
           <div class="genesys-points-badge ${cls}">${c.points}</div>
         </div>`;
       }).join('')}
