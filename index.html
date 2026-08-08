@@ -1404,6 +1404,7 @@
     font-size: 0.78rem; line-height: 1.45;
   }
   .genesys-ov-tag { color: var(--orange); font-weight: 600; }
+  .genesys-arch-tag { color: var(--blue); font-weight: 600; }
   .genesys-list-card:last-child { border-bottom: none; }
   .genesys-list-card:hover { background: var(--bg-soft); }
   .genesys-list-card img {
@@ -3032,7 +3033,7 @@
       <p class="section-note"><em>Tutte le carte con punti nel formato Genesys. Ordinate dai più alti ai più bassi.</em></p>
       <div class="card padded" style="margin-bottom:16px">
         <div style="display:flex;gap:10px;margin-bottom:12px">
-          <input type="text" id="genesys-search" placeholder="Filtra per nome carta…" style="flex:1">
+          <input type="text" id="genesys-search" placeholder="Filtra per nome o archetipo…" style="flex:1">
         </div>
         <button class="filtri-toggle" id="gfiltri-toggle" onclick="toggleGFiltri()">
           <span id="gfiltri-toggle-label">▶ Filtri avanzati</span>
@@ -5624,7 +5625,7 @@ async function apriListaGenesys(silent = false, forza = false) {
       .map(c => {
         const ptsUfficiali = c.misc_info?.[0]?.genesys_points ?? 0;
         const pts = puntiConCorrezione(c.name, ptsUfficiali); // override manuale
-        return { id: c.id, name: c.name, type: c.type || '', attr: c.attribute || '', img: c.card_images?.[0]?.image_url_small || '', points: pts, ptsUfficiali };
+        return { id: c.id, name: c.name, type: c.type || '', attr: c.attribute || '', arch: c.archetype || '', img: c.card_images?.[0]?.image_url_small || '', points: pts, ptsUfficiali };
       })
       .filter(c => c.points > 0)
       .sort((a, b) => b.points - a.points);
@@ -5665,7 +5666,7 @@ function renderListaGenesys(cards) {
           onmouseenter="mostraPreviewGenesys(event, ${c.id})"
           onmouseleave="nascondiPreview()">
           <img src="${c.img}" alt="${escapeHtml(c.name)}" loading="lazy">
-          <div><div class="genesys-list-name">${escapeHtml(c.name)}</div><div class="genesys-list-type">${escapeHtml(c.type || '')}${isOv ? ` · <span class="genesys-ov-tag">override, ufficiale ${c.ptsUfficiali}</span>` : ''}</div></div>
+          <div><div class="genesys-list-name">${escapeHtml(c.name)}</div><div class="genesys-list-type">${escapeHtml(c.type || '')}${c.arch ? ` · <span class="genesys-arch-tag">${escapeHtml(c.arch)}</span>` : ''}${isOv ? ` · <span class="genesys-ov-tag">override, ufficiale ${c.ptsUfficiali}</span>` : ''}</div></div>
           <div class="genesys-points-badge ${cls}">${c.points}</div>
         </div>`;
       }).join('')}
@@ -5680,7 +5681,9 @@ function filtraListaGenesys() {
   const pMin = document.getElementById('gf-pts-min')?.value ? parseInt(document.getElementById('gf-pts-min').value) : 0;
   const pMax = document.getElementById('gf-pts-max')?.value ? parseInt(document.getElementById('gf-pts-max').value) : 999;
   const filtered = genesysCache.filter(c => {
-    if (q && !c.name.toLowerCase().includes(q)) return false;
+    // cerca sia nel nome sia nell'archetipo: es. "sacred beast" non compare in
+    // nessun nome ma è l'archetipo di Uria, Raviel, Hamon, Chaos Core...
+    if (q && !c.name.toLowerCase().includes(q) && !(c.arch || '').toLowerCase().includes(q)) return false;
     if (tipo && !c.type.includes(tipo)) return false;
     if (attr && !(c.attr || '').toUpperCase().includes(attr)) return false;
     if (c.points < pMin || c.points > pMax) return false;
