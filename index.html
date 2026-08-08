@@ -5497,6 +5497,7 @@ function renderListaGenesys(cards) {
   cont.innerHTML = `
     <div class="card" style="overflow:hidden">
       ${testa}
+      <div id="genesys-fallback"></div>
       ${cards.map(c => {
         const cls = c.points >= 30 ? 'high' : (c.points >= 10 ? 'mid' : 'low');
         _cardRegistry[c.id] = { name: c.name, img: c.img, type: c.type || '', pts: c.points, desc: '' };
@@ -5510,11 +5511,14 @@ function renderListaGenesys(cards) {
         </div>`;
       }).join('')}
     </div>`;
+  // va lanciato anche quando qualche risultato c'è: la carta cercata può mancare
+  // dalla lista pur essendo pointata nel database (es. "Sacred" trova solo Keldo)
+  cercaFuoriLista();
 }
 
-// L'endpoint format=genesys a volte non include carte che invece hanno punti
-// assegnati nel database. Quando la lista non trova nulla, interroghiamo il
-// database completo sul nome cercato e mostriamo le carte pointate mancanti.
+// format=genesys restituisce la lista TCG: le carte uscite solo in OCG (es.
+// "Martyr of the Sacred Beasts") ne restano fuori pur avendo punti Genesys.
+// Cerchiamo quindi anche nel database completo, senza filtro di formato.
 async function cercaFuoriLista() {
   const box = document.getElementById('genesys-fallback');
   const q = document.getElementById('genesys-search')?.value.trim() || '';
@@ -5535,7 +5539,7 @@ async function cercaFuoriLista() {
       .sort((a, b) => b.points - a.points);
     if (!trovate.length) { box.innerHTML = ''; return; }
     box.innerHTML = `
-      <div class="genesys-fallback-note">⚠️ Queste carte hanno punti nel database ma non compaiono nella lista scaricata:</div>
+      <div class="genesys-fallback-note">⚠️ Carte con punti Genesys assenti dalla lista TCG (di norma perché uscite solo in OCG):</div>
       ${trovate.map(c => {
         const cls = c.points >= 30 ? 'high' : (c.points >= 10 ? 'mid' : 'low');
         _cardRegistry[c.id] = { name: c.name, img: c.img, type: c.type || '', pts: c.points, desc: '' };
