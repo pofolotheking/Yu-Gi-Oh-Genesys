@@ -1367,6 +1367,11 @@
   }
   .genesys-refresh-btn:hover { color: var(--text); background: var(--border); }
   .genesys-arch-tag { color: var(--blue); font-weight: 600; }
+  .genesys-fallback-note {
+    padding: 10px 16px; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+    background: var(--orange-soft); color: var(--orange);
+    font-size: 0.78rem; line-height: 1.45; font-weight: 600;
+  }
   .genesys-list-card:last-child { border-bottom: none; }
   .genesys-list-card:hover { background: var(--bg-soft); }
   .genesys-list-card img {
@@ -5468,16 +5473,30 @@ window.aggiornaListaGenesys = aggiornaListaGenesys;
 
 function renderListaGenesys(cards) {
   const cont = document.getElementById('genesys-list');
-  if (cards.length === 0) { cont.innerHTML = '<div class="carte-empty">Nessuna carta trovata.</div>'; return; }
   const ora = _genesysAggiornata
     ? _genesysAggiornata.toLocaleString('it-IT', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
     : '—';
+  const tot = genesysCache ? genesysCache.length : cards.length;
+  // il conteggio deve sempre dire quante carte sono state scaricate in totale,
+  // altrimenti filtrando sembra che la lista sia quasi vuota
+  const conteggio = cards.length === tot
+    ? `${tot} carte in lista`
+    : `${cards.length} risultat${cards.length === 1 ? 'o' : 'i'} su ${tot} carte in lista`;
+  const testa = `
+      <div class="genesys-list-head">
+        <span>${conteggio} · scaricata il ${ora}</span>
+        <button class="genesys-refresh-btn" onclick="aggiornaListaGenesys()">↻ Aggiorna</button>
+      </div>`;
+  if (cards.length === 0) {
+    cont.innerHTML = `<div class="card" style="overflow:hidden">${testa}
+      <div class="carte-empty">Nessuna carta trovata nella lista Genesys.</div>
+      <div id="genesys-fallback"></div></div>`;
+    cercaFuoriLista();
+    return;
+  }
   cont.innerHTML = `
     <div class="card" style="overflow:hidden">
-      <div class="genesys-list-head">
-        <span>${cards.length} carte con punti Genesys · scaricata il ${ora}</span>
-        <button class="genesys-refresh-btn" onclick="aggiornaListaGenesys()">↻ Aggiorna</button>
-      </div>
+      ${testa}
       ${cards.map(c => {
         const cls = c.points >= 30 ? 'high' : (c.points >= 10 ? 'mid' : 'low');
         _cardRegistry[c.id] = { name: c.name, img: c.img, type: c.type || '', pts: c.points, desc: '' };
@@ -5491,6 +5510,42 @@ function renderListaGenesys(cards) {
         </div>`;
       }).join('')}
     </div>`;
+}
+
+// L'endpoint format=genesys a volte non include carte che invece hanno punti
+// assegnati nel database. Quando la lista non trova nulla, interroghiamo il
+// database completo sul nome cercato e mostriamo le carte pointate mancanti.
+async function cercaFuoriLista() {
+  const box = document.getElementById('genesys-fallback');
+  const q = document.getElementById('genesys-search')?.value.trim() || '';
+  if (!box || q.length < 3) return;
+  box.innerHTML = '<div class="carte-loading">Cerco nel database completo…</div>';
+  try {
+    const r = await fetch(`https://db.ygoprodeck.com/api/v7/cardinfo.php?fname=${encodeURIComponent(q)}&misc=yes`,
+                          { cache: 'no-cache' });
+    if (!r.ok) throw new Error();
+    const data = await r.json();
+    const trovate = (data.data || [])
+      .map(c => ({
+        id: c.id, name: c.name, type: c.type || '', arch: c.archetype || '',
+        img: c.card_images?.[0]?.image_url_small || '',
+        points: c.misc_info?.[0]?.genesys_points ?? 0
+      }))
+      .filter(c => c.points > 0 && !(genesysCache || []).some(g => g.id === c.id))
+      .sort((a, b) => b.points - a.points);
+    if (!trovate.length) { box.innerHTML = ''; return; }
+    box.innerHTML = `
+      <div class="genesys-fallback-note">⚠️ Queste carte hanno punti nel database ma non compaiono nella lista scaricata:</div>
+      ${trovate.map(c => {
+        const cls = c.points >= 30 ? 'high' : (c.points >= 10 ? 'mid' : 'low');
+        _cardRegistry[c.id] = { name: c.name, img: c.img, type: c.type || '', pts: c.points, desc: '' };
+        return `<div class="genesys-list-card" onclick="mostraDettaglioCartaDaGenesys(${c.id})">
+          <img src="${c.img}" alt="${escapeHtml(c.name)}" loading="lazy">
+          <div><div class="genesys-list-name">${escapeHtml(c.name)}</div><div class="genesys-list-type">${escapeHtml(c.type || '')}${c.arch ? ` · <span class="genesys-arch-tag">${escapeHtml(c.arch)}</span>` : ''}</div></div>
+          <div class="genesys-points-badge ${cls}">${c.points}</div>
+        </div>`;
+      }).join('')}`;
+  } catch(e) { box.innerHTML = ''; }
 }
 
 function filtraListaGenesys() {
