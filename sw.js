@@ -1,5 +1,5 @@
 // sw.js — Service Worker essenziale, network-first
-const CACHE_NAME = 'genesys-cache-v22';
+const CACHE_NAME = 'genesys-cache-v23';
 const CORE_ASSETS = ['./', './index.html', './manifest.json'];
 
 // Installazione: pre-cache dei file base
@@ -24,16 +24,13 @@ self.addEventListener('activate', e => {
 self.addEventListener('fetch', e => {
   const url = e.request.url;
 
-  // NON intercettare: Firebase, Google APIs, YGOProDeck, proxy RSS, immagini carte
+  // NON intercettare: Firebase, Google APIs, YGOProDeck
   if (
     url.includes('firestore.googleapis.com') ||
     url.includes('firebase') ||
     url.includes('googleapis.com') ||
     url.includes('gstatic.com') ||
     url.includes('ygoprodeck.com') ||
-    url.includes('allorigins.win') ||
-    url.includes('corsproxy.io') ||
-    url.includes('ygorganization.com') ||
     e.request.method !== 'GET'
   ) {
     return; // lascia gestire al browser, niente cache

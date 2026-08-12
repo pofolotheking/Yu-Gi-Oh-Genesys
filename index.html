@@ -1801,54 +1801,19 @@
     .h2h-u-stat { flex-direction: column; align-items: flex-start; gap: 2px; }
   }
 
-  /* ── NOTIZIE ── */
-  .news-card {
-    display: block;
-    padding: 16px;
-    border-bottom: 1px solid var(--border);
-    text-decoration: none;
-    color: inherit;
-    transition: background 0.15s;
+
+  /* ── STAGIONI ── */
+  .stagione-item { overflow: hidden; margin-bottom: 12px; }
+  .stagione-head {
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    padding: 16px; cursor: pointer; list-style: none; user-select: none;
   }
-  .news-card:last-child { border-bottom: none; }
-  .news-card:hover { background: var(--bg-soft); }
-  .news-card:active { background: var(--border); }
-  .news-title {
-    font-size: 0.95rem;
-    font-weight: 600;
-    color: var(--text);
-    line-height: 1.35;
-    margin-bottom: 5px;
-  }
-  .news-meta {
-    font-size: 0.78rem;
-    color: var(--text-faint);
-    display: flex;
-    gap: 10px;
-    align-items: center;
-  }
-  .news-date { font-variant-numeric: tabular-nums; }
-  .news-source {
-    background: var(--bg-soft);
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    padding: 1px 6px;
-    font-size: 0.68rem;
-    font-weight: 600;
-    color: var(--text-dim);
-  }
-  .news-loading {
-    text-align: center;
-    padding: 40px 20px;
-    color: var(--text-faint);
-    font-size: 0.9rem;
-  }
-  .news-empty {
-    text-align: center;
-    padding: 30px 20px;
-    color: var(--text-faint);
-    font-size: 0.88rem;
-  }
+  .stagione-head::-webkit-details-marker { display: none; }
+  .stagione-nome { font-size: 1.05rem; font-weight: 700; }
+  .stagione-meta { font-size: 0.8rem; color: var(--text-dim); }
+  .stagione-arrow { margin-left: auto; color: var(--text-faint); font-size: 0.75rem; transition: transform 0.2s; }
+  .stagione-item[open] .stagione-arrow { transform: rotate(90deg); }
+  .stagione-body { border-top: 1px solid var(--border); }
 
   /* ── BOTTONE RICERCA HEADER ── */
   .header-btn-search {
@@ -1977,7 +1942,6 @@
     .carta-detail-img { width: 110px; }
 
     .carta-preview-tooltip { display: none !important; }
-    .news-title { font-size: 0.88rem; }
 
     .accordion-btn { font-size: 0.9rem; padding: 14px; }
     .config-row { grid-template-columns: 1fr; gap: 8px; }
@@ -2877,7 +2841,7 @@
   <button class="tab-btn" data-tab="giocatori"><svg width="13" height="13" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:-1px;margin-right:4px"><path d="M7 9.5c-2.5 0-4-1.8-4-4V2h8v3.5c0 2.2-1.5 4-4 4z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M5 9.8v1.7M9 9.8v1.7M4.5 11.5h5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M3 2H1.5v1.5C1.5 4.9 2.3 6 3.5 6.5M11 2h1.5v1.5C12.5 4.9 11.7 6 10.5 6.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>Classifica</button>
   <button class="tab-btn" data-tab="mazzi"><svg width="13" height="13" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:-1px;margin-right:4px"><rect x="3" y="1" width="8" height="10" rx="1.5" stroke="currentColor" stroke-width="1.6"/><rect x="1.5" y="2.5" width="8" height="10" rx="1.5" stroke="currentColor" stroke-width="1.6"/><line x1="4.5" y1="6" x2="8.5" y2="6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><line x1="4.5" y1="8.5" x2="7" y2="8.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Deck</button>
   <button class="tab-btn" data-tab="statistiche"><svg width="13" height="13" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:-1px;margin-right:4px"><polyline points="2,11 5,7 8,9 12,3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>Statistiche</button>
-  <button class="tab-btn" data-tab="news" onclick="caricaNotizie()"><svg width="13" height="13" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:-1px;margin-right:4px"><rect x="1" y="2" width="12" height="10" rx="2" stroke="currentColor" stroke-width="1.6"/><line x1="4" y1="6" x2="10" y2="6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><line x1="4" y1="8.5" x2="8" y2="8.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><line x1="4" y1="4" x2="10" y2="4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Notizie</button>
+  <button class="tab-btn" data-tab="stagioni" onclick="apriStagioni()"><svg width="13" height="13" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:-1px;margin-right:4px"><path d="M4 1.5h6v3a3 3 0 0 1-6 0v-3z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M5.5 7.6v2.2M8.5 7.6v2.2M4.5 10.2h5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M4 2.5H2v1a2 2 0 0 0 2 2M10 2.5h2v1a2 2 0 0 1-2 2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Stagioni</button>
 </nav>
 
 <main>
@@ -3217,11 +3181,33 @@
 
   </section>
 
-  <section id="news">
-    <h2 class="section-title-centered">Notizie Genesys</h2>
-    <p class="section-note">Aggiornamenti dal mondo ufficiale Yu-Gi-Oh! Genesys</p>
-    <div class="card" id="news-list">
-      <div class="news-loading">Caricamento notizie…</div>
+
+  <section id="stagioni">
+    <h2 class="section-title-centered">Stagioni</h2>
+    <div class="inner-tab-bar" style="max-width:640px;margin:0 auto 18px">
+      <button class="inner-tab active" id="stab-archivio" onclick="switchStagioniTab('archivio')">📚 Archivio</button>
+      <button class="inner-tab" id="stab-alltime" onclick="switchStagioniTab('alltime')">🏆 All-time</button>
+    </div>
+
+    <div id="stagioni-archivio">
+      <p class="section-note">Le stagioni concluse vengono conservate qui con la loro classifica finale.</p>
+      <div class="classifica-top" id="lista-stagioni"></div>
+      <div class="classifica-top">
+        <div class="card padded">
+          <h3 class="subsection-title" style="margin-top:0">Stagione in corso</h3>
+          <div id="stagione-corrente-riepilogo"></div>
+          <button class="danger" style="width:100%;margin-top:14px" onclick="chiudiStagione()">🔒 Chiudi stagione e archivia</button>
+          <p class="section-note" style="margin:10px 0 0;text-align:left">
+            Archivia tutte le partite giocate finora in una nuova stagione e azzera la classifica.
+            I giocatori, i mazzi e le decklist restano. L\'operazione non si annulla.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div id="stagioni-alltime" style="display:none">
+      <p class="section-note">Statistiche di sempre: stagioni archiviate + stagione in corso.</p>
+      <div class="classifica-top" id="alltime-content"></div>
     </div>
   </section>
 
@@ -5726,129 +5712,252 @@ function resetGFiltri() {
 window.toggleGFiltri = toggleGFiltri;
 window.resetGFiltri = resetGFiltri;
 
-// ============ NOTIZIE GENESYS ============
-let _newsLoaded = false;
 
-async function caricaNotizie() {
-  if (_newsLoaded) return;
-  const c = document.getElementById('news-list');
-  if (!c) return;
-  c.innerHTML = '<div class="news-loading">Caricamento notizie…</div>';
 
-  // notizia ufficiale Konami sempre in cima
-  const KONAMI_PINNED = {
-    title: '📌 GENESYS June Points Update (Konami ufficiale)',
-    date: '01/06/26',
-    url: 'https://yugiohblog.konami.com/2026/genesys/genesys-june-points-update/',
-    source: 'Konami'
-  };
-  const cardHtml = (a) => `
-    <a class="news-card" href="${a.url}" target="_blank" rel="noopener">
-      <div class="news-title">${a.title}</div>
-      <div class="news-meta">
-        <span class="news-date">${a.dateStr || a.date}</span>
-        <span class="news-source">${a.source || 'YGOrganization'}</span>
-      </div>
-    </a>`;
+// ============ STAGIONI (archivio + all-time) ============
+let _stagioniCache = null;
 
-  // scarica e parsa un feed RSS/Atom via proxy → array di {title, url, ts, dateStr, source}
-  async function caricaFeed(rssUrl, source) {
-    // 1) prima provo rss2json: fa il parsing lato server e torna JSON pulito (gestisce RSS/Atom/date)
-    try {
-      const r = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`);
-      if (r.ok) {
-        const j = await r.json();
-        if (j.status === 'ok' && Array.isArray(j.items) && j.items.length) {
-          return j.items.map(it => {
-            const d  = it.pubDate ? new Date(it.pubDate.replace(' ', 'T')) : null;
-            const ts = d && !isNaN(d) ? d.getTime() : 0;
-            const dateStr = d && !isNaN(d) ? d.toLocaleDateString('it-IT', { day:'2-digit', month:'2-digit', year:'2-digit' }) : '';
-            return {
-              title: (it.title || '').replace(/&amp;/g,'&').trim(),
-              url: it.link || '#',
-              ts, dateStr, source
-            };
-          });
-        }
-      }
-    } catch(e) { /* passo al fallback */ }
+// statistiche giocatori calcolate su un array di partite qualsiasi
+// (le funzioni originali leggono la globale `dati`, qui serve anche sugli archivi)
+function statGiocatoriDa(partite, giocatori = []) {
+  const stat = {};
+  giocatori.forEach(g => stat[g] = { punti: 0, v: 0, p: 0, partite: 0 });
+  (partite || []).forEach(par => {
+    const r = PUNTI[par.risultato];
+    if (!r) return;
+    const [p1, p2] = r;
+    if (!stat[par.g1]) stat[par.g1] = { punti: 0, v: 0, p: 0, partite: 0 };
+    if (!stat[par.g2]) stat[par.g2] = { punti: 0, v: 0, p: 0, partite: 0 };
+    stat[par.g1].punti += p1; stat[par.g2].punti += p2;
+    stat[par.g1].partite++;   stat[par.g2].partite++;
+    if (p1 > p2) { stat[par.g1].v++; stat[par.g2].p++; }
+    else         { stat[par.g2].v++; stat[par.g1].p++; }
+  });
+  return stat;
+}
 
-    // 2) fallback: proxy CORS generici + parsing manuale (RSS o Atom)
-    const proxies = [
-      `https://corsproxy.io/?url=${encodeURIComponent(rssUrl)}`,
-      `https://api.allorigins.win/raw?url=${encodeURIComponent(rssUrl)}`,
-      `https://api.allorigins.win/get?url=${encodeURIComponent(rssUrl)}`,
-    ];
-    let xml = null;
-    for (const proxy of proxies) {
-      try {
-        const r = await fetch(proxy);
-        if (!r.ok) continue;
-        let raw = await r.text();
-        if (raw.trim().startsWith('{')) {
-          try { const jj = JSON.parse(raw); raw = jj.contents || raw; } catch(e) {}
-        }
-        if (raw && (raw.includes('<item') || raw.includes('<entry'))) { xml = raw; break; }
-      } catch(e) { continue; }
-    }
-    if (!xml) return [];
-    try {
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(xml, 'text/xml');
-      let nodes = [...doc.querySelectorAll('item')];
-      if (!nodes.length) nodes = [...doc.querySelectorAll('entry')];
-      return nodes.map(item => {
-        const title = (item.querySelector('title')?.textContent || '')
-          .replace(/&amp;/g,'&').replace(/&#8211;/g,'–').replace(/<!\[CDATA\[|\]\]>/g,'').trim();
-        let link = item.querySelector('link')?.textContent?.trim() || '';
-        if (!link) { const l = item.querySelector('link'); link = l?.getAttribute('href') || ''; }
-        if (!link) link = item.querySelector('guid')?.textContent?.trim() || '#';
-        const pub = item.querySelector('pubDate')?.textContent
-                 || item.querySelector('published')?.textContent
-                 || item.querySelector('updated')?.textContent || '';
-        const d  = pub ? new Date(pub) : null;
-        const ts = d && !isNaN(d) ? d.getTime() : 0;
-        const dateStr = d && !isNaN(d) ? d.toLocaleDateString('it-IT', { day:'2-digit', month:'2-digit', year:'2-digit' }) : '';
-        return { title, url: link, ts, dateStr, source };
-      });
-    } catch(e) { return []; }
+function statMazziDa(partite) {
+  const stat = {};
+  (partite || []).forEach(par => {
+    const r = PUNTI[par.risultato];
+    if (!r || !par.m1 || !par.m2) return;
+    const [p1, p2] = r;
+    [par.m1, par.m2].forEach(m => { if (!stat[m]) stat[m] = { v: 0, p: 0, partite: 0 }; });
+    stat[par.m1].partite++; stat[par.m2].partite++;
+    if (p1 > p2) { stat[par.m1].v++; stat[par.m2].p++; }
+    else         { stat[par.m2].v++; stat[par.m1].p++; }
+  });
+  Object.values(stat).forEach(s => { s.wr = s.partite > 0 ? s.v / s.partite : 0; });
+  return stat;
+}
+
+function ordinaClassifica(stat) {
+  return Object.entries(stat).sort((a, b) => b[1].punti - a[1].punti || b[1].v - a[1].v);
+}
+
+async function caricaStagioni(forza = false) {
+  if (_stagioniCache && !forza) return _stagioniCache;
+  try {
+    const snap = await getDocs(collection(db, 'stagioni'));
+    const arr = [];
+    snap.forEach(d => arr.push({ id: d.id, ...d.data() }));
+    arr.sort((a, b) => (b.numero || 0) - (a.numero || 0)); // più recenti in alto
+    _stagioniCache = arr;
+  } catch (e) {
+    _stagioniCache = [];
   }
+  return _stagioniCache;
+}
 
-  // scarico i feed in parallelo (YGOProDeck non ha un feed news aggiornato accessibile, quindi solo YGOrganization)
-  const [ygorg] = await Promise.all([
-    caricaFeed('https://ygorganization.com/category/events/yu-gi-oh-genesys/feed/', 'YGOrganization'),
-  ]);
-  const ygopro = [];
+function switchStagioniTab(tab) {
+  document.getElementById('stagioni-archivio').style.display = tab === 'archivio' ? 'block' : 'none';
+  document.getElementById('stagioni-alltime').style.display  = tab === 'alltime'  ? 'block' : 'none';
+  document.getElementById('stab-archivio').classList.toggle('active', tab === 'archivio');
+  document.getElementById('stab-alltime').classList.toggle('active', tab === 'alltime');
+  if (tab === 'alltime') renderAllTime();
+}
 
-  _newsLoaded = true;
-  let tutte = [...ygorg, ...ygopro].filter(a => a.title);
+async function apriStagioni() {
+  document.getElementById('lista-stagioni').innerHTML = '<div class="empty">Caricamento…</div>';
+  await caricaStagioni(true);
+  renderListaStagioni();
+  renderStagioneCorrente();
+  if (document.getElementById('stagioni-alltime').style.display !== 'none') renderAllTime();
+}
 
+function renderStagioneCorrente() {
+  const box = document.getElementById('stagione-corrente-riepilogo');
+  if (!box) return;
+  const n = dati.partite.length;
+  if (n === 0) {
+    box.innerHTML = '<div class="empty" style="padding:12px">Nessuna partita ancora giocata in questa stagione.</div>';
+    return;
+  }
+  const stat = statGiocatoriDa(dati.partite, dati.giocatori);
+  const ord = ordinaClassifica(stat);
+  const leader = ord.length ? ord[0][0] : '—';
+  box.innerHTML = `
+    <div class="deck-mu-stat-list" style="max-width:none">
+      <div class="deck-mu-stat-line"><span class="deck-mu-stat-lbl">Partite giocate:</span><span class="deck-mu-stat-val">${n}</span></div>
+      <div class="deck-mu-stat-line"><span class="deck-mu-stat-lbl">In testa:</span><span class="deck-mu-stat-val">${escapeHtml(leader)}</span></div>
+      <div class="deck-mu-stat-line"><span class="deck-mu-stat-lbl">Mazzi usati:</span><span class="deck-mu-stat-val">${Object.keys(statMazziDa(dati.partite)).length}</span></div>
+    </div>`;
+}
+
+function tabellaClassifica(ord) {
+  const medals = ['🥇', '🥈', '🥉'];
+  let html = '<table><tr><th>#</th><th>Giocatore</th><th>Punti</th><th>V</th><th>P</th></tr>';
+  ord.forEach(([nome, s], i) => {
+    const rank = i < 3 ? `<span class="medal">${medals[i]}</span>` : (i + 1);
+    html += `<tr class="${i === 0 ? 'top-1' : ''}">
+      <td class="rank">${rank}</td>
+      <td>${escapeHtml(nome)}</td>
+      <td class="num"><b>${s.punti}</b></td>
+      <td class="num">${s.v}</td><td class="num">${s.p}</td>
+    </tr>`;
+  });
+  return html + '</table>';
+}
+
+function renderListaStagioni() {
+  const cont = document.getElementById('lista-stagioni');
+  if (!cont) return;
+  const arr = _stagioniCache || [];
+  if (arr.length === 0) {
+    cont.innerHTML = '<div class="card"><div class="empty">Nessuna stagione archiviata. Quando chiuderete la stagione in corso, comparirà qui.</div></div>';
+    return;
+  }
+  cont.innerHTML = arr.map(st => {
+    // preferisco la classifica salvata al momento della chiusura: è la storia
+    // ufficiale e non cambia se un giorno modifichiamo il sistema di punteggio
+    const ord = (st.classifica && st.classifica.length)
+      ? st.classifica.map(r => [r.giocatore, r])
+      : ordinaClassifica(statGiocatoriDa(st.partite, st.giocatori));
+    const data = st.chiusaIl ? new Date(st.chiusaIl).toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '—';
+    const nPartite = (st.partite || []).length;
+    const vincitore = ord.length ? ord[0][0] : '—';
+    return `<details class="card stagione-item">
+      <summary class="stagione-head">
+        <span class="stagione-nome">${escapeHtml(st.nome || ('Stagione ' + st.numero))}</span>
+        <span class="stagione-meta">🏆 ${escapeHtml(vincitore)} · ${nPartite} partite · ${data}</span>
+        <span class="stagione-arrow">▶</span>
+      </summary>
+      <div class="stagione-body">${tabellaClassifica(ord)}</div>
+    </details>`;
+  }).join('');
+}
+
+function renderAllTime() {
+  const cont = document.getElementById('alltime-content');
+  if (!cont) return;
+  const archiviate = _stagioniCache || [];
+  // unione di tutte le partite: archivi + stagione in corso
+  const tutte = archiviate.flatMap(st => st.partite || []).concat(dati.partite || []);
   if (tutte.length === 0) {
-    // fallback statico se entrambi i feed falliscono
-    const articoli = [
-      { title: 'GENESYS Points List (June 1st 2026 Onwards)', date: '15/05/26', url: 'https://ygorganization.com/genesys-points-list-june-1st-2026-onwards-ocg/' },
-      { title: 'Genesys April Points Update', date: '30/04/26', url: 'https://ygorganization.com/genesysapril2026/' },
-      { title: '[YGOrg Tourneys] GENESYS 2 Top 4 Deck Lists', date: '19/04/26', url: 'https://ygorganization.com/ygorg2ndgenesys/' },
-      { title: 'GENESYS Comes To Japan', date: '10/03/26', url: 'https://ygorganization.com/genesysisnowbiginjapan/' },
-      { title: 'GENESYS Celebration Playmat', date: '09/03/26', url: 'https://ygorganization.com/genesyszeus/' },
-      { title: 'What to Expect for March 2026', date: '03/03/26', url: 'https://ygorganization.com/march2026genesywhattoexpect/' },
-      { title: 'Genesys Database Oddities', date: '01/02/26', url: 'https://ygorganization.com/genesys-database-oddities-genesys/' },
-      { title: 'Burst Protocol Pre-Release Points', date: '29/01/26', url: 'https://ygorganization.com/burstprotocolgenesyspoints/' },
-      { title: 'GENESYS Roadmap for 2026', date: '23/01/26', url: 'https://ygorganization.com/genesys2026roadmap/' },
-      { title: '[YGOrg Tourneys] Genesys 1 Top 8 Decklists', date: '21/01/26', url: 'https://ygorganization.com/hankowins/' },
-    ];
-    c.innerHTML = cardHtml(KONAMI_PINNED) + articoli.map(a => cardHtml({ ...a, source: 'YGOrganization' })).join('');
+    cont.innerHTML = '<div class="card"><div class="empty">Ancora nessuna partita registrata.</div></div>';
+    return;
+  }
+  const nomi = new Set(dati.giocatori || []);
+  archiviate.forEach(st => (st.giocatori || []).forEach(g => nomi.add(g)));
+  const ord = ordinaClassifica(statGiocatoriDa(tutte, [...nomi]));
+
+  const mazzi = statMazziDa(tutte);
+  const mazziOrd = Object.entries(mazzi)
+    .filter(([_, s]) => s.partite >= SOGLIA_MAZZO)
+    .sort((a, b) => b[1].wr - a[1].wr || b[1].partite - a[1].partite)
+    .slice(0, 10);
+
+  const titoli = {};
+  archiviate.forEach(st => {
+    const o = (st.classifica && st.classifica.length)
+      ? st.classifica.map(r => [r.giocatore, r])
+      : ordinaClassifica(statGiocatoriDa(st.partite, st.giocatori));
+    if (o.length) titoli[o[0][0]] = (titoli[o[0][0]] || 0) + 1;
+  });
+  const albo = Object.entries(titoli).sort((a, b) => b[1] - a[1]);
+
+  cont.innerHTML = `
+    <div class="card padded" style="margin-bottom:16px">
+      <div class="deck-mu-stat-list" style="max-width:none">
+        <div class="deck-mu-stat-line"><span class="deck-mu-stat-lbl">Partite di sempre:</span><span class="deck-mu-stat-val">${tutte.length}</span></div>
+        <div class="deck-mu-stat-line"><span class="deck-mu-stat-lbl">Stagioni archiviate:</span><span class="deck-mu-stat-val">${archiviate.length}</span></div>
+        <div class="deck-mu-stat-line"><span class="deck-mu-stat-lbl">Mazzi visti:</span><span class="deck-mu-stat-val">${Object.keys(mazzi).length}</span></div>
+      </div>
+    </div>
+
+    <h3 class="subsection-title">Classifica all-time</h3>
+    <div class="card" style="overflow:hidden;margin-bottom:16px">${tabellaClassifica(ord)}</div>
+
+    ${albo.length ? `<h3 class="subsection-title">Albo d'oro</h3>
+    <div class="card padded" style="margin-bottom:16px">
+      <div class="deck-mu-stat-list" style="max-width:none">
+        ${albo.map(([g, n]) => `<div class="deck-mu-stat-line"><span class="deck-mu-stat-lbl">${escapeHtml(g)}</span><span class="deck-mu-stat-val">${'🏆'.repeat(Math.min(n, 5))} ${n}</span></div>`).join('')}
+      </div>
+    </div>` : ''}
+
+    <h3 class="subsection-title">Migliori mazzi di sempre</h3>
+    <div class="card" style="overflow:hidden">
+      ${mazziOrd.length === 0
+        ? `<div class="empty">Nessun mazzo ha ancora raggiunto ${SOGLIA_MAZZO} partite.</div>`
+        : `<table><tr><th>#</th><th>Mazzo</th><th>V</th><th>P</th><th>Win Rate</th></tr>
+          ${mazziOrd.map(([nome, s], i) => {
+            const wr = Math.round(100 * s.wr);
+            return `<tr class="${i === 0 ? 'top-1' : ''}">
+              <td class="rank">${i + 1}</td>
+              <td>${escapeHtml(nome)}</td>
+              <td class="num">${s.v}</td><td class="num">${s.p}</td>
+              <td><div class="wr-cell"><span class="wr-text">${wr}%</span><span class="wr-bar"><span style="width:${wr}%"></span></span></div></td>
+            </tr>`;
+          }).join('')}</table>`}
+    </div>`;
+}
+
+// Archivia la stagione in corso e riparte da zero.
+// Scrive PRIMA l'archivio e svuota solo dopo che la scrittura è andata a buon fine.
+async function chiudiStagione() {
+  if (!dati.partite.length) { alert('Non ci sono partite da archiviare.'); return; }
+  const stagioni = await caricaStagioni(true);
+  const numero = stagioni.reduce((m, s) => Math.max(m, s.numero || 0), 0) + 1;
+
+  const nome = prompt(`Come vuoi chiamare la stagione che stai chiudendo?`, `Stagione ${numero}`);
+  if (nome === null) return;
+  const conferma = prompt(
+    `Stai per archiviare ${dati.partite.length} partite e azzerare la classifica.\n` +
+    `Giocatori, mazzi e decklist restano invariati.\n` +
+    `L'operazione NON si annulla.\n\nScrivi CHIUDI per confermare:`);
+  if (conferma !== 'CHIUDI') { alert('Operazione annullata: non è stato modificato nulla.'); return; }
+
+  const stat = statGiocatoriDa(dati.partite, dati.giocatori);
+  const classifica = ordinaClassifica(stat).map(([g, s], i) => ({
+    pos: i + 1, giocatore: g, punti: s.punti, v: s.v, p: s.p, partite: s.partite
+  }));
+
+  try {
+    await setDoc(doc(db, 'stagioni', 'stagione_' + numero), {
+      numero,
+      nome: (nome || '').trim() || `Stagione ${numero}`,
+      chiusaIl: new Date().toISOString(),
+      partite: dati.partite,
+      giocatori: dati.giocatori,
+      mazzi: dati.mazzi,
+      classifica
+    });
+  } catch (e) {
+    alert('Errore durante l\'archiviazione: non è stato cancellato nulla. Riprova.');
     return;
   }
 
-  // ordino per data decrescente e taglio a 25
-  tutte.sort((a, b) => b.ts - a.ts);
-  tutte = tutte.slice(0, 25);
-  c.innerHTML = cardHtml(KONAMI_PINNED) + tutte.map(cardHtml).join('');
+  dati.partite = [];
+  await salvaDatiCloud();
+  _stagioniCache = null;
+  popolaTutto();
+  await apriStagioni();
+  alert(`Stagione ${numero} archiviata. La nuova stagione parte da zero.`);
 }
 
-window.caricaNotizie = caricaNotizie;
-
+window.apriStagioni = apriStagioni;
+window.switchStagioniTab = switchStagioniTab;
+window.chiudiStagione = chiudiStagione;
 
 // ════════════════════════════════════════
 // DUELLO — LP, Calcolatrice, Chrono, Timer
