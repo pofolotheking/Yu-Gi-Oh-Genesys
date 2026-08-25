@@ -2852,7 +2852,10 @@
 <main>
   <section id="giocatori" class="active">
     <h2 class="section-title-centered">Classifica</h2>
-    <div class="inner-tab-bar" style="max-width:640px;margin:0 auto 18px">\n      <button class="inner-tab active" id="ctab-cur" onclick="switchScopeClassifica('cur')">Stagione corrente</button>\n      <button class="inner-tab" id="ctab-all" onclick="switchScopeClassifica('all')">All-time</button>\n    </div>
+    <div class="inner-tab-bar" style="max-width:640px;margin:0 auto 18px">
+      <button class="inner-tab active" id="ctab-cur" onclick="switchScopeClassifica('cur')">Stagione corrente</button>
+      <button class="inner-tab" id="ctab-all" onclick="switchScopeClassifica('all')">All-time</button>
+    </div>
     <div class="classifica-top">
       <div class="card"><table id="tabella-giocatori"></table></div>
     </div>
@@ -2891,7 +2894,10 @@
 
   <section id="mazzi">
     <h2 class="section-title-centered">Deck</h2>
-    <div class="inner-tab-bar" style="max-width:640px;margin:0 auto 18px">\n      <button class="inner-tab active" id="dtab-cur" onclick="switchScopeDeck('cur')">Stagione corrente</button>\n      <button class="inner-tab" id="dtab-all" onclick="switchScopeDeck('all')">All-time</button>\n    </div>
+    <div class="inner-tab-bar" style="max-width:640px;margin:0 auto 18px">
+      <button class="inner-tab active" id="dtab-cur" onclick="switchScopeDeck('cur')">Stagione corrente</button>
+      <button class="inner-tab" id="dtab-all" onclick="switchScopeDeck('all')">All-time</button>
+    </div>
     <div class="desktop-split">
       <div class="desktop-col-left">
         <p class="section-note"><em>Ordinati per win rate. I mazzi con meno di 3 partite sono In prova.</em></p>
@@ -3654,7 +3660,7 @@ function toggleProfiloInline(nome) {
 
 function buildProfiloInline(nome) {
   const profilo = (dati.profili || {})[nome] || {};
-  const stat = calcolaStatGiocatori();
+  const stat = calcolaStatGiocatori(partiteAllTime());
   const s = stat[nome] || { punti: 0, v: 0, p: 0, partite: 0 };
   const wr = s.partite > 0 ? Math.round(100 * s.v / s.partite) : 0;
   const media = s.partite > 0 ? (s.punti / s.partite).toFixed(1) : '—';
@@ -3684,9 +3690,9 @@ function buildProfiloInline(nome) {
       </div>
     </div>
     <div class="profile-inline-stats">
-      <div class="profile-inline-stat"><span class="pis-lbl">Classifica</span><span class="pis-val">${posLabel}</span></div>
+      <div class="profile-inline-stat"><span class="pis-lbl">Partite</span><span class="pis-val">${s.partite}</span></div>
       <div class="profile-inline-stat"><span class="pis-lbl">Win Rate</span><span class="pis-val">${wr}%</span></div>
-      <div class="profile-inline-stat"><span class="pis-lbl">Media pts</span><span class="pis-val">${media}</span></div>
+      <div class="profile-inline-stat"><span class="pis-lbl">V / P</span><span class="pis-val">${s.v} / ${s.p}</span></div>
       <div class="profile-inline-stat"><span class="pis-lbl">Mazzo + usato</span><span class="pis-val" style="font-size:0.7rem;line-height:1.2">${mazzoPreferitoGiocatore(nome)}</span></div>
    </div>
     <div style="padding: 12px 14px 0; background: var(--bg-soft);">
@@ -3821,8 +3827,8 @@ function renderGrafico(partite = dati.partite) {
         borderColor: COLORS[i % COLORS.length],
         backgroundColor: COLORS[i % COLORS.length] + '18',
         borderWidth: 2.5,
-        pointRadius: 4,
-        pointHoverRadius: 6,
+        pointRadius: 0,
+        pointHoverRadius: 4,
         tension: 0.3,
         fill: false,
       }))
@@ -4960,15 +4966,18 @@ const ACHIEVEMENTS_DEF = [
 ];
 
 function calcolaAchievements(nome) {
+  // gli achievement sono del GIOCATORE, non della stagione: si calcolano
+  // sempre su archivio + stagione in corso, cosi\u0300 non si azzerano mai
+  const tutte = partiteAllTime();
   return ACHIEVEMENTS_DEF.map(a => ({
     ...a,
-    unlocked: a.check(nome, dati.partite)
+    unlocked: a.check(nome, tutte)
   }));
 }
 
 function mazzoPreferitoGiocatore(nome) {
   const conteggio = {};
-  dati.partite.forEach(p => {
+  partiteAllTime().forEach(p => {
     if (p.g1 === nome) conteggio[p.m1] = (conteggio[p.m1] || 0) + 1;
     if (p.g2 === nome) conteggio[p.m2] = (conteggio[p.m2] || 0) + 1;
   });
@@ -4979,7 +4988,7 @@ function mazzoPreferitoGiocatore(nome) {
 
 function apriProfilo(nome) {
   const profilo = (dati.profili || {})[nome] || {};
-  const stat = calcolaStatGiocatori();
+  const stat = calcolaStatGiocatori(partiteAllTime());
   const s = stat[nome] || { punti: 0, v: 0, p: 0, partite: 0 };
   const wr = s.partite > 0 ? Math.round(100 * s.v / s.partite) : 0;
   const media = s.partite > 0 ? (s.punti / s.partite).toFixed(1) : '—';
@@ -4999,9 +5008,9 @@ function apriProfilo(nome) {
   document.getElementById('modal-mazzo-pref').innerHTML = `Mazzo preferito: <strong>${mazzoLabel}</strong>`;
   document.getElementById('modal-desc').textContent = profilo.descrizione || 'Nessuna descrizione ancora.';
   document.getElementById('modal-stats-row').innerHTML = `
-    <div class="modal-stat-cell"><span class="modal-stat-lbl">Classifica</span><span class="modal-stat-val">${posLabel}</span></div>
+    <div class="modal-stat-cell"><span class="modal-stat-lbl">Partite</span><span class="modal-stat-val">${s.partite}</span></div>
     <div class="modal-stat-cell"><span class="modal-stat-lbl">Win Rate</span><span class="modal-stat-val">${wr}%</span></div>
-    <div class="modal-stat-cell"><span class="modal-stat-lbl">Media punti</span><span class="modal-stat-val">${media}</span></div>
+    <div class="modal-stat-cell"><span class="modal-stat-lbl">V / P</span><span class="modal-stat-val">${s.v} / ${s.p}</span></div>
     <div class="modal-stat-cell"><span class="modal-stat-lbl">Mazzo usato</span><span class="modal-stat-val" style="font-size:0.75rem;line-height:1.2">${mazzoPref}</span></div>
   `;
   
