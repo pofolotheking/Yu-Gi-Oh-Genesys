@@ -1805,6 +1805,13 @@
 
   .mc-stagione { color: var(--blue); font-weight: 600; }
 
+  .st-sec-title {
+    font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--text-faint); padding: 18px 16px 8px; border-top: 1px solid var(--border);
+  }
+  .st-box { padding: 0 14px 14px; }
+  .stagione-body > table { width: 100%; }
+
   /* ── STAGIONI ── */
   .stagione-item { overflow: hidden; margin-bottom: 12px; }
   .stagione-head {
@@ -3689,9 +3696,10 @@ function buildProfiloInline(nome) {
   `;
 }
 
-function renderRiepilogo(partite = dati.partite) {
+function renderRiepilogo(partite = dati.partite, contId = 'riepilogo-h2h', cardId = 'riepilogo-card') {
   const giocatori = dati.giocatori;
-  const h2hDiv = document.getElementById('riepilogo-h2h');
+  const h2hDiv = document.getElementById(contId);
+  if (!h2hDiv) return;
   if (partite.length === 0) {
     h2hDiv.innerHTML = '<div class="empty" style="padding:20px 0">Nessuna partita ancora registrata.</div>';
     return;
@@ -3731,7 +3739,7 @@ function renderRiepilogo(partite = dati.partite) {
 
   // ordinati per numero di scontri (match totali) decrescente
   const arr = Object.values(h2h).sort((x, y) => (y.va + y.vb) - (x.va + x.vb));
-  const card = document.getElementById('riepilogo-card');
+  const card = document.getElementById(cardId);
   if (card) card.classList.add('h2h-united-card');
   const html = `
     <div class="h2h-united">
@@ -3845,8 +3853,8 @@ function renderGrafico(partite = dati.partite) {
 
 
 // ============ STATISTICHE DADO/PRIMO ============
-function renderStatDado(partite = dati.partite) {
-  const wrap = document.getElementById('stat-dado-wrap');
+function renderStatDado(partite = dati.partite, contId = 'stat-dado-wrap') {
+  const wrap = document.getElementById(contId);
   if (!wrap) return;
   const partiteConInfo = partite.filter(p => p.primo);
   if (!partiteConInfo.length) { wrap.innerHTML = ''; return; }
@@ -3883,7 +3891,7 @@ function renderStatDado(partite = dati.partite) {
 
   const pct = (v, t) => t > 0 ? Math.round(100 * v / t) + '%' : '—';
 
-  const classificaOrd = calcolaStatGiocatori();
+  const classificaOrd = calcolaStatGiocatori(partite);
   const ordine = Object.keys(classificaOrd).sort((a,b) =>
     classificaOrd[b].punti - classificaOrd[a].punti || classificaOrd[b].v - classificaOrd[a].v
   );
@@ -3916,7 +3924,7 @@ function renderStatDado(partite = dati.partite) {
   wrap.innerHTML = rows;
 }
 
-function renderMazzi(partite = dati.partite) {
+function renderMazzi(partite = dati.partite, contId = 'tabella-mazzi') {
   const stat = calcolaStatMazzi(partite);
   const arr = Object.entries(stat).sort((a, b) => {
     const ua = a[1].partite >= SOGLIA_MAZZO ? 1 : 0;
@@ -3925,7 +3933,8 @@ function renderMazzi(partite = dati.partite) {
     if (b[1].wr !== a[1].wr) return b[1].wr - a[1].wr;
     return b[1].partite - a[1].partite;
   });
-  const t = document.getElementById('tabella-mazzi');
+  const t = document.getElementById(contId);
+  if (!t) return;
   if (arr.length === 0) {
     t.innerHTML = '<tr><td class="empty">Ancora nessun mazzo registrato.</td></tr>';
     return;
@@ -3955,8 +3964,9 @@ function renderMazzi(partite = dati.partite) {
   t.innerHTML = html;
 }
 
-function renderStorico(partite = dati.partite, modificabile = true) {
-  const c = document.getElementById('lista-partite');
+function renderStorico(partite = dati.partite, modificabile = true, contId = 'lista-partite') {
+  const c = document.getElementById(contId);
+  if (!c) return;
   if (partite.length === 0) {
     c.innerHTML = '<div class="empty">Lo storico è vuoto.</div>';
     return;
@@ -5856,15 +5866,19 @@ function renderStagioneCorrente() {
 }
 
 function tabellaClassifica(ord) {
-  const medals = ['🥇', '🥈', '🥉'];
-  let html = '<table><tr><th>#</th><th>Giocatore</th><th>Punti</th><th>V</th><th>P</th></tr>';
+  const medals = ['\uD83E\uDD47', '\uD83E\uDD48', '\uD83E\uDD49'];
+  let html = '<table><tr><th>#</th><th>Giocatore</th><th>Punti</th><th>PG</th><th>V</th><th>P</th><th>Win Rate</th></tr>';
   ord.forEach(([nome, s], i) => {
+    const pg = s.partite != null ? s.partite : (s.v + s.p);
+    const wr = pg > 0 ? Math.round(100 * s.v / pg) : 0;
     const rank = i < 3 ? `<span class="medal">${medals[i]}</span>` : (i + 1);
     html += `<tr class="${i === 0 ? 'top-1' : ''}">
       <td class="rank">${rank}</td>
       <td>${escapeHtml(nome)}</td>
-      <td class="num"><b>${s.punti}</b></td>
+      <td class="pts">${s.punti}</td>
+      <td class="num">${pg}</td>
       <td class="num">${s.v}</td><td class="num">${s.p}</td>
+      <td><div class="wr-cell"><span class="wr-text">${wr}%</span><span class="wr-bar"><span style="width:${wr}%"></span></span></div></td>
     </tr>`;
   });
   return html + '</table>';
@@ -5874,29 +5888,62 @@ function renderListaStagioni() {
   const cont = document.getElementById('lista-stagioni');
   if (!cont) return;
   const arr = _stagioniCache || [];
+  _stagioniRese.clear();   // il DOM viene ricreato: i dettagli vanno ridisegnati
   if (arr.length === 0) {
-    cont.innerHTML = '<div class="card"><div class="empty">Nessuna stagione archiviata. Quando chiuderete la stagione in corso, comparirà qui.</div></div>';
+    cont.innerHTML = '<div class="card"><div class="empty">Nessuna stagione archiviata. Quando chiuderete la stagione in corso, comparir\u00E0 qui.</div></div>';
     return;
   }
   cont.innerHTML = arr.map(st => {
-    // preferisco la classifica salvata al momento della chiusura: è la storia
-    // ufficiale e non cambia se un giorno modifichiamo il sistema di punteggio
+    // la classifica salvata alla chiusura \u00E8 la storia ufficiale della stagione
     const ord = (st.classifica && st.classifica.length)
       ? st.classifica.map(r => [r.giocatore, r])
       : ordinaClassifica(statGiocatoriDa(st.partite, st.giocatori));
-    const data = st.chiusaIl ? new Date(st.chiusaIl).toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '—';
+    const data = st.chiusaIl
+      ? new Date(st.chiusaIl).toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric' })
+      : '\u2014';
     const nPartite = (st.partite || []).length;
-    const vincitore = ord.length ? ord[0][0] : '—';
-    return `<details class="card stagione-item">
+    const vincitore = ord.length ? ord[0][0] : '\u2014';
+    const k = st.id;
+    return `<details class="card stagione-item" ontoggle="renderDettaglioStagione('${k}')">
       <summary class="stagione-head">
         <span class="stagione-nome">${escapeHtml(st.nome || ('Stagione ' + st.numero))}</span>
-        <span class="stagione-meta">🏆 ${escapeHtml(vincitore)} · ${nPartite} partite · ${data}</span>
-        <span class="stagione-arrow">▶</span>
+        <span class="stagione-meta">\uD83C\uDFC6 ${escapeHtml(vincitore)} \u00B7 ${nPartite} partite \u00B7 ${data}</span>
+        <span class="stagione-arrow">\u25B6</span>
       </summary>
-      <div class="stagione-body">${tabellaClassifica(ord)}</div>
+      <div class="stagione-body">
+        <div class="st-sec-title">Classifica finale</div>
+        ${tabellaClassifica(ord)}
+        <div class="st-sec-title">Mazzi della stagione</div>
+        <table id="st-mazzi-${k}"></table>
+        <div class="st-sec-title">Scontri diretti</div>
+        <div class="st-box"><div class="card padded" id="st-h2hcard-${k}"><div id="st-h2h-${k}"></div></div></div>
+        <div class="st-sec-title">Statistiche dado</div>
+        <div class="st-box" id="st-dado-${k}"></div>
+        <div class="st-sec-title">Storico partite</div>
+        <div class="st-box"><div class="card" id="st-storico-${k}"></div></div>
+      </div>
     </details>`;
   }).join('');
 }
+
+const _stagioniRese = new Set();
+// il dettaglio si disegna alla prima apertura: evita di renderizzare tutte le
+// stagioni in blocco e riusa gli stessi renderer delle sezioni live
+function renderDettaglioStagione(id) {
+  if (_stagioniRese.has(id)) return;
+  const st = (_stagioniCache || []).find(x => x.id === id);
+  if (!st) return;
+  _stagioniRese.add(id);
+  const pt = st.partite || [];
+  renderMazzi(pt, 'st-mazzi-' + id);
+  renderRiepilogo(pt, 'st-h2h-' + id, 'st-h2hcard-' + id);
+  renderStatDado(pt, 'st-dado-' + id);
+  renderStorico(pt, false, 'st-storico-' + id);
+  const dado = document.getElementById('st-dado-' + id);
+  if (dado && !dado.innerHTML.trim())
+    dado.innerHTML = '<div class="empty">Nessun dato sul dado per questa stagione.</div>';
+}
+window.renderDettaglioStagione = renderDettaglioStagione;
 
 function renderAllTime() {
   const cont = document.getElementById('alltime-content');
