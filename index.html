@@ -2857,9 +2857,13 @@
   </section>
   <section id="statistiche">
     <h2 class="section-title-centered">Statistiche</h2>
+    <div class="inner-tab-bar" style="max-width:640px;margin:0 auto 18px">
+      <button class="inner-tab active" id="xtab-cur" onclick="switchScopeStat('cur')">Stagione corrente</button>
+      <button class="inner-tab" id="xtab-all" onclick="switchScopeStat('all')">All-time</button>
+    </div>
     <div class="desktop-split stat-top">
       <div class="desktop-col-left">
-        <p class="section-note"><em>Andamento punti per partite giocate</em></p>
+        <p class="section-note"><em>Andamento del win rate per partite giocate</em></p>
         <div class="card" id="chart-card">
           <div class="chart-wrap"><canvas id="chart-andamento"></canvas></div>
           <div class="chart-legend" id="chart-legend"></div>
@@ -3468,6 +3472,7 @@ function getMedalMap() {
 // ── SCOPE: stagione corrente vs all-time ──
 let _scopeDeck = 'cur';
 let _scopeClassifica = 'cur';
+let _scopeStat = 'cur';
 let _deckScopePartite = [];
 
 // partite archiviate (etichettate con la stagione) + partite della stagione in corso
@@ -3490,6 +3495,17 @@ function switchScopeDeck(scope) {
   renderMatchup(pt);
 }
 
+function switchScopeStat(scope) {
+  _scopeStat = scope;
+  document.getElementById('xtab-cur').classList.toggle('active', scope === 'cur');
+  document.getElementById('xtab-all').classList.toggle('active', scope === 'all');
+  const pt = partiteScope(scope);
+  renderRiepilogo(pt);
+  renderGrafico(pt);
+  renderStatDado(pt);
+}
+window.switchScopeStat = switchScopeStat;
+
 function switchScopeClassifica(scope) {
   _scopeClassifica = scope;
   document.getElementById('ctab-cur').classList.toggle('active', scope === 'cur');
@@ -3507,9 +3523,9 @@ window.switchScopeClassifica = switchScopeClassifica;
 
 function popolaTutto() {
   renderGiocatori(partiteScope(_scopeClassifica));
-  renderRiepilogo();
-  renderGrafico();
-  renderStatDado();
+  renderRiepilogo(partiteScope(_scopeStat));
+  renderGrafico(partiteScope(_scopeStat));
+  renderStatDado(partiteScope(_scopeStat));
   renderMazzi(partiteScope(_scopeDeck));
   renderStorico(partiteScope(_scopeClassifica), _scopeClassifica === 'cur');
   renderMatchup(partiteScope(_scopeDeck));
@@ -3673,10 +3689,10 @@ function buildProfiloInline(nome) {
   `;
 }
 
-function renderRiepilogo() {
+function renderRiepilogo(partite = dati.partite) {
   const giocatori = dati.giocatori;
   const h2hDiv = document.getElementById('riepilogo-h2h');
-  if (dati.partite.length === 0) {
+  if (partite.length === 0) {
     h2hDiv.innerHTML = '<div class="empty" style="padding:20px 0">Nessuna partita ancora registrata.</div>';
     return;
   }
@@ -3689,7 +3705,7 @@ function renderRiepilogo() {
                    gamesA: 0, gamesB: 0, dadoA: 0, dadoB: 0, ultimo: null };
     }
   }
-  dati.partite.forEach(p => {
+  partite.forEach(p => {
     const [p1, p2] = PUNTI[p.risultato];
     const key = [p.g1, p.g2].sort().join('|');
     if (!h2h[key]) return;
@@ -3745,38 +3761,41 @@ function renderRiepilogo() {
 let _chartInstance = null;
 const COLORS = ['#007aff', '#34c759', '#ff9500', '#ff3b30'];
 
-function renderGrafico() {
+function renderGrafico(partite = dati.partite) {
   if (typeof Chart === 'undefined') return;
   const giocatori = dati.giocatori;
-  if (!dati.partite.length) {
+  if (!partite.length) {
     document.getElementById('chart-card').style.display = 'none';
     return;
   }
   document.getElementById('chart-card').style.display = 'block';
 
-  const partiteOrd = [...dati.partite].sort((a,b) => a.data.localeCompare(b.data));
-  // Opzione B: ogni giocatore ha la sua serie, riallineata sulle SUE partite.
-  // Start = 0, poi un punto per ogni partita giocata da quel giocatore.
-  const puntiCum = {};
+  const partiteOrd = [...partite].sort((a, b) => (a.data || '').localeCompare(b.data || ''));
+  // andamento del win rate: per ogni giocatore un punto dopo ogni SUA partita
+  const serieWr = {};
   let maxPartite = 0;
   giocatori.forEach(g => {
-    const serie = [0];
-    partiteOrd.forEach(p => {
-      const [p1, p2] = PUNTI[p.risultato];
-      const last = serie[serie.length - 1];
-      if (p.g1 === g) serie.push(last + p1);
-      else if (p.g2 === g) serie.push(last + p2);
-      // se non ha giocato questa partita, NON aggiungo punti (la sua serie non avanza)
+    let v = 0, tot = 0;
+    const serie = [];
+    partiteOrd.forEach(par => {
+      const r = PUNTI[par.risultato];
+      if (!r) return;
+      const [p1, p2] = r;
+      let giocata = false, vinta = false;
+      if (par.g1 === g)      { giocata = true; vinta = p1 > p2; }
+      else if (par.g2 === g) { giocata = true; vinta = p2 > p1; }
+      if (!giocata) return;
+      tot++; if (vinta) v++;
+      serie.push(Math.round(100 * v / tot));
     });
-    puntiCum[g] = serie;
-    if (serie.length - 1 > maxPartite) maxPartite = serie.length - 1;
+    serieWr[g] = serie;
+    if (serie.length > maxPartite) maxPartite = serie.length;
   });
 
-  // etichette: Start, P1..Pn dove n = massimo numero di partite giocate da un singolo
-  const labels = ['Start', ...Array.from({length: maxPartite}, (_,i) => `P${i+1}`)];
+  const labels = Array.from({ length: maxPartite }, (_, i) => `P${i + 1}`);
 
   const legendEl = document.getElementById('chart-legend');
-  legendEl.innerHTML = giocatori.map((g,i) => `
+  legendEl.innerHTML = giocatori.map((g, i) => `
     <div class="chart-legend-item">
       <div class="chart-legend-dot" style="background:${COLORS[i % COLORS.length]}"></div>
       ${g}
@@ -3790,7 +3809,7 @@ function renderGrafico() {
       labels,
       datasets: giocatori.map((g, i) => ({
         label: g,
-        data: puntiCum[g],
+        data: serieWr[g],
         borderColor: COLORS[i % COLORS.length],
         backgroundColor: COLORS[i % COLORS.length] + '18',
         borderWidth: 2.5,
@@ -3807,28 +3826,17 @@ function renderGrafico() {
         legend: { display: false },
         tooltip: {
           callbacks: {
-            title: (items) => {
-              const idx = items[0].dataIndex;
-              if (idx === 0) return 'Inizio';
-              return `Dopo ${idx}ª partita giocata`;
-            }
+            title: (items) => `Dopo ${items[0].dataIndex + 1}\u00AA partita giocata`,
+            label: (item) => `${item.dataset.label}: ${item.parsed.y}%`
           }
         }
       },
       scales: {
-        x: {
-          grid: { color: 'rgba(0,0,0,0.05)' },
-          ticks: { font: { size: 10 }, color: '#a1a1a6' }
-        },
+        x: { grid: { color: 'rgba(0,0,0,0.05)' }, ticks: { font: { size: 10 }, color: '#a1a1a6' } },
         y: {
-          beginAtZero: true,
+          beginAtZero: true, max: 100,
           grid: { color: 'rgba(0,0,0,0.05)' },
-          ticks: {
-            font: { size: 10 },
-            color: '#a1a1a6',
-            stepSize: 1,
-            precision: 0
-          }
+          ticks: { font: { size: 10 }, color: '#a1a1a6', stepSize: 25, callback: v => v + '%' }
         }
       }
     }
@@ -3837,10 +3845,10 @@ function renderGrafico() {
 
 
 // ============ STATISTICHE DADO/PRIMO ============
-function renderStatDado() {
+function renderStatDado(partite = dati.partite) {
   const wrap = document.getElementById('stat-dado-wrap');
   if (!wrap) return;
-  const partiteConInfo = dati.partite.filter(p => p.primo);
+  const partiteConInfo = partite.filter(p => p.primo);
   if (!partiteConInfo.length) { wrap.innerHTML = ''; return; }
 
   const stat = {};
@@ -3848,7 +3856,7 @@ function renderStatDado() {
     stat[g] = { primoV: 0, primoT: 0, secondoV: 0, secondoT: 0, dadoV: 0, dadoT: 0, dadoWinV: 0, dadoPers: 0 };
   });
 
-  dati.partite.forEach(p => {
+  partite.forEach(p => {
     const [p1, p2] = PUNTI[p.risultato];
     const g1win = p1 > p2;
     if (p.primo) {
