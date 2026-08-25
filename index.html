@@ -197,7 +197,7 @@
   }
   .theme-btn:hover { background: var(--border); color: var(--text); }
   @media (max-width: 720px) { .theme-btn { right: 16px; } }
-  .cdg-btn {
+  .search-btn {
     position: fixed;
     top: 62px;
     right: calc((100vw - min(720px, 100vw)) / 2 + 16px);
@@ -206,13 +206,14 @@
     border-radius: 10px;
     width: 38px; height: 38px;
     display: flex; align-items: center; justify-content: center;
-    cursor: pointer; text-decoration: none; font-size: 1.05rem;
-    transition: background 0.15s; z-index: 50;
+    cursor: pointer; color: var(--text-dim);
+    transition: background 0.15s, color 0.15s; z-index: 50;
     box-shadow: 0 1px 4px rgba(0,0,0,0.08);
   }
-  .cdg-btn:hover { background: var(--border); }
-  @media (max-width: 720px) { .cdg-btn { right: 16px; } }
-  @media (max-width: 600px) { .cdg-btn { top: 56px; } }
+  .search-btn:hover { background: var(--border); color: var(--text); }
+  .search-btn.active { background: var(--blue); border-color: var(--blue); color: #fff; }
+  @media (max-width: 720px) { .search-btn { right: 16px; } }
+  @media (max-width: 600px) { .search-btn { top: 56px; } }
   .gear-btn {
     position: fixed;
     top: 16px;
@@ -1802,6 +1803,8 @@
   }
 
 
+  .mc-stagione { color: var(--blue); font-weight: 600; }
+
   /* ── STAGIONI ── */
   .stagione-item { overflow: hidden; margin-bottom: 12px; }
   .stagione-head {
@@ -1888,14 +1891,8 @@
     nav button { font-size: 0.72rem; padding: 7px 4px; }
     nav button svg { display: none; }
 
-    #tabella-giocatori th:nth-child(4),
-    #tabella-giocatori td:nth-child(4),
-    #tabella-giocatori th:nth-child(5),
-    #tabella-giocatori td:nth-child(5),
-    #tabella-giocatori th:nth-child(6),
-    #tabella-giocatori td:nth-child(6),
-    #tabella-giocatori th:nth-child(7),
-    #tabella-giocatori td:nth-child(7) { display: none; }
+    #tabella-giocatori th:nth-child(2),
+    #tabella-giocatori td:nth-child(2) { display: none; }
     th, td { padding: 10px 8px; font-size: 0.88rem; }
     th { font-size: 0.65rem; }
     .wr-bar { display: none; }
@@ -2663,7 +2660,9 @@
   <svg id="theme-icon-sun" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="display:none"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
 </button>
 
-<a href="ygordle.html" class="cdg-btn" title="Carta del Giorno - indovina la carta">🃏</a>
+<button class="search-btn" id="search-btn" onclick="switchTab('carte')" title="Ricerca carte e lista Genesys">
+  <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="16.2" y1="16.2" x2="21" y2="21"/></svg>
+</button>
 
 <!-- OVERLAY DUELLO -->
 <div class="duel-overlay" id="duel-overlay">
@@ -2837,22 +2836,22 @@
 </div>
 
 <nav>
-  <button class="tab-btn active" data-tab="carte"><svg width="13" height="13" viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:-1px;margin-right:4px"><circle cx="5.5" cy="5.5" r="4" stroke="currentColor" stroke-width="1.6"/><line x1="8.7" y1="8.7" x2="12" y2="12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>Ricerca</button>
-  <button class="tab-btn" data-tab="giocatori"><svg width="13" height="13" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:-1px;margin-right:4px"><path d="M7 9.5c-2.5 0-4-1.8-4-4V2h8v3.5c0 2.2-1.5 4-4 4z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M5 9.8v1.7M9 9.8v1.7M4.5 11.5h5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M3 2H1.5v1.5C1.5 4.9 2.3 6 3.5 6.5M11 2h1.5v1.5C12.5 4.9 11.7 6 10.5 6.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>Classifica</button>
+  <button class="tab-btn active" data-tab="giocatori"><svg width="13" height="13" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:-1px;margin-right:4px"><path d="M7 9.5c-2.5 0-4-1.8-4-4V2h8v3.5c0 2.2-1.5 4-4 4z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M5 9.8v1.7M9 9.8v1.7M4.5 11.5h5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M3 2H1.5v1.5C1.5 4.9 2.3 6 3.5 6.5M11 2h1.5v1.5C12.5 4.9 11.7 6 10.5 6.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>Classifica</button>
   <button class="tab-btn" data-tab="mazzi"><svg width="13" height="13" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:-1px;margin-right:4px"><rect x="3" y="1" width="8" height="10" rx="1.5" stroke="currentColor" stroke-width="1.6"/><rect x="1.5" y="2.5" width="8" height="10" rx="1.5" stroke="currentColor" stroke-width="1.6"/><line x1="4.5" y1="6" x2="8.5" y2="6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><line x1="4.5" y1="8.5" x2="7" y2="8.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Deck</button>
   <button class="tab-btn" data-tab="statistiche"><svg width="13" height="13" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:-1px;margin-right:4px"><polyline points="2,11 5,7 8,9 12,3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>Statistiche</button>
   <button class="tab-btn" data-tab="stagioni" onclick="apriStagioni()"><svg width="13" height="13" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:-1px;margin-right:4px"><path d="M4 1.5h6v3a3 3 0 0 1-6 0v-3z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M5.5 7.6v2.2M8.5 7.6v2.2M4.5 10.2h5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M4 2.5H2v1a2 2 0 0 0 2 2M10 2.5h2v1a2 2 0 0 1-2 2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Stagioni</button>
 </nav>
 
 <main>
-  <section id="giocatori">
+  <section id="giocatori" class="active">
     <h2 class="section-title-centered">Classifica</h2>
+    <div class="inner-tab-bar" style="max-width:640px;margin:0 auto 18px">\n      <button class="inner-tab active" id="ctab-cur" onclick="switchScopeClassifica('cur')">Stagione corrente</button>\n      <button class="inner-tab" id="ctab-all" onclick="switchScopeClassifica('all')">All-time</button>\n    </div>
     <div class="classifica-top">
       <div class="card"><table id="tabella-giocatori"></table></div>
     </div>
     <div class="classifica-top">
       <h3 class="subsection-title">Storico Partite</h3>
-      <p class="section-note">Tocca ✏️ per modificare o 🗑 per eliminare.</p>
+      <p class="section-note" id="storico-nota">Tocca ✏️ per modificare o 🗑 per eliminare.</p>
       <div class="card" id="lista-partite"></div>
     </div>
   </section>
@@ -2881,6 +2880,7 @@
 
   <section id="mazzi">
     <h2 class="section-title-centered">Deck</h2>
+    <div class="inner-tab-bar" style="max-width:640px;margin:0 auto 18px">\n      <button class="inner-tab active" id="dtab-cur" onclick="switchScopeDeck('cur')">Stagione corrente</button>\n      <button class="inner-tab" id="dtab-all" onclick="switchScopeDeck('all')">All-time</button>\n    </div>
     <div class="desktop-split">
       <div class="desktop-col-left">
         <p class="section-note"><em>Ordinati per win rate. I mazzi con meno di 3 partite sono In prova.</em></p>
@@ -2949,7 +2949,7 @@
     </div>
   </section>
 
-  <section id="carte" class="active">
+  <section id="carte">
     <h2 class="section-title-centered">Ricerca</h2>
 
     <div id="inner-tab-bar-wrap">
@@ -3378,6 +3378,7 @@ async function caricaDati() {
     }
   } catch (e) { console.error("Errore di caricamento dal Cloud:", e); }
   await caricaDecklist70();
+  await caricaStagioni(true);
   popolaTutto();
 }
 
@@ -3407,10 +3408,10 @@ async function salvaDatiCloud() {
 }
 
 // ============ STATISTICHE ============
-function calcolaStatGiocatori() {
+function calcolaStatGiocatori(partite = dati.partite) {
   const stat = {};
   dati.giocatori.forEach(g => stat[g] = { punti: 0, v: 0, p: 0, partite: 0 });
-  dati.partite.forEach(par => {
+  partite.forEach(par => {
     const [p1, p2] = PUNTI[par.risultato];
     if (!stat[par.g1]) stat[par.g1] = { punti: 0, v: 0, p: 0, partite: 0 };
     if (!stat[par.g2]) stat[par.g2] = { punti: 0, v: 0, p: 0, partite: 0 };
@@ -3422,12 +3423,12 @@ function calcolaStatGiocatori() {
   return stat;
 }
 
-function calcolaStatMazzi() {
+function calcolaStatMazzi(partite = dati.partite) {
   const stat = {};
   Object.entries(dati.mazzi).forEach(([nome, prop]) => {
     stat[nome] = { proprietario: prop, v: 0, p: 0, partite: 0 };
   });
-  dati.partite.forEach(par => {
+  partite.forEach(par => {
     [par.m1, par.m2].forEach((m, i) => {
       if (!stat[m]) {
         const prop = i === 0 ? par.g1 : par.g2;
@@ -3464,14 +3465,54 @@ function getMedalMap() {
 }
 
 // ============ RENDER ============
+// ── SCOPE: stagione corrente vs all-time ──
+let _scopeDeck = 'cur';
+let _scopeClassifica = 'cur';
+let _deckScopePartite = [];
+
+// partite archiviate (etichettate con la stagione) + partite della stagione in corso
+function partiteAllTime() {
+  const arch = (_stagioniCache || []).flatMap(st =>
+    (st.partite || []).map(par => ({ ...par, _stagione: st.nome || ('Stagione ' + st.numero) }))
+  );
+  return arch.concat(dati.partite || []);
+}
+function partiteScope(scope) {
+  return scope === 'all' ? partiteAllTime() : dati.partite;
+}
+
+function switchScopeDeck(scope) {
+  _scopeDeck = scope;
+  document.getElementById('dtab-cur').classList.toggle('active', scope === 'cur');
+  document.getElementById('dtab-all').classList.toggle('active', scope === 'all');
+  const pt = partiteScope(scope);
+  renderMazzi(pt);
+  renderMatchup(pt);
+}
+
+function switchScopeClassifica(scope) {
+  _scopeClassifica = scope;
+  document.getElementById('ctab-cur').classList.toggle('active', scope === 'cur');
+  document.getElementById('ctab-all').classList.toggle('active', scope === 'all');
+  const pt = partiteScope(scope);
+  renderGiocatori(pt);
+  renderStorico(pt, scope === 'cur');
+  const nota = document.getElementById('storico-nota');
+  if (nota) nota.textContent = scope === 'cur'
+    ? 'Tocca \u270F\uFE0F per modificare o \uD83D\uDDD1 per eliminare.'
+    : 'Comprende le partite delle stagioni archiviate, che non sono modificabili.';
+}
+window.switchScopeDeck = switchScopeDeck;
+window.switchScopeClassifica = switchScopeClassifica;
+
 function popolaTutto() {
-  renderGiocatori();
+  renderGiocatori(partiteScope(_scopeClassifica));
   renderRiepilogo();
   renderGrafico();
   renderStatDado();
-  renderMazzi();
-  renderStorico();
-  renderMatchup();
+  renderMazzi(partiteScope(_scopeDeck));
+  renderStorico(partiteScope(_scopeClassifica), _scopeClassifica === 'cur');
+  renderMatchup(partiteScope(_scopeDeck));
   popolaSelectGiocatori();
   aggiornaOpzioniRisultato();
   renderConfigGiocatori();
@@ -3482,35 +3523,32 @@ function popolaTutto() {
     document.getElementById('data').value = new Date().toISOString().slice(0, 10);
 }
 
-function renderGiocatori() {
-  const stat = calcolaStatGiocatori();
-  const arr = Object.entries(stat).sort((a, b) => b[1].punti - a[1].punti || b[1].v - a[1].v);
+function renderGiocatori(partite = dati.partite) {
+  const stat = calcolaStatGiocatori(partite);
+  // niente punti né podio: si ordina per win rate, poi per partite giocate
+  const arr = Object.entries(stat).sort((a, b) => {
+    const wa = a[1].partite > 0 ? a[1].v / a[1].partite : -1;
+    const wb = b[1].partite > 0 ? b[1].v / b[1].partite : -1;
+    if (wb !== wa) return wb - wa;
+    return b[1].partite - a[1].partite;
+  });
   const t = document.getElementById('tabella-giocatori');
   if (arr.length === 0 || arr.every(([_, s]) => s.partite === 0)) {
     t.innerHTML = '<tr><td class="empty">Ancora nessuna partita registrata.</td></tr>';
     return;
   }
-  const medals = ['🥇', '🥈', '🥉'];
-  const cols = 8;
-  let html = '<tr><th>#</th><th>Duellante</th><th>Punti</th><th>PG</th><th>V</th><th>P</th><th>Media</th><th>Win Rate</th></tr>';
-  arr.forEach(([nome, s], i) => {
+  const cols = 5;
+  let html = '<tr><th>Duellante</th><th>PG</th><th>V</th><th>P</th><th>Win Rate</th></tr>';
+  arr.forEach(([nome, s]) => {
     const wr = s.partite > 0 ? Math.round(100 * s.v / s.partite) : 0;
-    const media = s.partite > 0 ? (s.punti / s.partite).toFixed(1) : '—';
-    const hasMedal = i < 3 && s.partite > 0;
-    const rankCell = hasMedal
-      ? `<td class="rank"><span class="medal">${medals[i]}</span></td>`
-      : `<td class="rank">${i + 1}</td>`;
     const safeNome = nome.replace(/'/g, "\'");
-    html += `<tr class="${i === 0 && s.partite > 0 ? 'top-1' : ''}">
-      ${rankCell}
+    html += `<tr>
       <td>
         <span class="name-btn">${nome}</span>
         <button class="profile-toggle-btn" id="ptbtn-${safeNome}" onclick="toggleProfiloInline('${safeNome}')">${SVG_CHEVRON}</button>
       </td>
-      <td class="pts">${s.punti}</td>
       <td class="num">${s.partite}</td>
       <td class="num">${s.v}</td><td class="num">${s.p}</td>
-      <td class="num">${media}</td>
       <td><div class="wr-cell"><span class="wr-text">${wr}%</span><span class="wr-bar"><span style="width:${wr}%"></span></span></div></td>
     </tr>
     <tr class="profile-inline-row" id="prow-${safeNome}">
@@ -3870,8 +3908,8 @@ function renderStatDado() {
   wrap.innerHTML = rows;
 }
 
-function renderMazzi() {
-  const stat = calcolaStatMazzi();
+function renderMazzi(partite = dati.partite) {
+  const stat = calcolaStatMazzi(partite);
   const arr = Object.entries(stat).sort((a, b) => {
     const ua = a[1].partite >= SOGLIA_MAZZO ? 1 : 0;
     const ub = b[1].partite >= SOGLIA_MAZZO ? 1 : 0;
@@ -3909,13 +3947,13 @@ function renderMazzi() {
   t.innerHTML = html;
 }
 
-function renderStorico() {
+function renderStorico(partite = dati.partite, modificabile = true) {
   const c = document.getElementById('lista-partite');
-  if (dati.partite.length === 0) {
+  if (partite.length === 0) {
     c.innerHTML = '<div class="empty">Lo storico è vuoto.</div>';
     return;
   }
-  const arr = dati.partite.map((p, idx) => ({ p, idx })).reverse();
+  const arr = partite.map((p, idx) => ({ p, idx })).reverse();
   c.innerHTML = arr.map(({p, idx}) => {
     const [p1, p2] = PUNTI[p.risultato];
     const g1win = p1 > p2;
@@ -3924,7 +3962,7 @@ function renderStorico() {
     const noteHtml = p.note ? `<div class="match-note">${escapeHtml(p.note)}</div>` : '';
     return `<div class="match-card">
       <div class="mc-main">
-        <div class="date">${formatData(p.data)}</div>
+        <div class="date">${formatData(p.data)}${p._stagione ? ` · <span class="mc-stagione">${escapeHtml(p._stagione)}</span>` : ''}</div>
         <div class="mc-versus">
           <div class="side-left">
             <span class="player ${g1win ? 'win' : ''}">${p.g1}</span>
@@ -3941,18 +3979,19 @@ function renderStorico() {
         ${extraBadges.length ? `<div class="match-extra">${extraBadges.join('')}</div>` : ''}
         ${noteHtml}
       </div>
-      <div class="btn-group">
+      ${modificabile ? `<div class="btn-group">
         <button class="edit-btn" onclick="apriModifica(${idx})" title="Modifica partita">✏️</button>
         <button class="del-btn" onclick="eliminaPartita(${idx})" title="Elimina questa partita">🗑</button>
-      </div>
+      </div>` : ''}
     </div>`;
   }).join('');
 }
 
-function renderMatchup() {
+function renderMatchup(partite = dati.partite) {
+  _deckScopePartite = partite;
   const c = document.getElementById('grid-matchup');
   const mazzi = new Set();
-  dati.partite.forEach(p => { mazzi.add(p.m1); mazzi.add(p.m2); });
+  partite.forEach(p => { mazzi.add(p.m1); mazzi.add(p.m2); });
   const lista = [...mazzi].sort();
   if (lista.length === 0) {
     c.innerHTML = '<div class="empty" style="padding:32px">Nessun match-up ancora.</div>';
@@ -3963,7 +4002,7 @@ function renderMatchup() {
     stat[a] = { v:0, p:0, primoV:0, primoT:0, secondoV:0, secondoT:0, vs:{} };
     lista.forEach(b => { if (a !== b) stat[a].vs[b] = {v:0, p:0}; });
   });
-  dati.partite.forEach(par => {
+  partite.forEach(par => {
     const [p1, p2] = PUNTI[par.risultato];
     const g1win = p1 > p2;
     const m1 = par.m1, m2 = par.m2;
@@ -4073,7 +4112,7 @@ async function apriDettaglioMazzo(mazzo) {
   const tot = s.v + s.p;
 
   // posizione in classifica deck e % di utilizzo
-  const statMazzi = calcolaStatMazzi();
+  const statMazzi = calcolaStatMazzi(_deckScopePartite);
   const ordineMazzi = Object.entries(statMazzi).sort((a, b) => {
     const ua = a[1].partite >= SOGLIA_MAZZO ? 1 : 0;
     const ub = b[1].partite >= SOGLIA_MAZZO ? 1 : 0;
@@ -4082,7 +4121,7 @@ async function apriDettaglioMazzo(mazzo) {
     return b[1].partite - a[1].partite;
   }).map(([nome]) => nome);
   const posizione = ordineMazzi.indexOf(mazzo) + 1;
-  const totPartiteLega = dati.partite.length;
+  const totPartiteLega = _deckScopePartite.length;
   const utilizzo = totPartiteLega > 0 ? Math.round(100 * tot / totPartiteLega) + '%' : '—';
 
   const vsRows = Object.entries(s.vs)
@@ -4556,6 +4595,8 @@ function switchTab(id) {
   if (btn) btn.classList.add('active');
   const sec = document.getElementById(id);
   if (sec) sec.classList.add('active');
+  const sb = document.getElementById('search-btn');
+  if (sb) sb.classList.toggle('active', id === 'carte');
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
@@ -4565,6 +4606,8 @@ document.querySelectorAll('.tab-btn').forEach(b => {
     document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
     b.classList.add('active');
     document.getElementById(b.dataset.tab).classList.add('active');
+    const sb = document.getElementById('search-btn');
+    if (sb) sb.classList.remove('active');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   });
 });
