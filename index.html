@@ -3804,8 +3804,6 @@ function renderGrafico(partite = dati.partite) {
 
   const partiteOrd = [...partite].sort((a, b) => (a.data || '').localeCompare(b.data || ''));
   // andamento del win rate: per ogni giocatore un punto dopo ogni SUA partita
-  // tratti diversi per giocatore: se due curve coincidono restano distinguibili
-  const DASH = [[], [7, 4], [2, 3], [10, 4, 2, 4]];
   const serieWr = {};
   let maxPartite = 0;
   giocatori.forEach(g => {
@@ -3828,15 +3826,10 @@ function renderGrafico(partite = dati.partite) {
 
   const labels = Array.from({ length: maxPartite }, (_, i) => `P${i + 1}`);
 
-  const legendTratto = (c, i) => {
-    const d = DASH[i % DASH.length];
-    if (!d.length) return c;
-    return `repeating-linear-gradient(90deg, ${c} 0 ${d[0]}px, transparent ${d[0]}px ${d[0] + d[1]}px)`;
-  };
   const legendEl = document.getElementById('chart-legend');
   legendEl.innerHTML = giocatori.map((g, i) => `
     <div class="chart-legend-item">
-      <div class="chart-legend-bar" style="background:${legendTratto(COLORS[i % COLORS.length], i)}"></div>
+      <div class="chart-legend-bar" style="background:${COLORS[i % COLORS.length]}"></div>
       ${g}
     </div>`).join('');
 
@@ -3855,7 +3848,6 @@ function renderGrafico(partite = dati.partite) {
         borderColor: COLORS[i % COLORS.length],
         backgroundColor: COLORS[i % COLORS.length] + '18',
         borderWidth: 2.5,
-        borderDash: DASH[i % DASH.length],
         pointRadius: 0,
         pointHoverRadius: 4,
         tension: 0.3,
