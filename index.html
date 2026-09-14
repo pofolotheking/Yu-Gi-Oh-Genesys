@@ -2891,7 +2891,7 @@
     </div>
     <div class="desktop-split stat-top">
       <div class="desktop-col-left">
-        <p class="section-note"><em>Andamento del win rate nel corso delle partite della lega</em></p>
+        <p class="section-note"><em>Andamento del win rate per partite giocate</em></p>
         <div class="card" id="chart-card">
           <div class="chart-wrap"><canvas id="chart-andamento"></canvas></div>
           <div class="chart-legend" id="chart-legend"></div>
@@ -3804,24 +3804,24 @@ function renderGrafico(partite = dati.partite) {
 
   const partiteOrd = [...partite].sort((a, b) => (a.data || '').localeCompare(b.data || ''));
   // andamento del win rate: per ogni giocatore un punto dopo ogni SUA partita
-  // asse x = progressivo delle partite della LEGA, non del singolo giocatore:
-  // cosi' le curve sono confrontabili nello stesso istante e chi non gioca
-  // resta su una linea piatta invece di scalare le posizioni degli altri
-  const stato = {}, serieWr = {};
-  giocatori.forEach(g => { stato[g] = { v: 0, tot: 0 }; serieWr[g] = []; });
+  const serieWr = {};
   let maxPartite = 0;
-  partiteOrd.forEach(par => {
-    const r = PUNTI[par.risultato];
-    if (!r) return;
-    const [p1, p2] = r;
-    giocatori.forEach(g => {
-      if (par.g1 === g)      { stato[g].tot++; if (p1 > p2) stato[g].v++; }
-      else if (par.g2 === g) { stato[g].tot++; if (p2 > p1) stato[g].v++; }
+  giocatori.forEach(g => {
+    let v = 0, tot = 0;
+    const serie = [];
+    partiteOrd.forEach(par => {
+      const r = PUNTI[par.risultato];
+      if (!r) return;
+      const [p1, p2] = r;
+      let giocata = false, vinta = false;
+      if (par.g1 === g)      { giocata = true; vinta = p1 > p2; }
+      else if (par.g2 === g) { giocata = true; vinta = p2 > p1; }
+      if (!giocata) return;
+      tot++; if (vinta) v++;
+      serie.push(Math.round(100 * v / tot));
     });
-    // null finche' un giocatore non ha ancora debuttato: la sua linea parte dopo
-    giocatori.forEach(g => serieWr[g].push(
-      stato[g].tot > 0 ? Math.round(100 * stato[g].v / stato[g].tot) : null));
-    maxPartite++;
+    serieWr[g] = serie;
+    if (serie.length > maxPartite) maxPartite = serie.length;
   });
 
   const labels = Array.from({ length: maxPartite }, (_, i) => `P${i + 1}`);
@@ -3861,7 +3861,7 @@ function renderGrafico(partite = dati.partite) {
         legend: { display: false },
         tooltip: {
           callbacks: {
-            title: (items) => `Dopo la ${items[0].dataIndex + 1}\u00AA partita della lega`,
+            title: (items) => `Dopo ${items[0].dataIndex + 1}\u00AA partita giocata`,
             label: (item) => `${item.dataset.label}: ${item.parsed.y}%`
           }
         }
