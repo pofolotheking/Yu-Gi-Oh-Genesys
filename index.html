@@ -1715,6 +1715,10 @@
     border-radius: 50%;
     flex-shrink: 0;
   }
+  .chart-legend-n {
+    margin-left: 5px; font-size: 0.72rem; font-weight: 600;
+    color: var(--text-faint); font-variant-numeric: tabular-nums;
+  }
   .chart-legend-bar {
     width: 20px;
     height: 3px;
@@ -3833,7 +3837,7 @@ function renderGrafico(partite = dati.partite) {
   legendEl.innerHTML = giocatori.map((g, i) => `
     <div class="chart-legend-item">
       <div class="chart-legend-bar" style="background:${COLORS[i % COLORS.length]}"></div>
-      ${g}
+      ${g}<span class="chart-legend-n">${Math.max(0, serieWr[g].length - 1)}</span>
     </div>`).join('');
 
   const cssVar = getComputedStyle(document.documentElement);
@@ -3893,12 +3897,25 @@ function renderStatDado(partite = dati.partite, contId = 'stat-dado-wrap') {
 
   const stat = {};
   dati.giocatori.forEach(g => {
-    stat[g] = { primoV: 0, primoT: 0, secondoV: 0, secondoT: 0, dadoV: 0, dadoT: 0, dadoWinV: 0, dadoPers: 0 };
+    stat[g] = { primoV: 0, primoT: 0, secondoV: 0, secondoT: 0, dadoV: 0, dadoT: 0, dadoWinV: 0, dadoPers: 0,
+                v20: 0, v21: 0, s21: 0, s20: 0 };
   });
 
   partite.forEach(p => {
-    const [p1, p2] = PUNTI[p.risultato];
+    const punti = PUNTI[p.risultato];
+    if (!punti) return;                 // risultato non riconosciuto: si salta
+    const [p1, p2] = punti;
     const g1win = p1 > p2;
+    // scarti: il risultato e' sempre scritto dal punto di vista di g1
+    [p.g1, p.g2].forEach(g => {
+      if (!stat[g]) return;
+      const suo = p.g1 === g ? p.risultato
+                : { '2-0': '0-2', '2-1': '1-2', '1-2': '2-1', '0-2': '2-0' }[p.risultato];
+      if      (suo === '2-0') stat[g].v20++;
+      else if (suo === '2-1') stat[g].v21++;
+      else if (suo === '1-2') stat[g].s21++;
+      else if (suo === '0-2') stat[g].s20++;
+    });
     if (p.primo) {
       [p.g1, p.g2].forEach(g => {
         if (!stat[g]) return;
@@ -3929,7 +3946,8 @@ function renderStatDado(partite = dati.partite, contId = 'stat-dado-wrap') {
   );
 
   const rows = ordine.map(g => {
-    const s = stat[g] || { primoV:0, primoT:0, secondoV:0, secondoT:0, dadoV:0, dadoT:0, dadoWinV:0 };
+    const s = stat[g] || { primoV:0, primoT:0, secondoV:0, secondoT:0, dadoV:0, dadoT:0, dadoWinV:0,
+                           v20:0, v21:0, s21:0, s20:0 };
     const wrDado    = s.dadoV > 0 ? pct(s.dadoWinV, s.dadoV) : '—';
     const wrPrimo   = s.primoT > 0   ? pct(s.primoV, s.primoT)     : '—';
     const wrSecondo = s.secondoT > 0 ? pct(s.secondoV, s.secondoT) : '—';
@@ -3944,6 +3962,10 @@ function renderStatDado(partite = dati.partite, contId = 'stat-dado-wrap') {
         <div class="dps-item"><span class="dps-lbl">Volte 2°</span><span class="dps-val">${s.secondoT}</span></div>
         <div class="dps-item"><span class="dps-lbl">WR da 1°</span><span class="dps-val">${wrPrimo}</span></div>
         <div class="dps-item"><span class="dps-lbl">WR da 2°</span><span class="dps-val">${wrSecondo}</span></div>
+        <div class="dps-item"><span class="dps-lbl">Vittorie 2-0</span><span class="dps-val">${s.v20}</span></div>
+        <div class="dps-item"><span class="dps-lbl">Vittorie 2-1</span><span class="dps-val">${s.v21}</span></div>
+        <div class="dps-item"><span class="dps-lbl">Sconfitte 2-1</span><span class="dps-val">${s.s21}</span></div>
+        <div class="dps-item"><span class="dps-lbl">Sconfitte 2-0</span><span class="dps-val">${s.s20}</span></div>
       </div>
     </div>`;
   }).join('');
