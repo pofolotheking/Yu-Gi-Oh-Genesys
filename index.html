@@ -693,6 +693,58 @@
     font-size: 1.05rem; display: inline; margin-left: auto;
   }
   .deck-mu-vs-list { max-width: 480px; margin: 0 auto; width: 100%; }
+
+  /* cronologia partite dentro il popup del mazzo */
+  .dmh-tabs { max-width: 480px; margin: 0 auto 10px; }
+  .dmh-list { max-width: 480px; margin: 0 auto; width: 100%; }
+  .dmh-row {
+    display: flex; align-items: center; gap: 11px;
+    padding: 9px 12px; border-bottom: 1px solid var(--border);
+  }
+  .dmh-row:last-child { border-bottom: none; }
+  .dmh-esito {
+    flex-shrink: 0; width: 24px; height: 24px; border-radius: 7px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.74rem; font-weight: 800; color: #fff;
+  }
+  .dmh-row.win  .dmh-esito { background: var(--green); }
+  .dmh-row.lose .dmh-esito { background: var(--red); }
+  .dmh-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+  .dmh-vs {
+    font-size: 0.93rem; font-weight: 600; color: var(--text);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .dmh-meta {
+    font-size: 0.72rem; color: var(--text-faint);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .dmh-score {
+    flex-shrink: 0; font-size: 1.02rem; font-weight: 700;
+    font-variant-numeric: tabular-nums; letter-spacing: 0.02em;
+  }
+  .dmh-row.win  .dmh-score { color: var(--green-dark); }
+  .dmh-row.lose .dmh-score { color: var(--red); }
+  .dmh-vuoto { padding: 10px 2px; font-size: 0.85rem; color: var(--text-faint); text-align: center; }
+
+  /* sopra lo sfondo immagine servono testo chiaro e una base scura */
+  .detail-modal.has-bg-img .dmh-row { border-bottom-color: rgba(255,255,255,0.14); }
+  .detail-modal.has-bg-img .dmh-vs,
+  .detail-modal.has-bg-img .dmh-meta,
+  .detail-modal.has-bg-img .dmh-vuoto {
+    color: #fff !important; text-shadow: 0 1px 4px rgba(0,0,0,0.7);
+  }
+  .detail-modal.has-bg-img .dmh-meta { opacity: 0.85; }
+  .detail-modal.has-bg-img .dmh-row.win  .dmh-score { color: #4ade80 !important; }
+  .detail-modal.has-bg-img .dmh-row.lose .dmh-score { color: #f87171 !important; }
+
+  @media (max-width: 600px) {
+    .dmh-row { gap: 9px; padding: 8px 8px; }
+    .dmh-esito { width: 21px; height: 21px; font-size: 0.68rem; border-radius: 6px; }
+    .dmh-vs { font-size: 0.87rem; }
+    .dmh-meta { font-size: 0.68rem; }
+    .dmh-score { font-size: 0.95rem; }
+    .dmh-tabs .inner-tab { font-size: 0.78rem; padding: 7px 4px; }
+  }
   .deck-mu-vs-row {
     display: flex; align-items: center; justify-content: space-between;
     padding: 10px 16px; font-size: 0.88rem;
@@ -4177,6 +4229,47 @@ function chiudiDettaglio() {
   if (modal) { modal.style.backgroundImage = ''; modal.classList.remove('has-bg-img'); modal.classList.remove('deck-full'); }
 }
 
+// cronologia delle partite di un singolo mazzo, con il risultato sempre
+// scritto dal punto di vista del mazzo aperto
+let _dmhMazzo = null;
+function renderCronologiaMazzo(mazzo, scope) {
+  const box = document.getElementById('dmh-body');
+  if (!box) return;
+  const righe = partiteScope(scope).filter(par => par.m1 === mazzo || par.m2 === mazzo);
+  if (!righe.length) {
+    box.innerHTML = '<div class="dmh-vuoto">Nessuna partita con questo mazzo' +
+      (scope === 'cur' ? ' in questa stagione.' : '.') + '</div>';
+    return;
+  }
+  box.innerHTML = righe.reverse().map(par => {
+    const r = PUNTI[par.risultato];
+    if (!r) return '';
+    const [p1, p2] = r;
+    const suo = par.m1 === mazzo;
+    const vinta = suo ? p1 > p2 : p2 > p1;
+    const avvMazzo = suo ? par.m2 : par.m1;
+    const mioG = suo ? par.g1 : par.g2;
+    const avvG = suo ? par.g2 : par.g1;
+    // il risultato e' memorizzato dal punto di vista di g1: se il mazzo e' il
+    // secondo va ribaltato, altrimenti una vittoria sembrerebbe una sconfitta
+    const punteggio = suo ? par.risultato : par.risultato.split('-').reverse().join('-');
+    return `<div class="dmh-row ${vinta ? 'win' : 'lose'}">
+      <span class="dmh-esito">${vinta ? 'V' : 'S'}</span>
+      <span class="dmh-main">
+        <span class="dmh-vs">vs ${escapeHtml(avvMazzo)}</span>
+        <span class="dmh-meta">${escapeHtml(mioG)} contro ${escapeHtml(avvG)} \u00B7 ${formatData(par.data)}${par._stagione ? ' \u00B7 ' + escapeHtml(par._stagione) : ''}</span>
+      </span>
+      <span class="dmh-score">${punteggio}</span>
+    </div>`;
+  }).join('');
+}
+function switchCronologiaMazzo(scope) {
+  document.getElementById('dmh-tab-cur').classList.toggle('active', scope === 'cur');
+  document.getElementById('dmh-tab-all').classList.toggle('active', scope === 'all');
+  renderCronologiaMazzo(_dmhMazzo, scope);
+}
+window.switchCronologiaMazzo = switchCronologiaMazzo;
+
 async function apriDettaglioMazzo(mazzo) {
   const s = _matchupStat[mazzo];
   if (!s) return;
@@ -4232,9 +4325,18 @@ async function apriDettaglioMazzo(mazzo) {
     </div>
     <div class="detail-section-title">Match-up</div>
     <div class="deck-mu-vs-list">${noVs}</div>
+    <div class="detail-section-title">Cronologia partite</div>
+    <div class="inner-tab-bar dmh-tabs">
+      <button class="inner-tab active" id="dmh-tab-cur" onclick="switchCronologiaMazzo('cur')">Stagione corrente</button>
+      <button class="inner-tab" id="dmh-tab-all" onclick="switchCronologiaMazzo('all')">All-time</button>
+    </div>
+    <div class="dmh-list" id="dmh-body"></div>
     <div class="detail-section-title">Decklist</div>
     <div id="ddm-decklist-body"><div class="empty">Caricamento decklist…</div></div>
   `;
+
+  _dmhMazzo = mazzo;
+  renderCronologiaMazzo(mazzo, 'cur');
 
   const modal = document.getElementById('detail-modal');
   const imgUrl = imgMazzo(mazzo);
