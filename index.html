@@ -3820,11 +3820,14 @@ function renderGrafico(partite = dati.partite) {
       tot++; if (vinta) v++;
       serie.push(Math.round(100 * v / tot));
     });
-    serieWr[g] = serie;
+    // dopo una sola partita il win rate cumulato puo' valere solo 0 o 100:
+    // ogni serie parte quindi da un 50% neutro comune, cosi' si legge la
+    // divergenza invece di veder nascere le linee gia' agli estremi
+    serieWr[g] = [50, ...serie];
     if (serie.length > maxPartite) maxPartite = serie.length;
   });
 
-  const labels = Array.from({ length: maxPartite }, (_, i) => `P${i + 1}`);
+  const labels = ['Start', ...Array.from({ length: maxPartite }, (_, i) => `P${i + 1}`)];
 
   const legendEl = document.getElementById('chart-legend');
   legendEl.innerHTML = giocatori.map((g, i) => `
@@ -3861,7 +3864,9 @@ function renderGrafico(partite = dati.partite) {
         legend: { display: false },
         tooltip: {
           callbacks: {
-            title: (items) => `Dopo ${items[0].dataIndex + 1}\u00AA partita giocata`,
+            title: (items) => items[0].dataIndex === 0
+              ? 'Inizio stagione'
+              : `Dopo ${items[0].dataIndex}\u00AA partita giocata`,
             label: (item) => `${item.dataset.label}: ${item.parsed.y}%`
           }
         }
