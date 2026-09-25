@@ -1844,6 +1844,36 @@
   .notif-azioni { display: flex; gap: 8px; flex-wrap: wrap; }
   .notif-azioni button { flex: 1; min-width: 130px; }
 
+  /* ── CARTA DEL GIORNO ── */
+  .cdg-overlay {
+    position: fixed; inset: 0; z-index: 5000;
+    background: #0b0b10;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px;
+    padding: max(64px, env(safe-area-inset-top)) 20px max(28px, env(safe-area-inset-bottom));
+    animation: fade 0.3s ease;
+  }
+  body.cdg-aperta { overflow: hidden; }
+  .cdg-chiudi {
+    position: absolute; top: max(16px, env(safe-area-inset-top)); right: 16px;
+    width: 44px; height: 44px; border-radius: 50%; border: none; padding: 0;
+    background: #ff3b30; box-shadow: 0 4px 14px rgba(255, 59, 48, 0.45);
+    display: flex; align-items: center; justify-content: center; cursor: pointer;
+  }
+  .cdg-titolo {
+    color: rgba(255,255,255,0.7); font-size: 0.78rem; font-weight: 700;
+    letter-spacing: 0.14em; text-transform: uppercase;
+  }
+  .cdg-carta { display: flex; justify-content: center; min-height: 0; }
+  .cdg-img {
+    display: block; max-width: min(400px, 86vw); max-height: 64vh; width: auto; height: auto;
+    border-radius: 10px; box-shadow: 0 12px 40px rgba(0,0,0,0.6);
+  }
+  .cdg-nome { color: #fff; font-size: 1.15rem; font-weight: 700; text-align: center; max-width: 90vw; }
+  .cdg-punti {
+    color: #fff; background: rgba(255,255,255,0.12); border-radius: 999px;
+    padding: 5px 12px; font-size: 0.8rem; font-weight: 600;
+  }
+
   /* ── STAGIONI ── */
   .stagione-item { overflow: hidden; margin-bottom: 12px; }
   .stagione-head {
@@ -3306,7 +3336,7 @@
 <footer>
   <span>Tia · Gio · Richi</span>
   <button onclick="eseguiLogout()" style="background:none;border:none;color:var(--text-faint);font-size:0.75rem;cursor:pointer;margin-left:12px;font-family:inherit">Esci</button>
-  <div style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 46</div>
+  <div style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 47</div>
 </footer>
 
 </div>
@@ -6779,6 +6809,7 @@ onAuthStateChanged(auth, user => {
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('app-wrap').style.display = 'block';
     caricaDati();
+    cartaDelGiorno();
   } else {
     document.getElementById('login-screen').style.display = 'flex';
     document.getElementById('app-wrap').style.display = 'none';
@@ -7056,6 +7087,97 @@ window.collegaWorker = collegaWorker;
 window.attivaNotifiche = attivaNotifiche;
 window.disattivaNotifiche = disattivaNotifiche;
 window.provaNotifica = provaNotifica;
+
+// ============ CARTA DEL GIORNO ============
+// Alla prima apertura di ogni giornata compare a tutto schermo una carta del
+// formato Genesys. La scelta dipende solo dalla data, quindi nello stesso
+// giorno tutti vedono la stessa carta. Si chiede all'API una carta per volta
+// (num=1&offset=...) invece di scaricare l'intero elenco ogni mattina.
+const CDG_CHIAVE = 'genesys-carta-del-giorno';
+const CDG_API = 'https://db.ygoprodeck.com/api/v7/cardinfo.php?format=genesys&misc=yes&num=1&offset=';
+let _cdgInCorso = false;
+
+function oggiLocale() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+// numero stabile ricavato dalla data (FNV-1a): stessa data, stesso numero
+function semeDaData(s) {
+  let h = 2166136261;
+  for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); }
+  return h >>> 0;
+}
+
+async function cartaDelGiorno() {
+  const oggi = oggiLocale();
+  try { if (localStorage.getItem(CDG_CHIAVE) === oggi) return; } catch (e) {}
+  if (_cdgInCorso || document.visibilityState !== 'visible') return;
+  _cdgInCorso = true;
+  try {
+    const primo = await (await fetch(CDG_API + '0')).json();
+    const totale = primo && primo.meta && primo.meta.total_rows;
+    if (!totale) return;
+    const base = semeDaData(oggi) % totale;
+    let carta = null;
+    // Link e Pendulum non esistono in Genesys: se esce una di quelle si passa alla successiva
+    for (let t = 0; t < 8 && !carta; t++) {
+      const off = (base + t) % totale;
+      const r = off === 0 ? primo : await (await fetch(CDG_API + off)).json();
+      const c = r && r.data && r.data[0];
+      if (c && !/link|pendulum/i.test(c.type || '') && c.card_images && c.card_images[0]) carta = c;
+    }
+    if (!carta) return;
+    await mostraCartaDelGiorno(carta);
+    // si segna come vista solo se e' comparsa davvero: se la rete cade si riprova
+    try { localStorage.setItem(CDG_CHIAVE, oggi); } catch (e) {}
+  } catch (e) {
+    console.warn('Carta del giorno non disponibile:', e);
+  } finally {
+    _cdgInCorso = false;
+  }
+}
+
+function mostraCartaDelGiorno(c) {
+  return new Promise((ok, ko) => {
+    const img = new Image();
+    img.alt = c.name;
+    img.className = 'cdg-img';
+    img.onload = () => {
+      document.getElementById('cdg-overlay')?.remove();
+      const punti = c.misc_info && c.misc_info[0] && c.misc_info[0].genesys_points;
+      const ov = document.createElement('div');
+      ov.className = 'cdg-overlay';
+      ov.id = 'cdg-overlay';
+      ov.setAttribute('role', 'dialog');
+      ov.setAttribute('aria-label', 'Carta del giorno');
+      ov.innerHTML = `
+        <button class="cdg-chiudi" type="button" aria-label="Chiudi" onclick="chiudiCartaDelGiorno()">
+          <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M4 4l10 10M14 4L4 14" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/></svg>
+        </button>
+        <div class="cdg-titolo">Carta del giorno</div>
+        <div class="cdg-carta"></div>
+        <div class="cdg-nome">${escapeHtml(c.name)}</div>
+        ${punti > 0 ? `<div class="cdg-punti">${punti} punti Genesys</div>` : ''}`;
+      ov.querySelector('.cdg-carta').appendChild(img);
+      document.body.appendChild(ov);
+      document.body.classList.add('cdg-aperta');
+      ok();
+    };
+    img.onerror = () => ko(new Error('immagine non caricata'));
+    img.src = c.card_images[0].image_url;
+  });
+}
+
+function chiudiCartaDelGiorno() {
+  document.getElementById('cdg-overlay')?.remove();
+  document.body.classList.remove('cdg-aperta');
+}
+window.chiudiCartaDelGiorno = chiudiCartaDelGiorno;
+
+// se l'app resta aperta fino al giorno dopo, la carta nuova compare al rientro
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && document.getElementById('app-wrap')?.style.display === 'block') cartaDelGiorno();
+});
 
 // ============ FUMETTO ACHIEVEMENT ============
 // Un unico fumetto posizionato via JS: quello CSS era centrato sull'icona e
