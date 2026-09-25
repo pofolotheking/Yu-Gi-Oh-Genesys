@@ -6855,13 +6855,13 @@ function notifichePartita(par, achPrima) {
   const punteggio = vinceG1 ? par.risultato : par.risultato.split('-').reverse().join('-');
   // titolo = risultato, sempre visibile; i dettagli stanno su righe separate
   // e si leggono per intero allargando la notifica
-  const righe = [`🃏 ${mazzoV} contro ${mazzoS}`];
+  const righe = [];
   if (par.dado) righe.push(`🎲 Dado vinto da ${par.dado}`);
   if (par.note) {
     const nota = String(par.note).replace(/\s+/g, ' ').trim();
     if (nota) righe.push(`📝 ${nota.length > 200 ? nota.slice(0, 199) + '…' : nota}`);
   }
-  const lista = [{ title: `⚔️ ${vincitore} batte ${sconfitto} ${punteggio}`, body: righe.join('\n'), url: './' }];
+  const lista = [{ title: `⚔️ ${mazzoV} ${punteggio} ${mazzoS}`, body: righe.join('\n'), url: './' }];
   [par.g1, par.g2].forEach(g => {
     const prima = achPrima[g] || new Set();
     calcolaAchievements(g)
