@@ -1,5 +1,5 @@
 // sw.js — Service Worker essenziale, network-first
-const CACHE_NAME = 'genesys-cache-v38';
+const CACHE_NAME = 'genesys-cache-v39';
 const CORE_ASSETS = ['./', './index.html', './manifest.json'];
 
 // Installazione: pre-cache dei file base
@@ -51,12 +51,20 @@ self.addEventListener('fetch', e => {
 
 // Notifiche push: il messaggio arriva cifrato dal Worker e va SEMPRE mostrato,
 // altrimenti Safari su iPhone revoca l'iscrizione del dispositivo.
+// Toglie emoji e simboli: protegge dai testi composti da un'app non ancora
+// aggiornata, perche' il messaggio lo scrive il telefono di chi registra.
+function pulisci(t) {
+  return String(t || '')
+    .replace(/[\p{Extended_Pictographic}\u{1F000}-\u{1FAFF}\u2600-\u27BF\uFE0F\u200D\u20E3]/gu, '')
+    .split('\n').map(r => r.replace(/\s+/g, ' ').trim()).filter(Boolean).join('\n');
+}
+
 self.addEventListener('push', e => {
   let d = {};
   try { d = e.data ? e.data.json() : {}; }
   catch (_) { d = { body: e.data ? e.data.text() : '' }; }
-  e.waitUntil(self.registration.showNotification(d.title || 'Yu-Gi-Oh! Genesys', {
-    body: d.body || '',
+  e.waitUntil(self.registration.showNotification(pulisci(d.title) || 'Genesys', {
+    body: pulisci(d.body),
     icon: 'icon-192.png',
     badge: 'icon-192.png',
     tag: d.tag || undefined,

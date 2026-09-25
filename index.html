@@ -6829,15 +6829,14 @@ async function provaNotifica(silenziosa = false) {
   }
 }
 
-// avvisa tutti i dispositivi iscritti tranne quello da cui parte l'avviso
+// avvisa tutti i dispositivi iscritti, compreso quello di chi registra
 async function notificaLega(notifiche) {
   if (!notifiche || !notifiche.length || !(await workerNotifiche())) return;
   try {
     const snap = await getDoc(RIF_NOTIFICHE());
     const tutte = snap.exists() ? (snap.data().iscrizioni || {}) : {};
-    const mia = await iscrizioneCorrente().catch(() => null);
     const destinatari = Object.entries(tutte)
-      .filter(([, s]) => s && s.endpoint && s.keys && (!mia || s.endpoint !== mia.endpoint))
+      .filter(([, s]) => s && s.endpoint && s.keys)
       .map(([id, s]) => ({ id, endpoint: s.endpoint, keys: s.keys }));
     if (destinatari.length) await chiamaWorker(destinatari.slice(0, 25), notifiche.slice(0, 5));
   } catch (e) { console.warn('Notifiche della lega non inviate:', e); }
@@ -6879,10 +6878,26 @@ window.provaNotifica = provaNotifica;
 
 // ============ REGISTRAZIONE SERVICE WORKER (PWA) ============
 if ('serviceWorker' in navigator) {
+  // Su iPhone l'app resta in memoria e continua a eseguire il codice vecchio
+  // anche dopo un aggiornamento. Quando il service worker nuovo prende il
+  // controllo si ricarica la pagina, cosi' tutti usano sempre l'ultima versione.
+  // Non al primo avvio in assoluto, quando un controller prima non c'era.
+  const avevaController = !!navigator.serviceWorker.controller;
+  let ricaricata = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (!avevaController || ricaricata) return;
+    ricaricata = true;
+    location.reload();
+  });
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('sw.js')
       .then(reg => console.log('✅ Service Worker registrato', reg.scope))
       .catch(err => console.warn('SW non registrato:', err));
+  });
+  // ogni volta che l'app torna in primo piano si controlla se c'e' una versione nuova
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState !== 'visible') return;
+    navigator.serviceWorker.getRegistration().then(r => r && r.update()).catch(() => {});
   });
 }
 
