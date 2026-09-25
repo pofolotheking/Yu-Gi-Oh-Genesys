@@ -1886,6 +1886,11 @@
   [data-theme="dark"] .h2h-row.few { background: var(--orange-soft); }
   [data-theme="dark"] .header-btn-search:hover { background: var(--border); }
 
+  /* ── NOTIFICHE ── */
+  .notif-stato { margin: 0 0 12px; font-size: 0.9rem; line-height: 1.5; color: var(--text-dim); }
+  .notif-azioni { display: flex; gap: 8px; flex-wrap: wrap; }
+  .notif-azioni button { flex: 1; min-width: 130px; }
+
   /* ── STAGIONI ── */
   .stagione-item { overflow: hidden; margin-bottom: 12px; }
   .stagione-head {
@@ -3222,6 +3227,15 @@
     <h2 class="section-title-centered">Modifica</h2>
 
     <div class="accordion-item">
+      <button class="accordion-btn" onclick="toggleAccordion('acc-notifiche'); renderPannelloNotifiche()">
+        <span>🔔 Notifiche</span><span class="accordion-arrow">▶</span>
+      </button>
+      <div class="accordion-body" id="acc-notifiche" style="display:none">
+        <div class="card padded" id="notifiche-pannello"></div>
+      </div>
+    </div>
+
+    <div class="accordion-item">
       <button class="accordion-btn" onclick="toggleAccordion('acc-profili')">
         <span>👤 Profili Giocatori</span><span class="accordion-arrow">▶</span>
       </button>
@@ -3375,7 +3389,7 @@
 <script type="module">
 // ============ INIZIALIZZAZIONE FIREBASE ============
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, doc, getDoc, setDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFirestore, doc, getDoc, setDoc, updateDoc, deleteField, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 const firebaseConfig = {
@@ -3492,9 +3506,11 @@ async function salvaDatiCloud() {
     const docRef = doc(db, "lega", "dati_principali");
     await setDoc(docRef, dati);
     console.log("Dati sincronizzati con il Cloud!");
+    return true;
   } catch (e) {
     console.error("Errore durante il salvataggio:", e);
     alert("Errore di salvataggio nel Cloud. Controlla di aver avviato il database in Modalità Test.");
+    return false;
   }
 }
 
@@ -4826,9 +4842,15 @@ document.getElementById('form-partita').addEventListener('submit', async e => {
   const dado  = document.getElementById('dado')?.value  || '';
   const primo = document.getElementById('primo')?.value || '';
   const note  = document.getElementById('note')?.value.trim() || '';
-  dati.partite.push({ data, g1, m1, g2, m2, risultato: ris, dado, primo, note });
-  await salvaDatiCloud();
+  // achievement gia' sbloccati prima della partita, per avvisare solo dei nuovi
+  const achPrima = {};
+  [g1, g2].forEach(g => { achPrima[g] = new Set(calcolaAchievements(g).filter(a => a.unlocked).map(a => a.id)); });
+  const nuova = { data, g1, m1, g2, m2, risultato: ris, dado, primo, note };
+  dati.partite.push(nuova);
+  const salvata = await salvaDatiCloud();
   popolaTutto();
+  // senza await: l'invio non deve rallentare ne' bloccare la registrazione
+  if (salvata) notificaLega(notifichePartita(nuova, achPrima));
   const out = document.getElementById('output');
   out.classList.add('show');
   setTimeout(() => out.classList.remove('show'), 4000);
@@ -6606,6 +6628,246 @@ async function eseguiLogout() {
 window.eseguiLogin = eseguiLogin;
 window.eseguiLogout = eseguiLogout;
 
+
+// ============ NOTIFICHE PUSH ============
+// Le notifiche passano da un Worker Cloudflare (cartella cloudflare-worker/):
+// l'app non puo' firmarle da sola perche' la chiave privata finirebbe nel
+// codice pubblico. Indirizzo del Worker e iscrizioni dei dispositivi stanno
+// nel documento lega/notifiche, separato da dati_principali che viene
+// riscritto per intero a ogni salvataggio.
+const RIF_NOTIFICHE = () => doc(db, 'lega', 'notifiche');
+let _pushWorker = null;
+let _chiavePushCache = null;
+
+function pushSupportato() {
+  return 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
+}
+function isIOS() {
+  return /iPad|iPhone|iPod/.test(navigator.userAgent)
+    || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+}
+function isStandalone() {
+  return window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+}
+function b64uInBytes(s) {
+  const b = atob(s.replace(/-/g, '+').replace(/_/g, '/') + '==='.slice((s.length + 3) % 4));
+  return Uint8Array.from(b, c => c.charCodeAt(0));
+}
+async function idIscrizione(endpoint) {
+  const h = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(endpoint));
+  return [...new Uint8Array(h)].slice(0, 12).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+function nomeDispositivo() {
+  const ua = navigator.userAgent;
+  if (/iPhone/.test(ua)) return 'iPhone';
+  if (/iPad/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)) return 'iPad';
+  if (/Android/.test(ua)) return 'Android';
+  if (/Windows/.test(ua)) return 'Windows';
+  if (/Mac/.test(ua)) return 'Mac';
+  return 'Browser';
+}
+async function workerNotifiche() {
+  if (_pushWorker) return _pushWorker;
+  try {
+    const snap = await getDoc(RIF_NOTIFICHE());
+    if (snap.exists()) _pushWorker = snap.data().worker || null;
+  } catch (e) { console.warn('Configurazione notifiche non letta:', e); }
+  return _pushWorker;
+}
+async function iscrizioneCorrente() {
+  if (!pushSupportato()) return null;
+  const reg = await navigator.serviceWorker.getRegistration();
+  return reg ? reg.pushManager.getSubscription() : null;
+}
+async function caricaChiavePush() {
+  if (_chiavePushCache) return _chiavePushCache;
+  const w = await workerNotifiche();
+  if (!w) return null;
+  try {
+    const r = await fetch(w + '/chiave-pubblica');
+    if (r.ok) _chiavePushCache = (await r.json()).chiave || null;
+  } catch (e) { console.warn('Chiave notifiche non raggiungibile:', e); }
+  return _chiavePushCache;
+}
+function stessaChiave(a, b) {
+  if (!a || !b) return false;
+  const x = new Uint8Array(a), y = new Uint8Array(b);
+  return x.length === y.length && x.every((v, i) => v === y[i]);
+}
+
+async function renderPannelloNotifiche() {
+  const box = document.getElementById('notifiche-pannello');
+  if (!box) return;
+  const mostra = (testo, azioni = '') => { box.innerHTML = `<p class="notif-stato">${testo}</p>${azioni}`; };
+  const w = await workerNotifiche();
+  if (!w) {
+    return mostra('Per attivare le notifiche incolla qui l\'indirizzo del Worker Cloudflare. Si fa una volta sola e vale per tutti.',
+      `<div class="add-form"><div><label>Indirizzo del Worker</label>
+        <input type="url" id="notif-worker-url" placeholder="https://genesys-notifiche.nome.workers.dev" autocomplete="off"></div>
+        <button onclick="collegaWorker()">Collega</button></div>`);
+  }
+  if (isIOS() && !isStandalone()) {
+    return mostra('Su iPhone le notifiche arrivano solo all\'app aperta dall\'icona sulla schermata Home. '
+      + 'In Safari tocca <b>Condividi → Aggiungi alla schermata Home</b>, poi apri l\'app da lì e torna qui.');
+  }
+  if (!pushSupportato()) return mostra('Questo browser non supporta le notifiche.');
+  if (Notification.permission === 'denied') {
+    return mostra('Il permesso è stato negato. Per riattivarle apri le impostazioni del telefono → Notifiche → Genesys.');
+  }
+  // la chiave va tenuta pronta: su iPhone il permesso si chiede solo nel tocco
+  caricaChiavePush();
+  const sub = await iscrizioneCorrente();
+  if (sub && Notification.permission === 'granted') {
+    mostra('🔔 Notifiche attive su questo dispositivo. Ricevi un avviso quando qualcuno registra una partita o sblocca un achievement.',
+      `<div class="notif-azioni">
+        <button class="secondary" onclick="provaNotifica()">Invia una prova</button>
+        <button class="secondary" onclick="disattivaNotifiche()">Disattiva</button>
+      </div>`);
+  } else {
+    mostra('Ricevi un avviso sul telefono quando qualcuno registra una partita o sblocca un achievement.',
+      `<button onclick="attivaNotifiche()" style="width:100%">🔔 Attiva notifiche</button>`);
+  }
+}
+
+async function collegaWorker() {
+  const inp = document.getElementById('notif-worker-url');
+  const url = ((inp && inp.value) || '').trim().replace(/\/+$/, '');
+  if (!/^https:\/\/[^\s/]+$/.test(url)) {
+    alert('Incolla l\'indirizzo completo del Worker, per esempio https://genesys-notifiche.nome.workers.dev');
+    return;
+  }
+  let info;
+  try { info = await (await fetch(url + '/')).json(); }
+  catch (e) { alert('Non riesco a raggiungere il Worker a quell\'indirizzo. Controlla di averlo copiato bene.'); return; }
+  if (!info || info.servizio !== 'notifiche Genesys') {
+    alert('A quell\'indirizzo risponde un servizio diverso dal Worker delle notifiche.');
+    return;
+  }
+  if (!info.configurato) {
+    alert('Il Worker risponde ma mancano ancora le chiavi: completa il passo delle variabili e premi Deploy.');
+    return;
+  }
+  await setDoc(RIF_NOTIFICHE(), { worker: url }, { merge: true });
+  _pushWorker = url;
+  _chiavePushCache = null;
+  renderPannelloNotifiche();
+}
+
+async function attivaNotifiche() {
+  try {
+    // prima di ogni altra attesa: iOS accetta la richiesta solo dentro il tocco
+    const permesso = await Notification.requestPermission();
+    if (permesso !== 'granted') { renderPannelloNotifiche(); return; }
+    const chiave = await caricaChiavePush();
+    if (!chiave) { alert('Il servizio notifiche non risponde. Riprova tra poco.'); return; }
+    const chiaveBytes = b64uInBytes(chiave);
+    const reg = await navigator.serviceWorker.ready;
+    let sub = await reg.pushManager.getSubscription();
+    // un'iscrizione fatta con chiavi diverse va rifatta, altrimenti subscribe fallisce
+    if (sub && !stessaChiave(sub.options && sub.options.applicationServerKey, chiaveBytes)) {
+      await sub.unsubscribe();
+      sub = null;
+    }
+    if (!sub) sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: chiaveBytes });
+    const j = sub.toJSON();
+    const id = await idIscrizione(j.endpoint);
+    await setDoc(RIF_NOTIFICHE(), { iscrizioni: { [id]: {
+      endpoint: j.endpoint, keys: j.keys, dispositivo: nomeDispositivo(), creata: new Date().toISOString(),
+    } } }, { merge: true });
+    await renderPannelloNotifiche();
+    provaNotifica(true);
+  } catch (e) {
+    console.error('Attivazione notifiche fallita:', e);
+    alert('Non sono riuscito ad attivare le notifiche: ' + ((e && e.message) || e));
+  }
+}
+
+async function disattivaNotifiche() {
+  try {
+    const sub = await iscrizioneCorrente();
+    if (sub) {
+      const id = await idIscrizione(sub.endpoint);
+      await sub.unsubscribe();
+      await updateDoc(RIF_NOTIFICHE(), { ['iscrizioni.' + id]: deleteField() }).catch(() => {});
+    }
+  } catch (e) { console.error('Disattivazione notifiche fallita:', e); }
+  renderPannelloNotifiche();
+}
+
+async function chiamaWorker(iscrizioni, notifiche) {
+  const w = await workerNotifiche();
+  if (!w) return null;
+  try {
+    const r = await fetch(w + '/invia', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ iscrizioni, notifiche }),
+    });
+    const esito = await r.json().catch(() => null);
+    // i dispositivi che hanno revocato l'iscrizione si tolgono dall'elenco
+    if (esito && Array.isArray(esito.scadute) && esito.scadute.length) {
+      const via = {};
+      esito.scadute.forEach(id => { via['iscrizioni.' + id] = deleteField(); });
+      await updateDoc(RIF_NOTIFICHE(), via).catch(() => {});
+    }
+    return esito;
+  } catch (e) {
+    console.warn('Notifica non inviata:', e);
+    return null;
+  }
+}
+
+async function provaNotifica(silenziosa = false) {
+  const sub = await iscrizioneCorrente();
+  if (!sub) return;
+  const j = sub.toJSON();
+  const esito = await chiamaWorker(
+    [{ id: await idIscrizione(j.endpoint), endpoint: j.endpoint, keys: j.keys }],
+    [{ title: '🔔 Notifiche attive', body: 'Da ora ricevi gli avvisi della lega Genesys.', tag: 'prova' }]);
+  if (!silenziosa && !(esito && esito.inviate)) {
+    alert('La prova non è partita' + (esito && esito.errori && esito.errori[0] ? ` (errore ${esito.errori[0].stato})` : '') + '. Riprova tra poco.');
+  }
+}
+
+// avvisa tutti i dispositivi iscritti tranne quello da cui parte l'avviso
+async function notificaLega(notifiche) {
+  if (!notifiche || !notifiche.length || !(await workerNotifiche())) return;
+  try {
+    const snap = await getDoc(RIF_NOTIFICHE());
+    const tutte = snap.exists() ? (snap.data().iscrizioni || {}) : {};
+    const mia = await iscrizioneCorrente().catch(() => null);
+    const destinatari = Object.entries(tutte)
+      .filter(([, s]) => s && s.endpoint && s.keys && (!mia || s.endpoint !== mia.endpoint))
+      .map(([id, s]) => ({ id, endpoint: s.endpoint, keys: s.keys }));
+    if (destinatari.length) await chiamaWorker(destinatari.slice(0, 25), notifiche.slice(0, 5));
+  } catch (e) { console.warn('Notifiche della lega non inviate:', e); }
+}
+
+// testi delle notifiche per una partita appena registrata; achPrima contiene
+// gli achievement gia' sbloccati da ciascun giocatore prima della partita
+function notifichePartita(par, achPrima) {
+  const r = PUNTI[par.risultato];
+  if (!r) return [];
+  const vinceG1 = r[0] > r[1];
+  const vincitore = vinceG1 ? par.g1 : par.g2, sconfitto = vinceG1 ? par.g2 : par.g1;
+  const mazzoV = vinceG1 ? par.m1 : par.m2, mazzoS = vinceG1 ? par.m2 : par.m1;
+  // il risultato e' scritto dal punto di vista di g1: va girato se ha vinto g2
+  const punteggio = vinceG1 ? par.risultato : par.risultato.split('-').reverse().join('-');
+  const lista = [{ title: '⚔️ Nuova partita', body: `${vincitore} ha battuto ${sconfitto} ${punteggio} · ${mazzoV} contro ${mazzoS}`, url: './' }];
+  [par.g1, par.g2].forEach(g => {
+    const prima = achPrima[g] || new Set();
+    calcolaAchievements(g)
+      .filter(a => a.unlocked && !prima.has(a.id))
+      .forEach(a => lista.push({ title: '🏆 Achievement sbloccato', body: `${g} ha sbloccato «${a.name}» ${a.icon}`, url: './' }));
+  });
+  return lista.slice(0, 5);
+}
+
+window.renderPannelloNotifiche = renderPannelloNotifiche;
+window.collegaWorker = collegaWorker;
+window.attivaNotifiche = attivaNotifiche;
+window.disattivaNotifiche = disattivaNotifiche;
+window.provaNotifica = provaNotifica;
 
 // ============ REGISTRAZIONE SERVICE WORKER (PWA) ============
 if ('serviceWorker' in navigator) {

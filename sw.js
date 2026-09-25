@@ -1,5 +1,5 @@
 // sw.js — Service Worker essenziale, network-first
-const CACHE_NAME = 'genesys-cache-v34';
+const CACHE_NAME = 'genesys-cache-v35';
 const CORE_ASSETS = ['./', './index.html', './manifest.json'];
 
 // Installazione: pre-cache dei file base
@@ -31,6 +31,7 @@ self.addEventListener('fetch', e => {
     url.includes('googleapis.com') ||
     url.includes('gstatic.com') ||
     url.includes('ygoprodeck.com') ||
+    url.includes('workers.dev') ||
     e.request.method !== 'GET'
   ) {
     return; // lascia gestire al browser, niente cache
@@ -46,4 +47,32 @@ self.addEventListener('fetch', e => {
       })
       .catch(() => caches.match(e.request))
   );
+});
+
+// Notifiche push: il messaggio arriva cifrato dal Worker e va SEMPRE mostrato,
+// altrimenti Safari su iPhone revoca l'iscrizione del dispositivo.
+self.addEventListener('push', e => {
+  let d = {};
+  try { d = e.data ? e.data.json() : {}; }
+  catch (_) { d = { body: e.data ? e.data.text() : '' }; }
+  e.waitUntil(self.registration.showNotification(d.title || 'Yu-Gi-Oh! Genesys', {
+    body: d.body || '',
+    icon: 'icon-192.png',
+    badge: 'icon-192.png',
+    tag: d.tag || undefined,
+    data: { url: d.url || './' },
+  }));
+});
+
+// toccando la notifica si porta in primo piano l'app, o la si apre
+self.addEventListener('notificationclick', e => {
+  e.notification.close();
+  const dest = new URL((e.notification.data && e.notification.data.url) || './', self.registration.scope).href;
+  e.waitUntil((async () => {
+    const finestre = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+    for (const f of finestre) {
+      if ('focus' in f) return f.focus();
+    }
+    if (self.clients.openWindow) return self.clients.openWindow(dest);
+  })());
 });
