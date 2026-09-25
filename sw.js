@@ -1,5 +1,5 @@
 // sw.js — Service Worker essenziale, network-first
-const CACHE_NAME = 'genesys-cache-v42';
+const CACHE_NAME = 'genesys-cache-v43';
 const CORE_ASSETS = ['./', './index.html', './manifest.json'];
 
 // Installazione: pre-cache dei file base
@@ -63,8 +63,11 @@ self.addEventListener('push', e => {
   let d = {};
   try { d = e.data ? e.data.json() : {}; }
   catch (_) { d = { body: e.data ? e.data.text() : '' }; }
-  e.waitUntil(self.registration.showNotification(pulisci(d.title) || 'Genesys', {
-    body: pulisci(d.body),
+  // i trofei tengono la loro icona: sono gli unici con il tag "trofeo-"
+  const trofeo = typeof d.tag === 'string' && d.tag.startsWith('trofeo-');
+  const testo = t => trofeo ? String(t || '').replace(/\s+/g, ' ').trim() : pulisci(t);
+  e.waitUntil(self.registration.showNotification(testo(d.title) || 'Genesys', {
+    body: testo(d.body),
     icon: 'icon-192.png',
     badge: 'icon-192.png',
     tag: d.tag || undefined,

@@ -7023,7 +7023,7 @@ function notifichePartita(par, achPrima) {
     const prima = achPrima[g] || new Set();
     calcolaAchievements(g)
       .filter(a => a.unlocked && !prima.has(a.id))
-      .forEach(a => lista.push({ title: `${g} ha sbloccato il trofeo ${a.name}`, body: '', url: './' }));
+      .forEach(a => lista.push({ title: `${a.icon} ${g} ha sbloccato il trofeo ${a.name}`, body: '', url: './', tag: `trofeo-${a.id}-${g}` }));
   });
   return lista.slice(0, 5);
 }
