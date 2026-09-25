@@ -1187,7 +1187,6 @@
     max-height: 0;
     transition: max-height 0.35s ease;
   }
-  .profile-inline-wrap.open { max-height: 600px; }
   .profile-inline-body {
     display: grid;
     grid-template-columns: 140px 1fr;
@@ -1286,7 +1285,7 @@
     text-transform: uppercase;
     letter-spacing: 0.01em;
     max-width: 100%;
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
   }
   .ach-item.locked {
     opacity: 0.22;
@@ -3674,6 +3673,27 @@ function renderProfiliSempreAperti() {
   }).join('');
 }
 
+// apertura/chiusura animata all'altezza reale del contenuto: un tetto fisso
+// (era 600px) tagliava il profilo quando i trofei sono diventati di piu'
+function apriProfiloWrap(wrap) {
+  wrap.classList.add('open');
+  wrap.style.maxHeight = wrap.scrollHeight + 'px';
+  const fine = e => {
+    if (e.propertyName !== 'max-height') return;
+    wrap.removeEventListener('transitionend', fine);
+    // a fine animazione niente limite: puo' crescere se il contenuto cambia
+    if (wrap.classList.contains('open')) wrap.style.maxHeight = 'none';
+  };
+  wrap.addEventListener('transitionend', fine);
+}
+function chiudiProfiloWrap(wrap) {
+  if (!wrap) return;
+  wrap.style.maxHeight = wrap.scrollHeight + 'px';   // da 'none' a un valore animabile
+  wrap.offsetHeight;                                  // forza il ricalcolo prima di chiudere
+  wrap.classList.remove('open');
+  wrap.style.maxHeight = '0px';
+}
+
 function toggleProfiloInline(nome) {
   const btn   = document.getElementById('ptbtn-' + nome);
   const row   = document.getElementById('prow-' + nome);
@@ -3686,18 +3706,19 @@ function toggleProfiloInline(nome) {
       b.classList.remove('open');
       const n = b.id.replace('ptbtn-', '');
       document.getElementById('prow-' + n)?.classList.remove('open');
-      document.getElementById('pwrap-' + n)?.classList.remove('open');
+      chiudiProfiloWrap(document.getElementById('pwrap-' + n));
     }
   });
   if (isOpen) {
     btn.classList.remove('open');
-    row.classList.remove('open');
-    wrap.classList.remove('open');
+    chiudiProfiloWrap(wrap);
+    // la riga si nasconde solo a chiusura finita, altrimenti l'animazione non si vede
+    setTimeout(() => { if (!btn.classList.contains('open')) row.classList.remove('open'); }, 360);
   } else {
     btn.classList.add('open');
     row.classList.add('open');
-    wrap.classList.add('open');
-    cont.innerHTML = buildProfiloInline(nome);
+    cont.innerHTML = buildProfiloInline(nome);   // prima il contenuto, poi la misura
+    apriProfiloWrap(wrap);
   }
 }
 
@@ -5180,7 +5201,7 @@ const ACHIEVEMENTS_DEF = [
   {
     id: 'ammazzagiganti',
     icon: '🗡️',
-    name: 'Ammazzagiganti',
+    name: 'Ammazza\u00ADgiganti',
     desc: 'Batti il mazzo primo in classifica deck in quel momento',
     check: (nome, partite) => {
       // classifica deck ricostruita partita per partita: conta chi era in vetta
@@ -7023,7 +7044,7 @@ function notifichePartita(par, achPrima) {
     const prima = achPrima[g] || new Set();
     calcolaAchievements(g)
       .filter(a => a.unlocked && !prima.has(a.id))
-      .forEach(a => lista.push({ title: `${a.icon} ${g} ha sbloccato il trofeo ${a.name}`, body: '', url: './', tag: `trofeo-${a.id}-${g}` }));
+      .forEach(a => lista.push({ title: `${a.icon} ${g} ha sbloccato il trofeo ${a.name.replace(/\u00AD/g, '')}`, body: '', url: './', tag: `trofeo-${a.id}-${g}` }));
   });
   return lista.slice(0, 5);
 }
