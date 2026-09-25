@@ -5087,8 +5087,213 @@ const ACHIEVEMENTS_DEF = [
       });
       return v >= 3;
     }
+  },
+  {
+    id: 'mezzo_secolo',
+    icon: '🏛️',
+    name: 'Mezzo secolo',
+    desc: '50 partite giocate',
+    check: (nome, partite) => partiteDi(partite, nome).length >= 50
+  },
+  {
+    id: 'patologico',
+    icon: '🤯',
+    name: 'Patologico',
+    desc: '100 partite giocate',
+    check: (nome, partite) => partiteDi(partite, nome).length >= 100
+  },
+  {
+    id: 'nemesi',
+    icon: '👻',
+    name: 'Nemesi',
+    desc: 'Perdi 3 partite di fila contro la stessa persona',
+    check: (nome, partite) => {
+      const serie = {};   // sconfitte consecutive negli scontri con ciascun avversario
+      for (const e of partiteDi(partite, nome)) {
+        serie[e.avv] = e.vinta ? 0 : (serie[e.avv] || 0) + 1;
+        if (serie[e.avv] >= 3) return true;
+      }
+      return false;
+    }
+  },
+  {
+    id: 'mind_games',
+    icon: '🧠',
+    name: 'Mind games',
+    desc: 'Vinci il dado, vai secondo e vinci la partita',
+    check: (nome, partite) => partiteDi(partite, nome).some(e =>
+      e.par.dado === nome && e.par.primo && e.par.primo !== nome && e.vinta)
+  },
+  {
+    id: 'dado_truccato',
+    icon: '🎲',
+    name: 'Dado truccato',
+    desc: 'Vinci il dado 5 volte di fila',
+    check: (nome, partite) => {
+      let n = 0;
+      for (const e of partiteDi(partite, nome)) {
+        if (!e.par.dado) continue;   // partite senza dato sul dado: non contano ne' interrompono
+        n = e.par.dado === nome ? n + 1 : 0;
+        if (n >= 5) return true;
+      }
+      return false;
+    }
+  },
+  {
+    id: 'maledetto',
+    icon: '🌧️',
+    name: 'Maledetto',
+    desc: 'Perdi il dado e la partita 3 volte',
+    check: (nome, partite) => partiteDi(partite, nome)
+      .filter(e => e.par.dado && e.par.dado !== nome && !e.vinta).length >= 3
+  },
+  {
+    id: 'rinascita',
+    icon: '🔄',
+    name: 'Rinascita',
+    desc: 'Vinci subito dopo 3 sconfitte di fila',
+    check: (nome, partite) => {
+      let perse = 0;
+      for (const e of partiteDi(partite, nome)) {
+        if (e.vinta) { if (perse >= 3) return true; perse = 0; }
+        else perse++;
+      }
+      return false;
+    }
+  },
+  {
+    id: 'esordio_botto',
+    icon: '🎆',
+    name: 'Esordio col botto',
+    desc: 'Vinci 2-0 la prima partita di un mazzo nuovo',
+    check: (nome, partite) => {
+      const visti = new Set();   // mazzi gia' comparsi nella lega
+      for (const par of inOrdine(partite)) {
+        if (!PUNTI[par.risultato]) continue;
+        const e = esitoPer(par, nome);
+        if (e && e.vinta && e.netto && !visti.has(e.mazzo)) return true;
+        visti.add(par.m1); visti.add(par.m2);
+      }
+      return false;
+    }
+  },
+  {
+    id: 'ammazzagiganti',
+    icon: '🗡️',
+    name: 'Ammazzagiganti',
+    desc: 'Batti il mazzo primo in classifica deck in quel momento',
+    check: (nome, partite) => {
+      // classifica deck ricostruita partita per partita: conta chi era in vetta
+      // quando si e' giocato, cosi' l'achievement non sparisce se poi cambia
+      const st = {};
+      for (const par of inOrdine(partite)) {
+        const r = PUNTI[par.risultato];
+        if (!r) continue;
+        const e = esitoPer(par, nome);
+        if (e && e.vinta) {
+          let vetta = null;
+          for (const [m, s] of Object.entries(st)) {
+            if (s.t < SOGLIA_MAZZO) continue;
+            const wr = s.v / s.t;
+            if (!vetta || wr > vetta.wr || (wr === vetta.wr && s.t > vetta.t)) vetta = { m, wr, t: s.t };
+          }
+          if (vetta && vetta.m === e.mazzoAvv) return true;
+        }
+        const vinceG1 = r[0] > r[1];
+        [[par.m1, vinceG1], [par.m2, !vinceG1]].forEach(([m, v]) => {
+          st[m] = st[m] || { v: 0, t: 0 };
+          st[m].t++;
+          if (v) st[m].v++;
+        });
+      }
+      return false;
+    }
+  },
+  {
+    id: 'specialista',
+    icon: '🎯',
+    name: 'Specialista',
+    desc: 'Almeno 70% di vittorie con un mazzo, su 10 partite o più',
+    check: (nome, partite) => {
+      const st = {};
+      partiteDi(partite, nome).forEach(e => {
+        st[e.mazzo] = st[e.mazzo] || { v: 0, t: 0 };
+        st[e.mazzo].t++;
+        if (e.vinta) st[e.mazzo].v++;
+      });
+      return Object.values(st).some(s => s.t >= 10 && s.v / s.t >= 0.7);
+    }
+  },
+  {
+    id: 'necromante',
+    icon: '🧟',
+    name: 'Necromante',
+    desc: 'Vinci con un mazzo che non usavi da almeno 30 giorni',
+    check: (nome, partite) => {
+      const ultimo = {};   // ultima data in cui hai usato ciascun mazzo
+      for (const e of partiteDi(partite, nome)) {
+        const prima = ultimo[e.mazzo];
+        if (e.vinta && prima && e.par.data && giorniTra(prima, e.par.data) >= 30) return true;
+        if (e.par.data) ultimo[e.mazzo] = e.par.data;
+      }
+      return false;
+    }
+  },
+  {
+    id: 'maratona',
+    icon: '🏃',
+    name: 'Maratona',
+    desc: '4 partite giocate nello stesso giorno',
+    check: (nome, partite) => {
+      const perGiorno = {};
+      for (const e of partiteDi(partite, nome)) {
+        if (!e.par.data) continue;
+        perGiorno[e.par.data] = (perGiorno[e.par.data] || 0) + 1;
+        if (perGiorno[e.par.data] >= 4) return true;
+      }
+      return false;
+    }
+  },
+  {
+    id: 'campione',
+    icon: '🏆',
+    name: 'Campione',
+    desc: 'Vinci una stagione',
+    // vale la classifica congelata alla chiusura della stagione
+    check: (nome) => (_stagioniCache || []).some(st =>
+      Array.isArray(st.classifica) && st.classifica.length && st.classifica[0].giocatore === nome)
   }
 ];
+
+// ── supporto agli achievement ──
+// partite in ordine cronologico; a parita' di data vale l'ordine di inserimento
+function inOrdine(partite) {
+  return partite.map((p, i) => ({ p, i }))
+    .sort((a, b) => (a.p.data || '').localeCompare(b.p.data || '') || a.i - b.i)
+    .map(x => x.p);
+}
+// com'e' andata una partita per un giocatore; null se non l'ha giocata
+function esitoPer(par, nome) {
+  const r = PUNTI[par.risultato];
+  if (!r || (par.g1 !== nome && par.g2 !== nome)) return null;
+  const primo = par.g1 === nome;   // il risultato e' scritto dal punto di vista di g1
+  return {
+    par,
+    vinta: primo ? r[0] > r[1] : r[1] > r[0],
+    netto: par.risultato === (primo ? '2-0' : '0-2'),
+    mazzo: primo ? par.m1 : par.m2,
+    avv: primo ? par.g2 : par.g1,
+    mazzoAvv: primo ? par.m2 : par.m1,
+  };
+}
+// esiti di tutte le partite giocate da un giocatore, in ordine cronologico
+function partiteDi(partite, nome) {
+  return inOrdine(partite).map(p => esitoPer(p, nome)).filter(Boolean);
+}
+function giorniTra(da, a) {
+  return (Date.parse(a) - Date.parse(da)) / 86400000;
+}
+
 
 function calcolaAchievements(nome) {
   // gli achievement sono del GIOCATORE, non della stagione: si calcolano
