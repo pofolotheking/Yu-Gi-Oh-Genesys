@@ -3306,6 +3306,7 @@
 <footer>
   <span>Tia · Gio · Richi</span>
   <button onclick="eseguiLogout()" style="background:none;border:none;color:var(--text-faint);font-size:0.75rem;cursor:pointer;margin-left:12px;font-family:inherit">Esci</button>
+  <div style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 45</div>
 </footer>
 
 </div>
@@ -7116,7 +7117,7 @@ if ('serviceWorker' in navigator) {
     location.reload();
   });
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('sw.js')
+    navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' })
       .then(reg => console.log('✅ Service Worker registrato', reg.scope))
       .catch(err => console.warn('SW non registrato:', err));
   });

@@ -1,5 +1,5 @@
 // sw.js — Service Worker essenziale, network-first
-const CACHE_NAME = 'genesys-cache-v44';
+const CACHE_NAME = 'genesys-cache-v45';
 const CORE_ASSETS = ['./', './index.html', './manifest.json'];
 
 // Installazione: pre-cache dei file base
@@ -38,8 +38,11 @@ self.addEventListener('fetch', e => {
   }
 
   // Network-first: prova la rete, fallback alla cache se offline
+  // 'no-cache' chiede sempre al server se il file e' cambiato: GitHub Pages fa
+  // tenere i file 10 minuti in cache, e un aggiornamento poteva ricaricare
+  // ancora la pagina vecchia. Se non e' cambiato il server risponde 304, leggero.
   e.respondWith(
-    fetch(e.request)
+    fetch(e.request, { cache: 'no-cache' })
       .then(resp => {
         const copy = resp.clone();
         caches.open(CACHE_NAME).then(c => c.put(e.request, copy)).catch(() => {});
