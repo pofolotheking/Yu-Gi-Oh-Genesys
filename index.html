@@ -6823,7 +6823,7 @@ async function provaNotifica(silenziosa = false) {
   const j = sub.toJSON();
   const esito = await chiamaWorker(
     [{ id: await idIscrizione(j.endpoint), endpoint: j.endpoint, keys: j.keys }],
-    [{ title: '🔔 Notifiche attive', body: 'Da ora ricevi gli avvisi della lega Genesys.', tag: 'prova' }]);
+    [{ title: 'Notifiche attive', body: 'Da ora ricevi gli avvisi della lega Genesys.', tag: 'prova' }]);
   if (!silenziosa && !(esito && esito.inviate)) {
     alert('La prova non è partita' + (esito && esito.errori && esito.errori[0] ? ` (errore ${esito.errori[0].stato})` : '') + '. Riprova tra poco.');
   }
@@ -6856,17 +6856,17 @@ function notifichePartita(par, achPrima) {
   // titolo = risultato, sempre visibile; i dettagli stanno su righe separate
   // e si leggono per intero allargando la notifica
   const righe = [];
-  if (par.dado) righe.push(`🎲 Dado vinto da ${par.dado}`);
+  if (par.dado) righe.push(`Dado vinto da ${par.dado}`);
   if (par.note) {
     const nota = String(par.note).replace(/\s+/g, ' ').trim();
-    if (nota) righe.push(`📝 ${nota.length > 200 ? nota.slice(0, 199) + '…' : nota}`);
+    if (nota) righe.push(`Note: ${nota.length > 200 ? nota.slice(0, 199) + '…' : nota}`);
   }
-  const lista = [{ title: `⚔️ ${mazzoV} ${punteggio} ${mazzoS}`, body: righe.join('\n'), url: './' }];
+  const lista = [{ title: `${mazzoV} ${punteggio} ${mazzoS}`, body: righe.join('\n'), url: './' }];
   [par.g1, par.g2].forEach(g => {
     const prima = achPrima[g] || new Set();
     calcolaAchievements(g)
       .filter(a => a.unlocked && !prima.has(a.id))
-      .forEach(a => lista.push({ title: '🏆 Achievement sbloccato', body: `${g} ha sbloccato «${a.name}» ${a.icon}`, url: './' }));
+      .forEach(a => lista.push({ title: 'Achievement sbloccato', body: `${g} ha sbloccato «${a.name}»`, url: './' }));
   });
   return lista.slice(0, 5);
 }
