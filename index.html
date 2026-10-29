@@ -19,6 +19,8 @@
     --bg: #ffffff;
     --bg-soft: #f5f5f7;
     --bg-card: #ffffff;
+    --seg-pill: #ffffff;
+    --seg-ombra: 0 1px 2px rgba(0,0,0,0.10), 0 3px 10px rgba(0,0,0,0.10);
     --border: #e5e5ea;
     --border-strong: #d2d2d7;
     --text: #1d1d1f;
@@ -38,6 +40,8 @@
     --bg: #000000;
     --bg-soft: #1c1c1e;
     --bg-card: #1c1c1e;
+    --seg-pill: #48484a;
+    --seg-ombra: 0 1px 3px rgba(0,0,0,0.45);
     --border: #2c2c2e;
     --border-strong: #3a3a3c;
     --text: #f5f5f7;
@@ -373,6 +377,20 @@
     font-style: italic;
   }
   /* ── INNER TAB BAR (dentro sezione Ricerca) ── */
+  /* riquadro selezionato in stile iOS: un unico elemento che scivola sotto i tasti */
+  nav, .inner-tab-bar { position: relative; isolation: isolate; }
+  .seg-pill {
+    position: absolute; top: 0; left: 0; width: 0; height: 0;
+    border-radius: 8px;
+    background: var(--seg-pill);
+    box-shadow: var(--seg-ombra);
+    z-index: 0; pointer-events: none;
+    transition: transform 0.34s cubic-bezier(0.32, 0.72, 0, 1), width 0.34s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.2s;
+  }
+  .seg-pill.no-anim { transition: none; }
+  .seg-ready > button { position: relative; z-index: 1; }
+  .seg-ready > button.active { background: transparent; box-shadow: none; color: var(--text); font-weight: 600; }
+  @media (prefers-reduced-motion: reduce) { .seg-pill { transition: none; } }
   .inner-tab-bar {
     display: flex;
     gap: 2px;
@@ -3218,6 +3236,19 @@
     </div>
 
     <div class="accordion-item">
+      <button class="accordion-btn" onclick="toggleAccordion('acc-esporta')">
+        <span>📤 Copia dati</span><span class="accordion-arrow">▶</span>
+      </button>
+      <div class="accordion-body" id="acc-esporta" style="display:none">
+        <div class="card padded">
+          <p class="notif-stato">Copia tutte le partite, comprese quelle delle stagioni archiviate, per incollarle in una chat.</p>
+          <button onclick="copiaDati()" style="width:100%" id="copia-dati-btn">Copia dati</button>
+          <textarea id="copia-dati-testo" readonly hidden style="width:100%;height:140px;margin-top:12px;font-size:0.7rem;font-family:monospace"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="accordion-item">
       <button class="accordion-btn" onclick="toggleAccordion('acc-profili')">
         <span>👤 Profili Giocatori</span><span class="accordion-arrow">▶</span>
       </button>
@@ -3336,7 +3367,7 @@
 <footer>
   <span>Tia · Gio · Richi</span>
   <button onclick="eseguiLogout()" style="background:none;border:none;color:var(--text-faint);font-size:0.75rem;cursor:pointer;margin-left:12px;font-family:inherit">Esci</button>
-  <div style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 48</div>
+  <div style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 50</div>
 </footer>
 
 </div>
@@ -7089,6 +7120,72 @@ window.collegaWorker = collegaWorker;
 window.attivaNotifiche = attivaNotifiche;
 window.disattivaNotifiche = disattivaNotifiche;
 window.provaNotifica = provaNotifica;
+
+// ============ RIQUADRO DELLE SEZIONI ============
+// Ogni barra (sezioni e sottosezioni) riceve un riquadro che segue il tasto
+// attivo. Si osservano le classi dei tasti, quindi funziona con qualunque
+// codice che cambi .active, e anche con le barre create dopo (popup mazzo).
+function attivaRiquadro(bar) {
+  if (bar._seg) return;
+  bar._seg = true;
+  const pill = document.createElement('span');
+  pill.className = 'seg-pill no-anim';
+  pill.setAttribute('aria-hidden', 'true');
+  bar.prepend(pill);
+  bar.classList.add('seg-ready');
+  const muovi = anima => {
+    const a = bar.querySelector(':scope > button.active');
+    if (!a || !a.offsetWidth) { pill.style.opacity = '0'; return; }
+    if (!anima) pill.classList.add('no-anim');
+    pill.style.opacity = '1';
+    pill.style.width = a.offsetWidth + 'px';
+    pill.style.height = a.offsetHeight + 'px';
+    pill.style.borderRadius = getComputedStyle(a).borderRadius;
+    pill.style.transform = `translate(${a.offsetLeft}px, ${a.offsetTop}px)`;
+    if (!anima) { void pill.offsetWidth; pill.classList.remove('no-anim'); }
+    // se la barra scorre in orizzontale, porta in vista il tasto attivo
+    if (bar.scrollWidth > bar.clientWidth + 1) {
+      const sx = a.offsetLeft, dx = sx + a.offsetWidth;
+      if (sx < bar.scrollLeft || dx > bar.scrollLeft + bar.clientWidth)
+        bar.scrollTo({ left: sx - (bar.clientWidth - a.offsetWidth) / 2, behavior: anima ? 'smooth' : 'auto' });
+    }
+  };
+  bar._muovi = muovi;
+  new MutationObserver(ms => { if (ms.some(m => m.target !== pill)) muovi(true); })
+    .observe(bar, { subtree: true, attributes: true, attributeFilter: ['class'] });
+  // una barra nascosta ha larghezza 0: quando ricompare si posiziona senza animazione
+  new ResizeObserver(() => muovi(false)).observe(bar);
+  muovi(false);
+}
+function cercaBarre(root) {
+  if (root.matches && root.matches('nav, .inner-tab-bar')) attivaRiquadro(root);
+  root.querySelectorAll && root.querySelectorAll('nav, .inner-tab-bar').forEach(attivaRiquadro);
+}
+cercaBarre(document);
+new MutationObserver(ms => ms.forEach(m => m.addedNodes.forEach(n => n.nodeType === 1 && cercaBarre(n))))
+  .observe(document.body, { childList: true, subtree: true });
+// i font web cambiano la larghezza dei tasti: a caricamento finito si riallinea
+if (document.fonts) document.fonts.ready.then(() => document.querySelectorAll('.seg-ready').forEach(b => b._muovi && b._muovi(false)));
+
+// ============ COPIA DATI ============
+// tutto sincrono: su iPhone la copia negli appunti e' ammessa solo dentro il tocco
+function copiaDati() {
+  const testo = JSON.stringify({
+    giocatori: dati.giocatori,
+    mazzi: dati.mazzi,
+    stagioni: (_stagioniCache || []).map(st => ({ nome: st.nome, numero: st.numero, partite: st.partite || [] })),
+    partite: dati.partite,
+  });
+  const area = document.getElementById('copia-dati-testo');
+  const btn = document.getElementById('copia-dati-btn');
+  area.value = testo;
+  area.hidden = false;
+  const fatto = () => { btn.textContent = 'Copiato \u2713'; setTimeout(() => { btn.textContent = 'Copia dati'; }, 2500); };
+  const aMano = () => { area.focus(); area.select(); area.setSelectionRange(0, testo.length); btn.textContent = 'Seleziona il testo qui sotto e copialo'; };
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(testo).then(fatto, aMano);
+  else aMano();
+}
+window.copiaDati = copiaDati;
 
 // ============ CARTA DEL GIORNO ============
 // Alla prima apertura di ogni giornata compare a tutto schermo una carta del
