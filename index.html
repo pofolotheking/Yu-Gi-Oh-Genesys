@@ -732,6 +732,7 @@
     box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
   }
   .detail-modal:not(.has-bg-img) .ddm-tabs { margin-right: 44px; }
+  .deck-mu-stat-sub { display: block; width: 100%; font-size: 12px; color: var(--text-dim); margin-top: 1px; }
   .deck-mu-vuoto { padding: 10px 14px; font-size: 0.85rem; color: var(--text-faint); }
   .dmh-list { max-width: 480px; margin: 0 auto; width: 100%; }
   .dmh-row {
@@ -3291,15 +3292,18 @@
       -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
     }
     .detail-modal .detail-section-title { display: none; }
-    /* la scelta sta sopra l'immagine, alla stessa altezza della X, e resta li' scorrendo */
+    /* la scelta sta in basso, sotto il pollice, e resta li' mentre si scorre */
     .detail-modal .ddm-tabs {
-      height: 40px; margin: calc(env(safe-area-inset-top) + 14px) 56px 0 0;
-      top: calc(env(safe-area-inset-top) + 14px); background: var(--seg-solido);
+      position: fixed; top: auto; z-index: 6;
+      bottom: calc(env(safe-area-inset-bottom) + 16px);
+      left: 50%; transform: translateX(-50%);
+      width: min(340px, calc(100vw - 48px)); max-width: none; height: 48px; margin: 0; padding: 3px;
+      border-radius: 14px; background: var(--seg-solido);
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35), 0 0 0 0.5px var(--barra-bordo);
     }
-    /* scorrendo, dietro la scelta compare una fascia del colore di fondo fino in cima */
-    .detail-modal.scorre .ddm-tabs { box-shadow: 0 -100px 0 100px var(--bg-gruppo); }
-    .detail-modal .ddm-tabs .inner-tab { padding: 0 4px; height: 36px; font-size: 14px; }
-    .detail-modal .ddm-tabs + .dh-hero { margin-top: calc(-1 * (env(safe-area-inset-top) + 54px)); }
+    .detail-modal .ddm-tabs .inner-tab { padding: 0 4px; height: 42px; font-size: 15px; border-radius: 11px; }
+    .detail-modal .ddm-tabs .seg-pill { border-radius: 11px; }
+    .detail-modal.deck-full { padding-bottom: calc(env(safe-area-inset-bottom) + 90px); }
     .detail-modal .deck-mu-stat-list {
       display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 0; max-width: none;
     }
@@ -4195,7 +4199,7 @@
 <footer>
   <span>Tia · Gio · Richi</span>
   <button onclick="eseguiLogout()" style="background:none;border:none;color:var(--text-faint);font-size:0.75rem;cursor:pointer;margin-left:12px;font-family:inherit">Esci</button>
-  <div style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 71</div>
+  <div style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 72</div>
 </footer>
 
 </div>
@@ -5317,7 +5321,7 @@ function calcolaMatchup(partite) {
   const stat = {};
   const lista = [...new Set(partite.flatMap(p => [p.m1, p.m2]))].sort();
   lista.forEach(a => {
-    stat[a] = { v:0, p:0, primoV:0, primoT:0, secondoV:0, secondoT:0, vs:{} };
+    stat[a] = { v:0, p:0, primoV:0, primoT:0, secondoV:0, secondoT:0, dadoV:0, dadoT:0, dadoWinV:0, vs:{} };
     lista.forEach(b => { if (a !== b) stat[a].vs[b] = {v:0, p:0}; });
   });
   partite.forEach(par => {
@@ -5344,6 +5348,12 @@ function calcolaMatchup(partite) {
         stat[m2].primoT++; if (!g1win) stat[m2].primoV++;
         stat[m1].secondoT++; if (g1win) stat[m1].secondoV++;
       }
+    }
+    // dado: conta per il mazzo di chi l'ha tirato, e se poi quel mazzo ha vinto
+    if (par.dado && m1 !== m2) {
+      stat[m1].dadoT++; stat[m2].dadoT++;
+      const mDado = par.dado === par.g1 ? m1 : par.dado === par.g2 ? m2 : null;
+      if (mDado) { stat[mDado].dadoV++; if ((mDado === m1) === g1win) stat[mDado].dadoWinV++; }
     }
   });
   return stat;
@@ -5579,8 +5589,10 @@ function renderDettaglioMazzoScope(mazzo, scope) {
       <div class="deck-mu-stat-line"><span class="deck-mu-stat-lbl">% Utilizzo<span class="m-nascondi">:</span></span><span class="deck-mu-stat-val">${utilizzo}</span></div>
       <div class="deck-mu-stat-line"><span class="deck-mu-stat-lbl">Win Rate<span class="m-nascondi">:</span></span><span class="deck-mu-stat-val">${pct(s.v, tot)}</span></div>
       <div class="deck-mu-stat-line"><span class="deck-mu-stat-lbl">Vittorie / Sconfitte<span class="m-nascondi">:</span></span><span class="deck-mu-stat-val">${s.v} / ${s.p}</span></div>
-      <div class="deck-mu-stat-line"><span class="deck-mu-stat-lbl">WR da 1°<span class="m-nascondi">:</span></span><span class="deck-mu-stat-val">${pct(s.primoV,s.primoT)}</span></div>
-      <div class="deck-mu-stat-line"><span class="deck-mu-stat-lbl">WR da 2°<span class="m-nascondi">:</span></span><span class="deck-mu-stat-val">${pct(s.secondoV,s.secondoT)}</span></div>
+      <div class="deck-mu-stat-line"><span class="deck-mu-stat-lbl">WR da 1°<span class="m-nascondi">:</span></span><span class="deck-mu-stat-val">${pct(s.primoV,s.primoT)}</span><span class="deck-mu-stat-sub">${s.primoT} volt${s.primoT === 1 ? 'a' : 'e'} primo</span></div>
+      <div class="deck-mu-stat-line"><span class="deck-mu-stat-lbl">WR da 2°<span class="m-nascondi">:</span></span><span class="deck-mu-stat-val">${pct(s.secondoV,s.secondoT)}</span><span class="deck-mu-stat-sub">${s.secondoT} volt${s.secondoT === 1 ? 'a' : 'e'} secondo</span></div>
+      <div class="deck-mu-stat-line"><span class="deck-mu-stat-lbl">Dadi vinti<span class="m-nascondi">:</span></span><span class="deck-mu-stat-val">${s.dadoT ? `${s.dadoV}/${s.dadoT}` : '—'}</span><span class="deck-mu-stat-sub">${s.dadoT ? pct(s.dadoV, s.dadoT) + ' dei lanci' : 'nessun dado registrato'}</span></div>
+      <div class="deck-mu-stat-line"><span class="deck-mu-stat-lbl">WR col dado<span class="m-nascondi">:</span></span><span class="deck-mu-stat-val">${pct(s.dadoWinV, s.dadoV)}</span><span class="deck-mu-stat-sub">quando vince il dado</span></div>
     </div>
     <div class="detail-section-title">Match-up</div>
     <div class="deck-mu-vs-list">${noVs}</div>
