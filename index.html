@@ -1754,6 +1754,8 @@
     border-radius: 50%;
     flex-shrink: 0;
   }
+  .chart-legend-nome { color: var(--text); font-weight: 600; }
+  .chart-legend-wr { color: var(--text); font-weight: 800; font-variant-numeric: tabular-nums; }
   .chart-legend-n {
     margin-left: 5px; font-size: 0.72rem; font-weight: 600;
     color: var(--text-faint); font-variant-numeric: tabular-nums;
@@ -3016,6 +3018,9 @@
     /* ── STATISTICHE: tre blocchi semplici ──
        grafico, scontri diretti in un unico riquadro a righe, una scheda a righe per giocatore */
     #chart-card { margin-bottom: 18px; }
+    .chart-legend { gap: 6px 12px; }
+    .chart-legend-item { font-size: 13px; gap: 5px; }
+    .chart-legend-n { margin-left: 1px; }
     #riepilogo-card.h2h-united-card, .card.h2h-united-card {
       background: var(--bg-card); padding: 0 16px; border: none; border-radius: 14px; margin-bottom: 18px;
     }
@@ -3420,6 +3425,59 @@
     table.tab-box .wr-bar { width: 48px; }
   }
 
+  /* ── STATISTICHE ALL-TIME ── */
+  #stat-extra { margin-bottom: 18px; }
+  .cur-riga { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 0.5px solid var(--border); }
+  .cur-riga:first-child { padding-top: 2px; }
+  .cur-riga:last-child { border-bottom: none; padding-bottom: 2px; }
+  .cur-ico {
+    flex: none; width: 38px; height: 38px; border-radius: 10px; background: var(--bg-soft);
+    display: flex; align-items: center; justify-content: center; font-size: 20px;
+  }
+  .cur-testo { flex: 1; min-width: 0; }
+  .cur-tit { font-size: 15px; font-weight: 600; }
+  .cur-sotto { font-size: 13px; color: var(--text-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .cur-val { font-size: 24px; font-weight: 800; font-variant-numeric: tabular-nums; }
+  .tor-wrap { display: flex; flex-direction: column; align-items: center; gap: 16px; }
+  .tor-svg { width: min(260px, 78%); height: auto; overflow: visible; filter: drop-shadow(0 6px 16px rgba(0,0,0,0.18)); }
+  .tor-bordi path { stroke: var(--bg-card); stroke-width: 3; }
+  .tor-anello { fill: none; stroke: var(--bg-card); stroke-width: 3; }
+  .tor-legenda { width: 100%; display: grid; grid-template-columns: 1fr; }
+  .tor-voce { display: flex; align-items: center; gap: 10px; padding: 7px 0; border-bottom: 0.5px solid var(--border); font-size: 15px; }
+  .tor-voce:last-child { border-bottom: none; }
+  .tor-mini { flex: none; width: 28px; height: 28px; border-radius: 7px; background-size: cover; background-position: center 30%; }
+  .tor-nome { flex: 1; min-width: 0; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .tor-n { color: var(--text-dim); font-size: 13px; font-variant-numeric: tabular-nums; }
+  .tor-pct { width: 44px; text-align: right; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .ist-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .ist-mese { text-align: center; font-size: 17px; font-weight: 700; }
+  .ist-mese span { display: block; font-size: 13px; font-weight: 500; color: var(--text-dim); }
+  .ist-freccia {
+    width: 36px; height: 36px; border-radius: 50%; border: none; cursor: pointer;
+    background: var(--bg-soft); color: var(--blue); font-size: 24px; line-height: 1; font-family: inherit;
+  }
+  .ist-freccia:disabled { color: var(--text-faint); opacity: 0.5; cursor: default; }
+  .ist-corpo { display: flex; gap: 6px; }
+  .ist-asse {
+    flex: none; display: flex; flex-direction: column; justify-content: space-between;
+    height: 150px; padding: 18px 0 0; font-size: 11px; color: var(--text-faint); text-align: right; min-width: 14px;
+  }
+  .ist-scorri { flex: 1; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+  .ist-scorri::-webkit-scrollbar { display: none; }
+  .ist-barre {
+    display: flex; gap: 4px; width: max-content; padding-bottom: 2px;
+    background: linear-gradient(var(--border), var(--border)) 0 18px / 100% 0.5px no-repeat,
+                linear-gradient(var(--border), var(--border)) 0 84px / 100% 0.5px no-repeat;
+  }
+  .ist-col { width: 26px; display: flex; flex-direction: column; align-items: center; }
+  .ist-area { position: relative; height: 150px; width: 100%; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; padding-top: 18px; border-bottom: 1px solid var(--border-strong); }
+  .ist-barra { width: 18px; border-radius: 6px 6px 2px 2px; background: linear-gradient(180deg, #5ac8fa, var(--blue)); min-height: 0; }
+  .ist-n { font-size: 11px; font-weight: 700; color: var(--text-dim); margin-bottom: 3px; }
+  .ist-g { font-size: 12px; font-weight: 600; margin-top: 5px; font-variant-numeric: tabular-nums; }
+  .ist-gs { font-size: 10px; color: var(--text-faint); }
+  .ist-col.fest .ist-gs { color: var(--red); }
+  .ist-col.oggi .ist-g { color: #fff; background: var(--blue); border-radius: 999px; padding: 0 5px; }
+
 </style>
 </head>
 <body>
@@ -3703,6 +3761,7 @@
         </div>
       </div>
     </div>
+    <div id="stat-extra" style="display:none"></div>
     <h3 class="subsection-title m-nascondi">Statistiche dado</h3>
     <p class="section-note m-nascondi"><em>Espandi un giocatore per vedere le statistiche dado e primo/secondo.</em></p>
     <div id="stat-dado-wrap"></div>
@@ -4095,7 +4154,7 @@
 <footer>
   <span>Tia · Gio · Richi</span>
   <button onclick="eseguiLogout()" style="background:none;border:none;color:var(--text-faint);font-size:0.75rem;cursor:pointer;margin-left:12px;font-family:inherit">Esci</button>
-  <div style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 66</div>
+  <div style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 67</div>
 </footer>
 
 </div>
@@ -4360,6 +4419,7 @@ function switchScopeStat(scope) {
   renderRiepilogo(pt);
   renderGrafico(pt);
   renderStatDado(pt);
+  renderStatExtra(pt);
 }
 window.switchScopeStat = switchScopeStat;
 
@@ -4383,6 +4443,7 @@ function popolaTutto() {
   renderRiepilogo(partiteScope(_scopeStat));
   renderGrafico(partiteScope(_scopeStat));
   renderStatDado(partiteScope(_scopeStat));
+  renderStatExtra(partiteScope(_scopeStat));
   renderMazzi(partiteScope(_scopeDeck));
   renderStorico(partiteScope(_scopeClassifica), _scopeClassifica === 'cur');
   renderMatchup(partiteScope(_scopeDeck));
@@ -4697,56 +4758,297 @@ function renderGrafico(partite = dati.partite) {
   const labels = ['Start', ...Array.from({ length: maxPartite }, (_, i) => `P${i + 1}`)];
 
   const legendEl = document.getElementById('chart-legend');
-  legendEl.innerHTML = giocatori.map((g, i) => `
-    <div class="chart-legend-item">
-      <div class="chart-legend-bar" style="background:${COLORS[i % COLORS.length]}"></div>
-      ${g}<span class="chart-legend-n">${Math.max(0, serieWr[g].length - 1)}</span>
-    </div>`).join('');
+  // legenda: colore, nome, win rate attuale e numero di partite
+  legendEl.innerHTML = giocatori.map((g, i) => {
+    const serie = serieWr[g], n = Math.max(0, serie.length - 1);
+    return `<div class="chart-legend-item">
+      <div class="chart-legend-dot" style="background:${COLORS[i % COLORS.length]}"></div>
+      <span class="chart-legend-nome">${g}</span>
+      <span class="chart-legend-wr">${n ? serie[serie.length - 1] + '%' : '\u2014'}</span>
+      <span class="chart-legend-n">${n}</span>
+    </div>`;
+  }).join('');
 
   const cssVar = getComputedStyle(document.documentElement);
   const gridCol = (cssVar.getPropertyValue('--border') || '').trim() || 'rgba(0,0,0,0.06)';
   const tickCol = (cssVar.getPropertyValue('--text-faint') || '').trim() || '#a1a1a6';
+  const testoCol = (cssVar.getPropertyValue('--text') || '').trim() || '#1d1d1f';
+  const cardCol = (cssVar.getPropertyValue('--bg-card') || '').trim() || '#ffffff';
   const ctx = document.getElementById('chart-andamento').getContext('2d');
   if (_chartInstance) _chartInstance.destroy();
+  // linea tratteggiata sul 50%: il pareggio fra vittorie e sconfitte
+  const linea50 = {
+    id: 'linea50',
+    beforeDatasetsDraw(chart) {
+      const { ctx: c, chartArea: a, scales: { y } } = chart;
+      if (!a) return;
+      const yy = y.getPixelForValue(50);
+      c.save(); c.setLineDash([5, 5]); c.lineWidth = 1.2; c.strokeStyle = tickCol;
+      c.beginPath(); c.moveTo(a.left, yy); c.lineTo(a.right, yy); c.stroke(); c.restore();
+    }
+  };
+  // alone luminoso del colore di ogni linea
+  const alone = {
+    id: 'alone',
+    beforeDatasetDraw(chart, args) {
+      const c = chart.ctx; c.save();
+      c.shadowColor = (chart.data.datasets[args.index].borderColor || '#000') + '80';
+      c.shadowBlur = 10; c.shadowOffsetY = 3;
+    },
+    afterDatasetDraw(chart) { chart.ctx.restore(); }
+  };
   _chartInstance = new Chart(ctx, {
     type: 'line',
     data: {
       labels,
-      datasets: giocatori.map((g, i) => ({
-        label: g,
-        data: serieWr[g],
-        borderColor: COLORS[i % COLORS.length],
-        backgroundColor: COLORS[i % COLORS.length] + '18',
-        borderWidth: 2.5,
-        pointRadius: 0,
-        pointHoverRadius: 4,
-        tension: 0.3,
-        fill: false,
-      }))
+      datasets: giocatori.map((g, i) => {
+        const col = COLORS[i % COLORS.length];
+        const ultimo = serieWr[g].length - 1;
+        return {
+          label: g,
+          data: serieWr[g],
+          borderColor: col,
+          borderWidth: 3,
+          tension: 0.4,
+          cubicInterpolationMode: 'monotone',
+          fill: false,
+          backgroundColor: col,
+          // solo l'ultimo punto e' segnato: dove si trova oggi il giocatore
+          pointRadius: c => c.dataIndex === ultimo && ultimo > 0 ? 5 : 0,
+          pointBackgroundColor: col,
+          pointBorderColor: cardCol,
+          pointBorderWidth: 2,
+          pointHoverRadius: 6,
+          pointHoverBorderWidth: 2,
+        };
+      })
     },
+    plugins: [linea50, alone],
     options: {
       responsive: true,
       maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      layout: { padding: { top: 8, right: 8 } },
       plugins: {
         legend: { display: false },
         tooltip: {
+          backgroundColor: cardCol, titleColor: testoCol, bodyColor: testoCol,
+          borderColor: gridCol, borderWidth: 1, padding: 10, cornerRadius: 12,
+          usePointStyle: true, boxPadding: 4,
+          titleFont: { weight: '600' },
+          itemSort: (a, b) => b.parsed.y - a.parsed.y,
           callbacks: {
             title: (items) => items[0].dataIndex === 0
               ? 'Inizio stagione'
               : `Dopo ${items[0].dataIndex}\u00AA partita giocata`,
-            label: (item) => `${item.dataset.label}: ${item.parsed.y}%`
+            label: (item) => ` ${item.dataset.label}: ${item.parsed.y}%`
           }
         }
       },
       scales: {
-        x: { grid: { color: gridCol }, ticks: { font: { size: 10 }, color: tickCol } },
+        x: {
+          grid: { display: false }, border: { display: false },
+          ticks: { font: { size: 10 }, color: tickCol, maxRotation: 0, autoSkip: true, maxTicksLimit: 7 }
+        },
         y: {
-          beginAtZero: true, max: 100,
-          grid: { color: gridCol },
-          ticks: { font: { size: 10 }, color: tickCol, stepSize: 25, callback: v => v + '%' }
+          min: 0, max: 100,
+          border: { display: false },
+          grid: { color: gridCol, drawTicks: false },
+          ticks: { font: { size: 10 }, color: tickCol, stepSize: 25, padding: 8, callback: v => v + '%' }
         }
       }
     }
+  });
+}
+
+// ============ STATISTICHE ALL-TIME: curiosità, torta dei mazzi, partite per giorno ============
+let _meseIst = null;      // mese mostrato nell'istogramma, 'AAAA-MM'
+let _partiteExtra = [];
+
+function renderStatExtra(partite) {
+  const box = document.getElementById('stat-extra');
+  if (!box) return;
+  if (_scopeStat !== 'all' || !partite.length) { box.style.display = 'none'; return; }
+  box.style.display = 'block';
+  _partiteExtra = inOrdine(partite);
+  box.innerHTML = `
+    <h3 class="subsection-title">Curiosità</h3>
+    <div class="card padded" id="sx-curiosita">${htmlCuriosita(_partiteExtra)}</div>
+    <h3 class="subsection-title">Mazzi più usati</h3>
+    <div class="card padded" id="sx-torta">${htmlTortaMazzi(_partiteExtra)}</div>
+    <h3 class="subsection-title">Partite per giorno</h3>
+    <div class="card padded" id="sx-istogramma"></div>`;
+  const mesi = mesiConPartite();
+  if (!_meseIst || !mesi.includes(_meseIst)) _meseIst = mesi[mesi.length - 1];
+  renderIstogramma();
+}
+
+function fmtGiorno(d) {
+  return d ? new Date(d + 'T12:00:00').toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit' }) : '';
+}
+
+function htmlCuriosita(partite) {
+  // scontro piu' equilibrato: la coppia con la differenza di vittorie piu' piccola
+  // in proporzione ai match giocati; a parita' vince chi ha giocato di piu'
+  const coppie = {};
+  partite.forEach(p => {
+    const r = PUNTI[p.risultato]; if (!r) return;
+    const [a, b] = [p.g1, p.g2].sort();
+    const k = a + '|' + b;
+    const c = coppie[k] || (coppie[k] = { a, b, va: 0, vb: 0 });
+    const vince = r[0] > r[1] ? p.g1 : p.g2;
+    if (vince === a) c.va++; else c.vb++;
+  });
+  const equil = Object.values(coppie).filter(c => c.va + c.vb >= 2).sort((x, y) => {
+    const dx = Math.abs(x.va - x.vb) / (x.va + x.vb), dy = Math.abs(y.va - y.vb) / (y.va + y.vb);
+    return dx - dy || (y.va + y.vb) - (x.va + x.vb);
+  })[0];
+
+  // serie piu' lunghe di vittorie e di sconfitte di fila, partite in ordine di data
+  const serie = {};
+  let migliore = null, peggiore = null;
+  partite.forEach(p => {
+    const r = PUNTI[p.risultato]; if (!r) return;
+    [[p.g1, r[0] > r[1]], [p.g2, r[1] > r[0]]].forEach(([g, vinta]) => {
+      const s = serie[g] || (serie[g] = { tipo: null, n: 0, da: null });
+      if (s.tipo !== vinta) { s.tipo = vinta; s.n = 0; s.da = p.data; }
+      s.n++;
+      const rec = { g, n: s.n, da: s.da, a: p.data };
+      if (vinta && (!migliore || s.n > migliore.n)) migliore = rec;
+      if (!vinta && (!peggiore || s.n > peggiore.n)) peggiore = rec;
+    });
+  });
+  const periodo = x => x.da === x.a ? fmtGiorno(x.da) : `${fmtGiorno(x.da)} – ${fmtGiorno(x.a)}`;
+  const riga = (icona, titolo, valore, sotto) => `
+    <div class="cur-riga">
+      <span class="cur-ico">${icona}</span>
+      <div class="cur-testo"><div class="cur-tit">${titolo}</div><div class="cur-sotto">${sotto}</div></div>
+      <div class="cur-val">${valore}</div>
+    </div>`;
+  return [
+    equil ? riga('⚖️', 'Scontro più equilibrato', `${equil.va}-${equil.vb}`,
+      `${escapeHtml(equil.a)} vs ${escapeHtml(equil.b)} · ${equil.va + equil.vb} match`) : '',
+    migliore ? riga('🔥', 'Migliore streak di vittorie', `${migliore.n}`,
+      `${escapeHtml(migliore.g)} · ${periodo(migliore)}`) : '',
+    peggiore ? riga('🧊', 'Peggiore streak di sconfitte', `${peggiore.n}`,
+      `${escapeHtml(peggiore.g)} · ${periodo(peggiore)}`) : '',
+  ].join('') || '<div class="empty">Servono più partite.</div>';
+}
+
+// torta dei mazzi: ogni spicchio mostra l'immagine del mazzo invece di un colore
+function htmlTortaMazzi(partite) {
+  const uso = {};
+  partite.forEach(p => { uso[p.m1] = (uso[p.m1] || 0) + 1; uso[p.m2] = (uso[p.m2] || 0) + 1; });
+  let voci = Object.entries(uso).sort((a, b) => b[1] - a[1]);
+  const tot = voci.reduce((s, v) => s + v[1], 0);
+  if (!tot) return '<div class="empty">Nessun mazzo usato.</div>';
+  if (voci.length > 8) {   // oltre 7 spicchi diventano illeggibili: il resto va in "Altri"
+    const altri = voci.slice(7).reduce((s, v) => s + v[1], 0);
+    voci = voci.slice(0, 7).concat([['Altri', altri]]);
+  }
+  const R = 120, C = 130;
+  const colori = ['#8e8e93', '#ff9f0a', '#30d158', '#64d2ff', '#bf5af2', '#ff375f', '#ffd60a', '#5e5ce6'];
+  let ang = -Math.PI / 2, defs = '', spicchi = '', bordi = '';
+  voci.forEach(([nome, n], i) => {
+    const da = ang, a = ang + 2 * Math.PI * n / tot; ang = a;
+    const id = 'tor' + i;
+    const intero = n === tot;
+    const forma = intero
+      ? `<circle cx="${C}" cy="${C}" r="${R}"/>`
+      : `<path d="M${C} ${C} L${C + R * Math.cos(da)} ${C + R * Math.sin(da)} A${R} ${R} 0 ${a - da > Math.PI ? 1 : 0} 1 ${C + R * Math.cos(a)} ${C + R * Math.sin(a)}Z"/>`;
+    defs += `<clipPath id="${id}">${forma}</clipPath>`;
+    const img = nome === 'Altri' ? null : imgMazzo(nome);
+    // l'immagine si centra sullo spicchio, cosi' se ne vede la parte giusta
+    const mid = (da + a) / 2, cx = C + R * 0.55 * Math.cos(mid), cy = C + R * 0.55 * Math.sin(mid);
+    const L = 2 * R;
+    spicchi += img
+      ? `<image href="${img}" x="${cx - L / 2}" y="${cy - L / 2}" width="${L}" height="${L}" preserveAspectRatio="xMidYMid slice" clip-path="url(#${id})"/>`
+      : `<g clip-path="url(#${id})"><rect x="0" y="0" width="${2 * C}" height="${2 * C}" fill="${colori[i % colori.length]}"/></g>`;
+    if (!intero) bordi += `<path d="M${C} ${C} L${C + R * Math.cos(da)} ${C + R * Math.sin(da)}"/>`;
+  });
+  const legenda = voci.map(([nome, n], i) => {
+    const img = nome === 'Altri' ? null : imgMazzo(nome);
+    return `<div class="tor-voce">
+      <span class="tor-mini"${img ? ` style="background-image:url('${img}')"` : ` style="background:${colori[i % colori.length]}"`}></span>
+      <span class="tor-nome">${escapeHtml(nome)}</span>
+      <span class="tor-n">${n}</span>
+      <span class="tor-pct">${Math.round(100 * n / tot)}%</span>
+    </div>`;
+  }).join('');
+  return `<div class="tor-wrap">
+      <svg class="tor-svg" viewBox="0 0 ${2 * C} ${2 * C}" role="img" aria-label="Mazzi più usati">
+        <defs>${defs}</defs>${spicchi}
+        <g class="tor-bordi">${bordi}</g>
+        <circle class="tor-anello" cx="${C}" cy="${C}" r="${R}"/>
+      </svg>
+      <div class="tor-legenda">${legenda}</div>
+    </div>`;
+}
+
+function mesiConPartite() {
+  const date = _partiteExtra.map(p => (p.data || '').slice(0, 7)).filter(Boolean).sort();
+  const oggi = new Date();
+  const fine = `${oggi.getFullYear()}-${String(oggi.getMonth() + 1).padStart(2, '0')}`;
+  if (!date.length) return [fine];
+  const mesi = [];
+  let [y, m] = date[0].split('-').map(Number);
+  const ultimo = date[date.length - 1] > fine ? date[date.length - 1] : fine;
+  while (`${y}-${String(m).padStart(2, '0')}` <= ultimo) {
+    mesi.push(`${y}-${String(m).padStart(2, '0')}`);
+    if (++m > 12) { m = 1; y++; }
+  }
+  return mesi;
+}
+
+function cambiaMeseIst(passo) {
+  const mesi = mesiConPartite();
+  const i = Math.min(mesi.length - 1, Math.max(0, mesi.indexOf(_meseIst) + passo));
+  _meseIst = mesi[i];
+  renderIstogramma();
+}
+window.cambiaMeseIst = cambiaMeseIst;
+
+// istogramma delle partite giocate in ogni giorno del mese, scorrevole in orizzontale
+function renderIstogramma() {
+  const box = document.getElementById('sx-istogramma');
+  if (!box) return;
+  const mesi = mesiConPartite();
+  const [y, m] = _meseIst.split('-').map(Number);
+  const giorni = new Date(y, m, 0).getDate();
+  const conta = Array(giorni + 1).fill(0);
+  _partiteExtra.forEach(p => { if ((p.data || '').startsWith(_meseIst)) conta[+p.data.slice(8, 10)]++; });
+  const totale = conta.reduce((s, n) => s + n, 0);
+  const max = Math.max(1, ...conta);
+  const oggi = new Date();
+  const giornoOggi = oggi.getFullYear() === y && oggi.getMonth() + 1 === m ? oggi.getDate() : 0;
+  const nomeMese = new Date(y, m - 1, 1).toLocaleDateString('it-IT', { month: 'long', year: 'numeric' });
+  const iniziali = ['D', 'L', 'M', 'M', 'G', 'V', 'S'];
+  let barre = '';
+  for (let d = 1; d <= giorni; d++) {
+    const n = conta[d];
+    const fest = [0, 6].includes(new Date(y, m - 1, d).getDay());
+    barre += `<div class="ist-col${d === giornoOggi ? ' oggi' : ''}${fest ? ' fest' : ''}">
+      <div class="ist-area">${n ? `<span class="ist-n">${n}</span>` : ''}<div class="ist-barra" style="height:${100 * n / max}%"></div></div>
+      <div class="ist-g">${d}</div><div class="ist-gs">${iniziali[new Date(y, m - 1, d).getDay()]}</div>
+    </div>`;
+  }
+  box.innerHTML = `
+    <div class="ist-head">
+      <button class="ist-freccia" onclick="cambiaMeseIst(-1)" ${mesi.indexOf(_meseIst) <= 0 ? 'disabled' : ''} aria-label="Mese precedente">‹</button>
+      <div class="ist-mese"><div>${nomeMese.charAt(0).toUpperCase() + nomeMese.slice(1)}</div><span>${totale} partit${totale === 1 ? 'a' : 'e'}</span></div>
+      <button class="ist-freccia" onclick="cambiaMeseIst(1)" ${mesi.indexOf(_meseIst) >= mesi.length - 1 ? 'disabled' : ''} aria-label="Mese successivo">›</button>
+    </div>
+    <div class="ist-corpo">
+      <div class="ist-asse"><span>${max}</span><span>${max > 1 ? Math.round(max / 2) : ''}</span><span>0</span></div>
+      <div class="ist-scorri" id="ist-scorri"><div class="ist-barre">${barre}</div></div>
+    </div>`;
+  // si parte mostrando l'ultimo giorno giocato del mese (o oggi)
+  const scorri = document.getElementById('ist-scorri');
+  let fuoco = giornoOggi;
+  for (let d = giorni; d >= 1 && !fuoco; d--) if (conta[d]) fuoco = d;
+  requestAnimationFrame(() => {
+    const col = scorri.querySelectorAll('.ist-col')[Math.max(0, (fuoco || 1) - 1)];
+    if (col) scorri.scrollLeft = Math.max(0, col.offsetLeft - scorri.clientWidth * 0.7);
   });
 }
 
