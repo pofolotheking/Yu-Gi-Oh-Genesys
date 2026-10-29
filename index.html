@@ -3018,6 +3018,13 @@
     /* ── STATISTICHE: tre blocchi semplici ──
        grafico, scontri diretti in un unico riquadro a righe, una scheda a righe per giocatore */
     #chart-card { margin-bottom: 18px; }
+    /* ordine su telefono: grafico, giocatori, scontri diretti, extra */
+    #statistiche.active { display: flex; flex-direction: column; }
+    #statistiche .desktop-split, #statistiche .desktop-col-left, #statistiche .desktop-col-right { display: contents; }
+    #statistiche > h2 { order: 0; }
+    #statistiche > .inner-tab-bar { order: 1; width: 100%; margin-left: 0 !important; margin-right: 0 !important; }
+    #statistiche #chart-card { order: 2; } #stat-dado-wrap { order: 3; margin-bottom: 18px; }
+    #statistiche #riepilogo-card { order: 4; } #stat-extra { order: 5; }
     .chart-legend { gap: 6px 12px; }
     .chart-legend-item { font-size: 13px; gap: 5px; }
     .chart-legend-n { margin-left: 1px; }
@@ -3436,7 +3443,7 @@
   }
   .cur-testo { flex: 1; min-width: 0; }
   .cur-tit { font-size: 15px; font-weight: 600; }
-  .cur-sotto { font-size: 13px; color: var(--text-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .cur-sotto { font-size: 13px; color: var(--text-dim); }
   .cur-val { font-size: 24px; font-weight: 800; font-variant-numeric: tabular-nums; }
   .tor-wrap { display: flex; flex-direction: column; align-items: center; gap: 16px; }
   .tor-svg { width: min(260px, 78%); height: auto; overflow: visible; filter: drop-shadow(0 6px 16px rgba(0,0,0,0.18)); }
@@ -4154,7 +4161,7 @@
 <footer>
   <span>Tia · Gio · Richi</span>
   <button onclick="eseguiLogout()" style="background:none;border:none;color:var(--text-faint);font-size:0.75rem;cursor:pointer;margin-left:12px;font-family:inherit">Esci</button>
-  <div style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 67</div>
+  <div style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 68</div>
 </footer>
 
 </div>
@@ -4861,14 +4868,14 @@ function renderGrafico(partite = dati.partite) {
   });
 }
 
-// ============ STATISTICHE ALL-TIME: curiosità, torta dei mazzi, partite per giorno ============
+// ============ STATISTICHE EXTRA (stagione corrente e all-time): curiosità, torta dei mazzi, partite per giorno ============
 let _meseIst = null;      // mese mostrato nell'istogramma, 'AAAA-MM'
 let _partiteExtra = [];
 
 function renderStatExtra(partite) {
   const box = document.getElementById('stat-extra');
   if (!box) return;
-  if (_scopeStat !== 'all' || !partite.length) { box.style.display = 'none'; return; }
+  if (!partite.length) { box.style.display = 'none'; return; }
   box.style.display = 'block';
   _partiteExtra = inOrdine(partite);
   box.innerHTML = `
@@ -4888,21 +4895,24 @@ function fmtGiorno(d) {
 }
 
 function htmlCuriosita(partite) {
-  // scontro piu' equilibrato: la coppia con la differenza di vittorie piu' piccola
-  // in proporzione ai match giocati; a parita' vince chi ha giocato di piu'
+  // scontri fra mazzi: per ogni coppia di mazzi che si sono affrontati almeno
+  // 2 volte, quanto e' squilibrato il bilancio rispetto ai match giocati
   const coppie = {};
   partite.forEach(p => {
-    const r = PUNTI[p.risultato]; if (!r) return;
-    const [a, b] = [p.g1, p.g2].sort();
+    const r = PUNTI[p.risultato]; if (!r || p.m1 === p.m2) return;
+    const [a, b] = [p.m1, p.m2].sort();
     const k = a + '|' + b;
     const c = coppie[k] || (coppie[k] = { a, b, va: 0, vb: 0 });
-    const vince = r[0] > r[1] ? p.g1 : p.g2;
+    const vince = r[0] > r[1] ? p.m1 : p.m2;
     if (vince === a) c.va++; else c.vb++;
   });
-  const equil = Object.values(coppie).filter(c => c.va + c.vb >= 2).sort((x, y) => {
-    const dx = Math.abs(x.va - x.vb) / (x.va + x.vb), dy = Math.abs(y.va - y.vb) / (y.va + y.vb);
-    return dx - dy || (y.va + y.vb) - (x.va + x.vb);
-  })[0];
+  const squilibrio = c => Math.abs(c.va - c.vb) / (c.va + c.vb);
+  const validi = Object.values(coppie).filter(c => c.va + c.vb >= 2);
+  // a parita' di squilibrio conta di piu' lo scontro giocato piu' volte
+  const equil = [...validi].sort((x, y) => squilibrio(x) - squilibrio(y) || (y.va + y.vb) - (x.va + x.vb))[0];
+  const sbil = [...validi].sort((x, y) => squilibrio(y) - squilibrio(x) || (y.va + y.vb) - (x.va + x.vb))[0];
+  // nel meno equilibrato il mazzo che domina va per primo
+  const domina = c => c.va >= c.vb ? c : { a: c.b, b: c.a, va: c.vb, vb: c.va };
 
   // serie piu' lunghe di vittorie e di sconfitte di fila, partite in ordine di data
   const serie = {};
@@ -4928,6 +4938,8 @@ function htmlCuriosita(partite) {
   return [
     equil ? riga('⚖️', 'Scontro più equilibrato', `${equil.va}-${equil.vb}`,
       `${escapeHtml(equil.a)} vs ${escapeHtml(equil.b)} · ${equil.va + equil.vb} match`) : '',
+    sbil && sbil !== equil ? (() => { const d = domina(sbil); return riga('💥', 'Scontro meno equilibrato', `${d.va}-${d.vb}`,
+      `${escapeHtml(d.a)} vs ${escapeHtml(d.b)} · ${d.va + d.vb} match`); })() : '',
     migliore ? riga('🔥', 'Migliore streak di vittorie', `${migliore.n}`,
       `${escapeHtml(migliore.g)} · ${periodo(migliore)}`) : '',
     peggiore ? riga('🧊', 'Peggiore streak di sconfitte', `${peggiore.n}`,
