@@ -2851,7 +2851,30 @@
       background: var(--border); color: var(--text-dim);
       align-items: center; justify-content: center; font-size: 17px; font-weight: 700;
     }
-    .cl-avatar.mazzo { border-radius: 11px; }
+    table.tab-box tr.cl-riga { position: relative; isolation: isolate; }
+    .cl-avatar.mazzo {
+      position: absolute; top: 0; bottom: 0; left: 0; z-index: -1;
+      width: 34%; height: auto; border-radius: 0; background: none; color: transparent;
+      box-shadow: none !important;
+      -webkit-mask-image: linear-gradient(90deg, #000 0%, #000 35%, transparent 100%);
+      mask-image: linear-gradient(90deg, #000 0%, #000 35%, transparent 100%);
+    }
+    .cl-avatar.mazzo img { object-position: center 30%; }
+    .cl-chi:has(.cl-avatar.mazzo) { min-height: 50px; }
+    /* ombra sulle scritte sopra l'immagine: chiara di giorno, scura di notte */
+    table.tab-box tr.cl-riga td:has(> .cl-chi) { flex: 1 1 auto; }
+    .cl-chi:has(.cl-avatar.mazzo) .cl-testo {
+      padding-left: 84px;
+      text-shadow: 0 0 2px var(--bg-card), 0 0 6px var(--bg-card), 0 0 12px var(--bg-card);
+    }
+    [data-theme="dark"] .cl-chi:has(.cl-avatar.mazzo) .cl-testo {
+      text-shadow: 0 1px 3px #000, 0 0 8px rgba(0, 0, 0, 0.9), 0 0 14px rgba(0, 0, 0, 0.7);
+    }
+    table.tab-box tr.oro .cl-chi:has(.cl-avatar.mazzo) .cl-testo,
+    table.tab-box tr.argento .cl-chi:has(.cl-avatar.mazzo) .cl-testo,
+    table.tab-box tr.bronzo .cl-chi:has(.cl-avatar.mazzo) .cl-testo {
+      text-shadow: 0 0 3px rgba(255,255,255,0.9), 0 0 8px rgba(255,255,255,0.8), 0 0 14px rgba(255,255,255,0.6);
+    }
     .cl-avatar img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
     .cl-testo { min-width: 0; font-size: 17px; font-weight: 600; line-height: 1.3; }
     .cl-testo .name-btn { font: inherit; }
@@ -3327,16 +3350,20 @@
   <div class="subtitle">Il gioco che se vai primo vinci</div>
   <div class="header-actions">
     <button class="header-btn-primary" onclick="switchTab('nuova')">+ Registra Partita</button>
+    <!-- DECK EDITING sospeso: per riattivarlo togliere il commento (la pagina deck-builder.html e' ancora nel progetto)
     <a class="header-btn-search" href="deck-builder.html" style="text-decoration:none;text-align:center;display:flex;align-items:center;justify-content:center;gap:7px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#a1a1a6" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>Deck Editing</a>
+    -->
   </div>
 </header>
 
 <!-- barra in alto su telefono: sfondo sfocato e titolo piccolo della sezione quando si scorre -->
 <div class="m-topbar" aria-hidden="true"><span class="m-topbar-title" id="m-topbar-title"></span></div>
 
+<!-- DECK EDITING sospeso: icona in alto su telefono, da riattivare insieme al link nell'intestazione
 <a class="deck-edit-btn" href="deck-builder.html" title="Deck Editing" aria-label="Deck Editing">
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
 </a>
+-->
 
 <button class="gear-btn" onclick="apriImpostazioni()" title="Impostazioni" id="gear-btn">
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -3977,7 +4004,7 @@
 <footer>
   <span>Tia · Gio · Richi</span>
   <button onclick="eseguiLogout()" style="background:none;border:none;color:var(--text-faint);font-size:0.75rem;cursor:pointer;margin-left:12px;font-family:inherit">Esci</button>
-  <div style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 57</div>
+  <div style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 58</div>
 </footer>
 
 </div>
@@ -4439,12 +4466,6 @@ function buildProfiloInline(nome) {
         <div class="profile-inline-desc">${profilo.descrizione || 'Nessuna descrizione ancora.'}</div>
       </div>
     </div>
-    <div class="profile-inline-stats">
-      <div class="profile-inline-stat"><span class="pis-lbl">Partite</span><span class="pis-val">${s.partite}</span></div>
-      <div class="profile-inline-stat"><span class="pis-lbl">Win Rate</span><span class="pis-val">${wr}%</span></div>
-      <div class="profile-inline-stat"><span class="pis-lbl">V / P</span><span class="pis-val">${s.v} / ${s.p}</span></div>
-      <div class="profile-inline-stat"><span class="pis-lbl">Mazzo + usato</span><span class="pis-val" style="font-size:0.7rem;line-height:1.2">${mazzoPreferitoGiocatore(nome)}</span></div>
-   </div>
     <div class="profile-inline-ach-head">
       <div class="modal-section-title" style="margin-bottom: 0;">Achievements</div>
     </div>
