@@ -714,6 +714,9 @@
 
   /* cronologia partite dentro il popup del mazzo */
   .dmh-tabs { max-width: 480px; margin: 0 auto 10px; }
+  .ddm-tabs { max-width: 480px; margin: 0 auto 14px; padding-right: 4px; }
+  .detail-modal:not(.has-bg-img) .ddm-tabs { margin-right: 44px; }
+  .deck-mu-vuoto { padding: 10px 14px; font-size: 0.85rem; color: var(--text-faint); }
   .dmh-list { max-width: 480px; margin: 0 auto; width: 100%; }
   .dmh-row {
     display: flex; align-items: center; gap: 11px;
@@ -3152,6 +3155,7 @@
       -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
     }
     .detail-modal .detail-section-title { display: none; }
+    .detail-modal .ddm-tabs { margin: calc(env(safe-area-inset-top) + 10px) 52px 12px 0; }
     .detail-modal .deck-mu-stat-list {
       display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 0; max-width: none;
     }
@@ -3173,7 +3177,7 @@
     [data-theme="dark"] .detail-overlay .detail-modal .deck-mu-vs-row.win .deck-mu-vs-name,
     [data-theme="dark"] .detail-overlay .detail-modal .deck-mu-vs-row.win .deck-mu-vs-score { color: var(--green) !important; }
     .detail-modal .dmh-tabs { max-width: none; margin: 14px 0 10px; }
-    .detail-modal .dmh-list { max-width: none; background: var(--bg-card); border-radius: 12px; overflow: hidden; }
+    .detail-modal .dmh-list { margin-top: 12px; max-width: none; background: var(--bg-card); border-radius: 12px; overflow: hidden; }
     .detail-modal .dmh-row { border-bottom-color: var(--border); }
     [data-theme="dark"] .detail-modal .dmh-row.win .dmh-score { color: var(--green); }
     .detail-modal #ddm-decklist-body { margin-top: 12px; padding: 12px; background: var(--bg-card); border-radius: 12px; }
@@ -4004,7 +4008,7 @@
 <footer>
   <span>Tia · Gio · Richi</span>
   <button onclick="eseguiLogout()" style="background:none;border:none;color:var(--text-faint);font-size:0.75rem;cursor:pointer;margin-left:12px;font-family:inherit">Esci</button>
-  <div style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 58</div>
+  <div style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 59</div>
 </footer>
 
 </div>
@@ -4842,17 +4846,10 @@ function renderStorico(partite = dati.partite, modificabile = true, contId = 'li
   }).join('');
 }
 
-function renderMatchup(partite = dati.partite) {
-  _deckScopePartite = partite;
-  const c = document.getElementById('grid-matchup');
-  const mazzi = new Set();
-  partite.forEach(p => { mazzi.add(p.m1); mazzi.add(p.m2); });
-  const lista = [...mazzi].sort();
-  if (lista.length === 0) {
-    c.innerHTML = '<div class="empty" style="padding:32px">Nessun match-up ancora.</div>';
-    return;
-  }
+// vittorie, sconfitte, primo/secondo e scontri per ogni mazzo di un elenco di partite
+function calcolaMatchup(partite) {
   const stat = {};
+  const lista = [...new Set(partite.flatMap(p => [p.m1, p.m2]))].sort();
   lista.forEach(a => {
     stat[a] = { v:0, p:0, primoV:0, primoT:0, secondoV:0, secondoT:0, vs:{} };
     lista.forEach(b => { if (a !== b) stat[a].vs[b] = {v:0, p:0}; });
@@ -4883,6 +4880,20 @@ function renderMatchup(partite = dati.partite) {
       }
     }
   });
+  return stat;
+}
+
+function renderMatchup(partite = dati.partite) {
+  _deckScopePartite = partite;
+  const c = document.getElementById('grid-matchup');
+  const mazzi = new Set();
+  partite.forEach(p => { mazzi.add(p.m1); mazzi.add(p.m2); });
+  const lista = [...mazzi].sort();
+  if (lista.length === 0) {
+    c.innerHTML = '<div class="empty" style="padding:32px">Nessun match-up ancora.</div>';
+    return;
+  }
+  const stat = calcolaMatchup(partite);
   const pct = (v,t) => t > 0 ? Math.round(100*v/t)+'%' : '—';
   _matchupStat = stat;
   const medalMap = getMedalMap();
@@ -4997,31 +5008,71 @@ function renderCronologiaMazzo(mazzo, scope) {
     </div>`;
   }).join('');
 }
-function switchCronologiaMazzo(scope) {
-  document.getElementById('dmh-tab-cur').classList.toggle('active', scope === 'cur');
-  document.getElementById('dmh-tab-all').classList.toggle('active', scope === 'all');
-  renderCronologiaMazzo(_dmhMazzo, scope);
-}
-window.switchCronologiaMazzo = switchCronologiaMazzo;
 
-async function apriDettaglioMazzo(mazzo) {
-  const s = _matchupStat[mazzo];
-  if (!s) return;
+// Popup del mazzo. In alto si sceglie Stagione corrente / All-time: numeri,
+// match-up e cronologia si ricalcolano su quelle partite (la decklist resta).
+async function apriDettaglioMazzo(mazzo, scope = _scopeDeck) {
+  _dmhMazzo = mazzo;
+  const prop = dati.mazzi[mazzo] || '';
+  const imgUrl = imgMazzo(mazzo);
+  // su telefono l'immagine sta in alto e il resto su fondo normale; su PC fa da sfondo
+  const telefono = window.matchMedia('(max-width: 720px)').matches;
+  document.getElementById('detail-content').innerHTML = `
+    <div class="inner-tab-bar ddm-tabs">
+      <button class="inner-tab" id="ddm-tab-cur" onclick="switchScopeMazzo('cur')">Stagione corrente</button>
+      <button class="inner-tab" id="ddm-tab-all" onclick="switchScopeMazzo('all')">All-time</button>
+    </div>
+    <div class="dh-hero${imgUrl ? '' : ' senza-img'}"${imgUrl ? ` style="--hero:url('${imgUrl}')"` : ''}>
+    <div class="detail-head">
+      <div class="dh-name"><span id="ddm-medaglia"></span>${mazzo}</div>
+      ${prop ? `<div class="dh-sub">Proprietario: ${prop}</div>` : ''}
+    </div>
+    </div>
+    <div id="ddm-scope"></div>
+    <div class="detail-section-title">Decklist</div>
+    <div id="ddm-decklist-body"><div class="empty">Caricamento decklist…</div></div>
+  `;
+  renderDettaglioMazzoScope(mazzo, scope);
+
+  const modal = document.getElementById('detail-modal');
+  if (modal) {
+    modal.classList.add('deck-full');
+    if (imgUrl && !telefono) {
+      modal.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.60), rgba(0,0,0,0.60)), url('${imgUrl}')`;
+      modal.classList.add('has-bg-img');
+    } else {
+      modal.style.backgroundImage = '';
+      modal.classList.remove('has-bg-img');
+    }
+  }
+  document.getElementById('detail-overlay').classList.add('open');
+
+  await caricaDecklistInline('ddm-decklist-body', mazzo);
+}
+
+function renderDettaglioMazzoScope(mazzo, scope) {
+  document.getElementById('ddm-tab-cur').classList.toggle('active', scope === 'cur');
+  document.getElementById('ddm-tab-all').classList.toggle('active', scope === 'all');
+  const partite = partiteScope(scope);
+  const s = calcolaMatchup(partite)[mazzo] || { v:0, p:0, primoV:0, primoT:0, secondoV:0, secondoT:0, vs:{} };
   const pct = (v,t) => t > 0 ? Math.round(100*v/t)+'%' : '—';
   const tot = s.v + s.p;
 
-  // posizione in classifica deck e % di utilizzo
-  const statMazzi = calcolaStatMazzi(_deckScopePartite);
-  const ordineMazzi = Object.entries(statMazzi).sort((a, b) => {
+  // posizione in classifica deck e % di utilizzo, sulle partite scelte
+  const statMazzi = calcolaStatMazzi(partite);
+  const ordine = Object.entries(statMazzi).sort((a, b) => {
     const ua = a[1].partite >= SOGLIA_MAZZO ? 1 : 0;
     const ub = b[1].partite >= SOGLIA_MAZZO ? 1 : 0;
     if (ua !== ub) return ub - ua;
     if (b[1].wr !== a[1].wr) return b[1].wr - a[1].wr;
     return b[1].partite - a[1].partite;
-  }).map(([nome]) => nome);
-  const posizione = ordineMazzi.indexOf(mazzo) + 1;
-  const totPartiteLega = _deckScopePartite.length;
-  const utilizzo = totPartiteLega > 0 ? Math.round(100 * tot / totPartiteLega) + '%' : '—';
+  });
+  const indice = ordine.findIndex(([nome]) => nome === mazzo);
+  const posizione = indice + 1;
+  const utilizzo = partite.length > 0 ? Math.round(100 * tot / partite.length) + '%' : '—';
+  // medaglia solo per i primi tre mazzi ufficiali (almeno SOGLIA_MAZZO partite)
+  const ufficiale = indice >= 0 && ordine[indice][1].partite >= SOGLIA_MAZZO;
+  document.getElementById('ddm-medaglia').textContent = ufficiale && indice < 3 ? ['🥇', '🥈', '🥉'][indice] + ' ' : '';
 
   const vsRows = Object.entries(s.vs)
     .filter(([_, r]) => r.v + r.p > 0)
@@ -5039,23 +5090,11 @@ async function apriDettaglioMazzo(mazzo) {
         <span class="deck-mu-vs-wr">${pct(r.v, r.v + r.p)}</span>
       </div>`;
     }).join('');
-  const noVs = vsRows === '' ? '<div style="padding:8px 0;font-size:0.85rem;color:var(--text-faint)">Nessuno scontro registrato.</div>' : vsRows;
-  const prop = dati.mazzi[mazzo] || '';
-  const medalMap = getMedalMap();
-  const medal = medalMap[mazzo] ? `${medalMap[mazzo]} ` : '';
+  const noVs = vsRows === '' ? '<div class="deck-mu-vuoto">Nessuno scontro registrato.</div>' : vsRows;
 
-  const imgUrl = imgMazzo(mazzo);
-  // su telefono l'immagine sta in alto e il resto su fondo normale; su PC fa da sfondo
-  const telefono = window.matchMedia('(max-width: 720px)').matches;
-  document.getElementById('detail-content').innerHTML = `
-    <div class="dh-hero${imgUrl ? '' : ' senza-img'}"${imgUrl ? ` style="--hero:url('${imgUrl}')"` : ''}>
-    <div class="detail-head">
-      <div class="dh-name">${medal}${mazzo}</div>
-      ${prop ? `<div class="dh-sub">Proprietario: ${prop}</div>` : ''}
-    </div>
-    </div>
+  document.getElementById('ddm-scope').innerHTML = `
     <div class="deck-mu-stat-list">
-      <div class="deck-mu-stat-line"><span class="deck-mu-stat-lbl">Posizione classifica<span class="m-nascondi">:</span></span><span class="deck-mu-stat-val">#${posizione || '—'}</span></div>
+      <div class="deck-mu-stat-line"><span class="deck-mu-stat-lbl">Posizione classifica<span class="m-nascondi">:</span></span><span class="deck-mu-stat-val">${posizione ? '#' + posizione : '—'}</span></div>
       <div class="deck-mu-stat-line"><span class="deck-mu-stat-lbl">% Utilizzo<span class="m-nascondi">:</span></span><span class="deck-mu-stat-val">${utilizzo}</span></div>
       <div class="deck-mu-stat-line"><span class="deck-mu-stat-lbl">Win Rate<span class="m-nascondi">:</span></span><span class="deck-mu-stat-val">${pct(s.v, tot)}</span></div>
       <div class="deck-mu-stat-line"><span class="deck-mu-stat-lbl">Vittorie / Sconfitte<span class="m-nascondi">:</span></span><span class="deck-mu-stat-val">${s.v} / ${s.p}</span></div>
@@ -5065,33 +5104,14 @@ async function apriDettaglioMazzo(mazzo) {
     <div class="detail-section-title">Match-up</div>
     <div class="deck-mu-vs-list">${noVs}</div>
     <div class="detail-section-title">Cronologia partite</div>
-    <div class="inner-tab-bar dmh-tabs">
-      <button class="inner-tab active" id="dmh-tab-cur" onclick="switchCronologiaMazzo('cur')">Stagione corrente</button>
-      <button class="inner-tab" id="dmh-tab-all" onclick="switchCronologiaMazzo('all')">All-time</button>
-    </div>
-    <div class="dmh-list" id="dmh-body"></div>
-    <div class="detail-section-title">Decklist</div>
-    <div id="ddm-decklist-body"><div class="empty">Caricamento decklist…</div></div>
-  `;
-
-  _dmhMazzo = mazzo;
-  renderCronologiaMazzo(mazzo, 'cur');
-
-  const modal = document.getElementById('detail-modal');
-  if (modal) {
-    modal.classList.add('deck-full');
-    if (imgUrl && !telefono) {
-      modal.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.60), rgba(0,0,0,0.60)), url('${imgUrl}')`;
-      modal.classList.add('has-bg-img');
-    } else {
-      modal.style.backgroundImage = '';
-      modal.classList.remove('has-bg-img');
-    }
-  }
-  document.getElementById('detail-overlay').classList.add('open');
-
-  await caricaDecklistInline('ddm-decklist-body', mazzo);
+    <div class="dmh-list" id="dmh-body"></div>`;
+  renderCronologiaMazzo(mazzo, scope);
 }
+
+function switchScopeMazzo(scope) {
+  if (_dmhMazzo) renderDettaglioMazzoScope(_dmhMazzo, scope);
+}
+window.switchScopeMazzo = switchScopeMazzo;
 
 // carica e disegna la decklist associata a un mazzo dentro un contenitore qualsiasi
 async function caricaDecklistInline(containerId, nomeMazzo) {
