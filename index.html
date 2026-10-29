@@ -2717,7 +2717,7 @@
      con il + al centro, icone tonde in alto, riquadri su fondo grigio.
      Sopra i 720px resta tutto come prima. */
   .m-topbar, .deck-edit-btn, nav .nav-add, .cl-avatar, .cl-sub, .mc-bg, .mc-dado,
-  .ico-svg, .ico-imp, .edit-azione, .storico-dettagli-btn, .h2h-m, .dado-m { display: none; }
+  .ico-svg, .ico-imp, .edit-azione, .storico-dettagli-btn, .h2h-m, .dado-m, .h2h-bg { display: none; }
   tr.cl-riga[onclick] { cursor: pointer; }
   .dh-hero { display: contents; }
   :root {
@@ -3026,7 +3026,34 @@
     }
     .h2h-united .h2h-u-item:last-child { border-bottom: none; }
     .h2h-united .h2h-u-head { justify-content: space-between; gap: 10px; width: 100%; }
-    .h2h-u-head .cl-avatar { width: 36px; height: 36px; }
+    /* foto dei due giocatori sfumate ai lati della riga, dietro i testi */
+    .card.h2h-united-card { overflow: hidden; }
+    .h2h-united .h2h-u-item { margin: 0 -16px; padding: 0 16px 14px; }
+    .h2h-united .h2h-u-head { position: relative; isolation: isolate; min-height: 62px; }
+    /* le foto stanno solo nella fascia dei nomi e sfumano verso il centro e verso il basso */
+    .h2h-bg {
+      display: block; position: absolute; top: 0; bottom: -8px; width: 38%; z-index: -1;
+      background-size: cover; background-position: center 25%;
+      -webkit-mask-composite: source-in; mask-composite: intersect;
+    }
+    .h2h-bg.sx { left: -16px;
+      -webkit-mask-image: linear-gradient(90deg, #000 0%, #000 30%, transparent 100%), linear-gradient(180deg, #000 55%, transparent 100%);
+      mask-image: linear-gradient(90deg, #000 0%, #000 30%, transparent 100%), linear-gradient(180deg, #000 55%, transparent 100%); }
+    .h2h-bg.dx { right: -16px;
+      -webkit-mask-image: linear-gradient(270deg, #000 0%, #000 30%, transparent 100%), linear-gradient(180deg, #000 55%, transparent 100%);
+      mask-image: linear-gradient(270deg, #000 0%, #000 30%, transparent 100%), linear-gradient(180deg, #000 55%, transparent 100%); }
+    /* nomi vicino al punteggio, dove la foto e' gia' sfumata */
+    .h2h-united .h2h-u-name { text-align: right !important; }
+    .h2h-united .h2h-u-score + .h2h-u-name { text-align: left !important; }
+    .h2h-u-head .cl-avatar { display: none; }
+    .h2h-united .h2h-u-name, .h2h-united .h2h-u-stat {
+      text-shadow: 0 0 2px var(--bg-card), 0 0 6px var(--bg-card), 0 0 12px var(--bg-card), 0 0 16px var(--bg-card);
+    }
+    [data-theme="dark"] .h2h-united .h2h-u-name, [data-theme="dark"] .h2h-united .h2h-u-stat {
+      text-shadow: 0 1px 3px #000, 0 0 8px rgba(0, 0, 0, 0.9), 0 0 14px rgba(0, 0, 0, 0.7);
+    }
+    .h2h-united .h2h-u-name { font-size: 19px; font-weight: 700; padding: 0 4px; }
+    .h2h-united .h2h-u-score { background: var(--bg-card); }
     .h2h-united .h2h-u-name { flex: 1; min-width: 0; font-size: 17px; font-weight: 600; text-align: left; }
     .h2h-united .h2h-u-score + .h2h-u-name { text-align: right; }
     .h2h-united .h2h-u-score {
@@ -3036,7 +3063,7 @@
     .h2h-united .h2h-u-score strong { font-size: 19px; }
     /* quattro dati in fila sotto i nomi: etichetta piccola sopra, valore grande sotto */
     .h2h-united .h2h-u-stats {
-      display: grid !important; grid-template-columns: repeat(4, 1fr); gap: 0; margin-top: 6px;
+      display: grid !important; grid-template-columns: repeat(4, 1fr); gap: 0; margin-top: 10px;
     }
     .h2h-united .h2h-u-stat {
       flex-direction: column; align-items: center; gap: 3px; padding: 2px 4px;
@@ -4053,7 +4080,7 @@
 <footer>
   <span>Tia · Gio · Richi</span>
   <button onclick="eseguiLogout()" style="background:none;border:none;color:var(--text-faint);font-size:0.75rem;cursor:pointer;margin-left:12px;font-family:inherit">Esci</button>
-  <div style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 62</div>
+  <div style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 63</div>
 </footer>
 
 </div>
@@ -4572,8 +4599,11 @@ function renderRiepilogo(partite = dati.partite, contId = 'riepilogo-h2h', cardI
       ${arr.map(r => {
         const tot = r.va + r.vb;
         const ultimoStr = r.ultimo ? `${r.ultimo.vincitore}` : '—';
+        const fotoA = ((dati.profili || {})[r.a] || {}).foto, fotoB = ((dati.profili || {})[r.b] || {}).foto;
         return `<div class="h2h-u-item">
           <div class="h2h-u-head">
+            ${fotoA ? `<span class="h2h-bg sx" style="background-image:url('${escapeHtml(fotoA)}')"></span>` : ''}
+            ${fotoB ? `<span class="h2h-bg dx" style="background-image:url('${escapeHtml(fotoB)}')"></span>` : ''}
             ${avatarGiocatore(r.a)}
             <span class="h2h-u-name">${r.a}</span>
             <span class="h2h-u-score"><strong>${r.va}</strong>-<strong>${r.vb}</strong></span>
