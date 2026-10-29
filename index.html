@@ -2702,7 +2702,7 @@
      con il + al centro, icone tonde in alto, riquadri su fondo grigio.
      Sopra i 720px resta tutto come prima. */
   .m-topbar, .deck-edit-btn, nav .nav-add, .cl-avatar, .cl-sub, .mc-bg, .mc-dado,
-  .ico-svg, .ico-imp, .edit-azione { display: none; }
+  .ico-svg, .ico-imp, .edit-azione, .storico-dettagli-btn { display: none; }
   tr.cl-riga[onclick] { cursor: pointer; }
   .dh-hero { display: contents; }
   :root {
@@ -2901,14 +2901,36 @@
       column-gap: 8px; row-gap: 0; padding: 7px 10px 7px 14px;
     }
     .mc-bg {
-      display: block; position: absolute; top: 0; bottom: 0; width: 22%; z-index: -1;
+      display: block; position: absolute; top: 0; bottom: 0; width: 30%; z-index: -1;
       background-size: cover; background-position: center 30%; opacity: 0.9;
     }
-    .mc-bg.sx { left: 0; -webkit-mask-image: linear-gradient(90deg, #000 0%, #000 45%, transparent 100%); mask-image: linear-gradient(90deg, #000 0%, #000 45%, transparent 100%); }
-    .mc-bg.dx { right: 0; -webkit-mask-image: linear-gradient(270deg, #000 0%, #000 45%, transparent 100%); mask-image: linear-gradient(270deg, #000 0%, #000 45%, transparent 100%); }
+    .mc-bg.sx { left: 0; -webkit-mask-image: linear-gradient(90deg, #000 0%, #000 35%, transparent 100%); mask-image: linear-gradient(90deg, #000 0%, #000 35%, transparent 100%); }
+    .mc-bg.dx { right: 0; -webkit-mask-image: linear-gradient(270deg, #000 0%, #000 35%, transparent 100%); mask-image: linear-gradient(270deg, #000 0%, #000 35%, transparent 100%); }
     [data-theme="dark"] .mc-bg { opacity: 0.85; }
     /* alone del colore del riquadro attorno al testo: si legge anche sopra l'immagine */
-    .match-card .player, .match-card .deck { text-shadow: 0 0 6px var(--bg-card), 0 0 2px var(--bg-card); }
+    .match-card .player, .match-card .deck {
+      text-shadow: 0 0 2px var(--bg-card), 0 0 6px var(--bg-card), 0 0 12px var(--bg-card), 0 0 16px var(--bg-card);
+    }
+    [data-theme="dark"] .match-card .player, [data-theme="dark"] .match-card .deck {
+      text-shadow: 0 1px 3px #000, 0 0 8px rgba(0, 0, 0, 0.9), 0 0 14px rgba(0, 0, 0, 0.7);
+    }
+    /* storico della classifica: di base solo i mazzi, grandi; i dettagli a richiesta */
+    .storico-dettagli-btn {
+      display: block; background: none; border: none; padding: 2px 4px 10px; cursor: pointer;
+      font-family: inherit; font-size: 15px; font-weight: 500; color: var(--blue);
+    }
+    .match-card .deck .mc-dado { display: none; }
+    #lista-partite:not(.dettagli) .player,
+    #lista-partite:not(.dettagli) .date,
+    #lista-partite:not(.dettagli) .mc-side { display: none; }
+    #lista-partite:not(.dettagli) .deck {
+      font-size: 17px; font-weight: 700; line-height: 1.2; margin: 0; color: var(--text);
+    }
+    #lista-partite:not(.dettagli) .deck.win { color: var(--green-dark); }
+    [data-theme="dark"] #lista-partite:not(.dettagli) .deck.win { color: var(--green); }
+    #lista-partite:not(.dettagli) .deck .mc-dado { display: inline; }
+    #lista-partite:not(.dettagli) .score { grid-row: 1 / span 2; }
+    #lista-partite:not(.dettagli) .match-card { min-height: 64px; }
     .match-card .mc-main {
       flex: 1; min-width: 0;
       display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
@@ -3526,6 +3548,7 @@
     <div class="classifica-top">
       <h3 class="subsection-title m-nascondi">Storico Partite</h3>
       <p class="section-note m-nascondi" id="storico-nota">Tocca ✏️ per modificare o 🗑 per eliminare.</p>
+      <button class="storico-dettagli-btn" id="storico-dettagli-btn" onclick="toggleDettagliStorico()">Mostra dettagli</button>
       <div class="card" id="lista-partite"></div>
     </div>
   </section>
@@ -3954,7 +3977,7 @@
 <footer>
   <span>Tia · Gio · Richi</span>
   <button onclick="eseguiLogout()" style="background:none;border:none;color:var(--text-faint);font-size:0.75rem;cursor:pointer;margin-left:12px;font-family:inherit">Esci</button>
-  <div style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 56</div>
+  <div style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 57</div>
 </footer>
 
 </div>
@@ -4744,6 +4767,14 @@ function renderMazzi(partite = dati.partite, contId = 'tabella-mazzi') {
 const SVG_MATITA = '<svg class="ico-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>';
 const SVG_CESTINO = '<svg class="ico-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>';
 
+// su telefono lo storico mostra solo i mazzi: giocatori, data e note compaiono a richiesta
+function toggleDettagliStorico() {
+  const lista = document.getElementById('lista-partite');
+  const aperti = lista.classList.toggle('dettagli');
+  document.getElementById('storico-dettagli-btn').textContent = aperti ? 'Nascondi dettagli' : 'Mostra dettagli';
+}
+window.toggleDettagliStorico = toggleDettagliStorico;
+
 function renderStorico(partite = dati.partite, modificabile = true, contId = 'lista-partite') {
   const c = document.getElementById(contId);
   if (!c) return;
@@ -4754,7 +4785,8 @@ function renderStorico(partite = dati.partite, modificabile = true, contId = 'li
   const arr = partite.map((p, idx) => ({ p, idx })).reverse();
   // su telefono: immagine del mazzo sfumata dietro ogni giocatore e 🎲 accanto a chi ha vinto il dado
   const sfondo = (m, lato) => { const u = imgMazzo(m); return u ? `<span class="mc-bg ${lato}" style="background-image:url('${u}')"></span>` : ''; };
-  const dado = `<span class="mc-dado" title="Ha vinto il dado">\uD83C\uDFB2</span>`;
+  // \u2060 (word joiner) tiene l'icona attaccata al nome: non va a capo da sola
+  const dado = `<span class="mc-dado" title="Ha vinto il dado">\u2060\uD83C\uDFB2\u2060</span>`;
   c.innerHTML = arr.map(({p, idx}) => {
     const [p1, p2] = PUNTI[p.risultato];
     const g1win = p1 > p2;
@@ -4768,12 +4800,12 @@ function renderStorico(partite = dati.partite, modificabile = true, contId = 'li
         <div class="mc-versus">
           <div class="side-left">
             <span class="player ${g1win ? 'win' : ''}">${p.dado === p.g1 ? dado : ''}${p.g1}</span>
-            <span class="deck">${p.m1}</span>
+            <span class="deck${g1win ? ' win' : ''}">${p.dado === p.g1 ? dado : ''}${p.m1}</span>
           </div>
           <div class="score">${p.risultato}</div>
           <div class="side-right">
             <span class="player ${!g1win ? 'win' : ''}">${p.g2}${p.dado === p.g2 ? dado : ''}</span>
-            <span class="deck">${p.m2}</span>
+            <span class="deck${!g1win ? ' win' : ''}">${p.m2}${p.dado === p.g2 ? dado : ''}</span>
           </div>
         </div>
       </div>
