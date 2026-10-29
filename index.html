@@ -3034,8 +3034,17 @@
       border: 1px solid var(--border-strong); box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
     }
     .h2h-united .h2h-u-score strong { font-size: 19px; }
-    .h2h-united .h2h-u-stats { display: none !important; }
-    .h2h-m { display: block; text-align: center; font-size: 13px; color: var(--text-dim); font-variant-numeric: tabular-nums; }
+    /* quattro dati in fila sotto i nomi: etichetta piccola sopra, valore grande sotto */
+    .h2h-united .h2h-u-stats {
+      display: grid !important; grid-template-columns: repeat(4, 1fr); gap: 0; margin-top: 6px;
+    }
+    .h2h-united .h2h-u-stat {
+      flex-direction: column; align-items: center; gap: 3px; padding: 2px 4px;
+      background: none; border-radius: 0; text-align: center;
+    }
+    .h2h-united .h2h-u-stat + .h2h-u-stat { border-left: 0.5px solid var(--border); }
+    .h2h-united .h2h-u-stat .lbl { font-size: 10.5px; letter-spacing: 0.04em; color: var(--text-dim); white-space: nowrap; }
+    .h2h-united .h2h-u-stat .val { font-size: 17px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
     #stat-dado-wrap { display: flex; flex-direction: column; gap: 12px; }
     .dado-player-card {
       min-height: 0; padding: 0; border-radius: 14px; box-shadow: none;
@@ -4044,7 +4053,7 @@
 <footer>
   <span>Tia · Gio · Richi</span>
   <button onclick="eseguiLogout()" style="background:none;border:none;color:var(--text-faint);font-size:0.75rem;cursor:pointer;margin-left:12px;font-family:inherit">Esci</button>
-  <div style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 61</div>
+  <div style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 62</div>
 </footer>
 
 </div>
@@ -4573,9 +4582,9 @@ function renderRiepilogo(partite = dati.partite, contId = 'riepilogo-h2h', cardI
           </div>
           <div class="h2h-u-stats">
             <div class="h2h-u-stat"><span class="lbl">Match</span><span class="val">${tot}</span></div>
-            <div class="h2h-u-stat"><span class="lbl">Game vinti</span><span class="val">${r.gamesA} - ${r.gamesB}</span></div>
-            <div class="h2h-u-stat"><span class="lbl">Dadi vinti</span><span class="val">${r.dadoA} - ${r.dadoB}</span></div>
-            <div class="h2h-u-stat"><span class="lbl">Ultima vittoria</span><span class="val">${ultimoStr}</span></div>
+            <div class="h2h-u-stat"><span class="lbl">Game<span class="m-nascondi"> vinti</span></span><span class="val">${r.gamesA} - ${r.gamesB}</span></div>
+            <div class="h2h-u-stat"><span class="lbl">Dadi<span class="m-nascondi"> vinti</span></span><span class="val">${r.dadoA} - ${r.dadoB}</span></div>
+            <div class="h2h-u-stat"><span class="lbl">Ultima<span class="m-nascondi"> vittoria</span></span><span class="val">${ultimoStr}</span></div>
           </div>
           <div class="h2h-m">${tot} match · game ${r.gamesA}-${r.gamesB} · dadi ${r.dadoA}-${r.dadoB}${r.ultimo ? ` · ultima a ${escapeHtml(r.ultimo.vincitore)}` : ''}</div>
         </div>`;
