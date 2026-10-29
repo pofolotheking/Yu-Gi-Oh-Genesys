@@ -2901,11 +2901,11 @@
       column-gap: 8px; row-gap: 0; padding: 7px 10px 7px 14px;
     }
     .mc-bg {
-      display: block; position: absolute; top: 0; bottom: 0; width: 34%; z-index: -1;
+      display: block; position: absolute; top: 0; bottom: 0; width: 22%; z-index: -1;
       background-size: cover; background-position: center 30%; opacity: 0.9;
     }
-    .mc-bg.sx { left: 0; -webkit-mask-image: linear-gradient(90deg, #000 0%, #000 30%, transparent 100%); mask-image: linear-gradient(90deg, #000 0%, #000 30%, transparent 100%); }
-    .mc-bg.dx { right: 0; -webkit-mask-image: linear-gradient(270deg, #000 0%, #000 30%, transparent 100%); mask-image: linear-gradient(270deg, #000 0%, #000 30%, transparent 100%); }
+    .mc-bg.sx { left: 0; -webkit-mask-image: linear-gradient(90deg, #000 0%, #000 45%, transparent 100%); mask-image: linear-gradient(90deg, #000 0%, #000 45%, transparent 100%); }
+    .mc-bg.dx { right: 0; -webkit-mask-image: linear-gradient(270deg, #000 0%, #000 45%, transparent 100%); mask-image: linear-gradient(270deg, #000 0%, #000 45%, transparent 100%); }
     [data-theme="dark"] .mc-bg { opacity: 0.85; }
     /* alone del colore del riquadro attorno al testo: si legge anche sopra l'immagine */
     .match-card .player, .match-card .deck { text-shadow: 0 0 6px var(--bg-card), 0 0 2px var(--bg-card); }
@@ -2933,13 +2933,11 @@
     .mc-dado { display: inline; font-size: 12px; margin: 0 4px; vertical-align: 1px; }
     .match-card .mc-side { order: 3; flex: 0 0 100%; padding: 0; text-align: center; }
     .match-card .mc-side .match-extra { display: none; }
-    /* nota su un fondino con ombra, leggibile anche sopra le immagini */
+    /* nota senza riquadro: ombra in rilievo sul tratto del testo */
     .match-card .mc-side .match-note {
-      display: inline-block; max-width: 100%; margin: 5px 0 1px; padding: 4px 10px;
-      border-radius: 9px; background: var(--nota-fondo); color: var(--text);
-      box-shadow: 0 1px 6px rgba(0, 0, 0, 0.22);
-      -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
-      font-size: 12px; text-align: left;
+      display: block; margin: 4px 0 1px; padding: 0; background: none; border-radius: 0;
+      color: var(--text); font-size: 12px; font-weight: 500; text-align: center;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35), 0 0 6px var(--bg-card), 0 0 2px var(--bg-card);
     }
     .match-card .btn-group { position: static; order: 2; flex-direction: column; gap: 4px; }
     .match-card .edit-btn, .match-card .del-btn {
@@ -3956,7 +3954,7 @@
 <footer>
   <span>Tia · Gio · Richi</span>
   <button onclick="eseguiLogout()" style="background:none;border:none;color:var(--text-faint);font-size:0.75rem;cursor:pointer;margin-left:12px;font-family:inherit">Esci</button>
-  <div style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 55</div>
+  <div style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 56</div>
 </footer>
 
 </div>
