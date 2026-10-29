@@ -2700,7 +2700,7 @@
      Su schermi stretti: titolo grande a sinistra, barra delle sezioni in basso
      con il + al centro, icone tonde in alto, liste a blocchi su fondo grigio.
      Sopra i 720px resta tutto come prima. */
-  .m-topbar, .deck-edit-btn, nav .nav-add, .m-solo, .cl-avatar, .cl-sub { display: none; }
+  .m-topbar, .deck-edit-btn, nav .nav-add, .cl-avatar, .cl-sub, .mc-bg, .mc-dado, .ico-svg { display: none; }
   tr.cl-riga { cursor: pointer; }
   :root {
     --bg-gruppo: #f2f2f7;
@@ -2777,7 +2777,7 @@
       letter-spacing: 0.02em; color: var(--text-dim); margin: 26px 16px 7px;
     }
     .card h3.subsection-title { margin-left: 0; margin-right: 0; }
-    h3.subsection-title.m-solo { display: block; margin-top: 4px; }
+    .m-nascondi { display: none; }
     .section-note {
       text-align: left; font-style: normal; font-size: 13px; line-height: 1.4;
       color: var(--text-dim); margin: 0 16px 8px;
@@ -2799,8 +2799,42 @@
     #tabella-giocatori td:nth-child(2),
     #tabella-giocatori td:nth-child(3),
     #tabella-giocatori td:nth-child(4) { display: none; }
-    #tabella-giocatori tr.cl-riga td { padding: 10px 14px; vertical-align: middle; }
-    #tabella-giocatori tr.cl-riga:active td { background: var(--bg-soft); }
+    /* ogni giocatore nel suo riquadro: i primi tre in oro, argento e bronzo */
+    .card.card-classifica { background: none; border-radius: 0; overflow: visible; margin-bottom: 8px; }
+    #tabella-giocatori, #tabella-giocatori > tbody { display: block; }
+    #tabella-giocatori tr.cl-riga {
+      display: flex; align-items: center; margin-bottom: 8px;
+      background: var(--bg-card); border-radius: 14px; overflow: hidden;
+      transition: transform 0.12s;
+    }
+    #tabella-giocatori tr.cl-riga:active { transform: scale(0.985); }
+    #tabella-giocatori tr.cl-riga td { display: block; border: none; padding: 10px 14px; }
+    #tabella-giocatori tr.cl-riga td:nth-child(2),
+    #tabella-giocatori tr.cl-riga td:nth-child(3),
+    #tabella-giocatori tr.cl-riga td:nth-child(4) { display: none; }
+    #tabella-giocatori tr.cl-riga td:first-child { flex: 1; min-width: 0; }
+    #tabella-giocatori tr.profile-inline-row.open {
+      display: block; margin: -2px 0 10px; border-radius: 14px; overflow: hidden; background: var(--bg-card);
+    }
+    #tabella-giocatori .profile-inline-cell { display: block; border: none; }
+    #tabella-giocatori tr.oro { background: linear-gradient(135deg, #fff4c9 0%, #f3d36c 48%, #d6a633 100%); }
+    #tabella-giocatori tr.argento { background: linear-gradient(135deg, #fbfcfd 0%, #dde1e6 48%, #b3b9c2 100%); }
+    #tabella-giocatori tr.bronzo { background: linear-gradient(135deg, #fde4cc 0%, #e4a873 48%, #b8733a 100%); }
+    #tabella-giocatori tr.oro, #tabella-giocatori tr.argento, #tabella-giocatori tr.bronzo {
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.45), 0 2px 8px rgba(0, 0, 0, 0.12);
+    }
+    #tabella-giocatori tr.oro td, #tabella-giocatori tr.argento td, #tabella-giocatori tr.bronzo td,
+    #tabella-giocatori tr.oro .profile-toggle-btn, #tabella-giocatori tr.argento .profile-toggle-btn,
+    #tabella-giocatori tr.bronzo .profile-toggle-btn { color: #1d1d1f; }
+    #tabella-giocatori tr.oro .cl-sub, #tabella-giocatori tr.argento .cl-sub,
+    #tabella-giocatori tr.bronzo .cl-sub { color: rgba(29, 29, 31, 0.68); }
+    #tabella-giocatori tr.oro .cl-avatar, #tabella-giocatori tr.argento .cl-avatar,
+    #tabella-giocatori tr.bronzo .cl-avatar { box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.8); }
+    #tabella-giocatori tr.oro .wr-bar, #tabella-giocatori tr.argento .wr-bar,
+    #tabella-giocatori tr.bronzo .wr-bar { background: rgba(0, 0, 0, 0.13); }
+    #tabella-giocatori tr.oro .wr-bar > span { background: #8a6500; }
+    #tabella-giocatori tr.argento .wr-bar > span { background: #4b5563; }
+    #tabella-giocatori tr.bronzo .wr-bar > span { background: #7a3e12; }
     .cl-chi { display: flex; align-items: center; gap: 12px; }
     .cl-avatar {
       display: flex; position: relative; flex-shrink: 0; overflow: hidden;
@@ -2811,7 +2845,7 @@
     .cl-avatar img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
     .cl-testo { min-width: 0; }
     .cl-testo .name-btn { font-size: 17px; font-weight: 600; }
-    .cl-sub { display: block; font-size: 13px; color: var(--text-dim); font-variant-numeric: tabular-nums; }
+    .cl-sub { display: block; font-size: 14px; font-weight: 500; color: var(--text-dim); font-variant-numeric: tabular-nums; }
     #tabella-giocatori .wr-cell,
     #tabella-mazzi .wr-cell { flex-direction: column; align-items: flex-end; gap: 5px; }
     #tabella-giocatori .wr-text { font-size: 19px; font-weight: 700; }
@@ -2830,8 +2864,55 @@
     .stagione-body th, .stagione-body td { padding-left: 6px; padding-right: 6px; }
     .stagione-body tr > :first-child { padding-left: 12px; }
     .stagione-body tr > :last-child { padding-right: 12px; }
-    /* storico */
-    .match-card { padding: 12px 14px; }
+    /* storico compatto: giocatori ai lati con l'immagine del mazzo sfumata dietro,
+       punteggio e data al centro, modifica ed elimina in colonna a destra */
+    .match-card {
+      position: relative; isolation: isolate; overflow: hidden;
+      flex-direction: row; flex-wrap: wrap; align-items: center;
+      column-gap: 8px; row-gap: 0; padding: 7px 10px 7px 14px;
+    }
+    .mc-bg {
+      display: block; position: absolute; top: 0; bottom: 0; width: 50%; z-index: -1;
+      background-size: cover; background-position: center 30%; opacity: 0.3;
+    }
+    .mc-bg.sx { left: 0; -webkit-mask-image: linear-gradient(90deg, #000 0%, rgba(0,0,0,0.6) 50%, transparent 100%); mask-image: linear-gradient(90deg, #000 0%, rgba(0,0,0,0.6) 50%, transparent 100%); }
+    .mc-bg.dx { right: 0; -webkit-mask-image: linear-gradient(270deg, #000 0%, rgba(0,0,0,0.6) 50%, transparent 100%); mask-image: linear-gradient(270deg, #000 0%, rgba(0,0,0,0.6) 50%, transparent 100%); }
+    [data-theme="dark"] .mc-bg { opacity: 0.34; }
+    /* alone del colore del riquadro attorno al testo: si legge anche sopra l'immagine */
+    .match-card .player, .match-card .deck { text-shadow: 0 0 6px var(--bg-card), 0 0 2px var(--bg-card); }
+    .match-card .mc-main {
+      flex: 1; min-width: 0;
+      display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+      column-gap: 12px; align-items: center;
+    }
+    .match-card .mc-versus { display: contents; }
+    .match-card .side-left { grid-column: 1; grid-row: 1 / span 2; text-align: left; min-width: 0; }
+    .match-card .side-right { grid-column: 3; grid-row: 1 / span 2; text-align: right; min-width: 0; }
+    .match-card .score { grid-column: 2; grid-row: 1; font-size: 15px; padding: 3px 9px; background: var(--bg-card); }
+    .match-card .date { grid-column: 2; grid-row: 2; text-align: center; font-size: 10.5px; margin: 3px 0 0; white-space: nowrap; }
+    .match-card .date .mc-stagione { display: block; }
+    .match-card .player { display: block; font-size: 15px; line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .match-card .deck {
+      font-size: 12px; line-height: 1.25; margin-top: 1px; color: var(--text-dim);
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+    }
+    [data-theme="dark"] .match-card .player.win { color: var(--green); }
+    .card.card-classifica { margin-bottom: 18px; }
+    .mc-dado { display: inline; font-size: 12px; margin: 0 4px; vertical-align: 1px; }
+    .match-card .mc-side { order: 3; flex: 0 0 100%; padding: 0; text-align: left; }
+    .match-card .mc-side .match-extra { display: none; }
+    .match-card .mc-side .match-note { margin-top: 5px; font-size: 12px; color: var(--text-dim); }
+    .match-card .btn-group { position: static; order: 2; flex-direction: column; gap: 4px; }
+    .match-card .edit-btn, .match-card .del-btn {
+      display: flex; align-items: center; justify-content: center;
+      width: 26px; height: 26px; padding: 0; border-radius: 50%;
+      background: var(--tasto-tondo); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+    }
+    .match-card .edit-btn { color: var(--blue); }
+    .match-card .del-btn { color: var(--red); }
+    .match-card .edit-btn:hover, .match-card .del-btn:hover { background: var(--tasto-tondo); }
+    .match-card .ico-emoji { display: none; }
+    .match-card .ico-svg { display: block; width: 14px; height: 14px; }
 
     /* deck: riquadri dei mazzi in due colonne */
     #grid-matchup { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -3159,12 +3240,11 @@
       <button class="inner-tab" id="ctab-all" onclick="switchScopeClassifica('all')">All-time</button>
     </div>
     <div class="classifica-top">
-      <h3 class="subsection-title m-solo">Duellanti</h3>
-      <div class="card"><table id="tabella-giocatori"></table></div>
+      <div class="card card-classifica"><table id="tabella-giocatori"></table></div>
     </div>
     <div class="classifica-top">
-      <h3 class="subsection-title">Storico Partite</h3>
-      <p class="section-note" id="storico-nota">Tocca ✏️ per modificare o 🗑 per eliminare.</p>
+      <h3 class="subsection-title m-nascondi">Storico Partite</h3>
+      <p class="section-note m-nascondi" id="storico-nota">Tocca ✏️ per modificare o 🗑 per eliminare.</p>
       <div class="card" id="lista-partite"></div>
     </div>
   </section>
@@ -3591,7 +3671,7 @@
 <footer>
   <span>Tia · Gio · Richi</span>
   <button onclick="eseguiLogout()" style="background:none;border:none;color:var(--text-faint);font-size:0.75rem;cursor:pointer;margin-left:12px;font-family:inherit">Esci</button>
-  <div style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 51</div>
+  <div style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 52</div>
 </footer>
 
 </div>
@@ -3896,20 +3976,23 @@ function renderGiocatori(partite = dati.partite) {
   }
   const cols = 5;
   let html = '<tr class="tab-intestazione"><th>Duellante</th><th>PG</th><th>V</th><th>P</th><th>Win Rate</th></tr>';
-  arr.forEach(([nome, s]) => {
+  const metalli = ['oro', 'argento', 'bronzo'];
+  arr.forEach(([nome, s], i) => {
     const wr = s.partite > 0 ? Math.round(100 * s.v / s.partite) : 0;
     const safeNome = nome.replace(/'/g, "\'");
+    // su telefono i primi tre hanno il riquadro oro, argento e bronzo (solo chi ha giocato)
+    const metallo = i < 3 && s.partite > 0 ? ' ' + metalli[i] : '';
     // foto e riepilogo sotto il nome si vedono solo su telefono, dove le colonne PG/V/P spariscono
     const foto = ((dati.profili || {})[nome] || {}).foto;
     const avatar = `<span class="cl-avatar">${escapeHtml(nome.charAt(0).toUpperCase())}${foto ? `<img src="${escapeHtml(foto)}" alt="" onerror="this.remove()">` : ''}</span>`;
-    html += `<tr class="cl-riga" onclick="toggleProfiloInline('${safeNome}')">
+    html += `<tr class="cl-riga${metallo}" onclick="toggleProfiloInline('${safeNome}')">
       <td>
         <div class="cl-chi">
           ${avatar}
           <div class="cl-testo">
             <span class="name-btn">${nome}</span>
             <button class="profile-toggle-btn" id="ptbtn-${safeNome}" onclick="event.stopPropagation(); toggleProfiloInline('${safeNome}')">${SVG_CHEVRON}</button>
-            <span class="cl-sub">${s.partite} partit${s.partite === 1 ? 'a' : 'e'} · ${s.v} V · ${s.p} P</span>
+            <span class="cl-sub">${s.v}-${s.p}</span>
           </div>
         </div>
       </td>
@@ -4355,6 +4438,10 @@ function renderMazzi(partite = dati.partite, contId = 'tabella-mazzi') {
   t.innerHTML = html;
 }
 
+// icone a linea per modifica ed eliminazione (su PC restano le emoji)
+const SVG_MATITA = '<svg class="ico-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>';
+const SVG_CESTINO = '<svg class="ico-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>';
+
 function renderStorico(partite = dati.partite, modificabile = true, contId = 'lista-partite') {
   const c = document.getElementById(contId);
   if (!c) return;
@@ -4363,6 +4450,9 @@ function renderStorico(partite = dati.partite, modificabile = true, contId = 'li
     return;
   }
   const arr = partite.map((p, idx) => ({ p, idx })).reverse();
+  // su telefono: immagine del mazzo sfumata dietro ogni giocatore e 🎲 accanto a chi ha vinto il dado
+  const sfondo = (m, lato) => { const u = imgMazzo(m); return u ? `<span class="mc-bg ${lato}" style="background-image:url('${u}')"></span>` : ''; };
+  const dado = `<span class="mc-dado" title="Ha vinto il dado">\uD83C\uDFB2</span>`;
   c.innerHTML = arr.map(({p, idx}) => {
     const [p1, p2] = PUNTI[p.risultato];
     const g1win = p1 > p2;
@@ -4370,16 +4460,17 @@ function renderStorico(partite = dati.partite, modificabile = true, contId = 'li
     if (p.dado) extraBadges.push(`<span class="match-badge">🎲 Dado: ${p.dado}</span>`);
     const noteHtml = p.note ? `<div class="match-note">${escapeHtml(p.note)}</div>` : '';
     return `<div class="match-card">
+      ${sfondo(p.m1, 'sx')}${sfondo(p.m2, 'dx')}
       <div class="mc-main">
         <div class="date">${formatData(p.data)}${p._stagione ? ` · <span class="mc-stagione">${escapeHtml(p._stagione)}</span>` : ''}</div>
         <div class="mc-versus">
           <div class="side-left">
-            <span class="player ${g1win ? 'win' : ''}">${p.g1}</span>
+            <span class="player ${g1win ? 'win' : ''}">${p.g1}${p.dado === p.g1 ? dado : ''}</span>
             <span class="deck">${p.m1}</span>
           </div>
           <div class="score">${p.risultato}</div>
           <div class="side-right">
-            <span class="player ${!g1win ? 'win' : ''}">${p.g2}</span>
+            <span class="player ${!g1win ? 'win' : ''}">${p.dado === p.g2 ? dado : ''}${p.g2}</span>
             <span class="deck">${p.m2}</span>
           </div>
         </div>
@@ -4389,8 +4480,8 @@ function renderStorico(partite = dati.partite, modificabile = true, contId = 'li
         ${noteHtml}
       </div>
       ${modificabile ? `<div class="btn-group">
-        <button class="edit-btn" onclick="apriModifica(${idx})" title="Modifica partita">✏️</button>
-        <button class="del-btn" onclick="eliminaPartita(${idx})" title="Elimina questa partita">🗑</button>
+        <button class="edit-btn" onclick="apriModifica(${idx})" title="Modifica partita"><span class="ico-emoji">✏️</span>${SVG_MATITA}</button>
+        <button class="del-btn" onclick="eliminaPartita(${idx})" title="Elimina questa partita"><span class="ico-emoji">🗑</span>${SVG_CESTINO}</button>
       </div>` : ''}
     </div>`;
   }).join('');
