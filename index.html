@@ -2705,7 +2705,7 @@
      con il + al centro, icone tonde in alto, riquadri su fondo grigio.
      Sopra i 720px resta tutto come prima. */
   .m-topbar, .deck-edit-btn, nav .nav-add, .cl-avatar, .cl-sub, .mc-bg, .mc-dado,
-  .ico-svg, .ico-imp, .edit-azione, .storico-dettagli-btn { display: none; }
+  .ico-svg, .ico-imp, .edit-azione, .storico-dettagli-btn, .h2h-m, .dado-m { display: none; }
   tr.cl-riga[onclick] { cursor: pointer; }
   .dh-hero { display: contents; }
   :root {
@@ -3001,33 +3001,57 @@
     /* ── DECK ── la riga apre il dettaglio: i riquadri grandi sono superflui */
     #grid-matchup { display: none; }
 
-    /* ── STATISTICHE ── */
-    #riepilogo-card.h2h-united-card, .card.h2h-united-card { background: none; padding: 0; border: none; }
-    .h2h-united .h2h-u-item {
-      flex-direction: column; align-items: stretch; gap: 12px;
-      background: var(--bg-card); border: none; border-radius: 14px;
-      padding: 14px; margin-bottom: 10px;
+    /* ── STATISTICHE: tre blocchi semplici ──
+       grafico, scontri diretti in un unico riquadro a righe, una scheda a righe per giocatore */
+    #chart-card { margin-bottom: 18px; }
+    #riepilogo-card.h2h-united-card, .card.h2h-united-card {
+      background: var(--bg-card); padding: 0 16px; border: none; border-radius: 14px; margin-bottom: 18px;
     }
+    .h2h-united .h2h-u-item {
+      flex-direction: column; align-items: stretch; gap: 6px;
+      background: none; border-radius: 0; padding: 14px 0; margin: 0;
+      border-bottom: 0.5px solid var(--border);
+    }
+    .h2h-united .h2h-u-item:last-child { border-bottom: none; }
     .h2h-united .h2h-u-head { justify-content: space-between; gap: 10px; width: 100%; }
-    .h2h-u-head .cl-avatar { width: 40px; height: 40px; }
+    .h2h-u-head .cl-avatar { width: 36px; height: 36px; }
     .h2h-united .h2h-u-name { flex: 1; min-width: 0; font-size: 17px; font-weight: 600; text-align: left; }
     .h2h-united .h2h-u-score + .h2h-u-name { text-align: right; }
     .h2h-united .h2h-u-score {
-      padding: 4px 12px; border-radius: 10px; color: var(--text-dim);
-      background: var(--bg-card); border: 1px solid var(--border-strong);
-      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
+      padding: 3px 11px; border-radius: 10px; color: var(--text-dim);
+      border: 1px solid var(--border-strong); box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
     }
-    .h2h-united .h2h-u-score strong { font-size: 20px; }
-    .h2h-united .h2h-u-stats { display: grid !important; grid-template-columns: 1fr 1fr; gap: 8px; }
-    .h2h-united .h2h-u-stat {
-      flex-direction: column; align-items: flex-start; gap: 2px;
-      background: var(--seg-fondo); border-radius: 10px; padding: 8px 10px;
+    .h2h-united .h2h-u-score strong { font-size: 19px; }
+    .h2h-united .h2h-u-stats { display: none !important; }
+    .h2h-m { display: block; text-align: center; font-size: 13px; color: var(--text-dim); font-variant-numeric: tabular-nums; }
+    #stat-dado-wrap { display: flex; flex-direction: column; gap: 12px; }
+    .dado-player-card {
+      min-height: 0; padding: 0; border-radius: 14px; box-shadow: none;
+      background: var(--bg-card) !important; color: var(--text); flex: none;
     }
-    .h2h-united .h2h-u-stat .lbl { font-size: 10.5px; color: var(--text-dim); }
-    .h2h-united .h2h-u-stat .val { font-size: 16px; }
-    #chart-card { margin-bottom: 10px; }
-    .dado-player-card { border-radius: 14px; min-height: 340px; }
-    #stat-dado-wrap { gap: 10px; }
+    .dado-player-card::after, .dado-player-card > .dado-player-name, .dado-player-card > .dado-player-stats { display: none; }
+    .dado-m { display: block; padding: 0 16px 4px; }
+    .dado-m-head {
+      position: relative; isolation: isolate; display: flex; align-items: center;
+      margin: 0 -16px; padding: 0 16px; min-height: 58px; overflow: hidden; border-radius: 14px 14px 0 0;
+    }
+    .dado-m-foto {
+      position: absolute; top: 0; bottom: 0; left: 0; width: 45%; z-index: -1;
+      background-size: cover; background-position: center 25%;
+      -webkit-mask-image: linear-gradient(90deg, #000 0%, #000 30%, transparent 100%);
+      mask-image: linear-gradient(90deg, #000 0%, #000 30%, transparent 100%);
+    }
+    .dado-m-nome {
+      margin-left: 31%; font-size: 21px; font-weight: 800; letter-spacing: -0.02em;
+      text-shadow: 0 0 2px var(--bg-card), 0 0 8px var(--bg-card), 0 0 14px var(--bg-card);
+    }
+    [data-theme="dark"] .dado-m-nome { text-shadow: 0 1px 3px #000, 0 0 10px rgba(0,0,0,0.9); }
+    .dado-m-riga {
+      display: flex; justify-content: space-between; align-items: baseline; gap: 12px;
+      padding: 11px 0; border-top: 0.5px solid var(--border); font-size: 15px;
+    }
+    .dado-m-riga b { font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .dm-n { font-weight: 400; font-size: 13px; color: var(--text-dim); }
 
     /* ── STAGIONI ── */
     details.stagione-item.card { background: none; overflow: visible; border-radius: 0; margin-bottom: 10px; }
@@ -4008,7 +4032,7 @@
 <footer>
   <span>Tia · Gio · Richi</span>
   <button onclick="eseguiLogout()" style="background:none;border:none;color:var(--text-faint);font-size:0.75rem;cursor:pointer;margin-left:12px;font-family:inherit">Esci</button>
-  <div style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 59</div>
+  <div style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 60</div>
 </footer>
 
 </div>
@@ -4541,6 +4565,7 @@ function renderRiepilogo(partite = dati.partite, contId = 'riepilogo-h2h', cardI
             <div class="h2h-u-stat"><span class="lbl">Dadi vinti</span><span class="val">${r.dadoA} - ${r.dadoB}</span></div>
             <div class="h2h-u-stat"><span class="lbl">Ultima vittoria</span><span class="val">${ultimoStr}</span></div>
           </div>
+          <div class="h2h-m">${tot} match · game ${r.gamesA}-${r.gamesB} · dadi ${r.dadoA}-${r.dadoB}${r.ultimo ? ` · ultima a ${escapeHtml(r.ultimo.vincitore)}` : ''}</div>
         </div>`;
       }).join('')}
     </div>
@@ -4714,7 +4739,18 @@ function renderStatDado(partite = dati.partite, contId = 'stat-dado-wrap') {
     const wrSecondo = s.secondoT > 0 ? pct(s.secondoV, s.secondoT) : '—';
     const img = GIOCATORI_IMG[g];
     const bg = img ? `background-image:url('${img}')` : '';
+    const pr = (v, t) => t > 0 ? `${pct(v, t)} <span class="dm-n">su ${t}</span>` : '—';
+    const telefono = `<div class="dado-m">
+      <div class="dado-m-head">${img ? `<span class="dado-m-foto" style="background-image:url('${img}')"></span>` : ''}<span class="dado-m-nome">${g}</span></div>
+      <div class="dado-m-riga"><span>Dado vinto</span><b>${s.dadoT > 0 ? `${s.dadoV}/${s.dadoT} <span class="dm-n">(${pct(s.dadoV, s.dadoT)})</span>` : '—'}</b></div>
+      <div class="dado-m-riga"><span>Win rate col dado</span><b>${wrDado}</b></div>
+      <div class="dado-m-riga"><span>Win rate da primo</span><b>${pr(s.primoV, s.primoT)}</b></div>
+      <div class="dado-m-riga"><span>Win rate da secondo</span><b>${pr(s.secondoV, s.secondoT)}</b></div>
+      <div class="dado-m-riga"><span>Vittorie 2-0 · 2-1</span><b>${s.v20} · ${s.v21}</b></div>
+      <div class="dado-m-riga"><span>Sconfitte 2-1 · 2-0</span><b>${s.s21} · ${s.s20}</b></div>
+    </div>`;
     return `<div class="dado-player-card" style="${bg}">
+      ${telefono}
       <span class="dado-player-name">${g}</span>
       <div class="dado-player-stats">
         <div class="dps-item"><span class="dps-lbl">Dado vinto</span><span class="dps-val">${s.dadoV}/${s.dadoT}${s.dadoT>0?' ('+pct(s.dadoV,s.dadoT)+')':''}</span></div>
