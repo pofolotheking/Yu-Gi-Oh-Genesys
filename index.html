@@ -2898,7 +2898,7 @@
     table.tab-box tr.cl-riga { position: relative; isolation: isolate; }
     .cl-avatar.mazzo {
       position: absolute; top: 0; bottom: 0; left: 0; z-index: -1;
-      width: 34%; height: auto; border-radius: 0; background: none; color: transparent;
+      width: min(34%, 240px); height: auto; border-radius: 0; background: none; color: transparent;
       box-shadow: none !important;
       -webkit-mask-image: linear-gradient(90deg, #000 0%, #000 35%, transparent 100%);
       mask-image: linear-gradient(90deg, #000 0%, #000 35%, transparent 100%);
@@ -2908,7 +2908,7 @@
     /* ombra sulle scritte sopra l'immagine: chiara di giorno, scura di notte */
     table.tab-box tr.cl-riga td:has(> .cl-chi) { flex: 1 1 auto; }
     .cl-chi:has(.cl-avatar.mazzo) .cl-testo {
-      padding-left: 84px;
+      padding-left: min(calc(22% + 58px), 210px);
       text-shadow: 0 0 2px var(--bg-card), 0 0 6px var(--bg-card), 0 0 12px var(--bg-card);
     }
     [data-theme="dark"] .cl-chi:has(.cl-avatar.mazzo) .cl-testo {
@@ -4199,7 +4199,7 @@
 <footer>
   <span>Tia · Gio · Richi</span>
   <button onclick="eseguiLogout()" style="background:none;border:none;color:var(--text-faint);font-size:0.75rem;cursor:pointer;margin-left:12px;font-family:inherit">Esci</button>
-  <div style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 72</div>
+  <div style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 73</div>
 </footer>
 
 </div>
