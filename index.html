@@ -3129,7 +3129,12 @@
     .stagione-meta { font-size: 13px; display: inline-flex; align-items: center; gap: 5px; }
     .ico-trofeo { color: #d4a530; vertical-align: 0; }
     .stagione-body { border-top: none; padding-top: 10px; }
-    .st-sec-title { display: none; }
+    .st-sec-title {
+      display: block; border-top: none; padding: 14px 16px 7px;
+      font-size: 13px; font-weight: 500; letter-spacing: 0.02em; color: var(--text-dim);
+    }
+    .stagione-body > .st-sec-title:first-child { padding-top: 4px; }
+    .stagione-corrente-body { background: var(--bg-card); border-radius: 14px; margin-top: 8px; padding: 4px 16px 14px; }
     .st-box { padding: 0; margin-bottom: 10px; }
     /* righe etichetta / valore, come nelle impostazioni */
     .card .deck-mu-stat-list { padding: 0; max-width: none; }
@@ -4042,17 +4047,6 @@
     <div id="stagioni-archivio">
       <p class="section-note m-nascondi">Le stagioni concluse vengono conservate qui con la loro classifica finale.</p>
       <div class="classifica-top" id="lista-stagioni"></div>
-      <div class="classifica-top">
-        <div class="card padded">
-          <h3 class="subsection-title m-nascondi" style="margin-top:0">Stagione in corso</h3>
-          <div id="stagione-corrente-riepilogo"></div>
-          <button class="danger chiudi-stagione-btn" style="width:100%;margin-top:14px" onclick="chiudiStagione()"><span class="ico-emoji">🔒 </span>Chiudi stagione e archivia</button>
-          <p class="section-note m-nascondi" style="margin:10px 0 0;text-align:left">
-            Archivia tutte le partite giocate finora in una nuova stagione e azzera la classifica.
-            I giocatori, i mazzi e le decklist restano. L'operazione non si annulla.
-          </p>
-        </div>
-      </div>
     </div>
 
     <div id="stagioni-alltime" style="display:none">
@@ -4101,7 +4095,7 @@
 <footer>
   <span>Tia · Gio · Richi</span>
   <button onclick="eseguiLogout()" style="background:none;border:none;color:var(--text-faint);font-size:0.75rem;cursor:pointer;margin-left:12px;font-family:inherit">Esci</button>
-  <div style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 65</div>
+  <div style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 66</div>
 </footer>
 
 </div>
@@ -7152,11 +7146,26 @@ function renderListaStagioni() {
   if (!cont) return;
   const arr = _stagioniCache || [];
   _stagioniRese.clear();   // il DOM viene ricreato: i dettagli vanno ridisegnati
-  if (arr.length === 0) {
-    cont.innerHTML = '<div class="card"><div class="empty">Nessuna stagione archiviata. Quando chiuderete la stagione in corso, comparir\u00E0 qui.</div></div>';
-    return;
-  }
-  cont.innerHTML = arr.map(st => {
+  // la stagione in corso e' la prima della lista, con il suo riepilogo e il tasto per archiviarla
+  const numCorrente = arr.reduce((m, st) => Math.max(m, st.numero || 0), 0) + 1;
+  const ordCorr = ordinaClassifica(statGiocatoriDa(dati.partite, dati.giocatori));
+  const inTesta = dati.partite.length && ordCorr.length ? ordCorr[0][0] : '\u2014';
+  const corrente = `<details class="card stagione-item stagione-corrente">
+      <summary class="stagione-head">
+        <span class="stagione-nome">Stagione ${numCorrente}</span>
+        <span class="stagione-meta"><span class="ico-emoji">\uD83C\uDFC6 </span>${SVG_TROFEO}${escapeHtml(inTesta)} \u00B7 ${dati.partite.length} partite \u00B7 in corso</span>
+        <span class="stagione-arrow">\u25B6</span>
+      </summary>
+      <div class="stagione-body stagione-corrente-body">
+        <div id="stagione-corrente-riepilogo"></div>
+        <button class="danger chiudi-stagione-btn" style="width:100%;margin-top:14px" onclick="chiudiStagione()"><span class="ico-emoji">\uD83D\uDD12 </span>Chiudi stagione e archivia</button>
+        <p class="section-note m-nascondi" style="margin:10px 0 0;text-align:left">
+          Archivia tutte le partite giocate finora in una nuova stagione e azzera la classifica.
+          I giocatori, i mazzi e le decklist restano. L'operazione non si annulla.
+        </p>
+      </div>
+    </details>`;
+  cont.innerHTML = corrente + arr.map(st => {
     // la classifica salvata alla chiusura \u00E8 la storia ufficiale della stagione
     const ord = (st.classifica && st.classifica.length)
       ? st.classifica.map(r => [r.giocatore, r])
@@ -7174,15 +7183,14 @@ function renderListaStagioni() {
         <span class="stagione-arrow">\u25B6</span>
       </summary>
       <div class="stagione-body">
-        <div class="st-sec-title">Classifica finale</div>
+        <div class="st-sec-title">Classifica</div>
         ${tabellaClassifica(ord)}
-        <div class="st-sec-title">Mazzi della stagione</div>
+        <div class="st-sec-title">Classifica mazzi</div>
         <table id="st-mazzi-${k}"></table>
-        <div class="st-sec-title">Scontri diretti</div>
+        <div class="st-sec-title">Statistiche</div>
         <div class="st-box"><div class="card padded" id="st-h2hcard-${k}"><div id="st-h2h-${k}"></div></div></div>
-        <div class="st-sec-title">Statistiche dado</div>
         <div class="st-box" id="st-dado-${k}"></div>
-        <div class="st-sec-title">Storico partite</div>
+        <div class="st-sec-title">Storico stagione ${st.numero || ''}</div>
         <div class="st-box"><div class="card" id="st-storico-${k}"></div></div>
       </div>
     </details>`;
