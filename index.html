@@ -3140,6 +3140,96 @@
     .dadi-close { background: var(--seg-fondo); color: var(--text-dim); }
     .dadi-btn, .dadi-btn:hover { background: var(--seg-fondo); border: none; border-radius: 14px; }
 
+    /* ── CAMPI DI TESTO E MENU: grigi senza bordo, come su iOS ── */
+    main input[type="text"], main input[type="url"], main input[type="number"],
+    main input[type="email"], main input[type="password"], main select {
+      background-color: var(--seg-fondo); border: none; border-radius: 10px;
+      padding: 11px 12px; font-size: 16px; color: var(--text);
+    }
+    main select {
+      padding-right: 32px;
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='9' height='14' viewBox='0 0 9 14'><path d='M1 5l3.5-3.5L8 5M1 9l3.5 3.5L8 9' fill='none' stroke='%238e8e93' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+      background-position: right 12px center;
+    }
+    main input:focus, main select:focus { box-shadow: 0 0 0 2px var(--blue); }
+    main input::placeholder, main textarea::placeholder { color: var(--text-faint); }
+    main label { font-size: 13px; font-weight: 500; color: var(--text-dim); }
+    /* pulsanti secondari a pillola */
+    main button.secondary, main button.danger {
+      border: none; border-radius: 9px; padding: 8px 14px;
+      font-size: 14px; font-weight: 600;
+    }
+    main button.secondary { background: var(--seg-fondo); color: var(--blue); }
+    main button.danger { background: var(--red-soft); color: var(--red); }
+    main button.secondary:hover { background: var(--seg-fondo); }
+
+    /* ── REGISTRA PARTITA: righe etichetta / valore raggruppate ── */
+    #nuova > .card.padded { background: none; padding: 0; }
+    #form-partita { gap: 10px; }
+    #form-partita > div:not(.row):not(.vs), #form-partita > .row {
+      background: var(--bg-card); border-radius: 12px; overflow: hidden;
+    }
+    #form-partita .row { display: block; }
+    #form-partita .row > div + div { border-top: 0.5px solid var(--border); }
+    #form-partita > div:not(.row):not(.vs), #form-partita .row > div {
+      display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+      column-gap: 12px; min-height: 48px; padding: 0 12px 0 16px;
+    }
+    /* etichetta e valore sempre sulla stessa riga (solo la riga del mazzo va a capo, per il nuovo mazzo) */
+    #form-partita .row > div:not(:has(> [id$="-nuovo"])) { flex-wrap: nowrap; }
+    #form-partita label { flex: none; margin: 0; font-size: 16px; font-weight: 400; color: var(--text); white-space: nowrap; }
+    #form-partita select, #form-partita input[type="date"] {
+      flex: 1 1 0; width: auto; min-width: 0; max-width: 62%;
+      border: none; border-radius: 0; background-color: transparent; box-shadow: none;
+      padding: 12px 20px 12px 0; font-size: 16px; color: var(--text-dim);
+      text-align: right; text-align-last: right; background-position: right 2px center;
+    }
+    #form-partita input[type="date"] { padding-right: 0; background-image: none; }
+    #form-partita input[type="date"]::-webkit-date-and-time-value { text-align: right; }
+    #form-partita select:focus, #form-partita input[type="date"]:focus { box-shadow: none; }
+    /* nome del nuovo mazzo: campo intero sotto la riga del mazzo */
+    #m1-nuovo, #m2-nuovo { flex: 0 0 100%; margin: 0 0 10px !important; }
+    #form-partita .vs { margin: 0; font-size: 12px; font-weight: 700; letter-spacing: 0.12em; }
+    #form-partita > div:has(> textarea) { display: block; padding: 4px 12px 6px 16px; }
+    #form-partita > div:has(> textarea) label { display: none; }
+    #form-partita #note {
+      border: none !important; background: transparent !important; border-radius: 0 !important;
+      padding: 10px 0 !important; min-height: 70px; font-size: 16px !important; resize: none !important;
+    }
+    #form-partita button.primary { margin-top: 4px; padding: 15px; font-size: 17px; }
+    .output-box { border: none; border-radius: 12px; }
+
+    /* ── CONTENUTO DELLE IMPOSTAZIONI ── */
+    .accordion-body .card { border-radius: 12px; }
+    .accordion-body .card.padded { padding: 14px 16px; }
+    .notif-stato { font-size: 14px; }
+    /* pulsanti principali senza stile (attiva notifiche, collega, copia dati) */
+    #notifiche-pannello > button, #copia-dati-btn, .add-form button {
+      width: 100%; border: none; border-radius: 12px; padding: 13px;
+      background: var(--blue); color: #fff; font-family: inherit; font-size: 16px; font-weight: 600; cursor: pointer;
+    }
+    .notif-azioni button.secondary { flex: 1; padding: 12px; font-size: 15px; border-radius: 12px; }
+    .add-form { background: none; border-top: none; padding: 14px 16px; gap: 10px; }
+    .add-form > div label { margin-bottom: 6px; }
+    .add-form button { height: auto; }
+    .card .add-form { padding: 0; }
+    .accordion-body .card:has(> .add-form) { padding: 14px 16px; }
+    /* elenchi di giocatori e mazzi */
+    .config-row { padding: 12px 16px; gap: 8px; border-bottom: 0.5px solid var(--border); }
+    .config-row .name { font-size: 17px; font-weight: 600; }
+    .config-row .meta { font-size: 13px; }
+    .config-row .actions { gap: 6px; }
+    /* profili: una riga per giocatore con la sua foto, il modulo si apre sotto */
+    #profili-config { background: none; padding: 0; }
+    #profili-config .accordion-btn { padding: 10px 16px 10px 12px; }
+    .acc-titolo .cl-avatar { width: 32px; height: 32px; font-size: 13px; }
+    #profili-config .accordion-body {
+      margin-top: 6px; padding: 14px 16px !important;
+      background: var(--bg-card); border-radius: 12px;
+    }
+    #profili-config .accordion-body label { margin-bottom: 6px; }
+    #profili-config .accordion-body button.primary { margin-top: 6px !important; }
+
     /* barra delle sezioni in basso, con il + al centro */
     nav {
       position: fixed; left: 0; right: 0; bottom: 0; z-index: 60;
@@ -3490,7 +3580,7 @@
 
   <section id="nuova">
     <h2>Registra una Partita</h2>
-    <div class="info">Compila e premi <strong>Registra</strong>. I dati verranno salvati in automatico nel Cloud.</div>
+    <div class="info m-nascondi">Compila e premi <strong>Registra</strong>. I dati verranno salvati in automatico nel Cloud.</div>
     <div class="card padded">
       <form id="form-partita">
         <div><label>Data</label><input type="date" id="data" required></div>
@@ -3522,11 +3612,11 @@
         <div class="row">
           <div>
             <label>Chi ha vinto il dado?</label>
-            <select id="dado"><option value="">— Non specificato —</option></select>
+            <select id="dado"><option value="">Non specificato</option></select>
           </div>
           <div>
             <label>Chi è andato primo?</label>
-            <select id="primo"><option value="">— Non specificato —</option></select>
+            <select id="primo"><option value="">Non specificato</option></select>
           </div>
         </div>
         <div>
@@ -3553,8 +3643,8 @@
     </div>
 
     <div id="genesys-view" style="display:none" data-inner-tab="genesys">
-      <h3 class="subsection-title" style="margin-top:0">Lista punti Genesys</h3>
-      <p class="section-note"><em>Tutte le carte con punti nel formato Genesys. Ordinate dai più alti ai più bassi.</em></p>
+      <h3 class="subsection-title m-nascondi" style="margin-top:0">Lista punti Genesys</h3>
+      <p class="section-note m-nascondi"><em>Tutte le carte con punti nel formato Genesys. Ordinate dai più alti ai più bassi.</em></p>
       <div class="card padded" style="margin-bottom:16px">
         <div style="display:flex;gap:10px;margin-bottom:12px">
           <input type="text" id="genesys-search" placeholder="Filtra per nome o archetipo…" style="flex:1">
@@ -3612,8 +3702,8 @@
     </div>
 
     <div id="database-view" data-inner-tab="db">
-      <h3 class="subsection-title" style="margin-top:0">Database Carte</h3>
-      <p class="section-note"><em>Cerca qualsiasi carta in tempo reale da YGOProDeck. Inserisci il nome in inglese (es. Blue-Eyes White Dragon, Ash Blossom).</em></p>
+      <h3 class="subsection-title m-nascondi" style="margin-top:0">Database Carte</h3>
+      <p class="section-note m-nascondi"><em>Cerca qualsiasi carta in tempo reale da YGOProDeck. Inserisci il nome in inglese (es. Blue-Eyes White Dragon, Ash Blossom).</em></p>
 
       <div class="card padded" style="margin-bottom:16px">
         <div style="display:flex;gap:10px;margin-bottom:12px">
@@ -3866,7 +3956,7 @@
 <footer>
   <span>Tia · Gio · Richi</span>
   <button onclick="eseguiLogout()" style="background:none;border:none;color:var(--text-faint);font-size:0.75rem;cursor:pointer;margin-left:12px;font-family:inherit">Esci</button>
-  <div style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 54</div>
+  <div style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 55</div>
 </footer>
 
 </div>
@@ -5074,7 +5164,7 @@ function aggiornaSelectDadoPrimo() {
     const sel = document.getElementById(id);
     if (!sel) return;
     const prev = sel.value;
-    sel.innerHTML = `<option value="">— Non specificato —</option>
+    sel.innerHTML = `<option value="">Non specificato</option>
       ${[g1, g2].map(g => `<option value="${g}">${g}</option>`).join('')}`;
     if (prev) sel.value = prev;
   });
@@ -5133,7 +5223,7 @@ function renderProfiliConfig() {
     return `
     <div class="accordion-item" style="margin-bottom:8px">
       <button class="accordion-btn" onclick="toggleAccordion('acc-prof-${g}')">
-        <span><span class="ico-emoji">👤 </span>${g}</span><span class="accordion-arrow">▶</span>
+        <span class="acc-titolo"><span class="ico-emoji">👤 </span>${avatarGiocatore(g)}${g}</span><span class="accordion-arrow">▶</span>
       </button>
       <div class="accordion-body" id="acc-prof-${g}" style="display:none;padding:16px">
         <div style="display:flex;flex-direction:column;gap:10px">
@@ -5317,7 +5407,7 @@ function apriModifica(idx) {
 
   ['edit-dado', 'edit-primo'].forEach(id => {
     const sel = document.getElementById(id);
-    sel.innerHTML = `<option value="">— Non specificato —</option>
+    sel.innerHTML = `<option value="">Non specificato</option>
       <option value="${p.g1}">${p.g1}</option>
       <option value="${p.g2}">${p.g2}</option>`;
   });
@@ -7525,7 +7615,7 @@ async function renderPannelloNotifiche() {
       </div>`);
   } else {
     mostra('Ricevi un avviso sul telefono quando qualcuno registra una partita o sblocca un achievement.',
-      `<button onclick="attivaNotifiche()" style="width:100%">🔔 Attiva notifiche</button>`);
+      `<button onclick="attivaNotifiche()" style="width:100%"><span class="ico-emoji">🔔 </span>Attiva notifiche</button>`);
   }
 }
 
