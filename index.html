@@ -7,7 +7,19 @@
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#f2f2f7" id="meta-theme-color">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-status-bar-style" content="default" id="meta-status-bar">
+<script>
+  // Nell'app installata su iPhone la barra di stato non segue theme-color: con
+  // "default" resta bianca anche di notte. Col tema scuro si usa
+  // "black-translucent" (testo bianco, la pagina nera passa sotto la barra).
+  // iOS legge questo valore all'apertura, quindi va deciso prima del disegno.
+  (function () {
+    var t = null;
+    try { t = localStorage.getItem('genesys-tema'); } catch (e) {}
+    if (!t) t = window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    document.getElementById('meta-status-bar').setAttribute('content', t === 'dark' ? 'black-translucent' : 'default');
+  })();
+</script>
 <meta name="apple-mobile-web-app-title" content="Genesys">
 <link rel="apple-touch-icon" href="icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -4032,7 +4044,7 @@
 <footer>
   <span>Tia · Gio · Richi</span>
   <button onclick="eseguiLogout()" style="background:none;border:none;color:var(--text-faint);font-size:0.75rem;cursor:pointer;margin-left:12px;font-family:inherit">Esci</button>
-  <div style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 60</div>
+  <div style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 61</div>
 </footer>
 
 </div>
@@ -7502,6 +7514,8 @@ function applicaTema(tema) {
     document.getElementById('theme-icon-sun').style.display = 'none';
   }
   // barra di stato del telefono dello stesso colore dello sfondo
+  const barra = document.getElementById('meta-status-bar');
+  if (barra) barra.setAttribute('content', tema === 'dark' ? 'black-translucent' : 'default');
   const meta = document.getElementById('meta-theme-color');
   if (meta) meta.setAttribute('content', tema === 'dark' ? '#000000' : '#f2f2f7');
 }
