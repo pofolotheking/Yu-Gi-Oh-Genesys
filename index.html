@@ -2745,11 +2745,23 @@
     --nota-fondo: rgba(28, 28, 30, 0.86);
   }
 
-  @media (max-width: 720px) {
+  /* Lo stile nuovo vale ovunque: telefono in verticale e in orizzontale, tablet e PC.
+     Sugli schermi larghi il contenuto resta una colonna centrata e le icone in alto
+     si allineano ai suoi bordi (e lontano dalla tacca del telefono in orizzontale). */
+  :root {
+    --lato-sx: max(16px, calc((100vw - 760px) / 2 + 16px), calc(env(safe-area-inset-left) + 8px));
+    --lato-dx: max(16px, calc((100vw - 760px) / 2 + 16px), calc(env(safe-area-inset-right) + 8px));
+  }
+  @media all {
     html, body { background: var(--bg-gruppo); }
+    main, main.main { max-width: 760px; margin: 0 auto; }
+    #mazzi .desktop-split { display: block; }
+    /* barre e blocchi a tutta larghezza della colonna, come su telefono */
+    main > section > .inner-tab-bar { max-width: none !important; margin-left: 0 !important; margin-right: 0 !important; }
+    .classifica-top { max-width: none; }
     body { padding-bottom: calc(env(safe-area-inset-bottom) + 76px); }
     header { display: none; }
-    main { padding: calc(env(safe-area-inset-top) + 56px) 16px 0; }
+    main { padding: calc(env(safe-area-inset-top) + 56px) max(16px, env(safe-area-inset-right)) 0 max(16px, env(safe-area-inset-left)); }
 
     /* barra in alto: trasparente in cima, sfocata quando il contenuto ci scorre sotto */
     .m-topbar {
@@ -2788,12 +2800,12 @@
       box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
       text-decoration: none;
     }
-    .duel-btn { left: 16px; right: auto; }
+    .duel-btn { left: var(--lato-sx); right: auto; }
     .duel-btn .ico-svg { display: block; }
-    .deck-edit-btn { left: 56px; right: auto; }
-    .search-btn { right: 96px; left: auto; }
-    .theme-btn { right: 56px; left: auto; }
-    .gear-btn { right: 16px; left: auto; }
+    .deck-edit-btn { left: calc(var(--lato-sx) + 40px); right: auto; }
+    .search-btn { right: calc(var(--lato-dx) + 80px); left: auto; }
+    .theme-btn { right: calc(var(--lato-dx) + 40px); left: auto; }
+    .gear-btn { right: var(--lato-dx); left: auto; }
     .gear-btn:hover, .duel-btn:hover, .theme-btn:hover, .search-btn:hover { background: var(--tasto-tondo); color: var(--blue); }
     .search-btn.active, .search-btn.active:hover { background: var(--blue); color: #fff; }
 
@@ -3256,7 +3268,7 @@
 
     /* ── POPUP DEL MAZZO: immagine in alto, contenuto a riquadri ── */
     .detail-modal.deck-full { background: var(--bg-gruppo); padding: 0 0 calc(env(safe-area-inset-bottom) + 28px); }
-    .detail-modal.deck-full #detail-content { padding: 0 16px; }
+    .detail-modal.deck-full #detail-content { padding: 0 16px; max-width: 760px; margin: 0 auto; }
     .detail-modal .dh-hero {
       display: flex; align-items: flex-end; position: relative; isolation: isolate;
       min-height: 300px; margin: 0 -16px 14px; padding: 0 20px 18px;
@@ -3274,7 +3286,7 @@
     .detail-modal .dh-hero:not(.senza-img) .dh-sub { color: rgba(255,255,255,0.88); }
     .detail-modal .dh-sub { font-size: 15px; margin-top: 4px; }
     .detail-modal.deck-full .detail-close {
-      position: fixed; top: calc(env(safe-area-inset-top) + 18px); right: 14px; z-index: 5;
+      position: fixed; top: calc(env(safe-area-inset-top) + 18px); right: max(14px, calc((100vw - 760px) / 2 + 14px), calc(env(safe-area-inset-right) + 8px)); z-index: 5;
       background: rgba(0, 0, 0, 0.45); color: #fff;
       -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
     }
@@ -3414,7 +3426,7 @@
       position: fixed; left: 0; right: 0; bottom: 0; z-index: 60;
       max-width: none; margin: 0; border-radius: 0;
       display: flex; gap: 0; overflow: visible;
-      padding: 6px 4px calc(env(safe-area-inset-bottom) + 4px);
+      padding: 6px max(4px, calc((100vw - 620px) / 2), env(safe-area-inset-right)) calc(env(safe-area-inset-bottom) + 4px) max(4px, calc((100vw - 620px) / 2), env(safe-area-inset-left));
       background: var(--barra);
       -webkit-backdrop-filter: saturate(180%) blur(20px);
       backdrop-filter: saturate(180%) blur(20px);
@@ -4183,7 +4195,7 @@
 <footer>
   <span>Tia · Gio · Richi</span>
   <button onclick="eseguiLogout()" style="background:none;border:none;color:var(--text-faint);font-size:0.75rem;cursor:pointer;margin-left:12px;font-family:inherit">Esci</button>
-  <div style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 70</div>
+  <div style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 71</div>
 </footer>
 
 </div>
@@ -5480,7 +5492,7 @@ async function apriDettaglioMazzo(mazzo, scope = _scopeDeck) {
   const prop = dati.mazzi[mazzo] || '';
   const imgUrl = imgMazzo(mazzo);
   // su telefono l'immagine sta in alto e il resto su fondo normale; su PC fa da sfondo
-  const telefono = window.matchMedia('(max-width: 720px)').matches;
+  const telefono = true;   // lo stile nuovo vale su tutti gli schermi: immagine sempre in alto
   document.getElementById('detail-content').innerHTML = `
     <div class="inner-tab-bar ddm-tabs">
       <button class="inner-tab" id="ddm-tab-cur" onclick="switchScopeMazzo('cur')">Stagione corrente</button>
