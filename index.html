@@ -4183,7 +4183,7 @@
 <footer>
   <span>Tia · Gio · Richi</span>
   <button onclick="eseguiLogout()" style="background:none;border:none;color:var(--text-faint);font-size:0.75rem;cursor:pointer;margin-left:12px;font-family:inherit">Esci</button>
-  <div style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 69</div>
+  <div style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 70</div>
 </footer>
 
 </div>
@@ -4934,6 +4934,8 @@ function htmlCuriosita(partite) {
   // a parita' di squilibrio conta di piu' lo scontro giocato piu' volte
   const equil = [...validi].sort((x, y) => squilibrio(x) - squilibrio(y) || (y.va + y.vb) - (x.va + x.vb))[0];
   const sbil = [...validi].sort((x, y) => squilibrio(y) - squilibrio(x) || (y.va + y.vb) - (x.va + x.vb))[0];
+  // il match fra mazzi giocato piu' volte (qui basta una partita)
+  const frequente = Object.values(coppie).sort((x, y) => (y.va + y.vb) - (x.va + x.vb))[0];
   // nel meno equilibrato il mazzo che domina va per primo
   const domina = c => c.va >= c.vb ? c : { a: c.b, b: c.a, va: c.vb, vb: c.va };
 
@@ -4963,6 +4965,8 @@ function htmlCuriosita(partite) {
       `${escapeHtml(equil.a)} vs ${escapeHtml(equil.b)} · ${equil.va + equil.vb} match`) : '',
     sbil && sbil !== equil ? (() => { const d = domina(sbil); return riga('💥', 'Scontro meno equilibrato', `${d.va}-${d.vb}`,
       `${escapeHtml(d.a)} vs ${escapeHtml(d.b)} · ${d.va + d.vb} match`); })() : '',
+    frequente ? (() => { const d = domina(frequente); return riga('⚔️', 'Match più giocato', `${d.va + d.vb}`,
+      `${escapeHtml(d.a)} vs ${escapeHtml(d.b)} · bilancio ${d.va}-${d.vb}`); })() : '',
     migliore ? riga('🔥', 'Migliore streak di vittorie', `${migliore.n}`,
       `${escapeHtml(migliore.g)} · ${periodo(migliore)}`) : '',
     peggiore ? riga('🧊', 'Peggiore streak di sconfitte', `${peggiore.n}`,
