@@ -1278,6 +1278,7 @@
     font-variant-numeric: tabular-nums;
   }
   
+  .profile-inline-ach-head { padding: 12px 14px 0; background: var(--bg-soft); }
   .profile-inline-ach {
     padding: 14px 16px;
     border-top: 1px solid var(--border);
@@ -2817,6 +2818,31 @@
       display: block; margin: -2px 0 10px; border-radius: 14px; overflow: hidden; background: var(--bg-card);
     }
     #tabella-giocatori .profile-inline-cell { display: block; border: none; }
+    .profile-inline-body {
+      display: flex; flex-direction: column; align-items: center; text-align: center;
+      background: none; padding: 20px 18px 4px;
+    }
+    .profile-inline-photo, .profile-inline-placeholder {
+      width: min(240px, 72%); height: auto; aspect-ratio: 1 / 1;
+      border-radius: 22px; box-shadow: 0 10px 28px rgba(0, 0, 0, 0.2);
+    }
+    .profile-inline-placeholder { font-size: 4rem; }
+    .profile-inline-right { padding: 16px 0 0; align-items: center; gap: 4px; }
+    .profile-inline-name { font-size: 24px; font-weight: 800; letter-spacing: -0.02em; }
+    .profile-inline-mazzo { font-size: 14px; }
+    .profile-inline-desc { font-size: 14px; line-height: 1.45; font-style: normal; margin-top: 6px; }
+    .profile-inline-stats {
+      grid-template-columns: 1fr 1fr; gap: 8px; padding: 14px 16px 2px;
+      border: none; background: none;
+    }
+    .profile-inline-stats .profile-inline-stat {
+      border: none; border-radius: 12px; padding: 10px 6px; background: var(--seg-fondo);
+    }
+    .profile-inline-stats .pis-lbl { font-size: 11px; margin-bottom: 3px; }
+    .profile-inline-stats .pis-val { font-size: 20px; }
+    .profile-inline-stats .pis-val[style] { font-size: 15px !important; line-height: 1.6 !important; }
+    .profile-inline-ach-head { background: none; padding: 18px 16px 0; }
+    .profile-inline-ach { background: none; padding: 12px 12px 18px; }
     #tabella-giocatori tr.oro { background: linear-gradient(135deg, #fff4c9 0%, #f3d36c 48%, #d6a633 100%); }
     #tabella-giocatori tr.argento { background: linear-gradient(135deg, #fbfcfd 0%, #dde1e6 48%, #b3b9c2 100%); }
     #tabella-giocatori tr.bronzo { background: linear-gradient(135deg, #fde4cc 0%, #e4a873 48%, #b8733a 100%); }
@@ -2872,23 +2898,27 @@
       column-gap: 8px; row-gap: 0; padding: 7px 10px 7px 14px;
     }
     .mc-bg {
-      display: block; position: absolute; top: 0; bottom: 0; width: 50%; z-index: -1;
-      background-size: cover; background-position: center 30%; opacity: 0.3;
+      display: block; position: absolute; top: 0; bottom: 0; width: 40%; z-index: -1;
+      background-size: cover; background-position: center 30%; opacity: 0.85;
     }
-    .mc-bg.sx { left: 0; -webkit-mask-image: linear-gradient(90deg, #000 0%, rgba(0,0,0,0.6) 50%, transparent 100%); mask-image: linear-gradient(90deg, #000 0%, rgba(0,0,0,0.6) 50%, transparent 100%); }
-    .mc-bg.dx { right: 0; -webkit-mask-image: linear-gradient(270deg, #000 0%, rgba(0,0,0,0.6) 50%, transparent 100%); mask-image: linear-gradient(270deg, #000 0%, rgba(0,0,0,0.6) 50%, transparent 100%); }
-    [data-theme="dark"] .mc-bg { opacity: 0.34; }
+    .mc-bg.sx { left: 0; -webkit-mask-image: linear-gradient(90deg, #000 0%, rgba(0,0,0,0.75) 35%, transparent 100%); mask-image: linear-gradient(90deg, #000 0%, rgba(0,0,0,0.75) 35%, transparent 100%); }
+    .mc-bg.dx { right: 0; -webkit-mask-image: linear-gradient(270deg, #000 0%, rgba(0,0,0,0.75) 35%, transparent 100%); mask-image: linear-gradient(270deg, #000 0%, rgba(0,0,0,0.75) 35%, transparent 100%); }
+    [data-theme="dark"] .mc-bg { opacity: 0.8; }
     /* alone del colore del riquadro attorno al testo: si legge anche sopra l'immagine */
     .match-card .player, .match-card .deck { text-shadow: 0 0 6px var(--bg-card), 0 0 2px var(--bg-card); }
     .match-card .mc-main {
       flex: 1; min-width: 0;
       display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
-      column-gap: 12px; align-items: center;
+      column-gap: 10px; align-items: center;
     }
     .match-card .mc-versus { display: contents; }
-    .match-card .side-left { grid-column: 1; grid-row: 1 / span 2; text-align: left; min-width: 0; }
-    .match-card .side-right { grid-column: 3; grid-row: 1 / span 2; text-align: right; min-width: 0; }
-    .match-card .score { grid-column: 2; grid-row: 1; font-size: 15px; padding: 3px 9px; background: var(--bg-card); }
+    .match-card .side-left { grid-column: 1; grid-row: 1 / span 2; text-align: right; min-width: 0; }
+    .match-card .side-right { grid-column: 3; grid-row: 1 / span 2; text-align: left; min-width: 0; }
+    .match-card .score {
+      grid-column: 2; grid-row: 1; font-size: 15px; padding: 4px 10px; border-radius: 10px;
+      background: var(--bg-card); border: 1px solid var(--border-strong);
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
+    }
     .match-card .date { grid-column: 2; grid-row: 2; text-align: center; font-size: 10.5px; margin: 3px 0 0; white-space: nowrap; }
     .match-card .date .mc-stagione { display: block; }
     .match-card .player { display: block; font-size: 15px; line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -3671,7 +3701,7 @@
 <footer>
   <span>Tia · Gio · Richi</span>
   <button onclick="eseguiLogout()" style="background:none;border:none;color:var(--text-faint);font-size:0.75rem;cursor:pointer;margin-left:12px;font-family:inherit">Esci</button>
-  <div style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 52</div>
+  <div style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 53</div>
 </footer>
 
 </div>
@@ -3898,7 +3928,9 @@ let _deckScopePartite = [];
 
 // partite archiviate (etichettate con la stagione) + partite della stagione in corso
 function partiteAllTime() {
-  const arch = (_stagioniCache || []).flatMap(st =>
+  // in ordine cronologico, dalla stagione piu' vecchia alla corrente (la cache e'
+  // al contrario): lo storico, che si legge dal fondo, mostra cosi' le piu' recenti in alto
+  const arch = [...(_stagioniCache || [])].sort((a, b) => (a.numero || 0) - (b.numero || 0)).flatMap(st =>
     (st.partite || []).map(par => ({ ...par, _stagione: st.nome || ('Stagione ' + st.numero) }))
   );
   return arch.concat(dati.partite || []);
@@ -3980,8 +4012,8 @@ function renderGiocatori(partite = dati.partite) {
   arr.forEach(([nome, s], i) => {
     const wr = s.partite > 0 ? Math.round(100 * s.v / s.partite) : 0;
     const safeNome = nome.replace(/'/g, "\'");
-    // su telefono i primi tre hanno il riquadro oro, argento e bronzo (solo chi ha giocato)
-    const metallo = i < 3 && s.partite > 0 ? ' ' + metalli[i] : '';
+    // su telefono i primi tre hanno il riquadro oro, argento e bronzo
+    const metallo = i < 3 ? ' ' + metalli[i] : '';
     // foto e riepilogo sotto il nome si vedono solo su telefono, dove le colonne PG/V/P spariscono
     const foto = ((dati.profili || {})[nome] || {}).foto;
     const avatar = `<span class="cl-avatar">${escapeHtml(nome.charAt(0).toUpperCase())}${foto ? `<img src="${escapeHtml(foto)}" alt="" onerror="this.remove()">` : ''}</span>`;
@@ -4137,7 +4169,7 @@ function buildProfiloInline(nome) {
       <div class="profile-inline-stat"><span class="pis-lbl">V / P</span><span class="pis-val">${s.v} / ${s.p}</span></div>
       <div class="profile-inline-stat"><span class="pis-lbl">Mazzo + usato</span><span class="pis-val" style="font-size:0.7rem;line-height:1.2">${mazzoPreferitoGiocatore(nome)}</span></div>
    </div>
-    <div style="padding: 12px 14px 0; background: var(--bg-soft);">
+    <div class="profile-inline-ach-head">
       <div class="modal-section-title" style="margin-bottom: 0;">Achievements</div>
     </div>
     <div class="profile-inline-ach" style="border-top: none;">${achHtml}</div>
@@ -4465,12 +4497,12 @@ function renderStorico(partite = dati.partite, modificabile = true, contId = 'li
         <div class="date">${formatData(p.data)}${p._stagione ? ` · <span class="mc-stagione">${escapeHtml(p._stagione)}</span>` : ''}</div>
         <div class="mc-versus">
           <div class="side-left">
-            <span class="player ${g1win ? 'win' : ''}">${p.g1}${p.dado === p.g1 ? dado : ''}</span>
+            <span class="player ${g1win ? 'win' : ''}">${p.dado === p.g1 ? dado : ''}${p.g1}</span>
             <span class="deck">${p.m1}</span>
           </div>
           <div class="score">${p.risultato}</div>
           <div class="side-right">
-            <span class="player ${!g1win ? 'win' : ''}">${p.dado === p.g2 ? dado : ''}${p.g2}</span>
+            <span class="player ${!g1win ? 'win' : ''}">${p.g2}${p.dado === p.g2 ? dado : ''}</span>
             <span class="deck">${p.m2}</span>
           </div>
         </div>
