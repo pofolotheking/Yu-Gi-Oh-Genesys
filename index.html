@@ -726,7 +726,11 @@
 
   /* cronologia partite dentro il popup del mazzo */
   .dmh-tabs { max-width: 480px; margin: 0 auto 10px; }
-  .ddm-tabs { max-width: 480px; margin: 0 auto 14px; padding-right: 4px; }
+  .ddm-tabs {
+    max-width: 480px; margin: 0 auto 14px; padding-right: 4px;
+    position: sticky; top: 0; z-index: 4; background: var(--seg-solido, var(--bg-soft));
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
+  }
   .detail-modal:not(.has-bg-img) .ddm-tabs { margin-right: 44px; }
   .deck-mu-vuoto { padding: 10px 14px; font-size: 0.85rem; color: var(--text-faint); }
   .dmh-list { max-width: 480px; margin: 0 auto; width: 100%; }
@@ -2728,6 +2732,7 @@
     --barra-bordo: rgba(60, 60, 67, 0.22);
     --tasto-tondo: #ffffff;
     --seg-fondo: rgba(118, 118, 128, 0.12);
+    --seg-solido: #e4e4e9;
     --nota-fondo: rgba(255, 255, 255, 0.86);
   }
   [data-theme="dark"] {
@@ -2736,6 +2741,7 @@
     --barra-bordo: rgba(84, 84, 88, 0.6);
     --tasto-tondo: #1c1c1e;
     --seg-fondo: rgba(118, 118, 128, 0.24);
+    --seg-solido: #2c2c2e;
     --nota-fondo: rgba(28, 28, 30, 0.86);
   }
 
@@ -2812,6 +2818,14 @@
     .section-note em { font-style: normal; }
     .info { background: none; padding: 0 16px; font-size: 13px; margin-bottom: 12px; }
 
+    /* la scelta Stagione corrente / All-time (e Archivio / All-time, Database / Lista)
+       resta fissa sotto la barra in alto mentre si scorre */
+    main > section > .inner-tab-bar, #inner-tab-bar-wrap {
+      position: sticky; top: calc(env(safe-area-inset-top) + 58px); z-index: 44;
+    }
+    main > section > .inner-tab-bar, #inner-tab-bar-wrap .inner-tab-bar {
+      background: var(--seg-solido); box-shadow: 0 0 0 6px var(--bg-gruppo);
+    }
     /* controllo a segmenti */
     .inner-tab-bar { background: var(--seg-fondo); padding: 2px; gap: 0; border-radius: 9px; }
     .inner-tab { font-size: 13px; padding: 6px 4px; border-radius: 7px; color: var(--text); }
@@ -3260,12 +3274,20 @@
     .detail-modal .dh-hero:not(.senza-img) .dh-sub { color: rgba(255,255,255,0.88); }
     .detail-modal .dh-sub { font-size: 15px; margin-top: 4px; }
     .detail-modal.deck-full .detail-close {
-      position: fixed; top: calc(env(safe-area-inset-top) + 12px); right: 14px; z-index: 5;
+      position: fixed; top: calc(env(safe-area-inset-top) + 18px); right: 14px; z-index: 5;
       background: rgba(0, 0, 0, 0.45); color: #fff;
       -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
     }
     .detail-modal .detail-section-title { display: none; }
-    .detail-modal .ddm-tabs { margin: calc(env(safe-area-inset-top) + 10px) 52px 12px 0; }
+    /* la scelta sta sopra l'immagine, alla stessa altezza della X, e resta li' scorrendo */
+    .detail-modal .ddm-tabs {
+      height: 40px; margin: calc(env(safe-area-inset-top) + 14px) 56px 0 0;
+      top: calc(env(safe-area-inset-top) + 14px); background: var(--seg-solido);
+    }
+    /* scorrendo, dietro la scelta compare una fascia del colore di fondo fino in cima */
+    .detail-modal.scorre .ddm-tabs { box-shadow: 0 -100px 0 100px var(--bg-gruppo); }
+    .detail-modal .ddm-tabs .inner-tab { padding: 0 4px; height: 36px; font-size: 14px; }
+    .detail-modal .ddm-tabs + .dh-hero { margin-top: calc(-1 * (env(safe-area-inset-top) + 54px)); }
     .detail-modal .deck-mu-stat-list {
       display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 0; max-width: none;
     }
@@ -4161,7 +4183,7 @@
 <footer>
   <span>Tia · Gio · Richi</span>
   <button onclick="eseguiLogout()" style="background:none;border:none;color:var(--text-faint);font-size:0.75rem;cursor:pointer;margin-left:12px;font-family:inherit">Esci</button>
-  <div style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 68</div>
+  <div style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 69</div>
 </footer>
 
 </div>
@@ -4896,7 +4918,7 @@ function fmtGiorno(d) {
 
 function htmlCuriosita(partite) {
   // scontri fra mazzi: per ogni coppia di mazzi che si sono affrontati almeno
-  // 2 volte, quanto e' squilibrato il bilancio rispetto ai match giocati
+  // MIN_SCONTRI volte, quanto e' squilibrato il bilancio rispetto ai match giocati
   const coppie = {};
   partite.forEach(p => {
     const r = PUNTI[p.risultato]; if (!r || p.m1 === p.m2) return;
@@ -4907,7 +4929,8 @@ function htmlCuriosita(partite) {
     if (vince === a) c.va++; else c.vb++;
   });
   const squilibrio = c => Math.abs(c.va - c.vb) / (c.va + c.vb);
-  const validi = Object.values(coppie).filter(c => c.va + c.vb >= 2);
+  const MIN_SCONTRI = 8;   // sotto questo numero di match il bilancio non dice molto
+  const validi = Object.values(coppie).filter(c => c.va + c.vb >= MIN_SCONTRI);
   // a parita' di squilibrio conta di piu' lo scontro giocato piu' volte
   const equil = [...validi].sort((x, y) => squilibrio(x) - squilibrio(y) || (y.va + y.vb) - (x.va + x.vb))[0];
   const sbil = [...validi].sort((x, y) => squilibrio(y) - squilibrio(x) || (y.va + y.vb) - (x.va + x.vb))[0];
@@ -5472,6 +5495,11 @@ async function apriDettaglioMazzo(mazzo, scope = _scopeDeck) {
   renderDettaglioMazzoScope(mazzo, scope);
 
   const modal = document.getElementById('detail-modal');
+  if (modal && !modal._ascoltaScroll) {
+    modal._ascoltaScroll = true;
+    modal.addEventListener('scroll', () => modal.classList.toggle('scorre', modal.scrollTop > 40), { passive: true });
+  }
+  if (modal) { modal.scrollTop = 0; modal.classList.remove('scorre'); }
   if (modal) {
     modal.classList.add('deck-full');
     if (imgUrl && !telefono) {
