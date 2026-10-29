@@ -2717,7 +2717,7 @@
      con il + al centro, icone tonde in alto, riquadri su fondo grigio.
      Sopra i 720px resta tutto come prima. */
   .m-topbar, .deck-edit-btn, nav .nav-add, .cl-avatar, .cl-sub, .mc-bg, .mc-dado,
-  .ico-svg, .ico-imp, .edit-azione, .storico-dettagli-btn, .h2h-m, .dado-m, .h2h-bg { display: none; }
+  .ico-svg, .ico-imp, .edit-azione, .storico-dettagli-btn, .h2h-m, .dado-m, .h2h-bg, .m-freccia { display: none; }
   tr.cl-riga[onclick] { cursor: pointer; }
   .dh-hero { display: contents; }
   :root {
@@ -3100,6 +3100,27 @@
     }
     .dado-m-riga b { font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
     .dm-n { font-weight: 400; font-size: 13px; color: var(--text-dim); }
+    /* tendine: chiuse si vedono solo nomi e punteggio, il tocco apre i dettagli */
+    .h2h-united .h2h-u-item, .dado-player-card { cursor: pointer; }
+    .h2h-united .h2h-u-item { padding-bottom: 0; }
+    .h2h-united .h2h-u-item.aperto { padding-bottom: 14px; }
+    .h2h-united .h2h-u-item:not(.aperto) .h2h-u-stats { display: none !important; }
+    .dado-player-card:not(.aperto) .dado-m-riga { display: none; }
+    .dado-player-card:not(.aperto) .dado-m-head { border-radius: 14px; }
+    .dado-player-card:not(.aperto) .dado-m { padding-bottom: 0; }
+    .m-freccia {
+      display: block; flex: none; width: 9px; height: 9px; margin: 0 4px 4px 8px;
+      border-right: 2.5px solid var(--text-faint); border-bottom: 2.5px solid var(--text-faint);
+      transform: rotate(45deg); transition: transform 0.2s;
+    }
+    .aperto .m-freccia { transform: rotate(-135deg); margin-bottom: -4px; }
+    .dado-m-head .m-freccia { margin-left: auto; }
+    /* negli scontri la freccia sta sopra la foto: bianca con ombra */
+    .h2h-u-head .m-freccia {
+      position: absolute; right: 2px; top: 50%; margin: -8px 0 0;
+      border-color: #fff; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.8));
+    }
+    .aperto .h2h-u-head .m-freccia { margin-top: -2px; }
 
     /* ── STAGIONI ── */
     details.stagione-item.card { background: none; overflow: visible; border-radius: 0; margin-bottom: 10px; }
@@ -4080,7 +4101,7 @@
 <footer>
   <span>Tia · Gio · Richi</span>
   <button onclick="eseguiLogout()" style="background:none;border:none;color:var(--text-faint);font-size:0.75rem;cursor:pointer;margin-left:12px;font-family:inherit">Esci</button>
-  <div style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 64</div>
+  <div style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 65</div>
 </footer>
 
 </div>
@@ -4212,6 +4233,16 @@ async function caricaDati() {
   await caricaDecklist70();
   await caricaStagioni(true);
   popolaTutto();
+  // ritorno dopo il cambio tema nell'app installata: stessa sezione, stesso punto
+  try {
+    const r = JSON.parse(sessionStorage.getItem('genesys-dopo-tema') || 'null');
+    sessionStorage.removeItem('genesys-dopo-tema');
+    if (r && r.sez && document.getElementById(r.sez)) {
+      switchTab(r.sez);
+      if (r.sez === 'stagioni') apriStagioni();
+      setTimeout(() => window.scrollTo(0, r.y || 0), 80);
+    }
+  } catch(e) {}
 }
 
 // popola _decklist70: per ogni giocatore, true se ha una decklist con 70+ carte (main+extra+side)
@@ -4600,7 +4631,7 @@ function renderRiepilogo(partite = dati.partite, contId = 'riepilogo-h2h', cardI
         const tot = r.va + r.vb;
         const ultimoStr = r.ultimo ? `${r.ultimo.vincitore}` : '—';
         const fotoA = ((dati.profili || {})[r.a] || {}).foto, fotoB = ((dati.profili || {})[r.b] || {}).foto;
-        return `<div class="h2h-u-item">
+        return `<div class="h2h-u-item" onclick="this.classList.toggle('aperto')">
           <div class="h2h-u-head">
             ${fotoA ? `<span class="h2h-bg sx" style="background-image:url('${escapeHtml(fotoA)}')"></span>` : ''}
             ${fotoB ? `<span class="h2h-bg dx" style="background-image:url('${escapeHtml(fotoB)}')"></span>` : ''}
@@ -4608,6 +4639,7 @@ function renderRiepilogo(partite = dati.partite, contId = 'riepilogo-h2h', cardI
             <span class="h2h-u-name">${r.a}</span>
             <span class="h2h-u-score"><strong>${r.va}</strong>-<strong>${r.vb}</strong></span>
             <span class="h2h-u-name">${r.b}</span>
+            <span class="m-freccia"></span>
             ${avatarGiocatore(r.b)}
           </div>
           <div class="h2h-u-stats">
@@ -4792,7 +4824,7 @@ function renderStatDado(partite = dati.partite, contId = 'stat-dado-wrap') {
     const bg = img ? `background-image:url('${img}')` : '';
     const pr = (v, t) => t > 0 ? `${pct(v, t)} <span class="dm-n">su ${t}</span>` : '—';
     const telefono = `<div class="dado-m">
-      <div class="dado-m-head">${img ? `<span class="dado-m-foto" style="background-image:url('${img}')"></span>` : ''}<span class="dado-m-nome">${g}</span></div>
+      <div class="dado-m-head">${img ? `<span class="dado-m-foto" style="background-image:url('${img}')"></span>` : ''}<span class="dado-m-nome">${g}</span><span class="m-freccia"></span></div>
       <div class="dado-m-riga"><span>Dado vinto</span><b>${s.dadoT > 0 ? `${s.dadoV}/${s.dadoT} <span class="dm-n">(${pct(s.dadoV, s.dadoT)})</span>` : '—'}</b></div>
       <div class="dado-m-riga"><span>Win rate col dado</span><b>${wrDado}</b></div>
       <div class="dado-m-riga"><span>Win rate da primo</span><b>${pr(s.primoV, s.primoT)}</b></div>
@@ -4800,7 +4832,7 @@ function renderStatDado(partite = dati.partite, contId = 'stat-dado-wrap') {
       <div class="dado-m-riga"><span>Vittorie 2-0 · 2-1</span><b>${s.v20} · ${s.v21}</b></div>
       <div class="dado-m-riga"><span>Sconfitte 2-1 · 2-0</span><b>${s.s21} · ${s.s20}</b></div>
     </div>`;
-    return `<div class="dado-player-card" style="${bg}">
+    return `<div class="dado-player-card" style="${bg}" onclick="this.classList.toggle('aperto')">
       ${telefono}
       <span class="dado-player-name">${g}</span>
       <div class="dado-player-stats">
@@ -7573,6 +7605,18 @@ function toggleTema() {
   const nuovo = attuale === 'dark' ? 'light' : 'dark';
   applicaTema(nuovo);
   try { localStorage.setItem('genesys-tema', nuovo); } catch(e) {}
+  // Nell'app installata su iPhone lo stile della barra di stato si legge solo
+  // all'apertura: senza ricaricare, cambiando tema la barra resta del colore
+  // vecchio (nera di giorno o bianca di notte). Si ricarica tornando alla
+  // stessa sezione e allo stesso punto.
+  if (navigator.standalone) {
+    try {
+      const sec = document.querySelector('main > section.active');
+      sessionStorage.setItem('genesys-dopo-tema', JSON.stringify({ sez: sec ? sec.id : '', y: window.scrollY }));
+    } catch(e) {}
+    location.reload();
+    return;
+  }
   // il grafico disegna su canvas: i colori non seguono il CSS, va ridisegnato
   try { if (_chartInstance) renderGrafico(partiteScope(_scopeStat)); } catch(e) {}
 }
