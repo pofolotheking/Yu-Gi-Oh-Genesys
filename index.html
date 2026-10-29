@@ -2699,16 +2699,19 @@
 
   /* ═══════════ RESTYLE TELEFONO (stile iOS) ═══════════
      Su schermi stretti: titolo grande a sinistra, barra delle sezioni in basso
-     con il + al centro, icone tonde in alto, liste a blocchi su fondo grigio.
+     con il + al centro, icone tonde in alto, riquadri su fondo grigio.
      Sopra i 720px resta tutto come prima. */
-  .m-topbar, .deck-edit-btn, nav .nav-add, .cl-avatar, .cl-sub, .mc-bg, .mc-dado, .ico-svg { display: none; }
-  tr.cl-riga { cursor: pointer; }
+  .m-topbar, .deck-edit-btn, nav .nav-add, .cl-avatar, .cl-sub, .mc-bg, .mc-dado,
+  .ico-svg, .ico-imp, .edit-azione { display: none; }
+  tr.cl-riga[onclick] { cursor: pointer; }
+  .dh-hero { display: contents; }
   :root {
     --bg-gruppo: #f2f2f7;
     --barra: rgba(249, 249, 251, 0.86);
     --barra-bordo: rgba(60, 60, 67, 0.22);
     --tasto-tondo: #ffffff;
     --seg-fondo: rgba(118, 118, 128, 0.12);
+    --nota-fondo: rgba(255, 255, 255, 0.86);
   }
   [data-theme="dark"] {
     --bg-gruppo: #000000;
@@ -2716,6 +2719,7 @@
     --barra-bordo: rgba(84, 84, 88, 0.6);
     --tasto-tondo: #1c1c1e;
     --seg-fondo: rgba(118, 118, 128, 0.24);
+    --nota-fondo: rgba(28, 28, 30, 0.86);
   }
 
   @media (max-width: 720px) {
@@ -2748,6 +2752,10 @@
     }
     body.m-titolo .m-topbar-title { opacity: 1; transform: none; }
 
+    /* icone: su telefono quelle a linea al posto delle emoji */
+    .ico-emoji { display: none; }
+    .ico-svg { display: inline-block; vertical-align: -2px; }
+
     /* icone tonde: a sinistra duello e deck editing, a destra ricerca, tema, impostazioni */
     .gear-btn, .duel-btn, .theme-btn, .search-btn, .deck-edit-btn {
       display: flex; align-items: center; justify-content: center;
@@ -2757,7 +2765,8 @@
       box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
       text-decoration: none;
     }
-    .duel-btn { left: 16px; right: auto; font-size: 0.95rem; }
+    .duel-btn { left: 16px; right: auto; }
+    .duel-btn .ico-svg { display: block; }
     .deck-edit-btn { left: 56px; right: auto; }
     .search-btn { right: 96px; left: auto; }
     .theme-btn { right: 56px; left: auto; }
@@ -2772,7 +2781,7 @@
       line-height: 1.15; margin: 4px 0 14px;
     }
 
-    /* intestazioni dei gruppi e note, come nelle impostazioni di iOS */
+    /* titoletti e note rimasti (ricerca, registra partita) in stile iOS */
     h3.subsection-title {
       text-align: left; font-size: 13px; font-weight: 500; text-transform: uppercase;
       letter-spacing: 0.02em; color: var(--text-dim); margin: 26px 16px 7px;
@@ -2791,29 +2800,68 @@
     .inner-tab { font-size: 13px; padding: 6px 4px; border-radius: 7px; color: var(--text); }
 
     /* blocchi bianchi senza bordo su fondo grigio */
-    .card, #riepilogo-card.h2h-united-card { border: none; border-radius: 12px; }
+    .card { border: none; border-radius: 12px; }
     .card.padded { padding: 16px; }
     .classifica-top { margin-bottom: 8px; }
     .tab-intestazione { display: none; }
 
-    /* classifica: foto, nome con riepilogo sotto, win rate grande a destra */
-    #tabella-giocatori td:nth-child(2),
-    #tabella-giocatori td:nth-child(3),
-    #tabella-giocatori td:nth-child(4) { display: none; }
-    /* ogni giocatore nel suo riquadro: i primi tre in oro, argento e bronzo */
-    .card.card-classifica { background: none; border-radius: 0; overflow: visible; margin-bottom: 8px; }
-    #tabella-giocatori, #tabella-giocatori > tbody { display: block; }
-    #tabella-giocatori tr.cl-riga {
+    /* ── TABELLE A RIQUADRI (classifica, deck, archivi, all-time) ──
+       ogni riga e' un riquadro: foto o immagine del mazzo, nome con riepilogo
+       sotto, win rate grande a destra; i primi tre in oro, argento e bronzo */
+    .card.card-box { background: none; border-radius: 0; overflow: visible !important; margin-bottom: 18px; }
+    table.tab-box, table.tab-box > tbody { display: block; }
+    table.tab-box .m-col-no, table.tab-box tr.cl-riga td.m-col-no { display: none; }
+    table.tab-box tr.cl-riga {
       display: flex; align-items: center; margin-bottom: 8px;
       background: var(--bg-card); border-radius: 14px; overflow: hidden;
       transition: transform 0.12s;
     }
-    #tabella-giocatori tr.cl-riga:active { transform: scale(0.985); }
-    #tabella-giocatori tr.cl-riga td { display: block; border: none; padding: 10px 14px; }
-    #tabella-giocatori tr.cl-riga td:nth-child(2),
-    #tabella-giocatori tr.cl-riga td:nth-child(3),
-    #tabella-giocatori tr.cl-riga td:nth-child(4) { display: none; }
-    #tabella-giocatori tr.cl-riga td:first-child { flex: 1; min-width: 0; }
+    table.tab-box tr.cl-riga[onclick]:active { transform: scale(0.985); }
+    table.tab-box tr.cl-riga td { display: block; border: none; padding: 10px 14px; min-width: 0; font-weight: inherit; }
+    table.tab-box tr.cl-riga td:last-child { margin-left: auto; width: auto; white-space: nowrap; }
+    table.tab-box tr.oro { background: linear-gradient(135deg, #fff4c9 0%, #f3d36c 48%, #d6a633 100%); }
+    table.tab-box tr.argento { background: linear-gradient(135deg, #fbfcfd 0%, #dde1e6 48%, #b3b9c2 100%); }
+    table.tab-box tr.bronzo { background: linear-gradient(135deg, #fde4cc 0%, #e4a873 48%, #b8733a 100%); }
+    table.tab-box tr.oro, table.tab-box tr.argento, table.tab-box tr.bronzo {
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.45), 0 2px 8px rgba(0, 0, 0, 0.12);
+    }
+    table.tab-box tr.oro td, table.tab-box tr.argento td, table.tab-box tr.bronzo td,
+    table.tab-box tr.oro .profile-toggle-btn, table.tab-box tr.argento .profile-toggle-btn,
+    table.tab-box tr.bronzo .profile-toggle-btn { color: #1d1d1f; }
+    table.tab-box tr.oro .cl-sub, table.tab-box tr.argento .cl-sub,
+    table.tab-box tr.bronzo .cl-sub { color: rgba(29, 29, 31, 0.68); }
+    table.tab-box tr.oro .cl-avatar, table.tab-box tr.argento .cl-avatar,
+    table.tab-box tr.bronzo .cl-avatar { box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.8); }
+    table.tab-box tr.oro .wr-bar, table.tab-box tr.argento .wr-bar,
+    table.tab-box tr.bronzo .wr-bar { background: rgba(0, 0, 0, 0.13); }
+    table.tab-box tr.oro .wr-bar > span { background: #8a6500; }
+    table.tab-box tr.argento .wr-bar > span { background: #4b5563; }
+    table.tab-box tr.bronzo .wr-bar > span { background: #7a3e12; }
+    table.tab-box tr.oro .pill, table.tab-box tr.argento .pill,
+    table.tab-box tr.bronzo .pill { background: rgba(255, 255, 255, 0.55); color: #1d1d1f; }
+    table.tab-box .wr-cell { flex-direction: column; align-items: flex-end; gap: 5px; }
+    table.tab-box .wr-text { font-size: 19px; font-weight: 700; min-width: 0; }
+    table.tab-box .wr-bar { display: block; flex: none; width: 64px; max-width: none; }
+    table.tab-box td.empty { background: var(--bg-card); border-radius: 14px; }
+    .wr-bar > span { background: var(--blue); }
+    .cl-chi { display: flex; align-items: center; gap: 12px; }
+    .cl-avatar {
+      display: flex; position: relative; flex-shrink: 0; overflow: hidden;
+      width: 44px; height: 44px; border-radius: 50%;
+      background: var(--border); color: var(--text-dim);
+      align-items: center; justify-content: center; font-size: 17px; font-weight: 700;
+    }
+    .cl-avatar.mazzo { border-radius: 11px; }
+    .cl-avatar img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+    .cl-testo { min-width: 0; font-size: 17px; font-weight: 600; line-height: 1.3; }
+    .cl-testo .name-btn { font: inherit; }
+    .cl-testo .pill { margin-left: 6px; font-size: 11px; vertical-align: 2px; }
+    .cl-sub {
+      display: block; font-size: 14px; font-weight: 500; color: var(--text-dim);
+      font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+
+    /* profilo aperto dalla classifica: foto grande al centro */
     #tabella-giocatori tr.profile-inline-row.open {
       display: block; margin: -2px 0 10px; border-radius: 14px; overflow: hidden; background: var(--bg-card);
     }
@@ -2843,67 +2891,22 @@
     .profile-inline-stats .pis-val[style] { font-size: 15px !important; line-height: 1.6 !important; }
     .profile-inline-ach-head { background: none; padding: 18px 16px 0; }
     .profile-inline-ach { background: none; padding: 12px 12px 18px; }
-    #tabella-giocatori tr.oro { background: linear-gradient(135deg, #fff4c9 0%, #f3d36c 48%, #d6a633 100%); }
-    #tabella-giocatori tr.argento { background: linear-gradient(135deg, #fbfcfd 0%, #dde1e6 48%, #b3b9c2 100%); }
-    #tabella-giocatori tr.bronzo { background: linear-gradient(135deg, #fde4cc 0%, #e4a873 48%, #b8733a 100%); }
-    #tabella-giocatori tr.oro, #tabella-giocatori tr.argento, #tabella-giocatori tr.bronzo {
-      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.45), 0 2px 8px rgba(0, 0, 0, 0.12);
-    }
-    #tabella-giocatori tr.oro td, #tabella-giocatori tr.argento td, #tabella-giocatori tr.bronzo td,
-    #tabella-giocatori tr.oro .profile-toggle-btn, #tabella-giocatori tr.argento .profile-toggle-btn,
-    #tabella-giocatori tr.bronzo .profile-toggle-btn { color: #1d1d1f; }
-    #tabella-giocatori tr.oro .cl-sub, #tabella-giocatori tr.argento .cl-sub,
-    #tabella-giocatori tr.bronzo .cl-sub { color: rgba(29, 29, 31, 0.68); }
-    #tabella-giocatori tr.oro .cl-avatar, #tabella-giocatori tr.argento .cl-avatar,
-    #tabella-giocatori tr.bronzo .cl-avatar { box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.8); }
-    #tabella-giocatori tr.oro .wr-bar, #tabella-giocatori tr.argento .wr-bar,
-    #tabella-giocatori tr.bronzo .wr-bar { background: rgba(0, 0, 0, 0.13); }
-    #tabella-giocatori tr.oro .wr-bar > span { background: #8a6500; }
-    #tabella-giocatori tr.argento .wr-bar > span { background: #4b5563; }
-    #tabella-giocatori tr.bronzo .wr-bar > span { background: #7a3e12; }
-    .cl-chi { display: flex; align-items: center; gap: 12px; }
-    .cl-avatar {
-      display: flex; position: relative; flex-shrink: 0; overflow: hidden;
-      width: 44px; height: 44px; border-radius: 50%;
-      background: var(--border); color: var(--text-dim);
-      align-items: center; justify-content: center; font-size: 17px; font-weight: 700;
-    }
-    .cl-avatar img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-    .cl-testo { min-width: 0; }
-    .cl-testo .name-btn { font-size: 17px; font-weight: 600; }
-    .cl-sub { display: block; font-size: 14px; font-weight: 500; color: var(--text-dim); font-variant-numeric: tabular-nums; }
-    #tabella-giocatori .wr-cell,
-    #tabella-mazzi .wr-cell { flex-direction: column; align-items: flex-end; gap: 5px; }
-    #tabella-giocatori .wr-text { font-size: 19px; font-weight: 700; }
-    #tabella-mazzi .wr-text { font-weight: 600; }
-    #tabella-giocatori .wr-bar,
-    #tabella-mazzi .wr-bar { display: block; flex: none; width: 64px; max-width: none; }
-    #tabella-giocatori td:last-child:not(:first-child),
-    #tabella-mazzi td:last-child:not(:first-child) { width: 1%; white-space: nowrap; }
-    .wr-bar > span { background: var(--blue); }
 
-    #tabella-mazzi td { padding: 10px 8px; }
-    #tabella-mazzi td:first-child:not(:last-child) { padding-left: 14px; width: 1%; }
-    #tabella-mazzi td:last-child:not(:first-child) { padding-right: 14px; }
-    #tabella-mazzi .deck-strip-cell { width: 76px; }
-    /* archivio stagioni: colonne strette, la tabella resta dentro il riquadro */
-    .stagione-body th, .stagione-body td { padding-left: 6px; padding-right: 6px; }
-    .stagione-body tr > :first-child { padding-left: 12px; }
-    .stagione-body tr > :last-child { padding-right: 12px; }
-    /* storico compatto: giocatori ai lati con l'immagine del mazzo sfumata dietro,
-       punteggio e data al centro, modifica ed elimina in colonna a destra */
+    /* ── STORICO COMPATTO ──
+       nomi vicino al punteggio (in un riquadro), immagine del mazzo sui lati,
+       data sotto il punteggio, modifica ed elimina in colonna a destra */
     .match-card {
       position: relative; isolation: isolate; overflow: hidden;
       flex-direction: row; flex-wrap: wrap; align-items: center;
       column-gap: 8px; row-gap: 0; padding: 7px 10px 7px 14px;
     }
     .mc-bg {
-      display: block; position: absolute; top: 0; bottom: 0; width: 40%; z-index: -1;
-      background-size: cover; background-position: center 30%; opacity: 0.85;
+      display: block; position: absolute; top: 0; bottom: 0; width: 34%; z-index: -1;
+      background-size: cover; background-position: center 30%; opacity: 0.9;
     }
-    .mc-bg.sx { left: 0; -webkit-mask-image: linear-gradient(90deg, #000 0%, rgba(0,0,0,0.75) 35%, transparent 100%); mask-image: linear-gradient(90deg, #000 0%, rgba(0,0,0,0.75) 35%, transparent 100%); }
-    .mc-bg.dx { right: 0; -webkit-mask-image: linear-gradient(270deg, #000 0%, rgba(0,0,0,0.75) 35%, transparent 100%); mask-image: linear-gradient(270deg, #000 0%, rgba(0,0,0,0.75) 35%, transparent 100%); }
-    [data-theme="dark"] .mc-bg { opacity: 0.8; }
+    .mc-bg.sx { left: 0; -webkit-mask-image: linear-gradient(90deg, #000 0%, #000 30%, transparent 100%); mask-image: linear-gradient(90deg, #000 0%, #000 30%, transparent 100%); }
+    .mc-bg.dx { right: 0; -webkit-mask-image: linear-gradient(270deg, #000 0%, #000 30%, transparent 100%); mask-image: linear-gradient(270deg, #000 0%, #000 30%, transparent 100%); }
+    [data-theme="dark"] .mc-bg { opacity: 0.85; }
     /* alone del colore del riquadro attorno al testo: si legge anche sopra l'immagine */
     .match-card .player, .match-card .deck { text-shadow: 0 0 6px var(--bg-card), 0 0 2px var(--bg-card); }
     .match-card .mc-main {
@@ -2927,11 +2930,17 @@
       display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
     }
     [data-theme="dark"] .match-card .player.win { color: var(--green); }
-    .card.card-classifica { margin-bottom: 18px; }
     .mc-dado { display: inline; font-size: 12px; margin: 0 4px; vertical-align: 1px; }
-    .match-card .mc-side { order: 3; flex: 0 0 100%; padding: 0; text-align: left; }
+    .match-card .mc-side { order: 3; flex: 0 0 100%; padding: 0; text-align: center; }
     .match-card .mc-side .match-extra { display: none; }
-    .match-card .mc-side .match-note { margin-top: 5px; font-size: 12px; color: var(--text-dim); }
+    /* nota su un fondino con ombra, leggibile anche sopra le immagini */
+    .match-card .mc-side .match-note {
+      display: inline-block; max-width: 100%; margin: 5px 0 1px; padding: 4px 10px;
+      border-radius: 9px; background: var(--nota-fondo); color: var(--text);
+      box-shadow: 0 1px 6px rgba(0, 0, 0, 0.22);
+      -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+      font-size: 12px; text-align: left;
+    }
     .match-card .btn-group { position: static; order: 2; flex-direction: column; gap: 4px; }
     .match-card .edit-btn, .match-card .del-btn {
       display: flex; align-items: center; justify-content: center;
@@ -2941,24 +2950,72 @@
     .match-card .edit-btn { color: var(--blue); }
     .match-card .del-btn { color: var(--red); }
     .match-card .edit-btn:hover, .match-card .del-btn:hover { background: var(--tasto-tondo); }
-    .match-card .ico-emoji { display: none; }
     .match-card .ico-svg { display: block; width: 14px; height: 14px; }
 
-    /* deck: riquadri dei mazzi in due colonne */
-    #grid-matchup { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    .mu-deck-btn { width: auto; height: 176px; padding: 12px; border-radius: 14px; }
-    .mu-deck-name { font-size: 15px; }
-    .mu-deck-prop { font-size: 12px; }
-    .mu-deck-stats { font-size: 12.5px; gap: 1px; }
+    /* ── DECK ── la riga apre il dettaglio: i riquadri grandi sono superflui */
+    #grid-matchup { display: none; }
 
-    /* statistiche */
-    .dado-player-card { border-radius: 14px; }
+    /* ── STATISTICHE ── */
+    #riepilogo-card.h2h-united-card, .card.h2h-united-card { background: none; padding: 0; border: none; }
+    .h2h-united .h2h-u-item {
+      flex-direction: column; align-items: stretch; gap: 12px;
+      background: var(--bg-card); border: none; border-radius: 14px;
+      padding: 14px; margin-bottom: 10px;
+    }
+    .h2h-united .h2h-u-head { justify-content: space-between; gap: 10px; width: 100%; }
+    .h2h-u-head .cl-avatar { width: 40px; height: 40px; }
+    .h2h-united .h2h-u-name { flex: 1; min-width: 0; font-size: 17px; font-weight: 600; text-align: left; }
+    .h2h-united .h2h-u-score + .h2h-u-name { text-align: right; }
+    .h2h-united .h2h-u-score {
+      padding: 4px 12px; border-radius: 10px; color: var(--text-dim);
+      background: var(--bg-card); border: 1px solid var(--border-strong);
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
+    }
+    .h2h-united .h2h-u-score strong { font-size: 20px; }
+    .h2h-united .h2h-u-stats { display: grid !important; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .h2h-united .h2h-u-stat {
+      flex-direction: column; align-items: flex-start; gap: 2px;
+      background: var(--seg-fondo); border-radius: 10px; padding: 8px 10px;
+    }
+    .h2h-united .h2h-u-stat .lbl { font-size: 10.5px; color: var(--text-dim); }
+    .h2h-united .h2h-u-stat .val { font-size: 16px; }
+    #chart-card { margin-bottom: 10px; }
+    .dado-player-card { border-radius: 14px; min-height: 340px; }
+    #stat-dado-wrap { gap: 10px; }
 
-    /* impostazioni: righe bianche arrotondate */
+    /* ── STAGIONI ── */
+    details.stagione-item.card { background: none; overflow: visible; border-radius: 0; margin-bottom: 10px; }
+    .stagione-head { background: var(--bg-card); border-radius: 14px; padding: 14px 16px; gap: 2px 10px; }
+    .stagione-nome { font-size: 17px; }
+    .stagione-meta { font-size: 13px; display: inline-flex; align-items: center; gap: 5px; }
+    .ico-trofeo { color: #d4a530; vertical-align: 0; }
+    .stagione-body { border-top: none; padding-top: 10px; }
+    .st-sec-title { display: none; }
+    .st-box { padding: 0; margin-bottom: 10px; }
+    /* righe etichetta / valore, come nelle impostazioni */
+    .card .deck-mu-stat-list { padding: 0; max-width: none; }
+    .card .deck-mu-stat-line { align-items: center; padding: 11px 0; border-bottom: 0.5px solid var(--border); }
+    .card .deck-mu-stat-line:last-child { border-bottom: none; }
+    .card .deck-mu-stat-line .deck-mu-stat-lbl { font-size: 16px; font-weight: 400; color: var(--text); }
+    .card .deck-mu-stat-line .deck-mu-stat-val { font-size: 16px; font-weight: 600; color: var(--text-dim); }
+    #stagioni-archivio > .classifica-top > .card.padded, #alltime-content > .card.padded { padding: 4px 16px; }
+    #stagioni-archivio > .classifica-top > .card.padded { padding-bottom: 14px; }
+    .stagione-body table.tab-box { margin-bottom: 18px; }
+    button.danger.chiudi-stagione-btn {
+      margin-top: 8px !important; padding: 13px; border: none; border-radius: 12px;
+      background: var(--red-soft); color: var(--red); font-size: 16px; font-weight: 600;
+    }
+
+    /* ── IMPOSTAZIONI: righe con icona colorata ── */
     .accordion-item { margin-bottom: 8px; }
     .accordion-btn, .accordion-btn.open {
-      border: none; border-radius: 12px; padding: 14px 16px;
+      border: none; border-radius: 12px; padding: 12px 16px 12px 12px;
       font-size: 16px; font-weight: 500; background: var(--bg-card);
+    }
+    .acc-titolo { display: flex; align-items: center; gap: 12px; }
+    .ico-imp {
+      display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;
+      width: 30px; height: 30px; border-radius: 8px;
     }
     .accordion-body { border: none; background: none; padding: 8px 0 6px; }
     /* freccia sottile al posto del triangolo pieno, ruota verso il basso da aperta */
@@ -2973,6 +3030,115 @@
     button.primary, button.primary:hover,
     .add-form button, .add-form button:hover { background: var(--blue); }
     button.primary { border-radius: 12px; }
+
+    /* ── FINESTRA MODIFICA PARTITA: foglio dal basso ── */
+    .edit-overlay { align-items: flex-end; padding: 0; }
+    .edit-overlay.open { animation: fade 0.2s ease; }
+    .edit-modal {
+      max-width: none; border-radius: 14px 14px 0 0; background: var(--bg-gruppo);
+      padding-bottom: calc(env(safe-area-inset-bottom) + 20px);
+      animation: slideUp 0.32s cubic-bezier(0.32, 0.72, 0, 1);
+    }
+    .edit-modal::before {
+      content: ''; display: block; width: 36px; height: 5px; border-radius: 3px;
+      background: var(--border-strong); margin: 6px auto 0;
+    }
+    .edit-modal-header {
+      display: grid; grid-template-columns: 70px 1fr 70px; align-items: center;
+      border-bottom: none; padding: 6px 16px 12px;
+    }
+    .edit-modal-close, .edit-modal-footer { display: none; }
+    .edit-azione {
+      display: block; background: none; border: none; padding: 6px 0; cursor: pointer;
+      font-family: inherit; font-size: 17px; color: var(--blue); text-align: left;
+    }
+    .edit-azione.salva { font-weight: 600; text-align: right; }
+    .edit-modal-title {
+      text-align: center; font-size: 15px; font-weight: 600;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .edit-modal-body {
+      margin: 0 16px; padding: 0; gap: 0;
+      background: var(--bg-card); border-radius: 12px; overflow: hidden;
+    }
+    .edit-modal-body > div {
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      min-height: 48px; padding: 0 12px 0 16px; border-bottom: 0.5px solid var(--border);
+    }
+    .edit-modal-body > div:last-child { display: block; border-bottom: none; padding: 4px 12px 6px 16px; }
+    .edit-modal-body > div:last-child label { display: none; }
+    .edit-modal-body label { margin: 0; font-size: 16px; font-weight: 400; color: var(--text); white-space: nowrap; }
+    .edit-modal-body select {
+      width: auto; min-width: 0; max-width: 62%; border: none; border-radius: 0;
+      background-color: transparent; box-shadow: none;
+      padding: 12px 20px 12px 0; font-size: 16px; color: var(--text-dim);
+      text-align: right; text-align-last: right;
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='9' height='14' viewBox='0 0 9 14'><path d='M1 5l3.5-3.5L8 5M1 9l3.5 3.5L8 9' fill='none' stroke='%238e8e93' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+      background-position: right 2px center;
+    }
+    .edit-modal-body select:focus { box-shadow: none; }
+    [data-theme="dark"] .edit-modal { background: #1c1c1e; }
+    [data-theme="dark"] .edit-modal-body { background: #2c2c2e; }
+    .edit-modal-body #edit-note {
+      border: none !important; background: transparent !important; border-radius: 0 !important;
+      padding: 10px 0 !important; min-height: 76px; font-size: 16px !important; resize: none !important;
+    }
+
+    /* ── POPUP DEL MAZZO: immagine in alto, contenuto a riquadri ── */
+    .detail-modal.deck-full { background: var(--bg-gruppo); padding: 0 0 calc(env(safe-area-inset-bottom) + 28px); }
+    .detail-modal.deck-full #detail-content { padding: 0 16px; }
+    .detail-modal .dh-hero {
+      display: flex; align-items: flex-end; position: relative; isolation: isolate;
+      min-height: 300px; margin: 0 -16px 14px; padding: 0 20px 18px;
+      background: var(--hero) center 25% / cover no-repeat;
+    }
+    .detail-modal .dh-hero::after {
+      content: ''; position: absolute; inset: 0; z-index: -1;
+      background: linear-gradient(180deg, rgba(0,0,0,0) 35%, rgba(0,0,0,0.75) 100%);
+    }
+    .detail-modal .dh-hero.senza-img { min-height: 0; padding-top: calc(env(safe-area-inset-top) + 64px); }
+    .detail-modal .dh-hero.senza-img::after { display: none; }
+    .detail-modal .dh-hero .detail-head { padding: 0; margin: 0; text-align: left; }
+    .detail-modal .dh-hero .dh-name { font-size: 30px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.1; }
+    .detail-modal .dh-hero:not(.senza-img) .dh-name { color: #fff; text-shadow: 0 2px 10px rgba(0,0,0,0.5); }
+    .detail-modal .dh-hero:not(.senza-img) .dh-sub { color: rgba(255,255,255,0.88); }
+    .detail-modal .dh-sub { font-size: 15px; margin-top: 4px; }
+    .detail-modal.deck-full .detail-close {
+      position: fixed; top: calc(env(safe-area-inset-top) + 12px); right: 14px; z-index: 5;
+      background: rgba(0, 0, 0, 0.45); color: #fff;
+      -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+    }
+    .detail-modal .detail-section-title { display: none; }
+    .detail-modal .deck-mu-stat-list {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 0; max-width: none;
+    }
+    .detail-modal .deck-mu-stat-line {
+      flex-direction: column; align-items: flex-start; gap: 2px;
+      background: var(--bg-card); border-radius: 12px; padding: 10px 12px;
+    }
+    .detail-modal .deck-mu-stat-line .deck-mu-stat-lbl {
+      font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em; color: var(--text-dim);
+    }
+    .detail-modal .deck-mu-stat-line .deck-mu-stat-val { margin-left: 0; font-size: 22px; font-weight: 700; color: var(--text); }
+    .detail-modal .deck-mu-vs-list { max-width: none; margin-top: 12px; background: var(--bg-card); border-radius: 12px; overflow: hidden; }
+    .detail-modal .deck-mu-vs-row { padding: 12px 14px; border-bottom: 0.5px solid var(--border); font-size: 15px; }
+    .detail-modal .deck-mu-vs-row:last-child { border-bottom: none; }
+    .detail-overlay .detail-modal .deck-mu-vs-row.win .deck-mu-vs-name,
+    .detail-overlay .detail-modal .deck-mu-vs-row.win .deck-mu-vs-score { color: var(--green-dark) !important; }
+    .detail-overlay .detail-modal .deck-mu-vs-row.lose .deck-mu-vs-name,
+    .detail-overlay .detail-modal .deck-mu-vs-row.lose .deck-mu-vs-score { color: var(--red) !important; }
+    [data-theme="dark"] .detail-overlay .detail-modal .deck-mu-vs-row.win .deck-mu-vs-name,
+    [data-theme="dark"] .detail-overlay .detail-modal .deck-mu-vs-row.win .deck-mu-vs-score { color: var(--green) !important; }
+    .detail-modal .dmh-tabs { max-width: none; margin: 14px 0 10px; }
+    .detail-modal .dmh-list { max-width: none; background: var(--bg-card); border-radius: 12px; overflow: hidden; }
+    .detail-modal .dmh-row { border-bottom-color: var(--border); }
+    [data-theme="dark"] .detail-modal .dmh-row.win .dmh-score { color: var(--green); }
+    .detail-modal #ddm-decklist-body { margin-top: 12px; padding: 12px; background: var(--bg-card); border-radius: 12px; }
+
+    /* ── DADI ── */
+    .dadi-modal { background: var(--bg-card); border-radius: 20px; }
+    .dadi-close { background: var(--seg-fondo); color: var(--text-dim); }
+    .dadi-btn, .dadi-btn:hover { background: var(--seg-fondo); border: none; border-radius: 14px; }
 
     /* barra delle sezioni in basso, con il + al centro */
     nav {
@@ -3010,16 +3176,13 @@
     }
     nav .nav-add:active .nav-add-cerchio { transform: scale(0.92); }
   }
-  /* telefoni stretti: il riepilogo sotto il nome resta su una riga */
+  /* telefoni stretti: riquadri un po' piu' compatti */
   @media (max-width: 360px) {
     .cl-chi { gap: 10px; }
     .cl-avatar { width: 40px; height: 40px; }
     .cl-sub { font-size: 12px; }
-    #tabella-giocatori tr.cl-riga td { padding: 10px 12px; }
-    #tabella-giocatori .wr-bar, #tabella-mazzi .wr-bar { width: 48px; }
-    .stagione-body th { font-size: 0.56rem; letter-spacing: 0; }
-    .stagione-body td { font-size: 0.8rem; }
-    .stagione-body th, .stagione-body td { padding-left: 4px; padding-right: 4px; }
+    table.tab-box tr.cl-riga td { padding: 10px 12px; }
+    table.tab-box .wr-bar { width: 48px; }
   }
 
 </style>
@@ -3072,7 +3235,7 @@
   </svg>
 </button>
 
-<button class="duel-btn" onclick="apriDuello()" title="Duello">⚔️</button>
+<button class="duel-btn" onclick="apriDuello()" title="Duello"><span class="ico-emoji">⚔️</span><svg class="ico-svg" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 17.5 3 6V3h3l11.5 11.5"/><path d="m13 19 6-6"/><path d="m16 16 4 4"/><path d="m19 21 2-2"/><path d="M14.5 6.5 18 3h3v3l-3.5 3.5"/><path d="m5 14 4 4"/><path d="m7 17-3 3"/><path d="m3 19 2 2"/></svg></button>
 
 <button class="theme-btn" onclick="toggleTema()" title="Modalità scura/chiara" id="theme-btn">
   <svg id="theme-icon-moon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
@@ -3270,7 +3433,7 @@
       <button class="inner-tab" id="ctab-all" onclick="switchScopeClassifica('all')">All-time</button>
     </div>
     <div class="classifica-top">
-      <div class="card card-classifica"><table id="tabella-giocatori"></table></div>
+      <div class="card card-box card-classifica"><table id="tabella-giocatori" class="tab-box"></table></div>
     </div>
     <div class="classifica-top">
       <h3 class="subsection-title m-nascondi">Storico Partite</h3>
@@ -3286,22 +3449,22 @@
     </div>
     <div class="desktop-split stat-top">
       <div class="desktop-col-left">
-        <p class="section-note"><em>Andamento del win rate per partite giocate</em></p>
+        <p class="section-note m-nascondi"><em>Andamento del win rate per partite giocate</em></p>
         <div class="card" id="chart-card">
           <div class="chart-wrap"><canvas id="chart-andamento"></canvas></div>
           <div class="chart-legend" id="chart-legend"></div>
         </div>
       </div>
       <div class="desktop-col-right">
-        <h3 class="subsection-title">Scontri diretti</h3>
+        <h3 class="subsection-title m-nascondi">Scontri diretti</h3>
         <div class="card padded" id="riepilogo-card">
           <div id="riepilogo-totali"></div>
           <div id="riepilogo-h2h"></div>
         </div>
       </div>
     </div>
-    <h3 class="subsection-title">Statistiche dado</h3>
-    <p class="section-note"><em>Espandi un giocatore per vedere le statistiche dado e primo/secondo.</em></p>
+    <h3 class="subsection-title m-nascondi">Statistiche dado</h3>
+    <p class="section-note m-nascondi"><em>Espandi un giocatore per vedere le statistiche dado e primo/secondo.</em></p>
     <div id="stat-dado-wrap"></div>
   </section>
 
@@ -3313,8 +3476,8 @@
     </div>
     <div class="desktop-split">
       <div class="desktop-col-left">
-        <p class="section-note"><em>Ordinati per win rate. I mazzi con meno di 3 partite sono In prova.</em></p>
-        <div class="card"><table id="tabella-mazzi"></table></div>
+        <p class="section-note m-nascondi"><em>Ordinati per win rate. I mazzi con meno di 3 partite sono In prova.</em></p>
+        <div class="card card-box"><table id="tabella-mazzi"></table></div>
       </div>
       <div class="desktop-col-right">
         <div id="mazzi-right-col"></div>
@@ -3384,8 +3547,8 @@
 
     <div id="inner-tab-bar-wrap">
       <div class="inner-tab-bar">
-        <button class="inner-tab active" id="itab-db" onclick="switchInnerTab('db')">🔍 Database</button>
-        <button class="inner-tab" id="itab-genesys" onclick="switchInnerTab('genesys')">📋 Lista Genesys</button>
+        <button class="inner-tab active" id="itab-db" onclick="switchInnerTab('db')"><span class="ico-emoji">🔍 </span>Database</button>
+        <button class="inner-tab" id="itab-genesys" onclick="switchInnerTab('genesys')"><span class="ico-emoji">📋 </span>Lista Genesys</button>
       </div>
     </div>
 
@@ -3562,7 +3725,7 @@
 
     <div class="accordion-item">
       <button class="accordion-btn" onclick="toggleAccordion('acc-notifiche'); renderPannelloNotifiche()">
-        <span>🔔 Notifiche</span><span class="accordion-arrow">▶</span>
+        <span class="acc-titolo"><span class="ico-emoji">🔔 </span><span class="ico-imp" style="background:#ff3b30"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></span>Notifiche</span><span class="accordion-arrow">▶</span>
       </button>
       <div class="accordion-body" id="acc-notifiche" style="display:none">
         <div class="card padded" id="notifiche-pannello"></div>
@@ -3571,7 +3734,7 @@
 
     <div class="accordion-item">
       <button class="accordion-btn" onclick="toggleAccordion('acc-esporta')">
-        <span>📤 Copia dati</span><span class="accordion-arrow">▶</span>
+        <span class="acc-titolo"><span class="ico-emoji">📤 </span><span class="ico-imp" style="background:#007aff"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M8 7l4-4 4 4"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg></span>Copia dati</span><span class="accordion-arrow">▶</span>
       </button>
       <div class="accordion-body" id="acc-esporta" style="display:none">
         <div class="card padded">
@@ -3584,7 +3747,7 @@
 
     <div class="accordion-item">
       <button class="accordion-btn" onclick="toggleAccordion('acc-profili')">
-        <span>👤 Profili Giocatori</span><span class="accordion-arrow">▶</span>
+        <span class="acc-titolo"><span class="ico-emoji">👤 </span><span class="ico-imp" style="background:#ff9500"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg></span>Profili Giocatori</span><span class="accordion-arrow">▶</span>
       </button>
       <div class="accordion-body" id="acc-profili" style="display:none">
         <div class="card padded" id="profili-config"></div>
@@ -3593,7 +3756,7 @@
 
     <div class="accordion-item">
       <button class="accordion-btn" onclick="toggleAccordion('acc-giocatori')">
-        <span>🎮 Giocatori</span><span class="accordion-arrow">▶</span>
+        <span class="acc-titolo"><span class="ico-emoji">🎮 </span><span class="ico-imp" style="background:#34c759"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.5 3-5.5 6.5-5.5s6.5 2 6.5 5.5"/><circle cx="17" cy="9" r="2.8"/><path d="M17 14.5c2.8 0 4.5 1.6 4.5 4.5"/></svg></span>Giocatori</span><span class="accordion-arrow">▶</span>
       </button>
       <div class="accordion-body" id="acc-giocatori" style="display:none">
         <div class="card" id="lista-giocatori-config"></div>
@@ -3611,7 +3774,7 @@
 
     <div class="accordion-item">
       <button class="accordion-btn" onclick="toggleAccordion('acc-mazzi')">
-        <span>🃏 Mazzi</span><span class="accordion-arrow">▶</span>
+        <span class="acc-titolo"><span class="ico-emoji">🃏 </span><span class="ico-imp" style="background:#af52de"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="3" width="12" height="16" rx="2"/><path d="M4 7v12a2 2 0 0 0 2 2h9"/></svg></span>Mazzi</span><span class="accordion-arrow">▶</span>
       </button>
       <div class="accordion-body" id="acc-mazzi" style="display:none">
         <div class="card">
@@ -3637,19 +3800,19 @@
   <section id="stagioni">
     <h2 class="section-title-centered">Stagioni</h2>
     <div class="inner-tab-bar" style="max-width:640px;margin:0 auto 18px">
-      <button class="inner-tab active" id="stab-archivio" onclick="switchStagioniTab('archivio')">📚 Archivio</button>
-      <button class="inner-tab" id="stab-alltime" onclick="switchStagioniTab('alltime')">🏆 All-time</button>
+      <button class="inner-tab active" id="stab-archivio" onclick="switchStagioniTab('archivio')"><span class="ico-emoji">📚 </span>Archivio</button>
+      <button class="inner-tab" id="stab-alltime" onclick="switchStagioniTab('alltime')"><span class="ico-emoji">🏆 </span>All-time</button>
     </div>
 
     <div id="stagioni-archivio">
-      <p class="section-note">Le stagioni concluse vengono conservate qui con la loro classifica finale.</p>
+      <p class="section-note m-nascondi">Le stagioni concluse vengono conservate qui con la loro classifica finale.</p>
       <div class="classifica-top" id="lista-stagioni"></div>
       <div class="classifica-top">
         <div class="card padded">
-          <h3 class="subsection-title" style="margin-top:0">Stagione in corso</h3>
+          <h3 class="subsection-title m-nascondi" style="margin-top:0">Stagione in corso</h3>
           <div id="stagione-corrente-riepilogo"></div>
-          <button class="danger" style="width:100%;margin-top:14px" onclick="chiudiStagione()">🔒 Chiudi stagione e archivia</button>
-          <p class="section-note" style="margin:10px 0 0;text-align:left">
+          <button class="danger chiudi-stagione-btn" style="width:100%;margin-top:14px" onclick="chiudiStagione()"><span class="ico-emoji">🔒 </span>Chiudi stagione e archivia</button>
+          <p class="section-note m-nascondi" style="margin:10px 0 0;text-align:left">
             Archivia tutte le partite giocate finora in una nuova stagione e azzera la classifica.
             I giocatori, i mazzi e le decklist restano. L'operazione non si annulla.
           </p>
@@ -3658,7 +3821,7 @@
     </div>
 
     <div id="stagioni-alltime" style="display:none">
-      <p class="section-note">Statistiche di sempre: stagioni archiviate + stagione in corso.</p>
+      <p class="section-note m-nascondi">Statistiche di sempre: stagioni archiviate + stagione in corso.</p>
       <div class="classifica-top" id="alltime-content"></div>
     </div>
   </section>
@@ -3670,8 +3833,10 @@
 <div class="edit-overlay" id="edit-overlay" onclick="chiudiModifica(event)">
   <div class="edit-modal">
     <div class="edit-modal-header">
+      <button class="edit-azione" onclick="chiudiModificaForce()">Annulla</button>
       <div class="edit-modal-title" id="edit-modal-title">Modifica partita</div>
       <button class="edit-modal-close" onclick="chiudiModificaForce()">✕</button>
+      <button class="edit-azione salva" onclick="salvaModifica()">Salva</button>
     </div>
     <div class="edit-modal-body">
       <div>
@@ -3701,7 +3866,7 @@
 <footer>
   <span>Tia · Gio · Richi</span>
   <button onclick="eseguiLogout()" style="background:none;border:none;color:var(--text-faint);font-size:0.75rem;cursor:pointer;margin-left:12px;font-family:inherit">Esci</button>
-  <div style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 53</div>
+  <div style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 54</div>
 </footer>
 
 </div>
@@ -4028,8 +4193,8 @@ function renderGiocatori(partite = dati.partite) {
           </div>
         </div>
       </td>
-      <td class="num">${s.partite}</td>
-      <td class="num">${s.v}</td><td class="num">${s.p}</td>
+      <td class="num m-col-no">${s.partite}</td>
+      <td class="num m-col-no">${s.v}</td><td class="num m-col-no">${s.p}</td>
       <td><div class="wr-cell"><span class="wr-text">${wr}%</span><span class="wr-bar"><span style="width:${wr}%"></span></span></div></td>
     </tr>
     <tr class="profile-inline-row" id="prow-${safeNome}">
@@ -4228,9 +4393,11 @@ function renderRiepilogo(partite = dati.partite, contId = 'riepilogo-h2h', cardI
         const ultimoStr = r.ultimo ? `${r.ultimo.vincitore}` : '—';
         return `<div class="h2h-u-item">
           <div class="h2h-u-head">
+            ${avatarGiocatore(r.a)}
             <span class="h2h-u-name">${r.a}</span>
             <span class="h2h-u-score"><strong>${r.va}</strong>-<strong>${r.vb}</strong></span>
             <span class="h2h-u-name">${r.b}</span>
+            ${avatarGiocatore(r.b)}
           </div>
           <div class="h2h-u-stats">
             <div class="h2h-u-stat"><span class="lbl">Match</span><span class="val">${tot}</span></div>
@@ -4243,6 +4410,12 @@ function renderRiepilogo(partite = dati.partite, contId = 'riepilogo-h2h', cardI
     </div>
   `;
   h2hDiv.innerHTML = html;
+}
+
+// foto tonda del giocatore (si vede solo su telefono), con l'iniziale se manca
+function avatarGiocatore(nome) {
+  const foto = ((dati.profili || {})[nome] || {}).foto;
+  return `<span class="cl-avatar">${escapeHtml(String(nome).charAt(0).toUpperCase())}${foto ? `<img src="${escapeHtml(foto)}" alt="" onerror="this.remove()">` : ''}</span>`;
 }
 
 // ============ GRAFICO ANDAMENTO PUNTI ============
@@ -4441,29 +4614,38 @@ function renderMazzi(partite = dati.partite, contId = 'tabella-mazzi') {
   });
   const t = document.getElementById(contId);
   if (!t) return;
+  t.classList.add('tab-box');
   if (arr.length === 0) {
     t.innerHTML = '<tr><td class="empty">Ancora nessun mazzo registrato.</td></tr>';
     return;
   }
   const medals = ['🥇', '🥈', '🥉'];
+  const metalli = ['oro', 'argento', 'bronzo'];
   const ufficiali = arr.filter(([_, s]) => s.partite >= SOGLIA_MAZZO).length;
+  // nella sezione Deck la riga apre il dettaglio del mazzo (negli archivi no:
+  // il dettaglio usa le statistiche della sezione Deck)
+  const apribile = contId === 'tabella-mazzi';
   let html = '<tr class="tab-intestazione"><th>#</th><th>Mazzo</th><th></th><th>V</th><th>P</th><th>Win Rate</th></tr>';
   arr.forEach(([nome, s], i) => {
     const wr = Math.round(100 * s.wr);
     const provv = s.partite < SOGLIA_MAZZO;
     const hasMedal = i < 3 && !provv && i < ufficiali;
     const rankCell = hasMedal
-      ? `<td class="rank"><span class="medal">${medals[i]}</span></td>`
-      : `<td class="rank">${i + 1}</td>`;
+      ? `<td class="rank m-col-no"><span class="medal">${medals[i]}</span></td>`
+      : `<td class="rank m-col-no">${i + 1}</td>`;
     const imgUrl = imgMazzo(nome);
     const stripCell = imgUrl
-      ? `<td class="deck-strip-cell"><div class="deck-strip" style="background-image:url('${imgUrl}')"></div></td>`
-      : `<td></td>`;
-    html += `<tr class="${i === 0 && !provv ? 'top-1' : ''}">
+      ? `<td class="deck-strip-cell m-col-no"><div class="deck-strip" style="background-image:url('${imgUrl}')"></div></td>`
+      : `<td class="m-col-no"></td>`;
+    const prop = (dati.mazzi || {})[nome];
+    const miniatura = `<span class="cl-avatar mazzo">${escapeHtml(nome.charAt(0).toUpperCase())}${imgUrl ? `<img src="${imgUrl}" alt="" onerror="this.remove()">` : ''}</span>`;
+    const classi = ['cl-riga', hasMedal ? metalli[i] : '', i === 0 && !provv ? 'top-1' : ''].filter(Boolean).join(' ');
+    const click = apribile ? ` onclick="apriDettaglioMazzo('${nome.replace(/'/g, "\\'")}')"` : '';
+    html += `<tr class="${classi}"${click}>
       ${rankCell}
-      <td>${nome}${provv ? '<span class="pill">In prova</span>' : ''}</td>
+      <td><div class="cl-chi">${miniatura}<div class="cl-testo">${nome}${provv ? '<span class="pill">In prova</span>' : ''}<span class="cl-sub">${prop ? escapeHtml(prop) + ' · ' : ''}${s.v}-${s.p}</span></div></div></td>
       ${stripCell}
-      <td class="num">${s.v}</td><td class="num">${s.p}</td>
+      <td class="num m-col-no">${s.v}</td><td class="num m-col-no">${s.p}</td>
       <td><div class="wr-cell"><span class="wr-text">${wr}%</span><span class="wr-bar"><span style="width:${wr}%"></span></span></div></td>
     </tr>`;
   });
@@ -4721,18 +4903,23 @@ async function apriDettaglioMazzo(mazzo) {
   const medalMap = getMedalMap();
   const medal = medalMap[mazzo] ? `${medalMap[mazzo]} ` : '';
 
+  const imgUrl = imgMazzo(mazzo);
+  // su telefono l'immagine sta in alto e il resto su fondo normale; su PC fa da sfondo
+  const telefono = window.matchMedia('(max-width: 720px)').matches;
   document.getElementById('detail-content').innerHTML = `
+    <div class="dh-hero${imgUrl ? '' : ' senza-img'}"${imgUrl ? ` style="--hero:url('${imgUrl}')"` : ''}>
     <div class="detail-head">
       <div class="dh-name">${medal}${mazzo}</div>
       ${prop ? `<div class="dh-sub">Proprietario: ${prop}</div>` : ''}
     </div>
+    </div>
     <div class="deck-mu-stat-list">
-      <div class="deck-mu-stat-line"><span class="deck-mu-stat-lbl">Posizione classifica:</span><span class="deck-mu-stat-val">#${posizione || '—'}</span></div>
-      <div class="deck-mu-stat-line"><span class="deck-mu-stat-lbl">% Utilizzo:</span><span class="deck-mu-stat-val">${utilizzo}</span></div>
-      <div class="deck-mu-stat-line"><span class="deck-mu-stat-lbl">Win Rate:</span><span class="deck-mu-stat-val">${pct(s.v, tot)}</span></div>
-      <div class="deck-mu-stat-line"><span class="deck-mu-stat-lbl">Vittorie / Sconfitte:</span><span class="deck-mu-stat-val">${s.v} / ${s.p}</span></div>
-      <div class="deck-mu-stat-line"><span class="deck-mu-stat-lbl">WR da 1°:</span><span class="deck-mu-stat-val">${pct(s.primoV,s.primoT)}</span></div>
-      <div class="deck-mu-stat-line"><span class="deck-mu-stat-lbl">WR da 2°:</span><span class="deck-mu-stat-val">${pct(s.secondoV,s.secondoT)}</span></div>
+      <div class="deck-mu-stat-line"><span class="deck-mu-stat-lbl">Posizione classifica<span class="m-nascondi">:</span></span><span class="deck-mu-stat-val">#${posizione || '—'}</span></div>
+      <div class="deck-mu-stat-line"><span class="deck-mu-stat-lbl">% Utilizzo<span class="m-nascondi">:</span></span><span class="deck-mu-stat-val">${utilizzo}</span></div>
+      <div class="deck-mu-stat-line"><span class="deck-mu-stat-lbl">Win Rate<span class="m-nascondi">:</span></span><span class="deck-mu-stat-val">${pct(s.v, tot)}</span></div>
+      <div class="deck-mu-stat-line"><span class="deck-mu-stat-lbl">Vittorie / Sconfitte<span class="m-nascondi">:</span></span><span class="deck-mu-stat-val">${s.v} / ${s.p}</span></div>
+      <div class="deck-mu-stat-line"><span class="deck-mu-stat-lbl">WR da 1°<span class="m-nascondi">:</span></span><span class="deck-mu-stat-val">${pct(s.primoV,s.primoT)}</span></div>
+      <div class="deck-mu-stat-line"><span class="deck-mu-stat-lbl">WR da 2°<span class="m-nascondi">:</span></span><span class="deck-mu-stat-val">${pct(s.secondoV,s.secondoT)}</span></div>
     </div>
     <div class="detail-section-title">Match-up</div>
     <div class="deck-mu-vs-list">${noVs}</div>
@@ -4750,10 +4937,9 @@ async function apriDettaglioMazzo(mazzo) {
   renderCronologiaMazzo(mazzo, 'cur');
 
   const modal = document.getElementById('detail-modal');
-  const imgUrl = imgMazzo(mazzo);
   if (modal) {
     modal.classList.add('deck-full');
-    if (imgUrl) {
+    if (imgUrl && !telefono) {
       modal.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.60), rgba(0,0,0,0.60)), url('${imgUrl}')`;
       modal.classList.add('has-bg-img');
     } else {
@@ -4947,7 +5133,7 @@ function renderProfiliConfig() {
     return `
     <div class="accordion-item" style="margin-bottom:8px">
       <button class="accordion-btn" onclick="toggleAccordion('acc-prof-${g}')">
-        <span>👤 ${g}</span><span class="accordion-arrow">▶</span>
+        <span><span class="ico-emoji">👤 </span>${g}</span><span class="accordion-arrow">▶</span>
       </button>
       <div class="accordion-body" id="acc-prof-${g}" style="display:none;padding:16px">
         <div style="display:flex;flex-direction:column;gap:10px">
@@ -6640,30 +6826,36 @@ function renderStagioneCorrente() {
   const leader = ord.length ? ord[0][0] : '—';
   box.innerHTML = `
     <div class="deck-mu-stat-list" style="max-width:none">
-      <div class="deck-mu-stat-line"><span class="deck-mu-stat-lbl">Partite giocate:</span><span class="deck-mu-stat-val">${n}</span></div>
-      <div class="deck-mu-stat-line"><span class="deck-mu-stat-lbl">In testa:</span><span class="deck-mu-stat-val">${escapeHtml(leader)}</span></div>
-      <div class="deck-mu-stat-line"><span class="deck-mu-stat-lbl">Mazzi usati:</span><span class="deck-mu-stat-val">${Object.keys(statMazziDa(dati.partite)).length}</span></div>
+      <div class="deck-mu-stat-line"><span class="deck-mu-stat-lbl">Partite giocate<span class="m-nascondi">:</span></span><span class="deck-mu-stat-val">${n}</span></div>
+      <div class="deck-mu-stat-line"><span class="deck-mu-stat-lbl">In testa<span class="m-nascondi">:</span></span><span class="deck-mu-stat-val">${escapeHtml(leader)}</span></div>
+      <div class="deck-mu-stat-line"><span class="deck-mu-stat-lbl">Mazzi usati<span class="m-nascondi">:</span></span><span class="deck-mu-stat-val">${Object.keys(statMazziDa(dati.partite)).length}</span></div>
     </div>`;
 }
 
 function tabellaClassifica(ord) {
   const medals = ['\uD83E\uDD47', '\uD83E\uDD48', '\uD83E\uDD49'];
-  let html = '<table><tr><th>#</th><th>Giocatore</th><th>Punti</th><th>PG</th><th>V</th><th>P</th><th>Win Rate</th></tr>';
+  const metalli = ['oro', 'argento', 'bronzo'];
+  let html = '<table class="tab-box"><tr class="tab-intestazione"><th>#</th><th>Giocatore</th><th>Punti</th><th>PG</th><th>V</th><th>P</th><th>Win Rate</th></tr>';
   ord.forEach(([nome, s], i) => {
     const pg = s.partite != null ? s.partite : (s.v + s.p);
     const wr = pg > 0 ? Math.round(100 * s.v / pg) : 0;
     const rank = i < 3 ? `<span class="medal">${medals[i]}</span>` : (i + 1);
-    html += `<tr class="${i === 0 ? 'top-1' : ''}">
-      <td class="rank">${rank}</td>
-      <td>${escapeHtml(nome)}</td>
-      <td class="pts">${s.punti}</td>
-      <td class="num">${pg}</td>
-      <td class="num">${s.v}</td><td class="num">${s.p}</td>
+    const foto = ((dati.profili || {})[nome] || {}).foto;
+    const avatar = `<span class="cl-avatar">${escapeHtml(nome.charAt(0).toUpperCase())}${foto ? `<img src="${escapeHtml(foto)}" alt="" onerror="this.remove()">` : ''}</span>`;
+    const classi = ['cl-riga', i < 3 ? metalli[i] : '', i === 0 ? 'top-1' : ''].filter(Boolean).join(' ');
+    html += `<tr class="${classi}">
+      <td class="rank m-col-no">${rank}</td>
+      <td><div class="cl-chi">${avatar}<div class="cl-testo">${escapeHtml(nome)}<span class="cl-sub">${s.punti} punti · ${s.v}-${s.p}</span></div></div></td>
+      <td class="pts m-col-no">${s.punti}</td>
+      <td class="num m-col-no">${pg}</td>
+      <td class="num m-col-no">${s.v}</td><td class="num m-col-no">${s.p}</td>
       <td><div class="wr-cell"><span class="wr-text">${wr}%</span><span class="wr-bar"><span style="width:${wr}%"></span></span></div></td>
     </tr>`;
   });
   return html + '</table>';
 }
+
+const SVG_TROFEO = '<svg class="ico-svg ico-trofeo" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>';
 
 function renderListaStagioni() {
   const cont = document.getElementById('lista-stagioni');
@@ -6688,7 +6880,7 @@ function renderListaStagioni() {
     return `<details class="card stagione-item" ontoggle="renderDettaglioStagione('${k}')">
       <summary class="stagione-head">
         <span class="stagione-nome">${escapeHtml(st.nome || ('Stagione ' + st.numero))}</span>
-        <span class="stagione-meta">\uD83C\uDFC6 ${escapeHtml(vincitore)} \u00B7 ${nPartite} partite \u00B7 ${data}</span>
+        <span class="stagione-meta"><span class="ico-emoji">\uD83C\uDFC6 </span>${SVG_TROFEO}${escapeHtml(vincitore)} \u00B7 ${nPartite} partite \u00B7 ${data}</span>
         <span class="stagione-arrow">\u25B6</span>
       </summary>
       <div class="stagione-body">
@@ -6758,33 +6950,37 @@ function renderAllTime() {
   cont.innerHTML = `
     <div class="card padded" style="margin-bottom:16px">
       <div class="deck-mu-stat-list" style="max-width:none">
-        <div class="deck-mu-stat-line"><span class="deck-mu-stat-lbl">Partite di sempre:</span><span class="deck-mu-stat-val">${tutte.length}</span></div>
-        <div class="deck-mu-stat-line"><span class="deck-mu-stat-lbl">Stagioni archiviate:</span><span class="deck-mu-stat-val">${archiviate.length}</span></div>
-        <div class="deck-mu-stat-line"><span class="deck-mu-stat-lbl">Mazzi visti:</span><span class="deck-mu-stat-val">${Object.keys(mazzi).length}</span></div>
+        <div class="deck-mu-stat-line"><span class="deck-mu-stat-lbl">Partite di sempre<span class="m-nascondi">:</span></span><span class="deck-mu-stat-val">${tutte.length}</span></div>
+        <div class="deck-mu-stat-line"><span class="deck-mu-stat-lbl">Stagioni archiviate<span class="m-nascondi">:</span></span><span class="deck-mu-stat-val">${archiviate.length}</span></div>
+        <div class="deck-mu-stat-line"><span class="deck-mu-stat-lbl">Mazzi visti<span class="m-nascondi">:</span></span><span class="deck-mu-stat-val">${Object.keys(mazzi).length}</span></div>
       </div>
     </div>
 
-    <h3 class="subsection-title">Classifica all-time</h3>
-    <div class="card" style="overflow:hidden;margin-bottom:16px">${tabellaClassifica(ord)}</div>
+    <h3 class="subsection-title m-nascondi">Classifica all-time</h3>
+    <div class="card card-box" style="overflow:hidden;margin-bottom:16px">${tabellaClassifica(ord)}</div>
 
-    ${albo.length ? `<h3 class="subsection-title">Albo d'oro</h3>
+    ${albo.length ? `<h3 class="subsection-title m-nascondi">Albo d'oro</h3>
     <div class="card padded" style="margin-bottom:16px">
       <div class="deck-mu-stat-list" style="max-width:none">
         ${albo.map(([g, n]) => `<div class="deck-mu-stat-line"><span class="deck-mu-stat-lbl">${escapeHtml(g)}</span><span class="deck-mu-stat-val">${'🏆'.repeat(Math.min(n, 5))} ${n}</span></div>`).join('')}
       </div>
     </div>` : ''}
 
-    <h3 class="subsection-title">Migliori mazzi di sempre</h3>
-    <div class="card" style="overflow:hidden">
+    <h3 class="subsection-title m-nascondi">Migliori mazzi di sempre</h3>
+    <div class="card card-box" style="overflow:hidden">
       ${mazziOrd.length === 0
         ? `<div class="empty">Nessun mazzo ha ancora raggiunto ${SOGLIA_MAZZO} partite.</div>`
-        : `<table><tr><th>#</th><th>Mazzo</th><th>V</th><th>P</th><th>Win Rate</th></tr>
+        : `<table class="tab-box"><tr class="tab-intestazione"><th>#</th><th>Mazzo</th><th>V</th><th>P</th><th>Win Rate</th></tr>
           ${mazziOrd.map(([nome, s], i) => {
             const wr = Math.round(100 * s.wr);
-            return `<tr class="${i === 0 ? 'top-1' : ''}">
-              <td class="rank">${i + 1}</td>
-              <td>${escapeHtml(nome)}</td>
-              <td class="num">${s.v}</td><td class="num">${s.p}</td>
+            const img = imgMazzo(nome);
+            const prop = (dati.mazzi || {})[nome];
+            const miniatura = `<span class="cl-avatar mazzo">${escapeHtml(nome.charAt(0).toUpperCase())}${img ? `<img src="${img}" alt="" onerror="this.remove()">` : ''}</span>`;
+            const classi = ['cl-riga', ['oro', 'argento', 'bronzo'][i] || '', i === 0 ? 'top-1' : ''].filter(Boolean).join(' ');
+            return `<tr class="${classi}">
+              <td class="rank m-col-no">${i + 1}</td>
+              <td><div class="cl-chi">${miniatura}<div class="cl-testo">${escapeHtml(nome)}<span class="cl-sub">${prop ? escapeHtml(prop) + ' · ' : ''}${s.v}-${s.p}</span></div></div></td>
+              <td class="num m-col-no">${s.v}</td><td class="num m-col-no">${s.p}</td>
               <td><div class="wr-cell"><span class="wr-text">${wr}%</span><span class="wr-bar"><span style="width:${wr}%"></span></span></div></td>
             </tr>`;
           }).join('')}</table>`}
