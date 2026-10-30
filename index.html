@@ -3476,6 +3476,24 @@
     table.tab-box .wr-bar { width: 48px; }
   }
 
+  /* ── STAGIONI: titoletti e albo d'oro ── */
+  h3.subsection-title.at-titolo { display: block; margin-top: 22px; }
+  #lista-stagioni > h3.at-titolo:first-child, #alltime-content > h3.at-titolo:first-child { margin-top: 2px; }
+  .albo-titoli { display: flex; flex-wrap: wrap; gap: 8px; padding: 2px 0 12px; border-bottom: 0.5px solid var(--border); }
+  .albo-chip {
+    display: inline-flex; align-items: center; gap: 7px; padding: 5px 12px 5px 5px;
+    border-radius: 999px; background: var(--seg-fondo); font-size: 14px;
+  }
+  .albo-chip .cl-avatar { display: flex; width: 28px; height: 28px; font-size: 12px; }
+  .albo-chip span:last-child { color: var(--text-dim); font-size: 12px; }
+  .albo-riga { display: flex; align-items: center; justify-content: space-between; padding: 11px 0; border-bottom: 0.5px solid var(--border); }
+  .albo-riga:last-child { border-bottom: none; padding-bottom: 2px; }
+  .albo-st { font-size: 16px; font-weight: 600; }
+  .albo-st span { display: block; font-size: 12px; font-weight: 400; color: var(--text-dim); }
+  .albo-vinc { display: flex; align-items: center; gap: 8px; font-size: 16px; font-weight: 600; }
+  .albo-vinc .cl-avatar { display: flex; width: 32px; height: 32px; font-size: 13px; }
+  .albo-vinc::after { content: '\1F3C6'; font-size: 16px; }
+
   /* ── STATISTICHE ALL-TIME ── */
   #stat-extra { margin-bottom: 18px; }
   .cur-riga { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 0.5px solid var(--border); }
@@ -4225,7 +4243,7 @@
 <footer>
   <span>Tia · Gio · Richi</span>
   <button onclick="eseguiLogout()" style="background:none;border:none;color:var(--text-faint);font-size:0.75rem;cursor:pointer;margin-left:12px;font-family:inherit">Esci</button>
-  <div style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 75</div>
+  <div style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 76</div>
 </footer>
 
 </div>
@@ -7635,7 +7653,8 @@ function renderListaStagioni() {
         </p>
       </div>
     </details>`;
-  cont.innerHTML = corrente + arr.map(st => {
+  cont.innerHTML = '<h3 class="subsection-title at-titolo">Stagione in corso</h3>' + corrente
+    + (arr.length ? '<h3 class="subsection-title at-titolo">Stagioni concluse</h3>' : '') + arr.map(st => {
     // la classifica salvata alla chiusura \u00E8 la storia ufficiale della stagione
     const ord = (st.classifica && st.classifica.length)
       ? st.classifica.map(r => [r.giocatore, r])
@@ -7714,8 +7733,16 @@ function renderAllTime() {
     if (o.length) titoli[o[0][0]] = (titoli[o[0][0]] || 0) + 1;
   });
   const albo = Object.entries(titoli).sort((a, b) => b[1] - a[1]);
+  // albo d'oro: una riga per stagione, dalla piu' recente, con il vincitore
+  const vincitori = [...archiviate].sort((a, b) => (b.numero || 0) - (a.numero || 0)).map(st => {
+    const o = (st.classifica && st.classifica.length)
+      ? st.classifica.map(r => [r.giocatore, r])
+      : ordinaClassifica(statGiocatoriDa(st.partite, st.giocatori));
+    return { nome: st.nome || ('Stagione ' + st.numero), g: o.length ? o[0][0] : null, n: (st.partite || []).length };
+  });
 
   cont.innerHTML = `
+    <h3 class="subsection-title at-titolo">Riepilogo</h3>
     <div class="card padded" style="margin-bottom:16px">
       <div class="deck-mu-stat-list" style="max-width:none">
         <div class="deck-mu-stat-line"><span class="deck-mu-stat-lbl">Partite di sempre<span class="m-nascondi">:</span></span><span class="deck-mu-stat-val">${tutte.length}</span></div>
@@ -7724,17 +7751,17 @@ function renderAllTime() {
       </div>
     </div>
 
-    <h3 class="subsection-title m-nascondi">Classifica all-time</h3>
+    <h3 class="subsection-title at-titolo">Classifica di sempre</h3>
     <div class="card card-box" style="overflow:hidden;margin-bottom:16px">${tabellaClassifica(ord)}</div>
 
-    ${albo.length ? `<h3 class="subsection-title m-nascondi">Albo d'oro</h3>
-    <div class="card padded" style="margin-bottom:16px">
-      <div class="deck-mu-stat-list" style="max-width:none">
-        ${albo.map(([g, n]) => `<div class="deck-mu-stat-line"><span class="deck-mu-stat-lbl">${escapeHtml(g)}</span><span class="deck-mu-stat-val">${'🏆'.repeat(Math.min(n, 5))} ${n}</span></div>`).join('')}
-      </div>
+    ${vincitori.length ? `<h3 class="subsection-title at-titolo">Albo d'oro</h3>
+    <div class="card padded albo" style="margin-bottom:16px">
+      ${albo.length ? `<div class="albo-titoli">${albo.map(([g, n]) => `<span class="albo-chip">${avatarGiocatore(g)}<b>${escapeHtml(g)}</b> ${'\uD83C\uDFC6'.repeat(Math.min(n, 5))}<span>${n} titol${n === 1 ? 'o' : 'i'}</span></span>`).join('')}</div>` : ''}
+      ${vincitori.map(v => `<div class="albo-riga"><span class="albo-st">${escapeHtml(v.nome)}<span>${v.n} partite</span></span>
+        <span class="albo-vinc">${v.g ? avatarGiocatore(v.g) + escapeHtml(v.g) : '\u2014'}</span></div>`).join('')}
     </div>` : ''}
 
-    <h3 class="subsection-title m-nascondi">Migliori mazzi di sempre</h3>
+    <h3 class="subsection-title at-titolo">Migliori mazzi di sempre</h3>
     <div class="card card-box" style="overflow:hidden">
       ${mazziOrd.length === 0
         ? `<div class="empty">Nessun mazzo ha ancora raggiunto ${SOGLIA_MAZZO} partite.</div>`
