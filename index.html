@@ -2661,9 +2661,11 @@
     background-size: cover; background-position: center;
   }
   /* popup dettaglio deck: riempie tutta la pagina (PC e mobile) */
+  /* a tutto schermo con inset 0, non 100vh: sull'iPhone 100vh puo' essere piu' alto
+     dello schermo e, centrato, il popup usciva in alto tagliando la scelta Stagione/All-time */
   .detail-modal.deck-full {
-    width: 100vw; height: 100vh;
-    max-width: 100vw; max-height: 100vh;
+    position: fixed; inset: 0;
+    width: auto; height: auto; max-width: none; max-height: none;
     border-radius: 0;
   }
   .detail-overlay:has(.deck-full) { padding: 0; }
@@ -2750,6 +2752,8 @@
      Sugli schermi larghi il contenuto resta una colonna centrata e le icone in alto
      si allineano ai suoi bordi (e lontano dalla tacca del telefono in orizzontale). */
   :root {
+    /* distanza dall'alto della fascia Stagione/All-time nel popup del mazzo */
+    --ddm-alto: max(calc(env(safe-area-inset-top) + 14px), 22px);
     --lato-sx: max(16px, calc((100vw - 760px) / 2 + 16px), calc(env(safe-area-inset-left) + 8px));
     --lato-dx: max(16px, calc((100vw - 760px) / 2 + 16px), calc(env(safe-area-inset-right) + 8px));
   }
@@ -3294,7 +3298,7 @@
     .detail-modal .dh-sub { font-size: 15px; margin-top: 4px; }
     .detail-modal.deck-full .detail-close {
       position: fixed; top: calc(env(safe-area-inset-top) + 18px); right: max(14px, calc((100vw - 760px) / 2 + 14px), calc(env(safe-area-inset-right) + 8px)); z-index: 7;
-      width: 36px; height: 36px; top: calc(env(safe-area-inset-top) + 16px);
+      width: 36px; height: 36px; top: calc(var(--ddm-alto) + 4px);
       background: #ff3b30; color: #fff; box-shadow: 0 2px 8px rgba(255, 59, 48, 0.4);
       -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
     }
@@ -3303,7 +3307,7 @@
        l'immagine del mazzo comincia sotto, e la fascia resta visibile scorrendo */
     .detail-modal .ddm-head {
       position: sticky; top: 0; z-index: 6;
-      margin: 0 -16px; padding: calc(env(safe-area-inset-top) + 12px) 64px 12px 16px;
+      margin: 0 -16px; padding: var(--ddm-alto) 64px 12px 16px;
       background: var(--bg-gruppo);
     }
     .detail-modal.scorre .ddm-head { box-shadow: 0 0.5px 0 var(--barra-bordo); }
@@ -4247,7 +4251,7 @@
 <footer>
   <span>Tia · Gio · Richi</span>
   <button onclick="eseguiLogout()" style="background:none;border:none;color:var(--text-faint);font-size:0.75rem;cursor:pointer;margin-left:12px;font-family:inherit">Esci</button>
-  <div style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 77</div>
+  <div style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 78</div>
 </footer>
 
 </div>
