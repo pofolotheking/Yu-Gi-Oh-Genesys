@@ -3260,6 +3260,12 @@
       background-position: right 2px center;
     }
     .edit-modal-body select:focus { box-shadow: none; }
+    .edit-modal-body input[type="date"] {
+      width: auto; max-width: 62%; border: none; border-radius: 0; background: transparent; box-shadow: none;
+      padding: 12px 0; font-size: 16px; color: var(--text-dim); text-align: right;
+    }
+    .edit-modal { max-width: 600px; max-height: 92vh; display: flex; flex-direction: column; }
+    .edit-modal-body { overflow-y: auto; flex: 1 1 auto; min-height: 0; }
     [data-theme="dark"] .edit-modal { background: #1c1c1e; }
     [data-theme="dark"] .edit-modal-body { background: #2c2c2e; }
     .edit-modal-body #edit-note {
@@ -4173,6 +4179,26 @@
     </div>
     <div class="edit-modal-body">
       <div>
+        <label>Data</label>
+        <input type="date" id="edit-data">
+      </div>
+      <div>
+        <label>Giocatore 1</label>
+        <select id="edit-g1" onchange="aggiornaModificaGiocatori()"></select>
+      </div>
+      <div>
+        <label>Mazzo 1</label>
+        <select id="edit-m1" onchange="sceltaMazzoModifica(this)"></select>
+      </div>
+      <div>
+        <label>Giocatore 2</label>
+        <select id="edit-g2" onchange="aggiornaModificaGiocatori()"></select>
+      </div>
+      <div>
+        <label>Mazzo 2</label>
+        <select id="edit-m2" onchange="sceltaMazzoModifica(this)"></select>
+      </div>
+      <div>
         <label>Risultato</label>
         <select id="edit-risultato"></select>
       </div>
@@ -4199,7 +4225,7 @@
 <footer>
   <span>Tia · Gio · Richi</span>
   <button onclick="eseguiLogout()" style="background:none;border:none;color:var(--text-faint);font-size:0.75rem;cursor:pointer;margin-left:12px;font-family:inherit">Esci</button>
-  <div style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 74</div>
+  <div style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 75</div>
 </footer>
 
 </div>
@@ -4475,6 +4501,7 @@ function switchScopeClassifica(scope) {
   const pt = partiteScope(scope);
   renderGiocatori(pt);
   renderStorico(pt, scope === 'cur');
+  adattaNomiStorico();
   const nota = document.getElementById('storico-nota');
   if (nota) nota.textContent = scope === 'cur'
     ? 'Tocca \u270F\uFE0F per modificare o \uD83D\uDDD1 per eliminare.'
@@ -4491,6 +4518,7 @@ function popolaTutto() {
   renderStatExtra(partiteScope(_scopeStat));
   renderMazzi(partiteScope(_scopeDeck));
   renderStorico(partiteScope(_scopeClassifica), _scopeClassifica === 'cur');
+  adattaNomiStorico();
   renderMatchup(partiteScope(_scopeDeck));
   popolaSelectGiocatori();
   aggiornaOpzioniRisultato();
@@ -5263,10 +5291,27 @@ const SVG_MATITA = '<svg class="ico-svg" width="16" height="16" viewBox="0 0 24 
 const SVG_CESTINO = '<svg class="ico-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>';
 
 // su telefono lo storico mostra solo i mazzi: giocatori, data e note compaiono a richiesta
+// un nome lungo di una sola parola (es. Adamancipator) non va a capo: si riduce
+// il carattere finche' il nome, con l'eventuale dado, entra nella sua colonna
+function adattaNomiStorico() {
+  const lista = document.getElementById('lista-partite');
+  if (!lista || !lista.clientWidth) return;
+  lista.querySelectorAll('.deck').forEach(el => {
+    el.style.fontSize = ''; el.style.overflowWrap = ''; el.style.hyphens = '';
+    if (!el.clientWidth) return;
+    let px = parseFloat(getComputedStyle(el).fontSize);
+    while (el.scrollWidth > el.clientWidth + 1 && px > 11.5) { px -= 0.5; el.style.fontSize = px + 'px'; }
+    // sotto gli 11,5px si leggerebbe male: meglio andare a capo dentro la parola
+    if (el.scrollWidth > el.clientWidth + 1) { el.style.overflowWrap = 'anywhere'; el.style.hyphens = 'auto'; }
+  });
+}
+if (window.ResizeObserver) new ResizeObserver(() => adattaNomiStorico()).observe(document.getElementById('lista-partite'));
+
 function toggleDettagliStorico() {
   const lista = document.getElementById('lista-partite');
   const aperti = lista.classList.toggle('dettagli');
   document.getElementById('storico-dettagli-btn').textContent = aperti ? 'Nascondi dettagli' : 'Mostra dettagli';
+  adattaNomiStorico();
 }
 window.toggleDettagliStorico = toggleDettagliStorico;
 
@@ -5963,32 +6008,84 @@ function apriModifica(idx) {
   _editIdx = idx;
 
   document.getElementById('edit-modal-title').textContent = `${p.g1} vs ${p.g2} — ${formatData(p.data)}`;
-
-  const selRis = document.getElementById('edit-risultato');
-  selRis.innerHTML = `
-    <option value="2-0">2-0 (${p.g1} stravince)</option>
-    <option value="2-1">2-1 (${p.g1} vince)</option>
-    <option value="1-2">1-2 (${p.g2} vince)</option>
-    <option value="0-2">0-2 (${p.g2} stravince)</option>`;
-  selRis.value = p.risultato;
-
-  ['edit-dado', 'edit-primo'].forEach(id => {
+  document.getElementById('edit-data').value = p.data || '';
+  // giocatori: quelli della lega, piu' quelli della partita se nel frattempo sono stati rinominati
+  const nomi = [...new Set([...(dati.giocatori || []), p.g1, p.g2])];
+  ['edit-g1', 'edit-g2'].forEach((id, k) => {
     const sel = document.getElementById(id);
-    sel.innerHTML = `<option value="">Non specificato</option>
-      <option value="${p.g1}">${p.g1}</option>
-      <option value="${p.g2}">${p.g2}</option>`;
+    sel.innerHTML = nomi.map(g => `<option value="${escapeHtml(g)}">${escapeHtml(g)}</option>`).join('');
+    sel.value = k ? p.g2 : p.g1;
   });
-  document.getElementById('edit-dado').value  = p.dado  || '';
-  document.getElementById('edit-primo').value = p.primo || '';
+  aggiornaModificaGiocatori({ m1: p.m1, m2: p.m2, risultato: p.risultato, dado: p.dado, primo: p.primo });
   const editNote = document.getElementById('edit-note'); if (editNote) editNote.value = p.note || '';
 
   document.getElementById('edit-overlay').classList.add('open');
   document.body.style.overflow = 'hidden';
 }
 
+// mazzi del giocatore (registrati a suo nome o usati da lui), piu' quello attuale
+function opzioniMazziModifica(selId, giocatore, attuale) {
+  const sel = document.getElementById(selId);
+  const set = new Set();
+  Object.entries(dati.mazzi || {}).forEach(([nome, prop]) => { if (prop === giocatore) set.add(nome); });
+  (dati.partite || []).forEach(q => { if (q.g1 === giocatore) set.add(q.m1); if (q.g2 === giocatore) set.add(q.m2); });
+  if (attuale) set.add(attuale);
+  sel.innerHTML = [...set].sort().map(m => `<option value="${escapeHtml(m)}">${escapeHtml(m)}</option>`).join('')
+    + '<option value="__nuovo__">+ Nuovo mazzo…</option>';
+  if (attuale) sel.value = attuale;
+  sel.dataset.prima = sel.value;
+}
+
+// dopo un cambio di giocatore si rifanno mazzi, risultato, dado e primo,
+// tenendo le scelte ancora valide
+function aggiornaModificaGiocatori(iniziali) {
+  const g1 = document.getElementById('edit-g1').value, g2 = document.getElementById('edit-g2').value;
+  const val = id => document.getElementById(id).value;
+  const v = iniziali || { m1: val('edit-m1'), m2: val('edit-m2'), risultato: val('edit-risultato'), dado: val('edit-dado'), primo: val('edit-primo') };
+  opzioniMazziModifica('edit-m1', g1, iniziali ? v.m1 : null);
+  opzioniMazziModifica('edit-m2', g2, iniziali ? v.m2 : null);
+  const selRis = document.getElementById('edit-risultato');
+  selRis.innerHTML = `
+    <option value="2-0">2-0 (${escapeHtml(g1)} stravince)</option>
+    <option value="2-1">2-1 (${escapeHtml(g1)} vince)</option>
+    <option value="1-2">1-2 (${escapeHtml(g2)} vince)</option>
+    <option value="0-2">0-2 (${escapeHtml(g2)} stravince)</option>`;
+  selRis.value = v.risultato || '2-0';
+  ['edit-dado', 'edit-primo'].forEach((id, k) => {
+    const sel = document.getElementById(id);
+    sel.innerHTML = `<option value="">Non specificato</option>
+      <option value="${escapeHtml(g1)}">${escapeHtml(g1)}</option>
+      <option value="${escapeHtml(g2)}">${escapeHtml(g2)}</option>`;
+    const prima = k ? v.primo : v.dado;
+    sel.value = [g1, g2].includes(prima) ? prima : '';
+  });
+}
+
+function sceltaMazzoModifica(sel) {
+  if (sel.value !== '__nuovo__') { sel.dataset.prima = sel.value; return; }
+  const nome = (prompt('Nome del nuovo mazzo:') || '').trim();
+  if (!nome) { sel.value = sel.dataset.prima || ''; return; }
+  if (![...sel.options].some(o => o.value === nome)) {
+    const o = document.createElement('option'); o.value = o.textContent = nome;
+    sel.insertBefore(o, sel.lastElementChild);
+  }
+  sel.value = nome; sel.dataset.prima = nome;
+}
+window.aggiornaModificaGiocatori = aggiornaModificaGiocatori;
+window.sceltaMazzoModifica = sceltaMazzoModifica;
+
 async function salvaModifica() {
   if (_editIdx === null) return;
   const p = dati.partite[_editIdx];
+  const g1 = document.getElementById('edit-g1').value, g2 = document.getElementById('edit-g2').value;
+  const m1 = document.getElementById('edit-m1').value, m2 = document.getElementById('edit-m2').value;
+  if (g1 === g2) { alert('I due giocatori devono essere diversi.'); return; }
+  if (!m1 || !m2 || m1 === '__nuovo__' || m2 === '__nuovo__') { alert('Scegli il mazzo di entrambi i giocatori.'); return; }
+  const data = document.getElementById('edit-data').value;
+  if (data) p.data = data;
+  p.g1 = g1; p.g2 = g2; p.m1 = m1; p.m2 = m2;
+  // un mazzo nuovo scritto qui entra nell'elenco dei mazzi del suo giocatore
+  [[m1, g1], [m2, g2]].forEach(([m, g]) => { if (!(dati.mazzi || {})[m]) { dati.mazzi = dati.mazzi || {}; dati.mazzi[m] = g; } });
   p.risultato = document.getElementById('edit-risultato').value;
   p.dado      = document.getElementById('edit-dado').value;
   p.primo     = document.getElementById('edit-primo').value;
