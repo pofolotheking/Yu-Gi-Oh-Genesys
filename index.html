@@ -3293,23 +3293,27 @@
     .detail-modal .dh-hero:not(.senza-img) .dh-sub { color: rgba(255,255,255,0.88); }
     .detail-modal .dh-sub { font-size: 15px; margin-top: 4px; }
     .detail-modal.deck-full .detail-close {
-      position: fixed; top: calc(env(safe-area-inset-top) + 18px); right: max(14px, calc((100vw - 760px) / 2 + 14px), calc(env(safe-area-inset-right) + 8px)); z-index: 5;
-      background: rgba(0, 0, 0, 0.45); color: #fff;
+      position: fixed; top: calc(env(safe-area-inset-top) + 18px); right: max(14px, calc((100vw - 760px) / 2 + 14px), calc(env(safe-area-inset-right) + 8px)); z-index: 7;
+      width: 36px; height: 36px; top: calc(env(safe-area-inset-top) + 16px);
+      background: #ff3b30; color: #fff; box-shadow: 0 2px 8px rgba(255, 59, 48, 0.4);
       -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
     }
     .detail-modal .detail-section-title { display: none; }
-    /* la scelta sta in basso, sotto il pollice, e resta li' mentre si scorre */
-    .detail-modal .ddm-tabs {
-      position: fixed; top: auto; z-index: 6;
-      bottom: calc(env(safe-area-inset-bottom) + 16px);
-      left: 50%; transform: translateX(-50%);
-      width: min(340px, calc(100vw - 48px)); max-width: none; height: 48px; margin: 0; padding: 3px;
-      border-radius: 14px; background: var(--seg-solido);
-      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35), 0 0 0 0.5px var(--barra-bordo);
+    /* in cima una fascia fissa con la scelta Stagione corrente / All-time e la X;
+       l'immagine del mazzo comincia sotto, e la fascia resta visibile scorrendo */
+    .detail-modal .ddm-head {
+      position: sticky; top: 0; z-index: 6;
+      margin: 0 -16px; padding: calc(env(safe-area-inset-top) + 12px) 64px 12px 16px;
+      background: var(--bg-gruppo);
     }
-    .detail-modal .ddm-tabs .inner-tab { padding: 0 4px; height: 42px; font-size: 15px; border-radius: 11px; }
-    .detail-modal .ddm-tabs .seg-pill { border-radius: 11px; }
-    .detail-modal.deck-full { padding-bottom: calc(env(safe-area-inset-bottom) + 90px); }
+    .detail-modal.scorre .ddm-head { box-shadow: 0 0.5px 0 var(--barra-bordo); }
+    .detail-modal .ddm-tabs {
+      position: relative; top: auto; margin: 0 !important; width: 100%; max-width: none; height: 44px; padding: 3px;
+      border-radius: 12px; background: var(--seg-solido); box-shadow: none;
+    }
+    .detail-modal .ddm-tabs .inner-tab { padding: 0 4px; height: 38px; font-size: 15px; border-radius: 9px; white-space: nowrap; }
+    .detail-modal .ddm-tabs .seg-pill { border-radius: 9px; }
+    .detail-modal .dh-hero { min-height: 250px; }
     .detail-modal .deck-mu-stat-list {
       display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 0; max-width: none;
     }
@@ -4243,7 +4247,7 @@
 <footer>
   <span>Tia · Gio · Richi</span>
   <button onclick="eseguiLogout()" style="background:none;border:none;color:var(--text-faint);font-size:0.75rem;cursor:pointer;margin-left:12px;font-family:inherit">Esci</button>
-  <div style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 76</div>
+  <div style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 77</div>
 </footer>
 
 </div>
@@ -5570,9 +5574,11 @@ async function apriDettaglioMazzo(mazzo, scope = _scopeDeck) {
   // su telefono l'immagine sta in alto e il resto su fondo normale; su PC fa da sfondo
   const telefono = true;   // lo stile nuovo vale su tutti gli schermi: immagine sempre in alto
   document.getElementById('detail-content').innerHTML = `
-    <div class="inner-tab-bar ddm-tabs">
-      <button class="inner-tab" id="ddm-tab-cur" onclick="switchScopeMazzo('cur')">Stagione corrente</button>
-      <button class="inner-tab" id="ddm-tab-all" onclick="switchScopeMazzo('all')">All-time</button>
+    <div class="ddm-head">
+      <div class="inner-tab-bar ddm-tabs">
+        <button class="inner-tab" id="ddm-tab-cur" onclick="switchScopeMazzo('cur')">Stagione corrente</button>
+        <button class="inner-tab" id="ddm-tab-all" onclick="switchScopeMazzo('all')">All-time</button>
+      </div>
     </div>
     <div class="dh-hero${imgUrl ? '' : ' senza-img'}"${imgUrl ? ` style="--hero:url('${imgUrl}')"` : ''}>
     <div class="detail-head">
