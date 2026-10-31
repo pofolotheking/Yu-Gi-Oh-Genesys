@@ -736,13 +736,20 @@
   /* popup del mazzo: grafico, tabella dei dati, storico a tendina */
   .ddm-grafico, .ddm-tabella { background: var(--bg-card); border-radius: 12px; margin-bottom: 12px; }
   .ddm-grafico { padding: 12px 10px 8px; }
-  .ddm-grafico-tit { font-size: 13px; font-weight: 600; color: var(--text-dim); padding: 0 6px 6px; }
-  .ddm-grafico-wrap { position: relative; height: 190px; }
-  .ddm-tabella { padding: 0 16px; }
-  .ddm-riga { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 0.5px solid var(--border); font-size: 15px; }
-  .ddm-riga:last-child { border-bottom: none; }
-  .ddm-riga b { font-weight: 700; font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
-  .ddm-riga small { display: block; font-size: 12px; font-weight: 400; color: var(--text-dim); }
+  .ddm-grafico-wrap { position: relative; height: 180px; }
+  .ddm-tabella { padding: 4px 14px; }
+  .ddm-riga { display: flex; align-items: center; gap: 11px; padding: 7px 0; font-size: 15px; }
+  .ddm-riga + .ddm-riga { border-top: 0.5px solid var(--border); }
+  .ddm-ico { flex: none; width: 26px; height: 26px; border-radius: 7px; display: flex; align-items: center; justify-content: center; }
+  .ddm-et { flex: 1; min-width: 0; color: var(--text); }
+  .ddm-riga b { font-size: 16px; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .ddm-riga b i { font-style: normal; font-weight: 600; font-size: 12px; color: var(--text-dim); margin-left: 4px; }
+  .ddm-riga b .v { color: var(--green-dark); } .ddm-riga b .p { color: var(--red); }
+  [data-theme="dark"] .ddm-riga b .v { color: var(--green); }
+  .ddm-riga b.pill { padding: 2px 10px; border-radius: 999px; background: var(--seg-fondo); }
+  .ddm-riga b.pill.buono { background: rgba(52, 199, 89, 0.16); color: var(--green-dark); }
+  .ddm-riga b.pill.basso { background: rgba(255, 59, 48, 0.14); color: var(--red); }
+  [data-theme="dark"] .ddm-riga b.pill.buono { color: var(--green); }
   .ddm-tendina {
     display: flex; align-items: center; gap: 8px; width: 100%; margin-top: 12px; padding: 14px 16px;
     border: none; border-radius: 12px; background: var(--bg-card); color: var(--text);
@@ -4273,7 +4280,7 @@
 <footer>
   <span>Tia · Gio · Richi</span>
   <button onclick="eseguiLogout()" style="background:none;border:none;color:var(--text-faint);font-size:0.75rem;cursor:pointer;margin-left:12px;font-family:inherit">Esci</button>
-  <div style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 80</div>
+  <div style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 81</div>
 </footer>
 
 </div>
@@ -5682,29 +5689,31 @@ function renderDettaglioMazzoScope(mazzo, scope) {
     }).join('');
   const noVs = vsRows === '' ? '<div class="deck-mu-vuoto">Nessuno scontro registrato.</div>' : vsRows;
 
-  // in all-time: grafico del win rate del mazzo e i dati in tabella; in stagione le caselle
-  const riga = (et, val, sotto = '') => `<div class="ddm-riga"><span>${et}</span><b>${val}${sotto ? `<small>${sotto}</small>` : ''}</b></div>`;
-  const dati_ = scope === 'all' ? `
-    <div class="ddm-grafico"><div class="ddm-grafico-tit">Andamento del win rate</div><div class="ddm-grafico-wrap"><canvas id="ddm-chart"></canvas></div></div>
+  // grafico del win rate del mazzo e, sotto, i dati in una tabella compatta:
+  // ogni riga ha la sua icona colorata e le percentuali sono colorate per esito
+  const ICO = {
+    pos: '<path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M7 6H4v1a3 3 0 0 0 3 3M17 6h3v1a3 3 0 0 1-3 3"/>',
+    partite: '<rect x="7" y="3" width="12" height="16" rx="2"/><path d="M4 7v11a3 3 0 0 0 3 3h8"/>',
+    vs: '<path d="M14.5 17.5 3 6V3h3l11.5 11.5M13 19l6-6M16 16l4 4M19 21l2-2"/>',
+    wr: '<path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/>',
+    primo: '<path d="M10 7l3-2v14"/>',
+    secondo: '<path d="M9 8a3 3 0 0 1 6 0c0 3-6 5-6 10h6"/>',
+    dado: '<rect x="4" y="4" width="16" height="16" rx="4"/><circle cx="9" cy="9" r="1.2" fill="#fff"/><circle cx="15" cy="15" r="1.2" fill="#fff"/><circle cx="12" cy="12" r="1.2" fill="#fff"/>',
+    dadoWr: '<rect x="3" y="3" width="12" height="12" rx="3"/><path d="M14 19l3 3 5-6"/>',
+  };
+  const tono = (v, t) => { if (!t) return ''; const p = v / t; return p >= 0.55 ? ' buono' : p < 0.45 ? ' basso' : ''; };
+  const riga = (ico, col, et, val, cls = '') => `<div class="ddm-riga"><span class="ddm-ico" style="background:${col}"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">${ICO[ico]}</svg></span><span class="ddm-et">${et}</span><b class="${cls.trim()}">${val}</b></div>`;
+  const dati_ = `
+    <div class="ddm-grafico"><div class="ddm-grafico-wrap"><canvas id="ddm-chart"></canvas></div></div>
     <div class="ddm-tabella">
-      ${riga('Posizione in classifica', posizione ? '#' + posizione : '\u2014')}
-      ${riga('Partite giocate', tot, utilizzo !== '\u2014' ? utilizzo + ' del totale' : '')}
-      ${riga('Vittorie \u00B7 Sconfitte', `${s.v} \u00B7 ${s.p}`)}
-      ${riga('Win rate', pct(s.v, tot))}
-      ${riga('Win rate da primo', pct(s.primoV, s.primoT), `${s.primoT} volt${s.primoT === 1 ? 'a' : 'e'}`)}
-      ${riga('Win rate da secondo', pct(s.secondoV, s.secondoT), `${s.secondoT} volt${s.secondoT === 1 ? 'a' : 'e'}`)}
-      ${riga('Dadi vinti', s.dadoT ? `${s.dadoV}/${s.dadoT}` : '\u2014', s.dadoT ? pct(s.dadoV, s.dadoT) : '')}
-      ${riga('Win rate col dado', pct(s.dadoWinV, s.dadoV))}
-    </div>` : `
-    <div class="deck-mu-stat-list">
-      <div class="deck-mu-stat-line"><span class="deck-mu-stat-lbl">Posizione classifica<span class="m-nascondi">:</span></span><span class="deck-mu-stat-val">${posizione ? '#' + posizione : '—'}</span></div>
-      <div class="deck-mu-stat-line"><span class="deck-mu-stat-lbl">% Utilizzo<span class="m-nascondi">:</span></span><span class="deck-mu-stat-val">${utilizzo}</span></div>
-      <div class="deck-mu-stat-line"><span class="deck-mu-stat-lbl">Win Rate<span class="m-nascondi">:</span></span><span class="deck-mu-stat-val">${pct(s.v, tot)}</span></div>
-      <div class="deck-mu-stat-line"><span class="deck-mu-stat-lbl">Vittorie / Sconfitte<span class="m-nascondi">:</span></span><span class="deck-mu-stat-val">${s.v} / ${s.p}</span></div>
-      <div class="deck-mu-stat-line"><span class="deck-mu-stat-lbl">WR da 1°<span class="m-nascondi">:</span></span><span class="deck-mu-stat-val">${pct(s.primoV,s.primoT)}</span><span class="deck-mu-stat-sub">${s.primoT} volt${s.primoT === 1 ? 'a' : 'e'} primo</span></div>
-      <div class="deck-mu-stat-line"><span class="deck-mu-stat-lbl">WR da 2°<span class="m-nascondi">:</span></span><span class="deck-mu-stat-val">${pct(s.secondoV,s.secondoT)}</span><span class="deck-mu-stat-sub">${s.secondoT} volt${s.secondoT === 1 ? 'a' : 'e'} secondo</span></div>
-      <div class="deck-mu-stat-line"><span class="deck-mu-stat-lbl">Dadi vinti<span class="m-nascondi">:</span></span><span class="deck-mu-stat-val">${s.dadoT ? `${s.dadoV}/${s.dadoT}` : '—'}</span><span class="deck-mu-stat-sub">${s.dadoT ? pct(s.dadoV, s.dadoT) + ' dei lanci' : 'nessun dado registrato'}</span></div>
-      <div class="deck-mu-stat-line"><span class="deck-mu-stat-lbl">WR col dado<span class="m-nascondi">:</span></span><span class="deck-mu-stat-val">${pct(s.dadoWinV, s.dadoV)}</span><span class="deck-mu-stat-sub">quando vince il dado</span></div>
+      ${riga('pos', '#ffcc00', 'Posizione', posizione ? '#' + posizione : '—')}
+      ${riga('partite', '#5e5ce6', 'Partite', `${tot} <i>${utilizzo !== '—' ? utilizzo : ''}</i>`)}
+      ${riga('vs', '#8e8e93', 'Vittorie · Sconfitte', `<span class="v">${s.v}</span> · <span class="p">${s.p}</span>`)}
+      ${riga('wr', '#0a84ff', 'Win rate', pct(s.v, tot), 'pill' + tono(s.v, tot))}
+      ${riga('primo', '#30b0c7', 'Da primo', pct(s.primoV, s.primoT), 'pill' + tono(s.primoV, s.primoT))}
+      ${riga('secondo', '#af52de', 'Da secondo', pct(s.secondoV, s.secondoT), 'pill' + tono(s.secondoV, s.secondoT))}
+      ${riga('dado', '#ff9500', 'Dadi vinti', s.dadoT ? `${s.dadoV}/${s.dadoT}` : '—')}
+      ${riga('dadoWr', '#34c759', 'Col dado vinto', pct(s.dadoWinV, s.dadoV), 'pill' + tono(s.dadoWinV, s.dadoV))}
     </div>`;
   document.getElementById('ddm-scope').innerHTML = `
     ${dati_}
@@ -5714,7 +5723,7 @@ function renderDettaglioMazzoScope(mazzo, scope) {
       <span>Storico partite</span><span class="ddm-tendina-n">${tot}</span><span class="m-freccia"></span>
     </button>
     <div class="dmh-list" id="dmh-body"></div>`;
-  if (scope === 'all') graficoMazzo(mazzo, partite);
+  graficoMazzo(mazzo, partite);
   renderCronologiaMazzo(mazzo, scope);
 }
 
