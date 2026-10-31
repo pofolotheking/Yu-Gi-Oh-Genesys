@@ -733,6 +733,28 @@
   }
   .detail-modal:not(.has-bg-img) .ddm-tabs { margin-right: 44px; }
   .deck-mu-stat-sub { display: block; width: 100%; font-size: 12px; color: var(--text-dim); margin-top: 1px; }
+  /* popup del mazzo: grafico, tabella dei dati, storico a tendina */
+  .ddm-grafico, .ddm-tabella { background: var(--bg-card); border-radius: 12px; margin-bottom: 12px; }
+  .ddm-grafico { padding: 12px 10px 8px; }
+  .ddm-grafico-tit { font-size: 13px; font-weight: 600; color: var(--text-dim); padding: 0 6px 6px; }
+  .ddm-grafico-wrap { position: relative; height: 190px; }
+  .ddm-tabella { padding: 0 16px; }
+  .ddm-riga { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 0.5px solid var(--border); font-size: 15px; }
+  .ddm-riga:last-child { border-bottom: none; }
+  .ddm-riga b { font-weight: 700; font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+  .ddm-riga small { display: block; font-size: 12px; font-weight: 400; color: var(--text-dim); }
+  .ddm-tendina {
+    display: flex; align-items: center; gap: 8px; width: 100%; margin-top: 12px; padding: 14px 16px;
+    border: none; border-radius: 12px; background: var(--bg-card); color: var(--text);
+    font-family: inherit; font-size: 16px; font-weight: 600; cursor: pointer; text-align: left;
+  }
+  .ddm-tendina > span:first-child { flex: 1; }
+  .ddm-tendina-n { font-size: 14px; font-weight: 500; color: var(--text-dim); }
+  .ddm-tendina .m-freccia { display: block; margin: 0 2px 4px 4px; }
+  .ddm-tendina.aperta { border-radius: 12px 12px 0 0; }
+  .ddm-tendina.aperta .m-freccia { transform: rotate(-135deg); margin-bottom: -4px; }
+  .ddm-tendina:not(.aperta) + .dmh-list { display: none; }
+  .detail-modal .ddm-tendina.aperta + .dmh-list { margin-top: 0; border-radius: 0 0 12px 12px; border-top: 0.5px solid var(--border); }
   .deck-mu-vuoto { padding: 10px 14px; font-size: 0.85rem; color: var(--text-faint); }
   .dmh-list { max-width: 480px; margin: 0 auto; width: 100%; }
   .dmh-row {
@@ -4251,7 +4273,7 @@
 <footer>
   <span>Tia · Gio · Richi</span>
   <button onclick="eseguiLogout()" style="background:none;border:none;color:var(--text-faint);font-size:0.75rem;cursor:pointer;margin-left:12px;font-family:inherit">Esci</button>
-  <div style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 79</div>
+  <div style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 80</div>
 </footer>
 
 </div>
@@ -5660,7 +5682,20 @@ function renderDettaglioMazzoScope(mazzo, scope) {
     }).join('');
   const noVs = vsRows === '' ? '<div class="deck-mu-vuoto">Nessuno scontro registrato.</div>' : vsRows;
 
-  document.getElementById('ddm-scope').innerHTML = `
+  // in all-time: grafico del win rate del mazzo e i dati in tabella; in stagione le caselle
+  const riga = (et, val, sotto = '') => `<div class="ddm-riga"><span>${et}</span><b>${val}${sotto ? `<small>${sotto}</small>` : ''}</b></div>`;
+  const dati_ = scope === 'all' ? `
+    <div class="ddm-grafico"><div class="ddm-grafico-tit">Andamento del win rate</div><div class="ddm-grafico-wrap"><canvas id="ddm-chart"></canvas></div></div>
+    <div class="ddm-tabella">
+      ${riga('Posizione in classifica', posizione ? '#' + posizione : '\u2014')}
+      ${riga('Partite giocate', tot, utilizzo !== '\u2014' ? utilizzo + ' del totale' : '')}
+      ${riga('Vittorie \u00B7 Sconfitte', `${s.v} \u00B7 ${s.p}`)}
+      ${riga('Win rate', pct(s.v, tot))}
+      ${riga('Win rate da primo', pct(s.primoV, s.primoT), `${s.primoT} volt${s.primoT === 1 ? 'a' : 'e'}`)}
+      ${riga('Win rate da secondo', pct(s.secondoV, s.secondoT), `${s.secondoT} volt${s.secondoT === 1 ? 'a' : 'e'}`)}
+      ${riga('Dadi vinti', s.dadoT ? `${s.dadoV}/${s.dadoT}` : '\u2014', s.dadoT ? pct(s.dadoV, s.dadoT) : '')}
+      ${riga('Win rate col dado', pct(s.dadoWinV, s.dadoV))}
+    </div>` : `
     <div class="deck-mu-stat-list">
       <div class="deck-mu-stat-line"><span class="deck-mu-stat-lbl">Posizione classifica<span class="m-nascondi">:</span></span><span class="deck-mu-stat-val">${posizione ? '#' + posizione : '—'}</span></div>
       <div class="deck-mu-stat-line"><span class="deck-mu-stat-lbl">% Utilizzo<span class="m-nascondi">:</span></span><span class="deck-mu-stat-val">${utilizzo}</span></div>
@@ -5670,12 +5705,58 @@ function renderDettaglioMazzoScope(mazzo, scope) {
       <div class="deck-mu-stat-line"><span class="deck-mu-stat-lbl">WR da 2°<span class="m-nascondi">:</span></span><span class="deck-mu-stat-val">${pct(s.secondoV,s.secondoT)}</span><span class="deck-mu-stat-sub">${s.secondoT} volt${s.secondoT === 1 ? 'a' : 'e'} secondo</span></div>
       <div class="deck-mu-stat-line"><span class="deck-mu-stat-lbl">Dadi vinti<span class="m-nascondi">:</span></span><span class="deck-mu-stat-val">${s.dadoT ? `${s.dadoV}/${s.dadoT}` : '—'}</span><span class="deck-mu-stat-sub">${s.dadoT ? pct(s.dadoV, s.dadoT) + ' dei lanci' : 'nessun dado registrato'}</span></div>
       <div class="deck-mu-stat-line"><span class="deck-mu-stat-lbl">WR col dado<span class="m-nascondi">:</span></span><span class="deck-mu-stat-val">${pct(s.dadoWinV, s.dadoV)}</span><span class="deck-mu-stat-sub">quando vince il dado</span></div>
-    </div>
+    </div>`;
+  document.getElementById('ddm-scope').innerHTML = `
+    ${dati_}
     <div class="detail-section-title">Match-up</div>
     <div class="deck-mu-vs-list">${noVs}</div>
-    <div class="detail-section-title">Cronologia partite</div>
+    <button class="ddm-tendina" onclick="this.classList.toggle('aperta')">
+      <span>Storico partite</span><span class="ddm-tendina-n">${tot}</span><span class="m-freccia"></span>
+    </button>
     <div class="dmh-list" id="dmh-body"></div>`;
+  if (scope === 'all') graficoMazzo(mazzo, partite);
   renderCronologiaMazzo(mazzo, scope);
+}
+
+// win rate cumulato del mazzo partita dopo partita, a partire da un 50% neutro
+function graficoMazzo(mazzo, partite) {
+  const cv = document.getElementById('ddm-chart');
+  if (!cv || typeof Chart === 'undefined') return;
+  const esiti = inOrdine(partite).filter(p => (p.m1 === mazzo || p.m2 === mazzo) && p.m1 !== p.m2 && PUNTI[p.risultato])
+    .map(p => { const [a, b] = PUNTI[p.risultato]; return p.m1 === mazzo ? a > b : b > a; });
+  let v = 0;
+  const serie = [50, ...esiti.map((w, i) => { if (w) v++; return Math.round(100 * v / (i + 1)); })];
+  const css = getComputedStyle(document.documentElement);
+  const grid = css.getPropertyValue('--border').trim(), tick = css.getPropertyValue('--text-faint').trim();
+  const card = css.getPropertyValue('--bg-card').trim(), testo = css.getPropertyValue('--text').trim();
+  const verde = css.getPropertyValue('--green').trim(), rosso = css.getPropertyValue('--red').trim();
+  if (_chartDetailInstance) _chartDetailInstance.destroy();
+  _chartDetailInstance = new Chart(cv.getContext('2d'), {
+    type: 'line',
+    data: { labels: serie.map((_, i) => i ? 'P' + i : 'Start'), datasets: [{
+      data: serie, borderColor: '#0a84ff', borderWidth: 3, tension: 0.35, cubicInterpolationMode: 'monotone',
+      fill: 'origin',
+      backgroundColor: c => { const a = c.chart.chartArea; if (!a) return 'transparent';
+        const g = c.chart.ctx.createLinearGradient(0, a.top, 0, a.bottom); g.addColorStop(0, '#0a84ff40'); g.addColorStop(1, '#0a84ff00'); return g; },
+      // ogni partita e' un puntino verde (vinta) o rosso (persa)
+      pointRadius: c => c.dataIndex ? 3 : 0, pointHoverRadius: 6,
+      pointBackgroundColor: c => c.dataIndex ? (esiti[c.dataIndex - 1] ? verde : rosso) : 'transparent',
+      pointBorderColor: card, pointBorderWidth: 1.5,
+    }] },
+    plugins: [{ id: 'l50', beforeDatasetsDraw(ch) { const { ctx: x, chartArea: a, scales: { y } } = ch; if (!a) return;
+      const yy = y.getPixelForValue(50); x.save(); x.setLineDash([5, 5]); x.strokeStyle = tick; x.beginPath(); x.moveTo(a.left, yy); x.lineTo(a.right, yy); x.stroke(); x.restore(); } }],
+    options: {
+      responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
+      plugins: { legend: { display: false }, tooltip: {
+        backgroundColor: card, titleColor: testo, bodyColor: testo, borderColor: grid, borderWidth: 1, padding: 10, cornerRadius: 12, displayColors: false,
+        callbacks: { title: it => it[0].dataIndex ? `Dopo ${it[0].dataIndex}\u00AA partita` : 'Inizio',
+          label: it => `Win rate ${it.parsed.y}%` + (it.dataIndex ? (esiti[it.dataIndex - 1] ? ' \u00B7 vinta' : ' \u00B7 persa') : '') } } },
+      scales: {
+        x: { grid: { display: false }, border: { display: false }, ticks: { color: tick, font: { size: 10 }, maxRotation: 0, autoSkip: true, maxTicksLimit: 6 } },
+        y: { min: 0, max: 100, border: { display: false }, grid: { color: grid, drawTicks: false }, ticks: { color: tick, font: { size: 10 }, stepSize: 25, padding: 6, callback: v => v + '%' } }
+      }
+    }
+  });
 }
 
 function switchScopeMazzo(scope) {
