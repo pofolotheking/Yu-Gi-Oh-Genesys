@@ -3077,8 +3077,10 @@
     #statistiche .desktop-split, #statistiche .desktop-col-left, #statistiche .desktop-col-right { display: contents; }
     #statistiche > h2 { order: 0; }
     #statistiche > .inner-tab-bar { order: 1; width: 100%; margin-left: 0 !important; margin-right: 0 !important; }
-    #statistiche #chart-card { order: 2; } #stat-dado-wrap { order: 3; margin-bottom: 18px; }
-    #statistiche #riepilogo-card { order: 4; } #stat-extra { order: 5; }
+    #statistiche #chart-card { order: 2; }
+    #statistiche .st-tit-gioc { order: 3; margin-top: 4px; } #stat-dado-wrap { order: 4; margin-bottom: 18px; }
+    #statistiche .st-tit-h2h { order: 5; margin-top: 4px; } #statistiche #riepilogo-card { order: 6; } #stat-extra { order: 7; }
+    #statistiche .section-note { order: 8; }
     .chart-legend { gap: 6px 12px; }
     .chart-legend-item { font-size: 13px; gap: 5px; }
     .chart-legend-n { margin-left: 1px; }
@@ -3854,7 +3856,7 @@
         </div>
       </div>
       <div class="desktop-col-right">
-        <h3 class="subsection-title m-nascondi">Scontri diretti</h3>
+        <h3 class="subsection-title st-tit-h2h">Scontri diretti</h3>
         <div class="card padded" id="riepilogo-card">
           <div id="riepilogo-totali"></div>
           <div id="riepilogo-h2h"></div>
@@ -3862,7 +3864,7 @@
       </div>
     </div>
     <div id="stat-extra" style="display:none"></div>
-    <h3 class="subsection-title m-nascondi">Statistiche dado</h3>
+    <h3 class="subsection-title st-tit-gioc">Giocatori</h3>
     <p class="section-note m-nascondi"><em>Espandi un giocatore per vedere le statistiche dado e primo/secondo.</em></p>
     <div id="stat-dado-wrap"></div>
   </section>
@@ -4274,7 +4276,7 @@
 <footer>
   <span>Tia · Gio · Richi</span>
   <button onclick="eseguiLogout()" style="background:none;border:none;color:var(--text-faint);font-size:0.75rem;cursor:pointer;margin-left:12px;font-family:inherit">Esci</button>
-  <div style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 86</div>
+  <div style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 87</div>
 </footer>
 
 </div>
