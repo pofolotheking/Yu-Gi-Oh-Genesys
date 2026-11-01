@@ -31,7 +31,7 @@
     --bg: #ffffff;
     --bg-soft: #f5f5f7;
     --bg-card: #ffffff;
-    --seg-pill: #ffffff;
+    --seg-pill: #007aff;
     --seg-ombra: 0 1px 2px rgba(0,0,0,0.10), 0 3px 10px rgba(0,0,0,0.10);
     --border: #e5e5ea;
     --border-strong: #d2d2d7;
@@ -52,7 +52,7 @@
     --bg: #000000;
     --bg-soft: #1c1c1e;
     --bg-card: #1c1c1e;
-    --seg-pill: #48484a;
+    --seg-pill: #0a84ff;
     --seg-ombra: 0 1px 3px rgba(0,0,0,0.45);
     --border: #2c2c2e;
     --border-strong: #3a3a3c;
@@ -401,7 +401,7 @@
   }
   .seg-pill.no-anim { transition: none; }
   .seg-ready > button { position: relative; z-index: 1; }
-  .seg-ready > button.active { background: transparent; box-shadow: none; color: var(--text); font-weight: 600; }
+  .seg-ready > button.active { background: transparent; box-shadow: none; color: #fff; font-weight: 600; }
   @media (prefers-reduced-motion: reduce) { .seg-pill { transition: none; } }
   .inner-tab-bar {
     display: flex;
@@ -3482,7 +3482,13 @@
       padding: 2px 0 0; border-radius: 0; background: none; box-shadow: none;
       font-size: 10px; font-weight: 500; letter-spacing: 0.01em; color: var(--text-faint);
     }
-    nav button.active, nav.seg-ready > button.active { color: var(--blue); }
+    nav button.active:not(.nav-add), nav.seg-ready > button.active:not(.nav-add) { color: #fff; }
+    nav button:not(.nav-add) { position: relative; z-index: 0; }
+    nav button.active svg rect[style] { fill: var(--blue) !important; }
+    nav button.active:not(.nav-add)::before {
+      content: ''; position: absolute; z-index: -1; inset: -1px max(6px, calc(50% - 38px)) 0;
+      border-radius: 14px; background: var(--blue); box-shadow: 0 4px 12px rgba(0, 122, 255, 0.35);
+    }
     nav button:not(.active):hover { color: var(--text-faint); }
     nav button:not(.nav-add) svg {
       display: block; width: 24px; height: 24px;
@@ -3592,19 +3598,6 @@
   .nv-sotto { font-size: 12px; color: var(--text-dim); white-space: nowrap; }
   .dado-m-nv .nv { padding: 4px 0 12px; border-top: 0.5px solid var(--border); padding-top: 12px; }
   .dado-player-card:not(.aperto) .dado-m-nv { display: none; }
-
-  /* ── PRONOSTICO ── */
-  .pr-scelta { display: flex; align-items: center; gap: 8px; }
-  .pr-lato { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
-  .pr-lato select { width: 100%; font-size: 15px; padding: 9px 28px 9px 10px; }
-  .pr-vs { font-size: 12px; font-weight: 800; color: var(--text-faint); letter-spacing: 0.08em; }
-  .pr-barra { display: flex; height: 38px; border-radius: 12px; overflow: hidden; margin-top: 14px; }
-  .pr-barra span { display: flex; align-items: center; min-width: 54px; color: #fff; font-size: 16px; }
-  .pr-barra span:first-child { background: var(--blue); justify-content: flex-start; padding-left: 12px; }
-  .pr-barra span:last-child { background: #ff9f0a; justify-content: flex-end; padding-right: 12px; }
-  .pr-nomi { display: flex; justify-content: space-between; font-size: 13px; font-weight: 600; margin: 5px 2px 10px; }
-  .pr-stime div { display: flex; justify-content: space-between; padding: 7px 0; font-size: 13px; color: var(--text-dim); border-top: 0.5px solid var(--border); }
-  .pr-info { font-weight: 600; color: var(--text); font-variant-numeric: tabular-nums; }
 
   /* ── FILTRI STORICO STAGIONI ARCHIVIATE: scritte blu come "Mostra dettagli" ── */
   .st-filtri { padding: 0 4px 6px; }
@@ -4368,7 +4361,7 @@
 <footer>
   <span>Tia · Gio · Richi</span>
   <button onclick="eseguiLogout()" style="background:none;border:none;color:var(--text-faint);font-size:0.75rem;cursor:pointer;margin-left:12px;font-family:inherit">Esci</button>
-  <div style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 88</div>
+  <div style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 89</div>
 </footer>
 
 </div>
@@ -5096,9 +5089,7 @@ function renderStatExtra(partite) {
     <h3 class="subsection-title">Mazzi più usati</h3>
     <div class="card padded" id="sx-torta">${htmlTortaMazzi(_partiteExtra)}</div>
     <h3 class="subsection-title">Partite per giorno</h3>
-    <div class="card padded" id="sx-istogramma"></div>
-    <h3 class="subsection-title">Pronostico</h3>
-    <div class="card padded" id="sx-pronostico">${htmlPronostico()}</div>`;
+    <div class="card padded" id="sx-istogramma"></div>`;
   const mesi = mesiConPartite();
   if (!_meseIst || !mesi.includes(_meseIst)) _meseIst = mesi[mesi.length - 1];
   renderIstogramma();
@@ -5359,70 +5350,6 @@ function htmlRecord(partite) {
     rival ? riga('⚔️', 'Sfida più giocata', rival.va + rival.vb, `${escapeHtml(rival.a)} vs ${escapeHtml(rival.b)} · ${rival.va}-${rival.vb}`) : '',
   ].join('');
 }
-
-// ============ PRONOSTICO ============
-// probabilita' che vinca il giocatore 1 col suo mazzo: media, pesata sul numero di
-// partite, di quattro stime (tutte con un piccolo correttivo verso il 50%):
-// scontri fra i due giocatori, scontri fra i due mazzi, forma dei due mazzi e dei due giocatori
-function calcolaPronostico(g1, m1, g2, m2, partite) {
-  const st = (v, n) => (v + 1) / (n + 2);
-  const log5 = (a, b) => a * (1 - b) / (a * (1 - b) + b * (1 - a));
-  let h = { v: 0, n: 0 }, mm = { v: 0, n: 0 };
-  const gioc = {}, maz = {};
-  const conta = (tab, k, w) => { const x = tab[k] || (tab[k] = { v: 0, n: 0 }); x.n++; if (w) x.v++; };
-  partite.forEach(p => {
-    const r = PUNTI[p.risultato]; if (!r) return; const w1 = r[0] > r[1];
-    conta(gioc, p.g1, w1); conta(gioc, p.g2, !w1); conta(maz, p.m1, w1); conta(maz, p.m2, !w1);
-    if (p.g1 === g1 && p.g2 === g2) { h.n++; if (w1) h.v++; }
-    if (p.g1 === g2 && p.g2 === g1) { h.n++; if (!w1) h.v++; }
-    if (p.m1 === m1 && p.m2 === m2) { mm.n++; if (w1) mm.v++; }
-    if (p.m1 === m2 && p.m2 === m1) { mm.n++; if (!w1) mm.v++; }
-  });
-  const z = { v: 0, n: 0 };
-  const G1 = gioc[g1] || z, G2 = gioc[g2] || z, M1 = maz[m1] || z, M2 = maz[m2] || z;
-  const stime = [
-    { nome: 'Scontri fra i giocatori', p: st(h.v, h.n), peso: h.n, info: h.n ? `${h.v}-${h.n - h.v}` : 'mai giocato' },
-    { nome: 'Scontri fra i mazzi', p: st(mm.v, mm.n), peso: mm.n * 1.5, info: mm.n ? `${mm.v}-${mm.n - mm.v}` : 'mai giocato' },
-    { nome: 'Forma dei mazzi', p: log5(st(M1.v, M1.n), st(M2.v, M2.n)), peso: Math.min(M1.n, M2.n) / 2, info: `${M1.n ? Math.round(100 * M1.v / M1.n) + '%' : '—'} vs ${M2.n ? Math.round(100 * M2.v / M2.n) + '%' : '—'}` },
-    { nome: 'Forma dei giocatori', p: log5(st(G1.v, G1.n), st(G2.v, G2.n)), peso: Math.min(G1.n, G2.n) / 4, info: `${G1.n ? Math.round(100 * G1.v / G1.n) + '%' : '—'} vs ${G2.n ? Math.round(100 * G2.v / G2.n) + '%' : '—'}` },
-  ];
-  const tot = stime.reduce((s, x) => s + x.peso, 0);
-  const logit = q => Math.log(q / (1 - q));
-  let p = tot ? 1 / (1 + Math.exp(-stime.reduce((s, x) => s + x.peso * logit(x.p), 0) / tot)) : 0.5;
-  p = Math.min(0.95, Math.max(0.05, p));
-  return { p, stime, base: Math.round(tot) };
-}
-
-let _pron = null;
-function htmlPronostico() {
-  const tutte = partiteAllTime();
-  const gioc = [...new Set([...(dati.giocatori || []), ...tutte.flatMap(p => [p.g1, p.g2])])];
-  if (gioc.length < 2) return '<div class="empty">Servono almeno due giocatori.</div>';
-  if (!_pron || !gioc.includes(_pron.g1) || !gioc.includes(_pron.g2)) _pron = { g1: gioc[0], g2: gioc[1] };
-  const mazziDi = g => [...new Set([...Object.entries(dati.mazzi || {}).filter(([, o]) => o === g).map(([m]) => m),
-    ...tutte.filter(p => p.g1 === g).map(p => p.m1), ...tutte.filter(p => p.g2 === g).map(p => p.m2)])].sort();
-  ['1', '2'].forEach(k => { const l = mazziDi(_pron['g' + k]); if (!l.includes(_pron['m' + k])) _pron['m' + k] = l[0] || ''; });
-  const opt = (l, v) => l.map(x => `<option value="${escapeHtml(x)}"${x === v ? ' selected' : ''}>${escapeHtml(x)}</option>`).join('');
-  const lato = k => `<div class="pr-lato">
-      <select onchange="cambiaPronostico('g${k}', this.value)">${opt(gioc, _pron['g' + k])}</select>
-      <select onchange="cambiaPronostico('m${k}', this.value)">${opt(mazziDi(_pron['g' + k]), _pron['m' + k])}</select>
-    </div>`;
-  let esito = '<div class="empty">Scegli due giocatori diversi.</div>';
-  if (_pron.g1 !== _pron.g2 && _pron.m1 && _pron.m2) {
-    const r = calcolaPronostico(_pron.g1, _pron.m1, _pron.g2, _pron.m2, tutte);
-    const a = Math.round(r.p * 100), b = 100 - a;
-    esito = `<div class="pr-barra"><span style="width:${a}%"><b>${a}%</b></span><span style="width:${b}%"><b>${b}%</b></span></div>
-      <div class="pr-nomi"><span>${escapeHtml(_pron.g1)}</span><span>${escapeHtml(_pron.g2)}</span></div>
-      <div class="pr-stime">${r.stime.map(x => `<div><span>${x.nome}</span><span class="pr-info">${x.info}</span></div>`).join('')}</div>`;
-  }
-  return `<div class="pr-scelta">${lato(1)}<span class="pr-vs">vs</span>${lato(2)}</div>${esito}`;
-}
-function cambiaPronostico(chiave, valore) {
-  _pron[chiave] = valore;
-  const box = document.getElementById('sx-pronostico');
-  if (box) box.innerHTML = htmlPronostico();
-}
-window.cambiaPronostico = cambiaPronostico;
 
 // ============ FILTRI DELLO STORICO NELLE STAGIONI ARCHIVIATE ============
 const _filtriStagione = {};
