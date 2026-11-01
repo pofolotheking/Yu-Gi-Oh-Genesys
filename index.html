@@ -31,8 +31,8 @@
     --bg: #ffffff;
     --bg-soft: #f5f5f7;
     --bg-card: #ffffff;
-    --seg-pill: #007aff;
-    --seg-ombra: 0 1px 2px rgba(0,0,0,0.10), 0 3px 10px rgba(0,0,0,0.10);
+    --seg-pill: #eaf3ff;
+    --seg-ombra: 0 0 0 1px rgba(0,122,255,0.18), 0 0 14px rgba(0,122,255,0.30);
     --border: #e5e5ea;
     --border-strong: #d2d2d7;
     --text: #1d1d1f;
@@ -52,8 +52,8 @@
     --bg: #000000;
     --bg-soft: #1c1c1e;
     --bg-card: #1c1c1e;
-    --seg-pill: #0a84ff;
-    --seg-ombra: 0 1px 3px rgba(0,0,0,0.45);
+    --seg-pill: #13263d;
+    --seg-ombra: 0 0 0 1px rgba(10,132,255,0.30), 0 0 16px rgba(10,132,255,0.40);
     --border: #2c2c2e;
     --border-strong: #3a3a3c;
     --text: #f5f5f7;
@@ -401,7 +401,7 @@
   }
   .seg-pill.no-anim { transition: none; }
   .seg-ready > button { position: relative; z-index: 1; }
-  .seg-ready > button.active { background: transparent; box-shadow: none; color: #fff; font-weight: 600; }
+  .seg-ready > button.active { background: transparent; box-shadow: none; color: var(--blue); font-weight: 600; }
   @media (prefers-reduced-motion: reduce) { .seg-pill { transition: none; } }
   .inner-tab-bar {
     display: flex;
@@ -3482,12 +3482,12 @@
       padding: 2px 0 0; border-radius: 0; background: none; box-shadow: none;
       font-size: 10px; font-weight: 500; letter-spacing: 0.01em; color: var(--text-faint);
     }
-    nav button.active:not(.nav-add), nav.seg-ready > button.active:not(.nav-add) { color: #fff; }
+    nav button.active:not(.nav-add), nav.seg-ready > button.active:not(.nav-add) { color: var(--blue); }
     nav button:not(.nav-add) { position: relative; z-index: 0; }
-    nav button.active svg rect[style] { fill: var(--blue) !important; }
+
     nav button.active:not(.nav-add)::before {
-      content: ''; position: absolute; z-index: -1; inset: -1px max(6px, calc(50% - 38px)) 0;
-      border-radius: 14px; background: var(--blue); box-shadow: 0 4px 12px rgba(0, 122, 255, 0.35);
+      content: ''; position: absolute; z-index: -1; inset: -4px max(4px, calc(50% - 40px)) -2px;
+      border-radius: 50%; background: radial-gradient(closest-side, rgba(10, 132, 255, 0.24), rgba(10, 132, 255, 0) 100%);
     }
     nav button:not(.active):hover { color: var(--text-faint); }
     nav button:not(.nav-add) svg {
@@ -4361,7 +4361,7 @@
 <footer>
   <span>Tia · Gio · Richi</span>
   <button onclick="eseguiLogout()" style="background:none;border:none;color:var(--text-faint);font-size:0.75rem;cursor:pointer;margin-left:12px;font-family:inherit">Esci</button>
-  <div style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 89</div>
+  <div style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 90</div>
 </footer>
 
 </div>
