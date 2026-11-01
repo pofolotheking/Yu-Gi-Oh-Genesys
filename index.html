@@ -4272,7 +4272,7 @@
 <footer>
   <span>Tia · Gio · Richi</span>
   <button onclick="eseguiLogout()" style="background:none;border:none;color:var(--text-faint);font-size:0.75rem;cursor:pointer;margin-left:12px;font-family:inherit">Esci</button>
-  <div style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 83</div>
+  <div style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 84</div>
 </footer>
 
 </div>
@@ -4488,7 +4488,8 @@ function getMedalMap() {
     const ub = b[1].partite >= SOGLIA_MAZZO ? 1 : 0;
     if (ua !== ub) return ub - ua;
     if (b[1].wr !== a[1].wr) return b[1].wr - a[1].wr;
-    return b[1].partite - a[1].partite;
+    // a pari win rate decide il saldo vittorie-sconfitte: chi ha perso di piu' scende
+    return (b[1].v - b[1].p) - (a[1].v - a[1].p) || b[1].partite - a[1].partite;
   });
   const medals = ['🥇', '🥈', '🥉'];
   const ufficiali = arr.filter(([_, s]) => s.partite >= SOGLIA_MAZZO).length;
@@ -4584,7 +4585,8 @@ function renderGiocatori(partite = dati.partite) {
     const wa = a[1].partite > 0 ? a[1].v / a[1].partite : -1;
     const wb = b[1].partite > 0 ? b[1].v / b[1].partite : -1;
     if (wb !== wa) return wb - wa;
-    return b[1].partite - a[1].partite;
+    // a pari win rate decide il saldo vittorie-sconfitte: chi ha perso di piu' scende
+    return (b[1].v - b[1].p) - (a[1].v - a[1].p) || b[1].partite - a[1].partite;
   });
   const t = document.getElementById('tabella-giocatori');
   if (arr.length === 0 || arr.every(([_, s]) => s.partite === 0)) {
@@ -5291,7 +5293,8 @@ function renderMazzi(partite = dati.partite, contId = 'tabella-mazzi') {
     const ub = b[1].partite >= SOGLIA_MAZZO ? 1 : 0;
     if (ua !== ub) return ub - ua;
     if (b[1].wr !== a[1].wr) return b[1].wr - a[1].wr;
-    return b[1].partite - a[1].partite;
+    // a pari win rate decide il saldo vittorie-sconfitte: chi ha perso di piu' scende
+    return (b[1].v - b[1].p) - (a[1].v - a[1].p) || b[1].partite - a[1].partite;
   });
   const t = document.getElementById(contId);
   if (!t) return;
@@ -5654,7 +5657,8 @@ function renderDettaglioMazzoScope(mazzo, scope) {
     const ub = b[1].partite >= SOGLIA_MAZZO ? 1 : 0;
     if (ua !== ub) return ub - ua;
     if (b[1].wr !== a[1].wr) return b[1].wr - a[1].wr;
-    return b[1].partite - a[1].partite;
+    // a pari win rate decide il saldo vittorie-sconfitte: chi ha perso di piu' scende
+    return (b[1].v - b[1].p) - (a[1].v - a[1].p) || b[1].partite - a[1].partite;
   });
   const indice = ordine.findIndex(([nome]) => nome === mazzo);
   const posizione = indice + 1;
@@ -7806,7 +7810,7 @@ function renderAllTime() {
   const mazzi = statMazziDa(tutte);
   const mazziOrd = Object.entries(mazzi)
     .filter(([_, s]) => s.partite >= SOGLIA_MAZZO)
-    .sort((a, b) => b[1].wr - a[1].wr || b[1].partite - a[1].partite)
+    .sort((a, b) => b[1].wr - a[1].wr || (b[1].v - b[1].p) - (a[1].v - a[1].p) || b[1].partite - a[1].partite)
     .slice(0, 10);
 
   const titoli = {};
