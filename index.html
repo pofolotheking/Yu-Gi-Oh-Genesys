@@ -754,6 +754,10 @@
   .ddm-tendina.aperta .m-freccia { transform: rotate(-135deg); margin-bottom: -4px; }
   .ddm-tendina:not(.aperta) + .dmh-list { display: none; }
   .detail-modal .ddm-tendina.aperta + .dmh-list { margin-top: 0; border-radius: 0 0 12px 12px; border-top: 0.5px solid var(--border); }
+  [data-mazzo] { cursor: pointer; -webkit-tap-highlight-color: transparent; }
+  [data-mazzo]:active { opacity: 0.7; }
+  table.tab-box tr[data-mazzo]:active { opacity: 1; transform: scale(0.985); }
+  .link-mazzo { color: var(--blue); }
   .deck-mu-vuoto { padding: 10px 14px; font-size: 0.85rem; color: var(--text-faint); }
   .dmh-list { max-width: 480px; margin: 0 auto; width: 100%; }
   .dmh-row {
@@ -4361,7 +4365,7 @@
 <footer>
   <span>Tia · Gio · Richi</span>
   <button onclick="eseguiLogout()" style="background:none;border:none;color:var(--text-faint);font-size:0.75rem;cursor:pointer;margin-left:12px;font-family:inherit">Esci</button>
-  <div style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 91</div>
+  <div style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 92</div>
 </footer>
 
 </div>
@@ -4835,7 +4839,7 @@ function buildProfiloInline(nome) {
       ${fotoHtml}
       <div class="profile-inline-right">
         <div class="profile-inline-name">${nome}</div>
-        <div class="profile-inline-mazzo">Mazzo preferito: <strong>${mazzoPref}</strong></div>
+        <div class="profile-inline-mazzo">Mazzo preferito: <strong${mazzoPref && mazzoPref !== '\u2014' ? ` data-mazzo="${escapeHtml(mazzoPref)}" class="link-mazzo"` : ''}>${mazzoPref}</strong></div>
         <div class="profile-inline-desc">${profilo.descrizione || 'Nessuna descrizione ancora.'}</div>
       </div>
     </div>
@@ -5190,7 +5194,7 @@ function htmlTortaMazzi(partite) {
   });
   const legenda = voci.map(([nome, n], i) => {
     const img = nome === 'Altri' ? null : imgMazzo(nome);
-    return `<div class="tor-voce">
+    return `<div class="tor-voce"${nome === 'Altri' ? '' : ` data-mazzo="${escapeHtml(nome)}"`}>
       <span class="tor-mini"${img ? ` style="background-image:url('${img}')"` : ` style="background:${colori[i % colori.length]}"`}></span>
       <span class="tor-nome">${escapeHtml(nome)}</span>
       <span class="tor-n">${n}</span>
@@ -5296,7 +5300,7 @@ function nemesiVittima(nome, partite) {
 }
 function htmlNemesiVittima(nome, partite) {
   const { nemesi, vittima } = nemesiVittima(nome, partite);
-  const voce = (tit, x, sotto) => `<div class="nv-voce">
+  const voce = (tit, x, sotto) => `<div class="nv-voce"${x ? ` data-mazzo="${escapeHtml(x.mazzo)}"` : ''}>
       <span class="nv-img"${x && imgMazzo(x.mazzo) ? ` style="background-image:url('${imgMazzo(x.mazzo)}')"` : ''}></span>
       <span class="nv-testo"><span class="nv-tit">${tit}</span><b>${x ? escapeHtml(x.mazzo) : '—'}</b><span class="nv-sotto">${x ? sotto(x) : 'Nessun dato'}</span></span>
     </div>`;
@@ -5545,7 +5549,7 @@ function renderMazzi(partite = dati.partite, contId = 'tabella-mazzi') {
   const ufficiali = arr.filter(([_, s]) => s.partite >= SOGLIA_MAZZO).length;
   // nella sezione Deck la riga apre il dettaglio del mazzo (negli archivi no:
   // il dettaglio usa le statistiche della sezione Deck)
-  const apribile = contId === 'tabella-mazzi';
+
   let html = '<tr class="tab-intestazione"><th>#</th><th>Mazzo</th><th></th><th>V</th><th>P</th><th>Win Rate</th></tr>';
   arr.forEach(([nome, s], i) => {
     const wr = Math.round(100 * s.wr);
@@ -5561,7 +5565,7 @@ function renderMazzi(partite = dati.partite, contId = 'tabella-mazzi') {
     const prop = (dati.mazzi || {})[nome];
     const miniatura = `<span class="cl-avatar mazzo">${escapeHtml(nome.charAt(0).toUpperCase())}${imgUrl ? `<img src="${imgUrl}" alt="" onerror="this.remove()">` : ''}</span>`;
     const classi = ['cl-riga', hasMedal ? metalli[i] : '', i === 0 && !provv ? 'top-1' : ''].filter(Boolean).join(' ');
-    const click = apribile ? ` onclick="apriDettaglioMazzo('${nome.replace(/'/g, "\\'")}')"` : '';
+    const click = ` data-mazzo="${escapeHtml(nome)}"`;
     html += `<tr class="${classi}"${click}>
       ${rankCell}
       <td><div class="cl-chi">${miniatura}<div class="cl-testo">${nome}${provv ? '<span class="pill">In prova</span>' : ''}<span class="cl-sub">${prop ? escapeHtml(prop) + ' · ' : ''}${s.v}-${s.p}</span></div></div></td>
@@ -5627,12 +5631,12 @@ function renderStorico(partite = dati.partite, modificabile = true, contId = 'li
         <div class="mc-versus">
           <div class="side-left">
             <span class="player ${g1win ? 'win' : ''}">${p.dado === p.g1 ? dado : ''}${p.g1}</span>
-            <span class="deck${g1win ? ' win' : ''}">${p.dado === p.g1 ? dado : ''}${p.m1}</span>
+            <span class="deck${g1win ? ' win' : ''}" data-mazzo="${escapeHtml(p.m1)}">${p.dado === p.g1 ? dado : ''}${p.m1}</span>
           </div>
           <div class="score">${p.risultato}</div>
           <div class="side-right">
             <span class="player ${!g1win ? 'win' : ''}">${p.g2}${p.dado === p.g2 ? dado : ''}</span>
-            <span class="deck${!g1win ? ' win' : ''}">${p.m2}${p.dado === p.g2 ? dado : ''}</span>
+            <span class="deck${!g1win ? ' win' : ''}" data-mazzo="${escapeHtml(p.m2)}">${p.m2}${p.dado === p.g2 ? dado : ''}</span>
           </div>
         </div>
       </div>
@@ -5790,6 +5794,7 @@ let _matchupStat = {};
 let _chartDetailInstance = null;
 
 function chiudiDettaglio() {
+  _ddmScope = null;
   document.getElementById('detail-overlay').classList.remove('open');
   if (_chartDetailInstance) { _chartDetailInstance.destroy(); _chartDetailInstance = null; }
   const modal = document.getElementById('detail-modal');
@@ -5820,7 +5825,7 @@ function renderCronologiaMazzo(mazzo, scope) {
     // il risultato e' memorizzato dal punto di vista di g1: se il mazzo e' il
     // secondo va ribaltato, altrimenti una vittoria sembrerebbe una sconfitta
     const punteggio = suo ? par.risultato : par.risultato.split('-').reverse().join('-');
-    return `<div class="dmh-row ${vinta ? 'win' : 'lose'}">
+    return `<div class="dmh-row ${vinta ? 'win' : 'lose'}" data-mazzo="${escapeHtml(avvMazzo)}">
       <span class="dmh-esito">${vinta ? 'V' : 'S'}</span>
       <span class="dmh-main">
         <span class="dmh-vs">vs ${escapeHtml(avvMazzo)}</span>
@@ -5830,6 +5835,30 @@ function renderCronologiaMazzo(mazzo, scope) {
     </div>`;
   }).join('');
 }
+
+// Qualunque elemento con data-mazzo apre la scheda di quel mazzo: righe della
+// classifica, nomi nello storico, torta, nemesi, match-up dentro la scheda stessa...
+// Si ascolta in cattura, cosi' il tocco non apre anche la tendina o la riga che lo contiene.
+let _ddmScope = null;
+function apriMazzo(nome, da) {
+  const aperto = document.getElementById('detail-overlay').classList.contains('open') && _ddmScope;
+  // la scheda si apre sulla stessa scelta di dove si e' toccato: Stagione corrente
+  // o All-time della sezione (l'Archivio e' sempre all-time); dentro la scheda resta la sua
+  const sez = da && da.closest ? da.closest('main > section') : null;
+  let scope = aperto ? _ddmScope
+    : !sez ? _scopeDeck
+    : sez.id === 'stagioni' ? 'all'
+    : sez.id === 'giocatori' ? _scopeClassifica
+    : sez.id === 'statistiche' ? _scopeStat : _scopeDeck;
+  if (!dati.partite.some(p => p.m1 === nome || p.m2 === nome)) scope = 'all';
+  apriDettaglioMazzo(nome, scope);
+}
+document.addEventListener('click', e => {
+  const el = e.target.closest && e.target.closest('[data-mazzo]');
+  if (!el || e.target.closest('button.edit-btn, button.del-btn')) return;
+  e.stopPropagation(); e.preventDefault();
+  apriMazzo(el.dataset.mazzo, el);
+}, true);
 
 // Popup del mazzo. In alto si sceglie Stagione corrente / All-time: numeri,
 // match-up e cronologia si ricalcolano su quelle partite (la decklist resta).
@@ -5880,6 +5909,7 @@ async function apriDettaglioMazzo(mazzo, scope = _scopeDeck) {
 }
 
 function renderDettaglioMazzoScope(mazzo, scope) {
+  _ddmScope = scope;
   document.getElementById('ddm-tab-cur').classList.toggle('active', scope === 'cur');
   document.getElementById('ddm-tab-all').classList.toggle('active', scope === 'all');
   const partite = partiteScope(scope);
@@ -5914,7 +5944,7 @@ function renderDettaglioMazzoScope(mazzo, scope) {
     })
     .map(([avv, r]) => {
       const cls = r.v > r.p ? 'win' : r.v < r.p ? 'lose' : '';
-      return `<div class="deck-mu-vs-row ${cls}">
+      return `<div class="deck-mu-vs-row ${cls}" data-mazzo="${escapeHtml(avv)}">
         <span class="deck-mu-vs-name">vs ${avv}</span>
         <span class="deck-mu-vs-score">${r.v}–${r.p}</span>
         <span class="deck-mu-vs-wr">${pct(r.v, r.v + r.p)}</span>
@@ -8108,7 +8138,7 @@ function renderAllTime() {
             const prop = (dati.mazzi || {})[nome];
             const miniatura = `<span class="cl-avatar mazzo">${escapeHtml(nome.charAt(0).toUpperCase())}${img ? `<img src="${img}" alt="" onerror="this.remove()">` : ''}</span>`;
             const classi = ['cl-riga', ['oro', 'argento', 'bronzo'][i] || '', i === 0 ? 'top-1' : ''].filter(Boolean).join(' ');
-            return `<tr class="${classi}">
+            return `<tr class="${classi}" data-mazzo="${escapeHtml(nome)}">
               <td class="rank m-col-no">${i + 1}</td>
               <td><div class="cl-chi">${miniatura}<div class="cl-testo">${escapeHtml(nome)}<span class="cl-sub">${prop ? escapeHtml(prop) + ' · ' : ''}${s.v}-${s.p}</span></div></div></td>
               <td class="num m-col-no">${s.v}</td><td class="num m-col-no">${s.p}</td>
