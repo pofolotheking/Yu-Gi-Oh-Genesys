@@ -3789,7 +3789,20 @@
   .cc-cerca input { flex: 1; min-width: 0; border: none; border-radius: 10px; padding: 11px 12px; font-size: 16px; background: var(--bg-card); color: var(--text); font-family: inherit; }
   .cc-cerca button { border: none; border-radius: 10px; padding: 0 16px; background: var(--blue); color: #fff; font-family: inherit; font-size: 15px; font-weight: 600; cursor: pointer; }
   .cc-risultati { flex: 1; min-height: 0; overflow-y: auto; }
+  .cc-riga-ris { display: flex; align-items: center; gap: 14px; margin: 0 2px 8px; }
+  .cc-riga-ris .cc-conta { flex: 1; margin: 0; }
+  .cc-sel-bt { border: none; background: none; padding: 4px 2px; color: var(--blue); font-family: inherit; font-size: 15px; font-weight: 600; cursor: pointer; }
   .cc-conta { font-size: 13px; color: var(--text-dim); margin: 0 2px 8px; }
+  .cc-carta.sel img { outline: 3.5px solid var(--blue); outline-offset: -3.5px; }
+  .cc-carta.sel::after {
+    content: ''; position: absolute; top: 4px; right: 4px; width: 22px; height: 22px; border-radius: 50%; pointer-events: none;
+    background: var(--blue) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E") center / 14px no-repeat;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.4);
+  }
+  .cc-griglia.selezione .cc-carta:not(.sel):not(.aggiunta) img { opacity: 0.8; }
+  .cc-barra { display: none; padding-top: 10px; }
+  .cc-barra.visibile { display: block; }
+  .cc-barra button { width: 100%; padding: 14px; border: none; border-radius: 14px; background: var(--blue); color: #fff; font-family: inherit; font-size: 17px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 14px rgba(0,122,255,0.35); }
   .cc-griglia { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; padding-bottom: 8px; }
   .ci-testa { width: var(--ci-l); min-height: 36px; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
   .ci-punti {
@@ -4534,7 +4547,7 @@
 <footer>
   <span>Tia · Gio · Richi</span>
   <button onclick="eseguiLogout()" style="background:none;border:none;color:var(--text-faint);font-size:0.75rem;cursor:pointer;margin-left:12px;font-family:inherit">Esci</button>
-  <div style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 104</div>
+  <div style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 105</div>
 </footer>
 
 </div>
@@ -5724,6 +5737,7 @@ function apriCercaCarte() {
         <button type="submit">Cerca</button>
       </form>
       <div class="cc-risultati" id="cc-risultati"><div class="cc-vuoto">Cerca una carta per nome o archetipo.</div></div>
+      <div class="cc-barra" id="cc-barra"><button onclick="aggiungiSelezionate()"></button></div>
     </div>`;
     ov.addEventListener('click', e => { if (e.target === ov) chiudiCercaCarte(); });
     document.body.appendChild(ov);
@@ -5732,7 +5746,57 @@ function apriCercaCarte() {
   ov.classList.add('open');
   setTimeout(() => document.getElementById('cc-q').focus(), 50);
 }
-function chiudiCercaCarte() { document.getElementById('cc-overlay')?.classList.remove('open'); }
+function chiudiCercaCarte() { document.getElementById('cc-overlay')?.classList.remove('open'); _selMode = false; _sel.clear(); }
+
+// selezione multipla: "Seleziona" attiva la scelta, un tocco su una carta la spunta,
+// "Aggiungi N carte" le mette tutte nel mazzo in una volta sola
+let _selMode = false;
+const _sel = new Set();
+function aggiornaSelezione() {
+  const grid = document.querySelector('#cc-risultati .cc-griglia'); if (!grid) return;
+  grid.classList.toggle('selezione', _selMode);
+  grid.querySelectorAll('.cc-carta').forEach(el => el.classList.toggle('sel', _sel.has(+el.dataset.carta)));
+  const bt = document.getElementById('cc-sel-bt'); if (bt) bt.textContent = _selMode ? 'Fine' : 'Seleziona';
+  const tutte = document.getElementById('cc-sel-tutte'); if (tutte) tutte.style.display = _selMode ? '' : 'none';
+  const barra = document.getElementById('cc-barra'), n = _sel.size;
+  barra.classList.toggle('visibile', _selMode && n > 0);
+  barra.querySelector('button').textContent = n === 1 ? 'Aggiungi 1 carta' : `Aggiungi ${n} carte`;
+}
+function toggleSelezioneCarte() { _selMode = !_selMode; if (!_selMode) _sel.clear(); aggiornaSelezione(); }
+function selezionaTutteCarte() {
+  const presenti = new Set(carteDi(_dmhMazzo).map(c => c.id));
+  const nuove = Object.keys(_risultatiCarte).map(Number).filter(id => !presenti.has(id));
+  if (nuove.every(id => _sel.has(id))) _sel.clear(); else nuove.forEach(id => _sel.add(id));
+  aggiornaSelezione();
+}
+function tocCartaRicerca(id) {
+  if (!_selMode) return mostraInfoCarta(id, true);
+  if (carteDi(_dmhMazzo).some(c => c.id === id)) return;     // gia' nel mazzo
+  if (_sel.has(id)) _sel.delete(id); else _sel.add(id);
+  aggiornaSelezione();
+}
+async function aggiungiSelezionate() {
+  const mazzo = _dmhMazzo; if (!mazzo || !_sel.size) return;
+  const prima = carteDi(mazzo);
+  const gia = new Set(prima.map(c => c.id));
+  const nuove = [..._sel].filter(id => !gia.has(id) && _risultatiCarte[id]).map(id => cartaBreve(_risultatiCarte[id]));
+  _sel.clear();
+  if (!nuove.length) { aggiornaSelezione(); return; }
+  dati.mazziCarte = dati.mazziCarte || {};
+  dati.mazziCarte[mazzo] = [...prima, ...nuove];
+  nuove.forEach(c => document.querySelector(`#cc-risultati .cc-carta[data-carta="${c.id}"]`)?.classList.add('aggiunta'));
+  aggiornaSelezione();
+  renderCarteMazzo(mazzo);
+  await salvaDatiCloud();
+  mostraAvviso(nuove.length === 1 ? 'Carta aggiunta al mazzo' : `${nuove.length} carte aggiunte al mazzo`, 'Annulla', async () => {
+    dati.mazziCarte[mazzo] = prima;
+    document.querySelectorAll('#cc-risultati .cc-carta.aggiunta').forEach(el => { if (nuove.some(c => c.id === +el.dataset.carta)) el.classList.remove('aggiunta'); });
+    renderCarteMazzo(mazzo);
+    await salvaDatiCloud();
+  });
+}
+window.toggleSelezioneCarte = toggleSelezioneCarte; window.selezionaTutteCarte = selezionaTutteCarte;
+window.tocCartaRicerca = tocCartaRicerca; window.aggiungiSelezionate = aggiungiSelezionate;
 
 async function cercaCarteMazzo() {
   const q = document.getElementById('cc-q').value.trim();
@@ -5751,8 +5815,13 @@ async function cercaCarteMazzo() {
   _risultatiCarte = {};
   trovate.forEach(c => { _risultatiCarte[c.id] = c; });
   const presenti = new Set(carteDi(_dmhMazzo).map(c => c.id));
-  box.innerHTML = `<div class="cc-conta">${trovate.length} risultati</div><div class="cc-griglia">${trovate.map(c =>
-    htmlMiniCarta(cartaBreve(c), `onclick="mostraInfoCarta(${c.id}, true)"`).replace('class="cc-carta"', `class="cc-carta${presenti.has(c.id) ? ' aggiunta' : ''}"`)).join('')}</div>`;
+  _sel.clear();
+  box.innerHTML = `<div class="cc-riga-ris"><span class="cc-conta">${trovate.length} risultati</span>
+    <button id="cc-sel-tutte" class="cc-sel-bt" style="display:none" onclick="selezionaTutteCarte()">Tutte</button>
+    <button id="cc-sel-bt" class="cc-sel-bt" onclick="toggleSelezioneCarte()">Seleziona</button></div>
+    <div class="cc-griglia${_selMode ? ' selezione' : ''}">${trovate.map(c =>
+    htmlMiniCarta(cartaBreve(c), `onclick="tocCartaRicerca(${c.id})"`).replace('class="cc-carta"', `class="cc-carta${presenti.has(c.id) ? ' aggiunta' : ''}"`)).join('')}</div>`;
+  aggiornaSelezione();
 }
 
 // scheda della carta (ovunque nell'app): solo l'immagine intera quasi a tutto
@@ -6164,7 +6233,7 @@ function renderMatchup(partite = dati.partite) {
 
 // mappa nome-mazzo → immagine di sfondo (compilala a mano quando aggiungi un'immagine in img/)
 const MAZZI_IMG = {
-  'Darklord': 'img/darklord.png',
+  'Darklord': 'img/darklord2.jpg',
   'Naturia': 'img/naturia.png',
   'Mimighoul': 'img/mimighoul.png',
   'Fire King': 'img/fireking.png',
