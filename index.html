@@ -2991,6 +2991,8 @@
     table.tab-box tr.riga-mazzo .cl-testo { font-size: 23px; font-weight: 700; line-height: 1.12; }
     table.tab-box tr.riga-mazzo .cl-testo .pill { font-size: 11px; font-weight: 600; display: inline-block; margin-top: 4px; margin-left: 0; }
     table.tab-box tr.riga-mazzo .vp-td { text-align: right; }
+    table.tab-box tr.riga-gioc .cl-testo { font-size: 21px; }
+    table.tab-box tr.riga-gioc .cl-chi { min-height: 62px; }
     @media (max-width: 360px) {
       table.tab-box tr.riga-mazzo .cl-testo { font-size: 19px; }
       .vp-cell { font-size: 25px !important; }
@@ -4622,7 +4624,7 @@
 <footer>
   <span>Tia · Gio · Richi</span>
   <button onclick="eseguiLogout()" style="background:none;border:none;color:var(--text-faint);font-size:0.75rem;cursor:pointer;margin-left:12px;font-family:inherit">Esci</button>
-  <div style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 119</div>
+  <div style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 120</div>
 </footer>
 
 </div>
@@ -4946,30 +4948,29 @@ function renderGiocatori(partite = dati.partite) {
     return;
   }
   const cols = 5;
-  let html = '<tr class="tab-intestazione"><th>Duellante</th><th>PG</th><th>V</th><th>P</th><th>Win Rate</th></tr>';
+  let html = '<tr class="tab-intestazione"><th>Duellante</th><th>PG</th><th>V</th><th>P</th><th>V-P</th></tr>';
   const metalli = ['oro', 'argento', 'bronzo'];
   arr.forEach(([nome, s], i) => {
-    const wr = s.partite > 0 ? Math.round(100 * s.v / s.partite) : 0;
     const safeNome = nome.replace(/'/g, "\'");
     // su telefono i primi tre hanno il riquadro oro, argento e bronzo
     const metallo = i < 3 ? ' ' + metalli[i] : '';
     // foto e riepilogo sotto il nome si vedono solo su telefono, dove le colonne PG/V/P spariscono
     const foto = ((dati.profili || {})[nome] || {}).foto;
-    const avatar = `<span class="cl-avatar">${escapeHtml(nome.charAt(0).toUpperCase())}${foto ? `<img src="${escapeHtml(foto)}" alt="" onerror="this.remove()">` : ''}</span>`;
-    html += `<tr class="cl-riga${metallo}" onclick="toggleProfiloInline('${safeNome}')">
+    // la foto non e' piu' in un riquadro: sfuma sul lato sinistro del bottone, come l'immagine dei mazzi
+    const avatar = `<span class="cl-avatar mazzo">${escapeHtml(nome.charAt(0).toUpperCase())}${foto ? `<img src="${escapeHtml(foto)}" alt="" onerror="this.remove()">` : ''}</span>`;
+    html += `<tr class="cl-riga riga-mazzo riga-gioc${metallo}" onclick="toggleProfiloInline('${safeNome}')">
       <td>
         <div class="cl-chi">
           ${avatar}
           <div class="cl-testo">
             <span class="name-btn">${nome}</span>
             <button class="profile-toggle-btn" id="ptbtn-${safeNome}" onclick="event.stopPropagation(); toggleProfiloInline('${safeNome}')">${SVG_CHEVRON}</button>
-            <span class="cl-sub">${s.v}-${s.p}</span>
           </div>
         </div>
       </td>
       <td class="num m-col-no">${s.partite}</td>
       <td class="num m-col-no">${s.v}</td><td class="num m-col-no">${s.p}</td>
-      <td><div class="wr-cell"><span class="wr-text">${wr}%</span><span class="wr-bar"><span style="width:${wr}%"></span></span></div></td>
+      <td class="vp-td"><span class="vp-cell">${s.v}-${s.p}</span></td>
     </tr>
     <tr class="profile-inline-row" id="prow-${safeNome}">
       <td class="profile-inline-cell" colspan="${cols}">
