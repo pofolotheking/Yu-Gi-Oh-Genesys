@@ -3621,6 +3621,15 @@
   .nv-voce:first-child .nv-tit { color: var(--red); } .nv-voce:last-child .nv-tit { color: var(--green-dark); }
   .nv-testo b { font-size: 15px; line-height: 1.2; }
   .nv-sotto { font-size: 12px; color: var(--text-dim); white-space: nowrap; }
+  /* nemesi e vittima preferita del mazzo (sempre all-time), tra il ventaglio e i quattro bottoni */
+  .ddm-nv .nv { padding: 0; margin: 4px 0 12px; gap: 12px; }
+  .ddm-nv .nv-voce { background: #cfcfd6; border-radius: 18px; min-height: 92px; padding: 14px 16px; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.12); }
+  [data-theme="dark"] .ddm-nv .nv-voce { background: #3a3a3f; box-shadow: 0 2px 8px rgba(0,0,0,0.5); }
+  .ddm-nv .nv-testo { text-shadow: 0 0 6px #cfcfd6, 0 0 3px #cfcfd6; }
+  [data-theme="dark"] .ddm-nv .nv-testo { text-shadow: 0 0 6px #3a3a3f, 0 0 3px #3a3a3f; }
+  .ddm-nv .nv-img { left: 58%; }
+  .ddm-nv .nv-testo b { font-size: 17px; }
+  .ddm-nv .nv-img { opacity: 0.8; inset: 0 0 0 58%; }
   .dado-m-nv .nv { padding: 4px 0 12px; border-top: 0.5px solid var(--border); padding-top: 12px; }
   .dado-player-card:not(.aperto) .dado-m-nv { display: none; }
 
@@ -4550,7 +4559,7 @@
 <footer>
   <span>Tia · Gio · Richi</span>
   <button onclick="eseguiLogout()" style="background:none;border:none;color:var(--text-faint);font-size:0.75rem;cursor:pointer;margin-left:12px;font-family:inherit">Esci</button>
-  <div style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 110</div>
+  <div style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 111</div>
 </footer>
 
 </div>
@@ -5484,8 +5493,16 @@ function nemesiVittima(nome, partite) {
   const vittima = l.filter(a => a.v > 0).sort((x, y) => y.v - x.v || (y.v / (y.v + y.p)) - (x.v / (x.v + x.p)))[0] || null;
   return { nemesi, vittima };
 }
-function htmlNemesiVittima(nome, partite) {
-  const { nemesi, vittima } = nemesiVittima(nome, partite);
+// per un mazzo: l'avversario che lo ha battuto di piu' e quello che ha battuto di piu'
+function nemesiVittimaMazzo(mazzo, partite) {
+  const vs = (calcolaMatchup(partite)[mazzo] || { vs: {} }).vs;
+  const l = Object.entries(vs).map(([m, r]) => ({ mazzo: m, v: r.v, p: r.p }));
+  const nemesi = l.filter(a => a.p > 0).sort((x, y) => y.p - x.p || (y.p / (y.v + y.p)) - (x.p / (x.v + x.p)))[0] || null;
+  const vittima = l.filter(a => a.v > 0).sort((x, y) => y.v - x.v || (y.v / (y.v + y.p)) - (x.v / (x.v + x.p)))[0] || null;
+  return { nemesi, vittima };
+}
+function htmlNemesiVittima(nome, partite, perMazzo = false) {
+  const { nemesi, vittima } = perMazzo ? nemesiVittimaMazzo(nome, partite) : nemesiVittima(nome, partite);
   const voce = (tit, x, sotto) => `<div class="nv-voce"${x ? ` data-mazzo="${escapeHtml(x.mazzo)}"` : ''}>
       <span class="nv-img"${x && imgMazzo(x.mazzo) ? ` style="background-image:url('${imgMazzo(x.mazzo)}')"` : ''}></span>
       <span class="nv-testo"><span class="nv-tit">${tit}</span><b>${x ? escapeHtml(x.mazzo) : '—'}</b><span class="nv-sotto">${x ? sotto(x) : 'Nessun dato'}</span></span>
@@ -6384,6 +6401,7 @@ async function apriDettaglioMazzo(mazzo, scope = _scopeDeck) {
     </div>
     </div>
     <div class="ddm-carte" id="ddm-carte"></div>
+    <div class="ddm-nv">${htmlNemesiVittima(mazzo, partiteAllTime(), true)}</div>
     <div id="ddm-scope"></div>
   `;
   renderDettaglioMazzoScope(mazzo, scope);
