@@ -4550,7 +4550,7 @@
 <footer>
   <span>Tia · Gio · Richi</span>
   <button onclick="eseguiLogout()" style="background:none;border:none;color:var(--text-faint);font-size:0.75rem;cursor:pointer;margin-left:12px;font-family:inherit">Esci</button>
-  <div style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 109</div>
+  <div style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 110</div>
 </footer>
 
 </div>
@@ -5837,9 +5837,10 @@ function prezzoMedio(c) {
   if (usd > 0) return usd.toLocaleString('it-IT', { style: 'currency', currency: 'USD', currencyDisplay: 'narrowSymbol' });
   return 'non disponibile';
 }
-function htmlCartaGrande(c, caricata = true) {
+function htmlCartaGrande(c, caricata = true, ptsNoti = 0) {
   const im = c.card_images?.[0] || {};
-  const pts = caricata ? puntiCarta(c) : (c.pts || 0);
+  // la richiesta per id spesso non riporta i punti Genesys: si tengono quelli gia' noti (mazzo, elenco, miniatura)
+  const pts = caricata ? (puntiCarta(c) || ptsNoti) : (c.pts || 0);
   const liv = pts >= 30 ? 'high' : pts >= 10 ? 'mid' : pts > 0 ? 'low' : '';
   const grande = caricata ? (im.image_url || im.image_url_small || '') : (c.img || '');
   const piccola = caricata ? (im.image_url_small || '') : (c.img || '');
@@ -5897,7 +5898,7 @@ async function mostraInfoCarta(id, conMazzo = false) {
   const breve = carteDi(_dmhMazzo).find(x => x.id === id)
     || (_cardRegistry[id] && { id, name: _cardRegistry[id].name, img: _cardRegistry[id].img, pts: _cardRegistry[id].pts });
   _ciBreve = completa ? cartaBreve(completa) : (breve || null);
-  ov.innerHTML = completa ? htmlCartaGrande(completa)
+  ov.innerHTML = completa ? htmlCartaGrande(completa, true, (breve && breve.pts) || 0)
     : breve ? htmlCartaGrande(breve, false)
     : `<div class="ci-testa"><span></span><div class="ci-destra"><button class="cc-chiudi ci-chiudi" onclick="chiudiInfoCarta()" aria-label="Chiudi">✕</button></div></div><div class="ci-attesa">Caricamento…</div>`;
   ov.classList.add('open');
@@ -5908,8 +5909,11 @@ async function mostraInfoCarta(id, conMazzo = false) {
     const c = (await r.json()).data?.[0];
     if (!c) throw new Error();
     if (n !== _ciRichiesta) return;
-    _ciBreve = cartaBreve(c);
-    ov.innerHTML = htmlCartaGrande(c);
+    let noti = (breve && breve.pts) || 0;
+    // senza punti noti si consulta l'elenco Genesys, che li riporta sempre
+    if (!puntiCarta(c) && !noti && !genesysCache) { try { await apriListaGenesys(true); } catch (e) {} if (n !== _ciRichiesta) return; }
+    _ciBreve = { ...cartaBreve(c), pts: puntiCarta(c) || noti };
+    ov.innerHTML = htmlCartaGrande(c, true, noti);
   } catch (e) {
     if (n !== _ciRichiesta) return;
     const prezzo = ov.querySelector('.ci-prezzo b'), attesa = ov.querySelector('.ci-attesa');
