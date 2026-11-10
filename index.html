@@ -3788,6 +3788,24 @@
   }
   [data-theme="dark"] .cc-nuova { background: #2c2c30; border-color: #6b6b72; color: #8e8e95; box-shadow: 0 10px 24px 2px rgba(0,0,0,0.7), 0 2px 6px rgba(0,0,0,0.5); }
   .cc-nuova svg { width: 46px; height: 46px; }
+  /* bottone Edit dopo la sagoma: stessa misura di una carta */
+  .cc-edit {
+    aspect-ratio: 59 / 86; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
+    border-radius: 8px; border: 1.5px solid rgba(255,255,255,0.35); color: #fff; font-weight: 800; font-size: 17px;
+    background: linear-gradient(160deg, #3b6fff, #1f3fbf); box-shadow: 0 10px 24px 2px rgba(0,0,0,0.55), 0 2px 6px rgba(0,0,0,0.4);
+  }
+  .cc-edit svg { width: 40px; height: 40px; }
+  /* finestra Modifica ventaglio */
+  .ce-foglio .cc-risultati { padding-bottom: 8px; }
+  .ce-titolo { font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em; color: var(--text-dim); margin: 4px 2px 8px; }
+  .ce-titolo-riga { margin-top: 16px; }
+  .ce-titolo-riga .ce-titolo { flex: 1; margin: 0; }
+  .ce-modi { background: var(--bg-card); border-radius: 14px; overflow: hidden; }
+  .ce-modo { display: flex; align-items: center; justify-content: space-between; width: 100%; padding: 13px 16px; border: none; background: none; color: var(--text); font-family: inherit; font-size: 16px; text-align: left; cursor: pointer; }
+  .ce-modo + .ce-modo { border-top: 0.5px solid var(--border); }
+  .ce-modo small { color: var(--text-dim); font-size: 12px; }
+  .ce-modo.attivo { color: var(--blue); font-weight: 600; }
+  .ce-elimina { background: var(--red) !important; box-shadow: 0 4px 14px rgba(255,59,48,0.35) !important; }
   .cc-scorri .cc-carta img { border-radius: 8px; box-shadow: 0 10px 24px 2px rgba(0,0,0,0.55), 0 2px 6px rgba(0,0,0,0.4); }
   .cc-scorri .cc-pts { top: 5px; left: 5px; min-width: 24px; padding: 2px 6px; font-size: 13px; border-radius: 7px; }
   .cc-carta { position: relative; cursor: pointer; border-radius: 6px; }
@@ -4595,7 +4613,7 @@
 <footer>
   <span>Tia · Gio · Richi</span>
   <button onclick="eseguiLogout()" style="background:none;border:none;color:var(--text-faint);font-size:0.75rem;cursor:pointer;margin-left:12px;font-family:inherit">Esci</button>
-  <div style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 117</div>
+  <div style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 118</div>
 </footer>
 
 </div>
@@ -4717,7 +4735,8 @@ async function caricaDati() {
         mazzi: j.mazzi || {},
         partite: j.partite || [],
         mazziDecklist: j.mazziDecklist || {},
-        mazziCarte: j.mazziCarte || {}
+        mazziCarte: j.mazziCarte || {},
+        mazziVentaglio: j.mazziVentaglio || {}
       };
     } else {
       dati = JSON.parse(JSON.stringify(DATI_INIZIALI));
@@ -5682,7 +5701,7 @@ function puntiCarta(c) {
 }
 function cartaBreve(c) {
   return { id: c.id, name: c.name, img: c.card_images?.[0]?.image_url_small || c.card_images?.[0]?.image_url || '', pts: puntiCarta(c),
-    tipo: c.type || '', liv: c.level ?? c.linkval ?? 0 };
+    tipo: c.type || '', liv: c.level ?? c.linkval ?? 0, atk: c.atk ?? null };
 }
 // ordine del ventaglio, da sinistra: fusione, synchro, xyz, (link), mostri normali, mostri con effetto,
 // magie, trappole; i mostri per livello/rango crescente, poi per nome
@@ -5697,6 +5716,30 @@ function gruppoCarta(c) {
   if (/trap/i.test(t)) return 8;
   return /normal/i.test(t) ? 4 : 5;
 }
+// disposizione scelta per il mazzo (dati.mazziVentaglio[mazzo] = { modo, ids }), standard di default
+const MODI_VENTAGLIO = [
+  ['standard', 'Standard'], ['casuale', 'Casuale'], ['livello', 'Per livello'], ['atk', 'Per ATK'],
+  ['mostri', 'Prima i mostri'], ['magie', 'Prima le magie'], ['trappole', 'Prima le trappole'],
+];
+const eMostro = c => gruppoCarta(c) < 6;
+function ordinaVentaglio(mazzo) {
+  const lista = carteDi(mazzo), v = (dati.mazziVentaglio || {})[mazzo] || {}, modo = v.modo || 'standard';
+  const nome = (a, b) => a.name.localeCompare(b.name);
+  const std = ordinaCarte(lista);
+  if (modo === 'casuale' && v.ids) {
+    const pos = new Map(v.ids.map((id, i) => [id, i]));
+    return lista.slice().sort((a, b) => (pos.has(a.id) ? pos.get(a.id) : 1e6) - (pos.has(b.id) ? pos.get(b.id) : 1e6));
+  }
+  if (modo === 'livello') return lista.slice().sort((a, b) => (eMostro(b) - eMostro(a)) || (eMostro(a) ? (a.liv || 0) - (b.liv || 0) : 0) || gruppoCarta(a) - gruppoCarta(b) || nome(a, b));
+  if (modo === 'atk') return lista.slice().sort((a, b) => (eMostro(b) - eMostro(a)) || (eMostro(a) ? (a.atk ?? -1) - (b.atk ?? -1) : 0) || gruppoCarta(a) - gruppoCarta(b) || nome(a, b));
+  if (modo === 'mostri') return lista.slice().sort((a, b) => gruppoCarta(a) === 7 || gruppoCarta(a) === 8 || gruppoCarta(b) === 7 || gruppoCarta(b) === 8 ? gruppoCarta(a) - gruppoCarta(b) || nome(a, b) : nome(a, b));
+  if (modo === 'magie' || modo === 'trappole') {
+    const primo = modo === 'magie' ? 7 : 8;
+    const rango = c => { const g = gruppoCarta(c); return g === primo ? 0 : g === 7 || g === 8 ? 2 : 1; };
+    return std.slice().sort((a, b) => rango(a) - rango(b));   // sort stabile: dentro ogni blocco resta l'ordine standard
+  }
+  return std;
+}
 function ordinaCarte(lista) {
   return lista.slice().sort((a, b) => {
     const ga = gruppoCarta(a), gb = gruppoCarta(b);
@@ -5708,7 +5751,7 @@ function ordinaCarte(lista) {
 // le carte salvate prima di questa versione non hanno il tipo: si recupera una volta dal database
 const _tipiProvati = new Set();
 async function completaTipiCarte(mazzo) {
-  const mancanti = carteDi(mazzo).filter(c => !c.tipo).map(c => c.id);
+  const mancanti = carteDi(mazzo).filter(c => !c.tipo || !('atk' in c)).map(c => c.id);
   if (!mancanti.length || _tipiProvati.has(mazzo)) return;
   _tipiProvati.add(mazzo);
   try {
@@ -5719,7 +5762,7 @@ async function completaTipiCarte(mazzo) {
       (await r.json()).data?.forEach(c => { info[c.id] = c; });
     }
     if (!Object.keys(info).length) return;
-    dati.mazziCarte[mazzo] = carteDi(mazzo).map(c => info[c.id] && !c.tipo ? { ...c, tipo: info[c.id].type || '', liv: info[c.id].level ?? info[c.id].linkval ?? 0 } : c);
+    dati.mazziCarte[mazzo] = carteDi(mazzo).map(c => info[c.id] ? { ...c, tipo: info[c.id].type || c.tipo || '', liv: info[c.id].level ?? info[c.id].linkval ?? c.liv ?? 0, atk: info[c.id].atk ?? null } : c);
     renderCarteMazzo(mazzo);
     await salvaDatiCloud();
   } catch (e) {}
@@ -5755,7 +5798,8 @@ async function renderCarteMazzo(mazzo) {
   if (!box || _dmhMazzo !== mazzo) return;
   const lista = carteDi(mazzo);
   const nuova = `<div class="cc-carta cc-nuova" onclick="apriCercaCarte()" role="button" aria-label="Aggiungi carte" title="Aggiungi carte"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></div>`;
-  box.innerHTML = `<div class="cc-scorri-wrap"><div class="cc-scorri">${ordinaCarte(lista).map(c => htmlMiniCarta(c, `onclick="mostraInfoCarta(${c.id}, true)"`)).join('')}${nuova}</div></div>`;
+  const modifica = lista.length ? `<div class="cc-carta cc-edit" onclick="apriModificaVentaglio()" role="button" aria-label="Modifica il ventaglio" title="Modifica il ventaglio"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20l1-4L16.5 4.5a2.1 2.1 0 0 1 3 3L8 19z"/><path d="M14.5 6.5l3 3"/></svg><span>Edit</span></div>` : '';
+  box.innerHTML = `<div class="cc-scorri-wrap"><div class="cc-scorri">${ordinaVentaglio(mazzo).map(c => htmlMiniCarta(c, `onclick="mostraInfoCarta(${c.id}, true)"`)).join('')}${nuova}${modifica}</div></div>`;
   const sc = box.querySelector('.cc-scorri');
   sc.addEventListener('scroll', () => ventaglioCarte(sc), { passive: true }); ventaglioCarte(sc);
   completaTipiCarte(mazzo);
@@ -5780,6 +5824,77 @@ async function renderCarteMazzo(mazzo) {
 }
 
 let _risultatiCarte = {};
+
+// ===== modifica del ventaglio: disposizione e rimozione di piu' carte =====
+const _selEd = new Set();
+function apriModificaVentaglio() {
+  let ov = document.getElementById('ce-overlay');
+  if (!ov) {
+    ov = document.createElement('div');
+    ov.id = 'ce-overlay'; ov.className = 'cc-overlay';
+    ov.innerHTML = `<div class="cc-foglio ce-foglio">
+      <div class="cc-foglio-testa"><span>Modifica ventaglio</span><button class="cc-chiudi" onclick="chiudiModificaVentaglio()" aria-label="Chiudi">\u2715</button></div>
+      <div class="cc-risultati" id="ce-corpo"></div>
+      <div class="cc-barra" id="ce-barra"><button class="ce-elimina" onclick="eliminaSelezionateVentaglio()"></button></div>
+    </div>`;
+    ov.addEventListener('click', e => { if (e.target === ov) chiudiModificaVentaglio(); });
+    document.body.appendChild(ov);
+  }
+  _selEd.clear();
+  ov.querySelector('.cc-foglio-testa span').textContent = `Modifica ventaglio \u00B7 ${_dmhMazzo}`;
+  renderModificaVentaglio();
+  ov.classList.add('open');
+}
+function chiudiModificaVentaglio() { document.getElementById('ce-overlay')?.classList.remove('open'); _selEd.clear(); }
+function renderModificaVentaglio() {
+  const mazzo = _dmhMazzo, corpo = document.getElementById('ce-corpo'); if (!corpo) return;
+  const modo = ((dati.mazziVentaglio || {})[mazzo] || {}).modo || 'standard';
+  const carte = ordinaVentaglio(mazzo);
+  corpo.innerHTML = `<div class="ce-titolo">Disposizione</div>
+    <div class="ce-modi">${MODI_VENTAGLIO.map(([k, t]) => `<button class="ce-modo${k === modo ? ' attivo' : ''}" onclick="scegliModoVentaglio('${k}')"><span>${t}${k === 'casuale' && modo === 'casuale' ? ' <small>(tocca per rimescolare)</small>' : ''}</span>${k === modo ? ICO_FATTO : ''}</button>`).join('')}</div>
+    <div class="cc-riga-ris ce-titolo-riga"><span class="ce-titolo">Carte (${carte.length})</span>
+      <button class="cc-sel-bt" onclick="selezionaTutteVentaglio()">${_selEd.size === carte.length && carte.length ? 'Nessuna' : 'Tutte'}</button></div>
+    <div class="cc-griglia selezione">${carte.map(c => htmlMiniCarta(c, `onclick="toggleCartaVentaglio(${c.id})"`).replace('class="cc-carta"', `class="cc-carta${_selEd.has(c.id) ? ' sel' : ''}"`)).join('')}</div>`;
+  const n = _selEd.size, barra = document.getElementById('ce-barra');
+  barra.classList.toggle('visibile', n > 0);
+  barra.querySelector('button').textContent = n === 1 ? 'Elimina 1 carta' : `Elimina ${n} carte`;
+}
+async function scegliModoVentaglio(modo) {
+  const mazzo = _dmhMazzo; dati.mazziVentaglio = dati.mazziVentaglio || {};
+  const v = { modo };
+  if (modo === 'casuale') {
+    const ids = carteDi(mazzo).map(c => c.id);
+    for (let i = ids.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [ids[i], ids[j]] = [ids[j], ids[i]]; }
+    v.ids = ids;
+  }
+  dati.mazziVentaglio[mazzo] = v;
+  renderModificaVentaglio(); renderCarteMazzo(mazzo);
+  const sc = document.querySelector('#ddm-carte .cc-scorri'); if (sc) sc.scrollLeft = 0;
+  await salvaDatiCloud();
+}
+function toggleCartaVentaglio(id) { if (_selEd.has(id)) _selEd.delete(id); else _selEd.add(id); renderModificaVentaglio(); }
+function selezionaTutteVentaglio() {
+  const ids = carteDi(_dmhMazzo).map(c => c.id);
+  if (_selEd.size === ids.length) _selEd.clear(); else ids.forEach(i => _selEd.add(i));
+  renderModificaVentaglio();
+}
+async function eliminaSelezionateVentaglio() {
+  const mazzo = _dmhMazzo; if (!_selEd.size) return;
+  const prima = carteDi(mazzo), n = _selEd.size;
+  dati.mazziCarte[mazzo] = prima.filter(c => !_selEd.has(c.id));
+  _selEd.clear();
+  renderModificaVentaglio(); renderCarteMazzo(mazzo);
+  await salvaDatiCloud();
+  mostraAvviso(n === 1 ? 'Carta eliminata' : `${n} carte eliminate`, 'Annulla', async () => {
+    dati.mazziCarte[mazzo] = prima;
+    if (document.getElementById('ce-overlay')?.classList.contains('open') && _dmhMazzo === mazzo) renderModificaVentaglio();
+    renderCarteMazzo(mazzo);
+    await salvaDatiCloud();
+  });
+}
+window.apriModificaVentaglio = apriModificaVentaglio; window.chiudiModificaVentaglio = chiudiModificaVentaglio;
+window.scegliModoVentaglio = scegliModoVentaglio; window.toggleCartaVentaglio = toggleCartaVentaglio;
+window.selezionaTutteVentaglio = selezionaTutteVentaglio; window.eliminaSelezionateVentaglio = eliminaSelezionateVentaglio;
 
 function apriCercaCarte() {
   let ov = document.getElementById('cc-overlay');
