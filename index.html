@@ -2987,6 +2987,15 @@
     .cl-avatar img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
     .cl-testo { min-width: 0; font-size: 17px; font-weight: 600; line-height: 1.3; }
     .cl-testo .name-btn { font: inherit; }
+    /* classifiche dei mazzi: nome grande, a destra vittorie-sconfitte al posto della percentuale */
+    table.tab-box tr.riga-mazzo .cl-testo { font-size: 23px; font-weight: 700; line-height: 1.12; }
+    table.tab-box tr.riga-mazzo .cl-testo .pill { font-size: 11px; font-weight: 600; display: inline-block; margin-top: 4px; margin-left: 0; }
+    table.tab-box tr.riga-mazzo .vp-td { text-align: right; }
+    @media (max-width: 360px) {
+      table.tab-box tr.riga-mazzo .cl-testo { font-size: 19px; }
+      .vp-cell { font-size: 25px !important; }
+    }
+    .vp-cell { font-size: 30px; font-weight: 800; letter-spacing: -0.01em; font-variant-numeric: tabular-nums; white-space: nowrap; }
     .cl-testo .pill { margin-left: 6px; font-size: 11px; vertical-align: 2px; }
     .cl-sub {
       display: block; font-size: 14px; font-weight: 500; color: var(--text-dim);
@@ -4613,7 +4622,7 @@
 <footer>
   <span>Tia · Gio · Richi</span>
   <button onclick="eseguiLogout()" style="background:none;border:none;color:var(--text-faint);font-size:0.75rem;cursor:pointer;margin-left:12px;font-family:inherit">Esci</button>
-  <div style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 118</div>
+  <div style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 119</div>
 </footer>
 
 </div>
@@ -6225,9 +6234,8 @@ function renderMazzi(partite = dati.partite, contId = 'tabella-mazzi') {
   // nella sezione Deck la riga apre il dettaglio del mazzo (negli archivi no:
   // il dettaglio usa le statistiche della sezione Deck)
 
-  let html = '<tr class="tab-intestazione"><th>#</th><th>Mazzo</th><th></th><th>V</th><th>P</th><th>Win Rate</th></tr>';
+  let html = '<tr class="tab-intestazione"><th>#</th><th>Mazzo</th><th></th><th>V</th><th>P</th><th>V-P</th></tr>';
   arr.forEach(([nome, s], i) => {
-    const wr = Math.round(100 * s.wr);
     const provv = s.partite < SOGLIA_MAZZO;
     const hasMedal = i < 3 && !provv && i < ufficiali;
     const rankCell = hasMedal
@@ -6239,14 +6247,14 @@ function renderMazzi(partite = dati.partite, contId = 'tabella-mazzi') {
       : `<td class="m-col-no"></td>`;
     const prop = (dati.mazzi || {})[nome];
     const miniatura = `<span class="cl-avatar mazzo">${escapeHtml(nome.charAt(0).toUpperCase())}${imgUrl ? `<img src="${imgUrl}" alt="" onerror="this.remove()">` : ''}</span>`;
-    const classi = ['cl-riga', hasMedal ? metalli[i] : '', i === 0 && !provv ? 'top-1' : ''].filter(Boolean).join(' ');
+    const classi = ['cl-riga', 'riga-mazzo', hasMedal ? metalli[i] : '', i === 0 && !provv ? 'top-1' : ''].filter(Boolean).join(' ');
     const click = ` data-mazzo="${escapeHtml(nome)}"`;
     html += `<tr class="${classi}"${click}>
       ${rankCell}
-      <td><div class="cl-chi">${miniatura}<div class="cl-testo">${nome}${provv ? '<span class="pill">In prova</span>' : ''}<span class="cl-sub">${prop ? escapeHtml(prop) + ' · ' : ''}${s.v}-${s.p}</span></div></div></td>
+      <td><div class="cl-chi">${miniatura}<div class="cl-testo">${nome}${provv ? '<span class="pill">In prova</span>' : ''}</div></div></td>
       ${stripCell}
       <td class="num m-col-no">${s.v}</td><td class="num m-col-no">${s.p}</td>
-      <td><div class="wr-cell"><span class="wr-text">${wr}%</span><span class="wr-bar"><span style="width:${wr}%"></span></span></div></td>
+      <td class="vp-td"><span class="vp-cell">${s.v}-${s.p}</span></td>
     </tr>`;
   });
   t.innerHTML = html;
@@ -8756,18 +8764,17 @@ function renderAllTime() {
     <div class="card card-box" style="overflow:hidden">
       ${mazziOrd.length === 0
         ? `<div class="empty">Nessun mazzo ha ancora raggiunto ${SOGLIA_MAZZO} partite.</div>`
-        : `<table class="tab-box"><tr class="tab-intestazione"><th>#</th><th>Mazzo</th><th>V</th><th>P</th><th>Win Rate</th></tr>
+        : `<table class="tab-box"><tr class="tab-intestazione"><th>#</th><th>Mazzo</th><th>V</th><th>P</th><th>V-P</th></tr>
           ${mazziOrd.map(([nome, s], i) => {
-            const wr = Math.round(100 * s.wr);
             const img = imgMazzo(nome);
             const prop = (dati.mazzi || {})[nome];
             const miniatura = `<span class="cl-avatar mazzo">${escapeHtml(nome.charAt(0).toUpperCase())}${img ? `<img src="${img}" alt="" onerror="this.remove()">` : ''}</span>`;
-            const classi = ['cl-riga', ['oro', 'argento', 'bronzo'][i] || '', i === 0 ? 'top-1' : ''].filter(Boolean).join(' ');
+            const classi = ['cl-riga', 'riga-mazzo', ['oro', 'argento', 'bronzo'][i] || '', i === 0 ? 'top-1' : ''].filter(Boolean).join(' ');
             return `<tr class="${classi}" data-mazzo="${escapeHtml(nome)}">
               <td class="rank m-col-no">${i + 1}</td>
-              <td><div class="cl-chi">${miniatura}<div class="cl-testo">${escapeHtml(nome)}<span class="cl-sub">${prop ? escapeHtml(prop) + ' · ' : ''}${s.v}-${s.p}</span></div></div></td>
+              <td><div class="cl-chi">${miniatura}<div class="cl-testo">${escapeHtml(nome)}</div></div></td>
               <td class="num m-col-no">${s.v}</td><td class="num m-col-no">${s.p}</td>
-              <td><div class="wr-cell"><span class="wr-text">${wr}%</span><span class="wr-bar"><span style="width:${wr}%"></span></span></div></td>
+              <td class="vp-td"><span class="vp-cell">${s.v}-${s.p}</span></td>
             </tr>`;
           }).join('')}</table>`}
     </div>`;
