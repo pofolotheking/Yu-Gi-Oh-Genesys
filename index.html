@@ -3748,17 +3748,18 @@
   /* sagoma tratteggiata grigia dopo l'ultima carta: tocco = aggiungi carte */
   /* quattro bottoni grandi 2x2: ognuno apre la sua finestra */
   .ddm-bottoni { display: flex; flex-direction: column; gap: 10px; margin-top: 8px; }
-  .ddm-bottone {
-    position: relative; overflow: hidden; isolation: isolate;
-    display: flex; flex-direction: row; align-items: center; justify-content: flex-start; gap: 16px; width: 100%; min-height: 68px; padding: 12px 20px;
-    border: none; border-radius: 18px; color: #fff; text-align: left; cursor: pointer; font-family: inherit;
-    background: #1a0d05 url('img/dorso-carta.jpg') center 4% / cover no-repeat;
-    box-shadow: 0 3px 10px rgba(0,0,0,0.35); transition: transform 0.12s;
+  /* sotto l'immagine del mazzo: lo sfondo e' il dorso di una carta (back card), dietro ventaglio e bottoni */
+  .ddm-sotto { position: relative; margin: 0 -16px -24px; padding: 0 16px 28px; }
+  .ddm-sotto::before {
+    content: ''; position: absolute; z-index: -1; left: 0; right: 0; bottom: 0; top: 80px;
+    background: #140803 url('img/back-card.jpg') center / cover no-repeat;
+    -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 70px); mask-image: linear-gradient(180deg, transparent 0, #000 70px);
   }
-  /* velo scuro a sinistra: scritta e icona restano leggibili sul disegno */
-  .ddm-bottone::before {
-    content: ''; position: absolute; inset: 0; z-index: -1;
-    background: linear-gradient(90deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.3) 55%, rgba(0,0,0,0.05) 100%);
+  .ddm-bottone {
+    position: relative; display: flex; flex-direction: row; align-items: center; justify-content: flex-start; gap: 16px; width: 100%; min-height: 68px; padding: 12px 20px;
+    border: 1px solid rgba(255,196,120,0.4); border-radius: 18px; color: #fff; text-align: left; cursor: pointer; font-family: inherit;
+    background: rgba(0,0,0,0.5); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+    box-shadow: 0 3px 10px rgba(0,0,0,0.4); transition: transform 0.12s;
   }
   .ddm-bottone:active { transform: scale(0.98); }
   .ddm-bottone b { font-size: 20px; font-weight: 800; color: #fff; text-shadow: 0 2px 3px rgba(0,0,0,0.95), 0 0 10px rgba(0,0,0,0.9), 0 0 2px #000; }
@@ -4595,7 +4596,7 @@
 <footer>
   <span>Tia · Gio · Richi</span>
   <button onclick="eseguiLogout()" style="background:none;border:none;color:var(--text-faint);font-size:0.75rem;cursor:pointer;margin-left:12px;font-family:inherit">Esci</button>
-  <div style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 115</div>
+  <div style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 116</div>
 </footer>
 
 </div>
@@ -6436,8 +6437,10 @@ async function apriDettaglioMazzo(mazzo, scope = _scopeDeck) {
       <div class="dh-name">${mazzo}</div>
     </div>
     </div>
-    <div class="ddm-carte" id="ddm-carte"></div>
-    <div id="ddm-scope"></div>
+    <div class="ddm-sotto">
+      <div class="ddm-carte" id="ddm-carte"></div>
+      <div id="ddm-scope"></div>
+    </div>
   `;
   renderDettaglioMazzoScope(mazzo, scope);
   renderCarteMazzo(mazzo);
