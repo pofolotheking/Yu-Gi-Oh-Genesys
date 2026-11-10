@@ -3622,14 +3622,14 @@
   .nv-testo b { font-size: 15px; line-height: 1.2; }
   .nv-sotto { font-size: 12px; color: var(--text-dim); white-space: nowrap; }
   /* nemesi e vittima preferita del mazzo (sempre all-time), tra il ventaglio e i quattro bottoni */
-  .ddm-nv .nv { padding: 0; margin: 4px 0 12px; gap: 12px; }
-  .ddm-nv .nv-voce { background: #cfcfd6; border-radius: 18px; min-height: 92px; padding: 14px 16px; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.12); }
-  [data-theme="dark"] .ddm-nv .nv-voce { background: #3a3a3f; box-shadow: 0 2px 8px rgba(0,0,0,0.5); }
-  .ddm-nv .nv-testo { text-shadow: 0 0 6px #cfcfd6, 0 0 3px #cfcfd6; }
-  [data-theme="dark"] .ddm-nv .nv-testo { text-shadow: 0 0 6px #3a3a3f, 0 0 3px #3a3a3f; }
-  .ddm-nv .nv-img { left: 58%; }
-  .ddm-nv .nv-testo b { font-size: 17px; }
-  .ddm-nv .nv-img { opacity: 0.8; inset: 0 0 0 58%; }
+  .ddm-nv .nv { padding: 0; margin: 6px 0 18px; gap: 8px; }
+  .ddm-nv .nv-voce { background: none; box-shadow: none; border-radius: 0; min-height: 104px; padding: 6px 4px; align-items: center; overflow: visible; }
+  .ddm-nv .nv-testo { text-shadow: 0 0 8px var(--pop-fondo), 0 0 3px var(--pop-fondo), 0 0 14px var(--pop-fondo); gap: 3px; position: relative; z-index: 1; }
+  .ddm-nv .nv-tit { font-size: 12px; }
+  .ddm-nv .nv-testo b { font-size: 24px; line-height: 1.12; font-weight: 800; }
+  .ddm-nv .nv-sotto { font-size: 15px; }
+  .ddm-nv .nv-img { opacity: 0.75; inset: -4px 0 -4px 52%; border-radius: 16px; z-index: 0;
+    -webkit-mask-image: linear-gradient(270deg, #000 25%, transparent 100%); mask-image: linear-gradient(270deg, #000 25%, transparent 100%); }
   .dado-m-nv .nv { padding: 4px 0 12px; border-top: 0.5px solid var(--border); padding-top: 12px; }
   .dado-player-card:not(.aperto) .dado-m-nv { display: none; }
 
@@ -3742,6 +3742,12 @@
   .sm-scelta { margin: 0 46px 14px 0; }
   .sm-modal .sm-scelta .ddm-tabs { height: 40px; }
   .sm-modal .sm-scelta .ddm-tabs .inner-tab { height: 34px; font-size: 14px; }
+  .sp-overlay { z-index: 390; }
+  .sp-testa { display: flex; flex-direction: column; gap: 3px; padding: 22px 70px 8px 20px; }
+  .sp-testa b { font-size: 26px; font-weight: 800; letter-spacing: -0.02em; color: var(--text); }
+  .sp-testa span { font-size: 14px; color: var(--text-dim); }
+  .sp-corpo { padding: 0 16px; }
+  .sp-corpo .stagione-body { display: block; border-top: none; }
   .sm-testa { display: flex; flex-direction: column; gap: 2px; margin: 0 4px 14px 4px; }
   .sm-testa b { font-size: 22px; font-weight: 800; letter-spacing: -0.01em; color: var(--text); }
   .sm-testa span { font-size: 13px; color: var(--text-dim); }
@@ -4559,7 +4565,7 @@
 <footer>
   <span>Tia · Gio · Richi</span>
   <button onclick="eseguiLogout()" style="background:none;border:none;color:var(--text-faint);font-size:0.75rem;cursor:pointer;margin-left:12px;font-family:inherit">Esci</button>
-  <div style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 111</div>
+  <div style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 112</div>
 </footer>
 
 </div>
@@ -8455,7 +8461,7 @@ function renderListaStagioni() {
     const nPartite = (st.partite || []).length;
     const vincitore = ord.length ? ord[0][0] : '\u2014';
     const k = st.id;
-    return `<details class="card stagione-item" ontoggle="renderDettaglioStagione('${k}')">
+    return `<details class="card stagione-item" data-k="${k}" ontoggle="renderDettaglioStagione('${k}')">
       <summary class="stagione-head">
         <span class="stagione-nome">${escapeHtml(st.nome || ('Stagione ' + st.numero))}</span>
         <span class="stagione-meta"><span class="ico-emoji">\uD83C\uDFC6 </span>${SVG_TROFEO}${escapeHtml(vincitore)} \u00B7 ${nPartite} partite \u00B7 ${data}</span>
@@ -8478,6 +8484,40 @@ function renderListaStagioni() {
 }
 
 const _stagioniRese = new Set();
+// una stagione archiviata si apre in una grande finestra (X rossa, niente barra di scorrimento);
+// il contenuto della stagione viene spostato nella finestra e rimesso a posto alla chiusura
+let _stagionePop = null;
+function apriStagionePopup(det) {
+  chiudiStagionePopup();
+  const k = det.dataset.k, st = (_stagioniCache || []).find(x => x.id === k);
+  const body = det.querySelector('.stagione-body'); if (!st || !body) return;
+  const ov = document.createElement('div');
+  ov.className = 'detail-overlay open sp-overlay'; ov.id = 'sp-overlay';
+  ov.setAttribute('role', 'dialog');
+  ov.innerHTML = `<div class="detail-modal deck-full sp-modal">
+    <button class="detail-close" onclick="chiudiStagionePopup()" title="Chiudi" aria-label="Chiudi">\u2715</button>
+    <div class="sp-testa"><b>${escapeHtml(st.nome || ('Stagione ' + st.numero))}</b><span>${det.querySelector('.stagione-meta').textContent.replace(/\s+/g, ' ').trim()}</span></div>
+    <div class="sp-corpo"></div></div>`;
+  ov.addEventListener('click', e => { if (e.target === ov) chiudiStagionePopup(); });
+  document.body.appendChild(ov);
+  ov.querySelector('.sp-corpo').appendChild(body);
+  _stagionePop = { det, body, ov };
+  renderDettaglioStagione(k);
+}
+function chiudiStagionePopup() {
+  if (!_stagionePop) return;
+  const { det, body, ov } = _stagionePop; _stagionePop = null;
+  if (det.isConnected) det.appendChild(body);
+  ov.remove();
+}
+window.chiudiStagionePopup = chiudiStagionePopup;
+document.addEventListener('click', e => {
+  const sm = e.target.closest && e.target.closest('details.stagione-item[data-k] > summary');
+  if (!sm) return;
+  e.preventDefault();
+  apriStagionePopup(sm.parentElement);
+});
+document.addEventListener('keydown', e => { if (e.key === 'Escape') chiudiStagionePopup(); });
 // il dettaglio si disegna alla prima apertura: evita di renderizzare tutte le
 // stagioni in blocco e riusa gli stessi renderer delle sezioni live
 function renderDettaglioStagione(id) {
