@@ -3747,18 +3747,17 @@
   .cc-scorri .cc-carta:last-child { margin-right: 0; }
   /* sagoma tratteggiata grigia dopo l'ultima carta: tocco = aggiungi carte */
   /* quattro bottoni grandi 2x2: ognuno apre la sua finestra */
-  .ddm-bottoni { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 4px; }
+  .ddm-bottoni { display: flex; flex-direction: column; gap: 10px; margin-top: 8px; }
   .ddm-bottone {
-    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; min-height: 136px; padding: 18px 10px;
-    border: none; border-radius: 20px; color: var(--text); text-align: center; cursor: pointer; font-family: inherit;
+    display: flex; flex-direction: row; align-items: center; justify-content: flex-start; gap: 16px; width: 100%; min-height: 68px; padding: 12px 20px;
+    border: none; border-radius: 18px; color: var(--text); text-align: left; cursor: pointer; font-family: inherit;
     background: #cfcfd6; box-shadow: 0 2px 8px rgba(0,0,0,0.12); transition: transform 0.12s;
   }
   [data-theme="dark"] .ddm-bottone { background: #3a3a3f; box-shadow: 0 2px 8px rgba(0,0,0,0.5); }
-  .ddm-bottone:active { transform: scale(0.97); }
-  .ddm-bottone b { font-size: 19px; font-weight: 800; color: var(--text); }
-  .ddm-bottone > span:last-child { font-size: 14px; color: var(--text-dim); }
-  .ddm-ico { display: flex; align-items: center; justify-content: center; margin-bottom: 4px; color: var(--text); }
-  .ddm-ico svg { width: 52px; height: 52px; }
+  .ddm-bottone:active { transform: scale(0.98); }
+  .ddm-bottone b { font-size: 20px; font-weight: 800; color: var(--text); }
+  .ddm-ico { display: flex; align-items: center; justify-content: center; flex: none; color: var(--text); }
+  .ddm-ico svg { width: 36px; height: 36px; }
   /* finestra dei dati sopra la scheda del mazzo */
   .sm-overlay { z-index: 420; padding: 16px; }
   .detail-modal.sm-modal { background: var(--bg-gruppo); max-width: 520px; max-height: 84vh; padding: 20px 16px 18px; }
@@ -4590,7 +4589,7 @@
 <footer>
   <span>Tia · Gio · Richi</span>
   <button onclick="eseguiLogout()" style="background:none;border:none;color:var(--text-faint);font-size:0.75rem;cursor:pointer;margin-left:12px;font-family:inherit">Esci</button>
-  <div style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 113</div>
+  <div style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 114</div>
 </footer>
 
 </div>
@@ -6432,7 +6431,6 @@ async function apriDettaglioMazzo(mazzo, scope = _scopeDeck) {
     </div>
     </div>
     <div class="ddm-carte" id="ddm-carte"></div>
-    <div class="ddm-nv">${htmlNemesiVittima(mazzo, partiteAllTime(), true)}</div>
     <div id="ddm-scope"></div>
   `;
   renderDettaglioMazzoScope(mazzo, scope);
@@ -6520,7 +6518,7 @@ function renderDettaglioMazzoScope(mazzo, scope) {
   };
   _ddmCtx = { mazzo, partite, scope };
   const nAvv = Object.values(s.vs).filter(r => r.v + r.p > 0).length;
-  const bottone = (k, ico, titolo, sub) => `<button class="ddm-bottone ${COL_DDM[k]}" onclick="apriSottoMazzo('${k}')"><span class="ddm-ico">${ico}</span><b>${titolo}</b><span>${sub}</span></button>`;
+  const bottone = (k, ico, titolo, sub) => `<button class="ddm-bottone ${COL_DDM[k]}" onclick="apriSottoMazzo('${k}')"><span class="ddm-ico">${ico}</span><b>${titolo}</b></button>`;
   document.getElementById('ddm-scope').innerHTML = `<div class="ddm-bottoni">
     ${bottone('andamento', ICO_DDM.andamento, 'Andamento', tot ? 'Win rate ' + pct(s.v, tot) : 'Nessuna partita')}
     ${bottone('statistiche', ICO_DDM.statistiche, 'Statistiche', posizione && tot ? posizione + '° in classifica' : 'Dati del mazzo')}

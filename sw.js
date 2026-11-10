@@ -1,5 +1,5 @@
 // sw.js — Service Worker essenziale, network-first
-const CACHE_NAME = 'genesys-cache-v113';
+const CACHE_NAME = 'genesys-cache-v114';
 const CORE_ASSETS = ['./', './index.html', './manifest.json'];
 
 // Installazione: pre-cache dei file base
