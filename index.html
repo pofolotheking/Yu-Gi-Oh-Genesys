@@ -3784,6 +3784,43 @@
   .sm-modal .sm-scelta .ddm-tabs { height: 40px; }
   .sm-modal .sm-scelta .ddm-tabs .inner-tab { height: 34px; font-size: 14px; }
   .sp-overlay { z-index: 390; }
+  .agg-banner {
+    position: fixed; z-index: 6000; left: 50%; transform: translateX(-50%); top: calc(env(safe-area-inset-top) + 10px);
+    display: flex; align-items: center; gap: 10px; max-width: calc(100vw - 24px); padding: 9px 10px 9px 16px; border-radius: 16px;
+    background: #1c1c1e; color: #fff; font-size: 15px; box-shadow: 0 8px 28px rgba(0,0,0,0.4); animation: popIn 0.3s ease;
+  }
+  .agg-banner button { border: none; border-radius: 10px; padding: 7px 14px; background: var(--blue); color: #fff; font-family: inherit; font-size: 15px; font-weight: 700; cursor: pointer; }
+  .agg-banner .agg-x { background: rgba(255,255,255,0.15); padding: 7px 10px; }
+  /* ---- stile unico per tutte le grandi finestre: stessa animazione, stessi angoli, fascia col dorso della carta in alto ---- */
+  @keyframes popIn { from { opacity: 0; transform: translateY(20px) scale(0.98); } to { opacity: 1; transform: none; } }
+  .detail-modal.deck-full, .detail-modal.sm-modal, #carte.active { animation: popIn 0.28s cubic-bezier(0.32, 0.72, 0, 1); }
+  .detail-modal.sm-modal { border-radius: 22px; box-shadow: 0 10px 40px rgba(0,0,0,0.3), 0 0 0 1px rgba(0,0,0,0.06); isolation: isolate; scrollbar-width: none; }
+  .detail-modal.sm-modal::-webkit-scrollbar { display: none; }
+  [data-theme="dark"] .detail-modal.sm-modal { box-shadow: 0 0 0 1px rgba(255,255,255,0.16); }
+  .detail-modal.sm-modal .detail-close { width: 36px; height: 36px; top: 14px; right: 14px; box-shadow: 0 2px 8px rgba(255,59,48,0.4); }
+  .sp-modal, #carte.active { isolation: isolate; }
+  .sp-modal::before, .sm-modal::before, #carte.active::before {
+    content: ''; position: absolute; z-index: -1; left: 0; right: 0; top: 0; height: var(--back-h, 150px);
+    background: #140803 url('img/back-card.jpg') center 30% / cover no-repeat; opacity: 0.9; border-radius: 22px 22px 0 0;
+    -webkit-mask-image: linear-gradient(180deg, #000 78%, transparent 100%); mask-image: linear-gradient(180deg, #000 78%, transparent 100%);
+    pointer-events: none;
+  }
+  #carte.active { --back-h: 120px; }
+  .sm-modal { --back-h: 170px; }
+  .sp-modal { --back-h: 124px; }
+  .sp-modal .sp-corpo { padding-top: 18px; }
+  .sp-testa b, .sm-testa b, #carte.active > h2 { color: #fff !important; text-shadow: 0 2px 4px rgba(0,0,0,0.9), 0 0 12px rgba(0,0,0,0.8); }
+  .sp-testa span, .sm-testa span { color: rgba(255,255,255,0.92) !important; text-shadow: 0 1px 3px rgba(0,0,0,0.9); }
+  /* scheda giocatore: carte-mazzo nel ventaglio */
+  .cc-carta.gm img, .gm-vuota { display: block; width: 100%; aspect-ratio: 59 / 86; object-fit: cover; object-position: center 30%; border-radius: 8px; box-shadow: 0 10px 24px 2px rgba(0,0,0,0.55), 0 2px 6px rgba(0,0,0,0.4); }
+  .gm-vuota { display: flex; align-items: center; justify-content: center; background: #2c2c30; color: #98989f; font-size: 40px; font-weight: 800; }
+  .gm-nome { position: absolute; left: 0; right: 0; bottom: 0; padding: 22px 8px 8px; border-radius: 0 0 8px 8px; color: #fff; font-size: 14px; font-weight: 800; line-height: 1.15; text-shadow: 0 1px 3px rgba(0,0,0,0.95);
+    background: linear-gradient(180deg, transparent, rgba(0,0,0,0.8)); display: flex; flex-direction: column; gap: 1px; }
+  .gm-nome small { font-size: 13px; font-weight: 700; opacity: 0.9; }
+  .dg-vuoto { margin-top: 16px; color: #fff; text-shadow: 0 1px 3px #000; }
+  .dg-desc { margin: 12px 4px; font-size: 14px; color: var(--text-dim); line-height: 1.4; }
+  .sm-modal .nv { padding: 12px 0 0; }
+  .dg-ach { padding: 8px 0 0; }
   .sp-testa { display: flex; flex-direction: column; gap: 3px; padding: 22px 70px 8px 20px; }
   .sp-testa b { font-size: 26px; font-weight: 800; letter-spacing: -0.02em; color: var(--text); }
   .sp-testa span { font-size: 14px; color: var(--text-dim); }
@@ -4496,6 +4533,22 @@
     </div>
 
     <div class="accordion-item">
+      <button class="accordion-btn" onclick="toggleAccordion('acc-backup'); aggiornaStatoBackup()">
+        <span class="acc-titolo"><span class="ico-emoji">\uD83D\uDCBE </span><span class="ico-imp" style="background:#34c759"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M4 19h16"/></svg></span>Backup e aggiornamenti</span>
+      </button>
+      <div class="accordion-body" id="acc-backup" style="display:none">
+        <div class="card padded">
+          <p class="notif-stato">Scarica una copia di tutto: giocatori, mazzi, carte, partite e stagioni archiviate. Conservala in un posto sicuro.</p>
+          <button onclick="scaricaBackup()" style="width:100%" id="backup-btn">Scarica backup</button>
+          <p class="notif-stato" id="backup-stato" style="margin-top:10px"></p>
+          <hr style="border:none;border-top:0.5px solid var(--border);margin:14px 0">
+          <p class="notif-stato" id="agg-stato">Versione installata: <b id="agg-versione"></b></p>
+          <button onclick="controllaAggiornamento(true)" style="width:100%" class="secondary" id="agg-btn">Controlla aggiornamenti</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="accordion-item">
       <button class="accordion-btn" onclick="toggleAccordion('acc-profili')">
         <span class="acc-titolo"><span class="ico-emoji">👤 </span><span class="ico-imp" style="background:#ff9500"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg></span>Profili Giocatori</span><span class="accordion-arrow">▶</span>
       </button>
@@ -4625,7 +4678,7 @@
 <footer>
   <span>Tia · Gio · Richi</span>
   <button onclick="eseguiLogout()" style="background:none;border:none;color:var(--text-faint);font-size:0.75rem;cursor:pointer;margin-left:12px;font-family:inherit">Esci</button>
-  <div style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 121</div>
+  <div id="versione-app" style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 122</div>
 </footer>
 
 </div>
@@ -4959,26 +5012,18 @@ function renderGiocatori(partite = dati.partite) {
     const foto = ((dati.profili || {})[nome] || {}).foto;
     // la foto non e' piu' in un riquadro: sfuma sul lato sinistro del bottone, come l'immagine dei mazzi
     const avatar = `<span class="cl-avatar mazzo">${escapeHtml(nome.charAt(0).toUpperCase())}${foto ? `<img src="${escapeHtml(foto)}" alt="" onerror="this.remove()">` : ''}</span>`;
-    html += `<tr class="cl-riga riga-mazzo riga-gioc${metallo}" onclick="toggleProfiloInline('${safeNome}')">
+    html += `<tr class="cl-riga riga-mazzo riga-gioc${metallo}" data-giocatore="${escapeHtml(nome)}">
       <td>
         <div class="cl-chi">
           ${avatar}
           <div class="cl-testo">
             <span class="name-btn">${nome}</span>
-            <button class="profile-toggle-btn" id="ptbtn-${safeNome}" onclick="event.stopPropagation(); toggleProfiloInline('${safeNome}')">${SVG_CHEVRON}</button>
           </div>
         </div>
       </td>
       <td class="num m-col-no">${s.partite}</td>
       <td class="num m-col-no">${s.v}</td><td class="num m-col-no">${s.p}</td>
       <td class="vp-td"><span class="vp-cell">${s.v}-${s.p}</span></td>
-    </tr>
-    <tr class="profile-inline-row" id="prow-${safeNome}">
-      <td class="profile-inline-cell" colspan="${cols}">
-        <div class="profile-inline-wrap" id="pwrap-${safeNome}">
-          <div id="pcontent-${safeNome}"></div>
-        </div>
-      </td>
     </tr>`;
   });
   t.innerHTML = html;
@@ -6649,7 +6694,8 @@ function renderDettaglioMazzoScope(mazzo, scope) {
     matchup: { titolo: 'Match-up', html: `<div class="deck-mu-vs-list">${noVs}</div>` },
     storico: { titolo: 'Storico partite', html: `<div class="dmh-list" id="dmh-body"></div>` },
   };
-  _ddmCtx = { mazzo, partite, scope };
+  _ddmCtx = { mazzo, partite, scope, ricalcola: sc => renderDettaglioMazzoScope(mazzo, sc),
+    dopo: k => { if (k === 'andamento') graficoMazzo(mazzo, partite); if (k === 'storico') renderCronologiaMazzo(mazzo, scope); } };
   const nAvv = Object.values(s.vs).filter(r => r.v + r.p > 0).length;
   const bottone = (k, ico, titolo, sub) => `<button class="ddm-bottone ${COL_DDM[k]}" onclick="apriSottoMazzo('${k}')"><span class="ddm-ico">${ico}</span><b>${titolo}</b></button>`;
   document.getElementById('ddm-scope').innerHTML = `<div class="ddm-bottoni">
@@ -6678,20 +6724,19 @@ function apriSottoMazzo(k) {
   ov.addEventListener('click', e => { if (e.target === ov) chiudiSottoMazzo(); });
   ov.innerHTML = `<div class="detail-modal sm-modal">
     <button class="detail-close" onclick="chiudiSottoMazzo()" title="Chiudi" aria-label="Chiudi">✕</button>
-    <div class="sm-scelta"><div class="inner-tab-bar ddm-tabs">
+    ${_ddmCtx.fisso ? '' : `<div class="sm-scelta"><div class="inner-tab-bar ddm-tabs">
       <button class="inner-tab${_ddmCtx.scope === 'cur' ? ' active' : ''}" onclick="scopeSottoMazzo('cur', '${k}')">Stagione corrente</button>
       <button class="inner-tab${_ddmCtx.scope === 'all' ? ' active' : ''}" onclick="scopeSottoMazzo('all', '${k}')">All-time</button>
-    </div></div>
-    <div class="sm-testa"><b>${pz.titolo}</b><span>${escapeHtml(_ddmCtx.mazzo)}</span></div>
+    </div></div>`}
+    <div class="sm-testa"><b>${pz.titolo}</b><span>${escapeHtml(_ddmCtx.mazzo)}${_ddmCtx.fisso ? ' \u00B7 ' + escapeHtml(_ddmCtx.fisso) : ''}</span></div>
     ${pz.html}</div>`;
   document.body.appendChild(ov);
-  if (k === 'andamento') graficoMazzo(_ddmCtx.mazzo, _ddmCtx.partite);
-  if (k === 'storico') renderCronologiaMazzo(_ddmCtx.mazzo, _ddmCtx.scope);
+  if (_ddmCtx.dopo) _ddmCtx.dopo(k);
 }
 // cambiando Stagione corrente / All-time dentro la finestra, si ricalcola tutto e la finestra si riapre sugli stessi dati
 function scopeSottoMazzo(scope, k) {
   if (!_ddmCtx || scope === _ddmCtx.scope) return;
-  renderDettaglioMazzoScope(_ddmCtx.mazzo, scope);
+  _ddmCtx.ricalcola(scope);
   apriSottoMazzo(k);
 }
 window.scopeSottoMazzo = scopeSottoMazzo;
@@ -6704,10 +6749,16 @@ window.apriSottoMazzo = apriSottoMazzo; window.chiudiSottoMazzo = chiudiSottoMaz
 
 // win rate cumulato del mazzo partita dopo partita, a partire da un 50% neutro
 function graficoMazzo(mazzo, partite) {
-  const cv = document.getElementById('ddm-chart');
-  if (!cv || typeof Chart === 'undefined') return;
   const esiti = inOrdine(partite).filter(p => (p.m1 === mazzo || p.m2 === mazzo) && p.m1 !== p.m2 && PUNTI[p.risultato])
     .map(p => { const [a, b] = PUNTI[p.risultato]; return p.m1 === mazzo ? a > b : b > a; });
+  disegnaGraficoWR(esiti);
+}
+function graficoGiocatore(nome, partite) {
+  disegnaGraficoWR(partiteDi(partite, nome).map(e => e.vinta));
+}
+function disegnaGraficoWR(esiti) {
+  const cv = document.getElementById('ddm-chart');
+  if (!cv || typeof Chart === 'undefined') return;
   let v = 0;
   const serie = [50, ...esiti.map((w, i) => { if (w) v++; return Math.round(100 * v / (i + 1)); })];
   const css = getComputedStyle(document.documentElement);
@@ -6742,6 +6793,116 @@ function graficoMazzo(mazzo, partite) {
     }
   });
 }
+
+// ============ SCHEDA GIOCATORE (stesso stile della scheda del mazzo) ============
+// foto grande in alto con il nome, ventaglio dei mazzi che usa di piu' e quattro bottoni
+let _dgNome = null, _dgFisse = null;
+function mazziDiGiocatore(nome, partite) {
+  const m = {};
+  partiteDi(partite, nome).forEach(e => { const x = m[e.mazzo] || (m[e.mazzo] = { nome: e.mazzo, v: 0, p: 0 }); e.vinta ? x.v++ : x.p++; });
+  return Object.values(m).sort((a, b) => (b.v + b.p) - (a.v + a.p) || b.v - a.v);
+}
+function apriGiocatore(nome, scope = 'all', fisse = null) {
+  chiudiSottoMazzo();
+  _dgNome = nome; _dgFisse = fisse; _dmhMazzo = null;
+  const foto = ((dati.profili || {})[nome] || {}).foto;
+  const partite = fisse ? fisse.partite : partiteAllTime();
+  const mazzi = mazziDiGiocatore(nome, partite);
+  const carta = m => { const img = imgMazzo(m.nome);
+    return `<div class="cc-carta gm" data-mazzo="${escapeHtml(m.nome)}">
+      ${img ? `<img src="${escapeHtml(img)}" alt="${escapeHtml(m.nome)}" loading="lazy">` : `<div class="gm-vuota">${escapeHtml(m.nome.charAt(0).toUpperCase())}</div>`}
+      <span class="gm-nome">${escapeHtml(m.nome)}<small>${m.v}-${m.p}</small></span></div>`; };
+  document.getElementById('detail-content').innerHTML = `
+    <div class="dh-hero${foto ? '' : ' senza-img'}"${foto ? ` style="--hero:url('${escapeHtml(foto)}')"` : ''}>
+      <div class="detail-head"><div class="dh-name">${escapeHtml(nome)}</div></div>
+    </div>
+    <div class="ddm-sotto">
+      <div class="ddm-carte" id="dg-carte">${mazzi.length
+        ? `<div class="cc-scorri-wrap"><div class="cc-scorri">${mazzi.map(carta).join('')}</div></div>`
+        : '<div class="cc-vuoto dg-vuoto">Nessun mazzo giocato ancora.</div>'}</div>
+      <div id="ddm-scope"></div>
+    </div>`;
+  const sc = document.querySelector('#dg-carte .cc-scorri');
+  if (sc) { sc.addEventListener('scroll', () => ventaglioCarte(sc), { passive: true }); ventaglioCarte(sc); }
+  renderGiocatoreScope(nome, scope);
+  const modal = document.getElementById('detail-modal');
+  if (modal && !modal._ascoltaScroll) {
+    modal._ascoltaScroll = true;
+    modal.addEventListener('scroll', () => modal.classList.toggle('scorre', modal.scrollTop > 40), { passive: true });
+  }
+  if (modal) { modal.scrollTop = 0; modal.classList.remove('scorre'); modal.classList.add('deck-full'); modal.style.backgroundImage = ''; modal.classList.remove('has-bg-img'); }
+  document.getElementById('detail-overlay').classList.add('open');
+}
+function renderGiocatoreScope(nome, scope) {
+  _ddmScope = scope;
+  const fisse = _dgFisse;
+  const partite = fisse ? fisse.partite : partiteScope(scope);
+  const stat = statGiocatoriDa(partite, dati.giocatori);
+  const s = stat[nome] || { punti: 0, v: 0, p: 0, partite: 0 };
+  const pos = ordinaClassifica(stat).findIndex(([n]) => n === nome) + 1;
+  const es = partiteDi(partite, nome);
+  const pct = (v, t) => t > 0 ? Math.round(100 * v / t) + '%' : '\u2014';
+  const volte = n => `${n} volt${n === 1 ? 'a' : 'e'}`;
+  const primo = es.filter(e => e.par.primo === nome), secondo = es.filter(e => e.par.primo && e.par.primo !== nome);
+  const dado = es.filter(e => e.par.dado === nome);
+  const riga = (et, val) => `<div class="ddm-riga"><span class="ddm-et">${et}</span><b>${val}</b></div>`;
+  const profilo = (dati.profili || {})[nome] || {};
+  const pref = profilo.mazzoPref || (mazziDiGiocatore(nome, partiteAllTime())[0] || {}).nome || '\u2014';
+  const ach = calcolaAchievements(nome).map(a => `<div class="ach-item ${a.unlocked ? 'unlocked' : 'locked'}" ${a.unlocked ? `data-tooltip="${a.desc}"` : ''}><span class="ach-icon">${a.icon}</span>${a.unlocked ? `<span class="ach-label">${a.name}</span>` : ''}</div>`).join('');
+  // match-up: contro gli altri giocatori e con ciascun mazzo del giocatore
+  const gruppi = (chiave, nomeDi, dataM) => {
+    const g = {}; es.forEach(e => { const k = chiave(e); const x = g[k] || (g[k] = { v: 0, p: 0 }); e.vinta ? x.v++ : x.p++; });
+    return Object.entries(g).sort((a, b) => (b[1].v + b[1].p) - (a[1].v + a[1].p)).map(([k, r]) => {
+      const cls = r.v > r.p ? 'win' : r.v < r.p ? 'lose' : '';
+      return `<div class="deck-mu-vs-row ${cls}"${dataM ? ` data-mazzo="${escapeHtml(k)}"` : ''}><span class="deck-mu-vs-name">${nomeDi(k)}</span><span class="deck-mu-vs-score">${r.v}\u2013${r.p}</span><span class="deck-mu-vs-wr">${pct(r.v, r.v + r.p)}</span></div>`; }).join('') || '<div class="deck-mu-vuoto">Nessuno scontro registrato.</div>';
+  };
+  const storico = es.slice().reverse().map(e => {
+    const par = e.par, sc = e.par.risultato.split('-'), punteggio = par.g1 === nome ? par.risultato : sc.reverse().join('-');
+    return `<div class="dmh-row ${e.vinta ? 'win' : 'lose'}"><span class="dmh-esito">${e.vinta ? 'V' : 'S'}</span><span class="dmh-main"><span class="dmh-vs">${escapeHtml(e.mazzo)} vs ${escapeHtml(e.mazzoAvv)}</span><span class="dmh-meta">contro ${escapeHtml(e.avv)} \u00B7 ${formatData(par.data)}${par._stagione ? ' \u00B7 ' + escapeHtml(par._stagione) : ''}</span></span><span class="dmh-score">${punteggio}</span></div>`;
+  }).join('') || '<div class="dmh-vuoto">Nessuna partita.</div>';
+  _ddmPezzi = {
+    andamento: { titolo: 'Andamento', html: `<div class="ddm-grafico"><div class="ddm-grafico-wrap sm-alto"><canvas id="ddm-chart"></canvas></div></div>` },
+    statistiche: { titolo: 'Statistiche', html: `<div class="ddm-tabella">
+      ${riga('Posizione in classifica', pos && s.partite ? pos + '\u00B0' : '\u2014')}
+      ${riga('Punti', s.punti)}
+      ${riga('Partite giocate', s.partite)}
+      ${riga('Vittorie e sconfitte', `${s.v} \u2013 ${s.p}`)}
+      ${riga('Percentuale di vittorie', pct(s.v, s.partite))}
+      ${riga(`Vittorie andando primo (${volte(primo.length)})`, pct(primo.filter(e => e.vinta).length, primo.length))}
+      ${riga(`Vittorie andando secondo (${volte(secondo.length)})`, pct(secondo.filter(e => e.vinta).length, secondo.length))}
+      ${riga('Dadi vinti su quelli lanciati', dado.length ? `${dado.length} su ${es.filter(e => e.par.dado).length}` : '\u2014')}
+      ${riga('Vittorie dopo aver vinto il dado', pct(dado.filter(e => e.vinta).length, dado.length))}
+      ${riga('Mazzo preferito', escapeHtml(pref))}
+    </div>
+    ${profilo.descrizione ? `<p class="dg-desc">${escapeHtml(profilo.descrizione)}</p>` : ''}
+    ${htmlNemesiVittima(nome, partite)}
+    <div class="ce-titolo" style="margin-top:14px">Achievements</div>
+    <div class="profile-inline-ach dg-ach">${ach}</div>` },
+    matchup: { titolo: 'Match-up', html: `<div class="ce-titolo">Contro i giocatori</div><div class="deck-mu-vs-list">${gruppi(e => e.avv, k => 'vs ' + escapeHtml(k), false)}</div>
+      <div class="ce-titolo" style="margin-top:14px">Con i suoi mazzi</div><div class="deck-mu-vs-list">${gruppi(e => e.mazzo, k => escapeHtml(k), true)}</div>` },
+    storico: { titolo: 'Storico partite', html: `<div class="dmh-list">${storico}</div>` },
+  };
+  _ddmCtx = { mazzo: nome, partite, scope, fisso: fisse ? fisse.etichetta : null, ricalcola: sc => renderGiocatoreScope(nome, sc),
+    dopo: k => { if (k === 'andamento') graficoGiocatore(nome, partite); } };
+  const bottone = (k, ico, titolo) => `<button class="ddm-bottone ${COL_DDM[k]}" onclick="apriSottoMazzo('${k}')"><span class="ddm-ico">${ico}</span><b>${titolo}</b></button>`;
+  document.getElementById('ddm-scope').innerHTML = `<div class="ddm-bottoni">
+    ${bottone('andamento', ICO_DDM.andamento, 'Andamento')}${bottone('statistiche', ICO_DDM.statistiche, 'Statistiche')}
+    ${bottone('matchup', ICO_DDM.matchup, 'Match-up')}${bottone('storico', ICO_DDM.storico, 'Storico partite')}</div>`;
+}
+window.apriGiocatore = apriGiocatore;
+// qualunque elemento con data-giocatore apre la scheda del giocatore, sulle partite della sezione in cui si trova
+document.addEventListener('click', e => {
+  const el = e.target.closest && e.target.closest('[data-giocatore]');
+  if (!el) return;
+  e.stopPropagation(); e.preventDefault();
+  const nome = el.dataset.giocatore;
+  if (el.closest('.sp-modal') && _stagionePop) {
+    const st = (_stagioniCache || []).find(x => x.id === _stagionePop.det.dataset.k);
+    if (st) return apriGiocatore(nome, 'all', { partite: st.partite || [], etichetta: st.nome || ('Stagione ' + st.numero) });
+  }
+  const sez = el.closest('main > section');
+  apriGiocatore(nome, sez && sez.id === 'giocatori' ? _scopeClassifica : 'all');
+}, true);
 
 function switchScopeMazzo(scope) {
   if (_dmhMazzo) renderDettaglioMazzoScope(_dmhMazzo, scope);
@@ -8568,23 +8729,20 @@ function renderStagioneCorrente() {
 }
 
 function tabellaClassifica(ord) {
-  const medals = ['\uD83E\uDD47', '\uD83E\uDD48', '\uD83E\uDD49'];
   const metalli = ['oro', 'argento', 'bronzo'];
-  let html = '<table class="tab-box"><tr class="tab-intestazione"><th>#</th><th>Giocatore</th><th>Punti</th><th>PG</th><th>V</th><th>P</th><th>Win Rate</th></tr>';
+  let html = '<table class="tab-box"><tr class="tab-intestazione"><th>#</th><th>Giocatore</th><th>Punti</th><th>PG</th><th>V</th><th>P</th><th>V-P</th></tr>';
   ord.forEach(([nome, s], i) => {
     const pg = s.partite != null ? s.partite : (s.v + s.p);
-    const wr = pg > 0 ? Math.round(100 * s.v / pg) : 0;
-    const rank = i < 3 ? `<span class="medal">${medals[i]}</span>` : (i + 1);
     const foto = ((dati.profili || {})[nome] || {}).foto;
-    const avatar = `<span class="cl-avatar">${escapeHtml(nome.charAt(0).toUpperCase())}${foto ? `<img src="${escapeHtml(foto)}" alt="" onerror="this.remove()">` : ''}</span>`;
-    const classi = ['cl-riga', i < 3 ? metalli[i] : '', i === 0 ? 'top-1' : ''].filter(Boolean).join(' ');
-    html += `<tr class="${classi}">
-      <td class="rank m-col-no">${rank}</td>
-      <td><div class="cl-chi">${avatar}<div class="cl-testo">${escapeHtml(nome)}<span class="cl-sub">${s.punti} punti · ${s.v}-${s.p}</span></div></div></td>
+    const avatar = `<span class="cl-avatar mazzo">${escapeHtml(nome.charAt(0).toUpperCase())}${foto ? `<img src="${escapeHtml(foto)}" alt="" onerror="this.remove()">` : ''}</span>`;
+    const classi = ['cl-riga', 'riga-mazzo', 'riga-gioc', i < 3 ? metalli[i] : '', i === 0 ? 'top-1' : ''].filter(Boolean).join(' ');
+    html += `<tr class="${classi}" data-giocatore="${escapeHtml(nome)}">
+      <td class="rank m-col-no">${i + 1}</td>
+      <td><div class="cl-chi">${avatar}<div class="cl-testo">${escapeHtml(nome)}</div></div></td>
       <td class="pts m-col-no">${s.punti}</td>
       <td class="num m-col-no">${pg}</td>
       <td class="num m-col-no">${s.v}</td><td class="num m-col-no">${s.p}</td>
-      <td><div class="wr-cell"><span class="wr-text">${wr}%</span><span class="wr-bar"><span style="width:${wr}%"></span></span></div></td>
+      <td class="vp-td"><span class="vp-cell">${s.v}-${s.p}</span></td>
     </tr>`;
   });
   return html + '</table>';
@@ -9555,6 +9713,71 @@ window.addEventListener('resize', barraAltaPresto);
 const _osservaSezioni = new MutationObserver(barraAltaPresto);
 document.querySelectorAll('main > section').forEach(sec => _osservaSezioni.observe(sec, { attributes: true, attributeFilter: ['class'] }));
 aggiornaBarraAlta();
+
+// ============ AGGIORNAMENTI E BACKUP ============
+// Dopo ogni pubblicazione GitHub Pages impiega alcuni minuti: l'app confronta il proprio numero
+// di versione con quello del sito e, se e' piu' vecchia, propone di aggiornarsi.
+const versioneInstallata = () => +((document.getElementById('versione-app') || {}).textContent || '').replace(/\D/g, '') || 0;
+async function controllaAggiornamento(manuale = false) {
+  const st = document.getElementById('agg-stato');
+  try {
+    const r = await fetch('index.html?v=' + Date.now(), { cache: 'no-store' });
+    const m = (await r.text()).match(/>versione (\d+)</);
+    if (!m) throw new Error();
+    const nuova = +m[1], mia = versioneInstallata();
+    if (nuova > mia) { mostraBannerAggiornamento(nuova); if (st) st.innerHTML = `Disponibile la versione <b>${nuova}</b> (hai la ${mia}).`; }
+    else { if (st) st.innerHTML = `Sei aggiornato: versione <b>${mia}</b>.`; if (manuale) mostraAvviso('Sei gia\u0027 alla versione piu\u0027 recente'); }
+  } catch (e) { if (manuale) mostraAvviso('Non riesco a controllare ora: riprova tra poco'); }
+}
+function mostraBannerAggiornamento(n) {
+  if (document.getElementById('agg-banner')) return;
+  const b = document.createElement('div');
+  b.id = 'agg-banner'; b.className = 'agg-banner';
+  b.innerHTML = `<span>Nuova versione <b>${n}</b> disponibile</span><button onclick="applicaAggiornamento()">Aggiorna</button><button class="agg-x" onclick="this.parentNode.remove()" aria-label="Chiudi">\u2715</button>`;
+  document.body.appendChild(b);
+}
+async function applicaAggiornamento() {
+  try { const k = await caches.keys(); await Promise.all(k.map(x => caches.delete(x))); } catch (e) {}
+  try { const r = await navigator.serviceWorker.getRegistrations(); await Promise.all(r.map(x => x.update())); } catch (e) {}
+  location.reload();
+}
+window.controllaAggiornamento = controllaAggiornamento; window.applicaAggiornamento = applicaAggiornamento;
+setTimeout(controllaAggiornamento, 4000);
+setInterval(controllaAggiornamento, 5 * 60 * 1000);
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') controllaAggiornamento(); });
+
+function aggiornaStatoBackup() {
+  const v = document.getElementById('agg-versione'); if (v) v.textContent = versioneInstallata();
+  let d = null; try { d = localStorage.getItem('genesys-ultimo-backup'); } catch (e) {}
+  const el = document.getElementById('backup-stato');
+  if (el) el.textContent = d ? 'Ultimo backup scaricato: ' + new Date(d).toLocaleString('it-IT', { dateStyle: 'medium', timeStyle: 'short' }) : 'Non hai ancora scaricato nessun backup.';
+}
+async function scaricaBackup() {
+  const btn = document.getElementById('backup-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Preparo il backup\u2026'; }
+  try {
+    let stagioni = [];
+    try { stagioni = await caricaStagioni(true); } catch (e) {}
+    const oggi = new Date().toISOString().slice(0, 10);
+    const copia = { app: 'yu-gi-oh-genesys', versione: versioneInstallata(), creato: new Date().toISOString(), dati, stagioni };
+    const nome = `genesys-backup-${oggi}.json`;
+    const file = new File([JSON.stringify(copia, null, 1)], nome, { type: 'application/json' });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      try { await navigator.share({ files: [file], title: nome }); }
+      catch (e) { if (e && e.name === 'AbortError') throw e; throw new Error('share'); }
+    } else {
+      const a = document.createElement('a'); a.href = URL.createObjectURL(file); a.download = nome;
+      document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+    }
+    try { localStorage.setItem('genesys-ultimo-backup', new Date().toISOString()); } catch (e) {}
+    mostraAvviso(`Backup pronto: ${(dati.partite || []).length + stagioni.reduce((n, x) => n + (x.partite || []).length, 0)} partite`);
+  } catch (e) {
+    if (!(e && e.name === 'AbortError')) mostraAvviso('Backup non riuscito, riprova');
+  }
+  if (btn) { btn.disabled = false; btn.textContent = 'Scarica backup'; }
+  aggiornaStatoBackup();
+}
+window.scaricaBackup = scaricaBackup; window.aggiornaStatoBackup = aggiornaStatoBackup;
 
 // ============ COPIA DATI ============
 // tutto sincrono: su iPhone la copia negli appunti e' ammessa solo dentro il tocco
