@@ -3669,6 +3669,73 @@
     .vitt-titolo, .vitt-carta, .vitt-mazzo, .vitt-chi { animation: none; }
   }
 
+  /* ── CARTE ASSOCIATE AL MAZZO ── */
+  .ddm-carte { margin: 0 0 12px; }
+  .cc-testa { display: flex; justify-content: flex-end; margin-bottom: 8px; }
+  .cc-aggiungi {
+    display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px 7px 10px; border: none; border-radius: 999px;
+    background: var(--blue); color: #fff; font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer;
+    box-shadow: 0 3px 10px rgba(0, 122, 255, 0.3);
+  }
+  .cc-scorri {
+    display: flex; gap: 8px; overflow-x: auto; scroll-snap-type: x proximity; scrollbar-width: none;
+    margin: 0 -16px; padding: 4px 28px 6px;
+    -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 28px, #000 calc(100% - 28px), transparent 100%);
+    mask-image: linear-gradient(90deg, transparent 0, #000 28px, #000 calc(100% - 28px), transparent 100%);
+  }
+  .cc-scorri::-webkit-scrollbar { display: none; }
+  .cc-scorri .cc-carta { flex: none; width: 78px; scroll-snap-align: start; }
+  .cc-carta { position: relative; cursor: pointer; border-radius: 6px; }
+  .cc-carta img { display: block; width: 100%; aspect-ratio: 59 / 86; object-fit: cover; border-radius: 6px; background: var(--seg-fondo); box-shadow: 0 2px 6px rgba(0,0,0,0.18); }
+  .cc-pts {
+    position: absolute; top: 3px; left: 3px; min-width: 20px; padding: 1px 5px; border-radius: 6px;
+    font-size: 11px; font-weight: 800; color: #fff; text-align: center; background: #1d1d1f; box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+  }
+  .cc-pts.high { background: var(--red); } .cc-pts.mid { background: var(--orange); } .cc-pts.low { background: var(--green-dark); }
+  .cc-carta.scelta img { filter: brightness(0.55); }
+  .cc-carta.aggiunta::after {
+    content: ''; position: absolute; inset: 0; border-radius: 6px; box-shadow: inset 0 0 0 2.5px var(--blue); pointer-events: none;
+  }
+  .cc-azioni { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; gap: 6px; }
+  .cc-az {
+    width: 32px; height: 32px; border-radius: 50%; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center;
+    background: #fff; color: #1d1d1f; box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+  }
+  .cc-az.piu, .cc-az.fatto { background: var(--blue); color: #fff; }
+  .cc-az.fatto { opacity: 0.85; cursor: default; }
+  .cc-az.togli { background: var(--red); color: #fff; }
+  .cc-vuoto { padding: 16px 4px; text-align: center; font-size: 14px; color: var(--text-dim); }
+  .cc-overlay, .ci-overlay {
+    display: none; position: fixed; inset: 0; z-index: 450; background: rgba(0,0,0,0.45);
+    align-items: flex-end; justify-content: center;
+  }
+  .ci-overlay { z-index: 460; align-items: center; padding: 16px; }
+  .cc-overlay.open, .ci-overlay.open { display: flex; animation: fade 0.2s ease; }
+  .cc-foglio {
+    width: 100%; max-width: 600px; height: min(88vh, 900px); display: flex; flex-direction: column;
+    background: var(--bg-gruppo); border-radius: 16px 16px 0 0; padding: 14px 14px calc(env(safe-area-inset-bottom) + 10px);
+    animation: slideUp 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+  }
+  .cc-foglio-testa { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 10px; font-size: 17px; font-weight: 700; }
+  .cc-foglio-testa span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .cc-chiudi {
+    flex: none; width: 32px; height: 32px; border-radius: 50%; border: none; cursor: pointer;
+    background: #ff3b30; color: #fff; font-size: 15px; font-weight: 700;
+  }
+  .cc-cerca { display: flex; flex-direction: row; gap: 8px; margin-bottom: 10px; }
+  .cc-az svg { flex: none; }
+  .cc-cerca input { flex: 1; min-width: 0; border: none; border-radius: 10px; padding: 11px 12px; font-size: 16px; background: var(--bg-card); color: var(--text); font-family: inherit; }
+  .cc-cerca button { border: none; border-radius: 10px; padding: 0 16px; background: var(--blue); color: #fff; font-family: inherit; font-size: 15px; font-weight: 600; cursor: pointer; }
+  .cc-risultati { flex: 1; min-height: 0; overflow-y: auto; }
+  .cc-conta { font-size: 13px; color: var(--text-dim); margin: 0 2px 8px; }
+  .cc-griglia { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; padding-bottom: 8px; }
+  .ci-foglio {
+    position: relative; width: 100%; max-width: 560px; max-height: 88vh; overflow-y: auto;
+    background: var(--bg-gruppo); border-radius: 16px; padding: 48px 12px 12px;
+  }
+  .ci-foglio .card { margin: 0; }
+  .ci-chiudi { position: absolute; top: 10px; right: 10px; }
+
 </style>
 </head>
 <body>
@@ -4365,7 +4432,7 @@
 <footer>
   <span>Tia · Gio · Richi</span>
   <button onclick="eseguiLogout()" style="background:none;border:none;color:var(--text-faint);font-size:0.75rem;cursor:pointer;margin-left:12px;font-family:inherit">Esci</button>
-  <div style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 92</div>
+  <div style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 93</div>
 </footer>
 
 </div>
@@ -4486,7 +4553,8 @@ async function caricaDati() {
         profili: j.profili || {},
         mazzi: j.mazzi || {},
         partite: j.partite || [],
-        mazziDecklist: j.mazziDecklist || {}
+        mazziDecklist: j.mazziDecklist || {},
+        mazziCarte: j.mazziCarte || {}
       };
     } else {
       dati = JSON.parse(JSON.stringify(DATI_INIZIALI));
@@ -5424,6 +5492,178 @@ function mostraVittoria(p) {
   setTimeout(chiudi, 3600);
 }
 
+// ============ CARTE ASSOCIATE AL MAZZO ============
+// dati.mazziCarte: { nomeMazzo: [{ id, name, img, pts }] }, salvate nel cloud con il resto.
+// Sotto l'immagine della scheda del mazzo si scorrono in orizzontale; "Aggiungi carte"
+// apre una ricerca nel database di YGOPRODeck.
+const API_CARTE = 'https://db.ygoprodeck.com/api/v7/cardinfo.php';
+// mazzi le cui carte si caricano da sole la prima volta: tutte quelle col termine nel nome
+const CARTE_INIZIALI = { 'mimighoul': 'mimighoul' };
+
+function carteDi(mazzo) { return ((dati.mazziCarte || {})[mazzo]) || []; }
+function puntiCarta(c) {
+  let pts = c.misc_info?.[0]?.genesys_points ?? null;
+  if ((pts === null || pts === 0) && genesysCache) {
+    const g = genesysCache.find(x => x.id === c.id);
+    if (g) pts = g.points;
+  }
+  return pts || 0;
+}
+function cartaBreve(c) {
+  return { id: c.id, name: c.name, img: c.card_images?.[0]?.image_url_small || c.card_images?.[0]?.image_url || '', pts: puntiCarta(c) };
+}
+function htmlMiniCarta(c, extra = '') {
+  return `<div class="cc-carta" data-carta="${c.id}" ${extra}>
+    <img src="${escapeHtml(c.img)}" alt="${escapeHtml(c.name)}" loading="lazy" onerror="this.style.opacity='0.2'">
+    ${c.pts > 0 ? `<span class="cc-pts ${c.pts >= 30 ? 'high' : c.pts >= 10 ? 'mid' : 'low'}">${c.pts}</span>` : ''}
+  </div>`;
+}
+const ICO_PIU = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>';
+const ICO_INFO = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/></svg>';
+const ICO_TOGLI = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg>';
+const ICO_FATTO = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg>';
+
+async function renderCarteMazzo(mazzo) {
+  const box = document.getElementById('ddm-carte');
+  if (!box || _dmhMazzo !== mazzo) return;
+  const lista = carteDi(mazzo);
+  box.innerHTML = `
+    <div class="cc-testa"><button class="cc-aggiungi" onclick="apriCercaCarte()">${ICO_PIU}<span>Aggiungi carte</span></button></div>
+    ${lista.length
+      ? `<div class="cc-scorri">${lista.map(c => htmlMiniCarta(c, `onclick="sceltaCarta(this, 'mazzo')"`)).join('')}</div>`
+      : `<div class="cc-vuoto">Nessuna carta associata a questo mazzo.</div>`}`;
+  // primo caricamento automatico per i mazzi previsti
+  const termine = CARTE_INIZIALI[normNome(mazzo)];
+  if (termine && (dati.mazziCarte || {})[mazzo] === undefined && !box._carico) {
+    box._carico = true;
+    box.querySelector('.cc-vuoto').textContent = 'Carico le carte del mazzo…';
+    try {
+      const r = await fetch(`${API_CARTE}?fname=${encodeURIComponent(termine)}&misc=yes`);
+      if (!r.ok) throw new Error();
+      const d = await r.json();
+      if (!genesysCache) { try { await apriListaGenesys(true); } catch (e) {} }
+      dati.mazziCarte = dati.mazziCarte || {};
+      dati.mazziCarte[mazzo] = (d.data || []).map(cartaBreve).sort((a, b) => a.name.localeCompare(b.name));
+      await salvaDatiCloud();
+    } catch (e) {
+      box._carico = false;
+    }
+    renderCarteMazzo(mazzo);
+  }
+}
+
+// tocco su una carta: sopra compaiono le sue azioni (info, e aggiungi o togli)
+function sceltaCarta(el, dove) {
+  const gia = el.classList.contains('scelta');
+  document.querySelectorAll('.cc-carta.scelta').forEach(x => { x.classList.remove('scelta'); x.querySelector('.cc-azioni')?.remove(); });
+  if (gia) return;
+  const id = +el.dataset.carta;
+  const presente = carteDi(_dmhMazzo).some(c => c.id === id);
+  let azione;
+  if (dove === 'mazzo') azione = `<button class="cc-az togli" title="Togli dal mazzo" onclick="event.stopPropagation(); togliCarta(${id})">${ICO_TOGLI}</button>`;
+  else if (presente) azione = `<button class="cc-az fatto" title="Gia' associata" disabled>${ICO_FATTO}</button>`;
+  else azione = `<button class="cc-az piu" title="Aggiungi al mazzo" onclick="event.stopPropagation(); aggiungiCarta(${id}, this)">${ICO_PIU}</button>`;
+  el.insertAdjacentHTML('beforeend', `<div class="cc-azioni">${azione}<button class="cc-az dettagli" title="Info carta" onclick="event.stopPropagation(); mostraInfoCarta(${id})">${ICO_INFO}</button></div>`);
+  el.classList.add('scelta');
+}
+document.addEventListener('click', e => {
+  if (!e.target.closest('.cc-carta')) document.querySelectorAll('.cc-carta.scelta').forEach(x => { x.classList.remove('scelta'); x.querySelector('.cc-azioni')?.remove(); });
+});
+
+let _risultatiCarte = {};
+async function aggiungiCarta(id, bottone) {
+  const c = _risultatiCarte[id]; if (!c || !_dmhMazzo) return;
+  dati.mazziCarte = dati.mazziCarte || {};
+  const lista = dati.mazziCarte[_dmhMazzo] = carteDi(_dmhMazzo).slice();
+  if (lista.some(x => x.id === id)) return;
+  lista.push(cartaBreve(c));
+  const el = bottone.closest('.cc-carta');
+  el.classList.add('aggiunta');
+  bottone.outerHTML = `<button class="cc-az fatto" disabled>${ICO_FATTO}</button>`;
+  renderCarteMazzo(_dmhMazzo);
+  await salvaDatiCloud();
+}
+async function togliCarta(id) {
+  if (!_dmhMazzo) return;
+  const prima = carteDi(_dmhMazzo);
+  const carta = prima.find(c => c.id === id);
+  dati.mazziCarte[_dmhMazzo] = prima.filter(c => c.id !== id);
+  const mazzo = _dmhMazzo;
+  renderCarteMazzo(mazzo);
+  await salvaDatiCloud();
+  mostraAvviso(`${escapeHtml(carta ? carta.name : 'Carta')} tolta`, 'Annulla', async () => {
+    dati.mazziCarte[mazzo] = prima;
+    renderCarteMazzo(mazzo);
+    await salvaDatiCloud();
+  });
+}
+
+function apriCercaCarte() {
+  let ov = document.getElementById('cc-overlay');
+  if (!ov) {
+    ov = document.createElement('div');
+    ov.id = 'cc-overlay'; ov.className = 'cc-overlay';
+    ov.innerHTML = `<div class="cc-foglio">
+      <div class="cc-foglio-testa"><span>Aggiungi carte</span><button class="cc-chiudi" onclick="chiudiCercaCarte()" aria-label="Chiudi">✕</button></div>
+      <form class="cc-cerca" onsubmit="event.preventDefault(); cercaCarteMazzo()">
+        <input type="search" id="cc-q" placeholder="Nome della carta in inglese" autocomplete="off">
+        <button type="submit">Cerca</button>
+      </form>
+      <div class="cc-risultati" id="cc-risultati"><div class="cc-vuoto">Cerca una carta per nome o archetipo.</div></div>
+    </div>`;
+    ov.addEventListener('click', e => { if (e.target === ov) chiudiCercaCarte(); });
+    document.body.appendChild(ov);
+  }
+  ov.querySelector('.cc-foglio-testa span').textContent = `Aggiungi carte a ${_dmhMazzo}`;
+  ov.classList.add('open');
+  setTimeout(() => document.getElementById('cc-q').focus(), 50);
+}
+function chiudiCercaCarte() { document.getElementById('cc-overlay')?.classList.remove('open'); }
+
+async function cercaCarteMazzo() {
+  const q = document.getElementById('cc-q').value.trim();
+  const box = document.getElementById('cc-risultati');
+  if (!q) return;
+  box.innerHTML = '<div class="cc-vuoto">Ricerca in corso…</div>';
+  if (!genesysCache) apriListaGenesys(true);
+  const trovate = [], visti = new Set();
+  for (const par of ['fname', 'archetype']) {
+    try {
+      const r = await fetch(`${API_CARTE}?${par}=${encodeURIComponent(q)}&misc=yes`);
+      if (r.ok) (await r.json()).data?.forEach(c => { if (!visti.has(c.id)) { visti.add(c.id); trovate.push(c); } });
+    } catch (e) {}
+  }
+  if (!trovate.length) { box.innerHTML = '<div class="cc-vuoto">Nessuna carta trovata.</div>'; return; }
+  _risultatiCarte = {};
+  trovate.forEach(c => { _risultatiCarte[c.id] = c; });
+  const presenti = new Set(carteDi(_dmhMazzo).map(c => c.id));
+  box.innerHTML = `<div class="cc-conta">${trovate.length} risultati</div><div class="cc-griglia">${trovate.map(c =>
+    htmlMiniCarta(cartaBreve(c), `onclick="sceltaCarta(this, 'ricerca')"${presenti.has(c.id) ? ' data-gia="1"' : ''}`).replace('class="cc-carta"', `class="cc-carta${presenti.has(c.id) ? ' aggiunta' : ''}"`)).join('')}</div>`;
+}
+
+// scheda della carta, come nel Database
+async function mostraInfoCarta(id) {
+  let ov = document.getElementById('ci-overlay');
+  if (!ov) {
+    ov = document.createElement('div');
+    ov.id = 'ci-overlay'; ov.className = 'ci-overlay';
+    ov.addEventListener('click', e => { if (e.target === ov) ov.classList.remove('open'); });
+    document.body.appendChild(ov);
+  }
+  ov.innerHTML = `<div class="ci-foglio"><button class="cc-chiudi ci-chiudi" onclick="document.getElementById('ci-overlay').classList.remove('open')" aria-label="Chiudi">✕</button><div class="carte-loading">Caricamento…</div></div>`;
+  ov.classList.add('open');
+  try {
+    const r = await fetch(`${API_CARTE}?id=${id}&misc=yes`);
+    const c = (await r.json()).data?.[0];
+    if (!c) throw new Error();
+    ov.querySelector('.carte-loading').outerHTML = htmlSchedaCarta(c);
+  } catch (e) {
+    ov.querySelector('.carte-loading').textContent = 'Errore nel caricamento.';
+  }
+}
+window.apriCercaCarte = apriCercaCarte; window.chiudiCercaCarte = chiudiCercaCarte; window.cercaCarteMazzo = cercaCarteMazzo;
+window.sceltaCarta = sceltaCarta; window.aggiungiCarta = aggiungiCarta; window.togliCarta = togliCarta; window.mostraInfoCarta = mostraInfoCarta;
+
 // ============ STATISTICHE DADO/PRIMO ============
 function renderStatDado(partite = dati.partite, contId = 'stat-dado-wrap') {
   const wrap = document.getElementById(contId);
@@ -5881,11 +6121,11 @@ async function apriDettaglioMazzo(mazzo, scope = _scopeDeck) {
       ${prop ? `<div class="dh-sub">Proprietario: ${prop}</div>` : ''}
     </div>
     </div>
+    <div class="ddm-carte" id="ddm-carte"></div>
     <div id="ddm-scope"></div>
-    <div class="detail-section-title">Decklist</div>
-    <div id="ddm-decklist-body"><div class="empty">Caricamento decklist…</div></div>
   `;
   renderDettaglioMazzoScope(mazzo, scope);
+  renderCarteMazzo(mazzo);
 
   const modal = document.getElementById('detail-modal');
   if (modal && !modal._ascoltaScroll) {
@@ -5904,8 +6144,6 @@ async function apriDettaglioMazzo(mazzo, scope = _scopeDeck) {
     }
   }
   document.getElementById('detail-overlay').classList.add('open');
-
-  await caricaDecklistInline('ddm-decklist-body', mazzo);
 }
 
 function renderDettaglioMazzoScope(mazzo, scope) {
@@ -7446,53 +7684,35 @@ async function cercaDaCache(gMin, gMax) {
     </div>`;
 }
 
-async function mostraDettaglioCarta(id) {
-  _prevScrollY = window.scrollY;
-  _prevView = document.getElementById('genesys-view').style.display !== 'none' ? 'genesys' : 'db';
-  const res = document.getElementById('carte-results');
-  const det = document.getElementById('carte-detail');
-  document.getElementById('inner-tab-bar-wrap').style.display = 'none';
-  document.getElementById('database-view').style.display = 'none';
-  document.getElementById('genesys-view').style.display = 'none';
-  res.style.display = 'none';
-  det.style.display = 'block';
-  det.innerHTML = '<div class="carte-loading">Caricamento…</div>';
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-  try {
-    const r = await fetch(`https://db.ygoprodeck.com/api/v7/cardinfo.php?id=${id}&misc=yes`);
-    const data = await r.json();
-    const c = data.data?.[0];
-    if (!c) throw new Error();
-    const img = c.card_images?.[0]?.image_url || '';
-    const chips = [];
-    if (c.type)              chips.push({txt: c.type, cls: ''});
-    if (c.attribute)         chips.push({txt: c.attribute, cls: ''});
-    if (c.level)             chips.push({txt: 'Livello ' + c.level, cls: ''});
-    if (c.atk !== undefined) chips.push({txt: 'ATK ' + c.atk, cls: ''});
-    if (c.def !== undefined) chips.push({txt: 'DEF ' + c.def, cls: ''});
-    if (c.race)              chips.push({txt: c.race, cls: ''});
-    let genesysPoints = c.misc_info?.[0]?.genesys_points ?? null;
-    if ((genesysPoints === null || genesysPoints === 0) && genesysCache) {
-      const cached = genesysCache.find(x => x.id === c.id);
-      if (cached) genesysPoints = cached.points;
-    }
-    genesysPoints = genesysPoints ?? 0;
-    const genesysBadgeHtml = (genesysPoints !== undefined && genesysPoints !== null && genesysPoints > 0)
-      ? `<div class="genesys-detail-badge ${genesysPoints >= 30 ? 'high' : genesysPoints >= 10 ? 'mid' : 'low'}">
-           <span class="genesys-detail-icon">⬡</span>
-           <span class="genesys-detail-pts">${genesysPoints}</span>
-           <span class="genesys-detail-label">pt Genesys</span>
-         </div>`
-      : '';
-    const cmPrice = c.card_prices?.[0]?.cardmarket_price;
-    const priceHtml = (cmPrice && parseFloat(cmPrice) > 0)
-      ? `<span class="carta-price">€ ${parseFloat(cmPrice).toFixed(2)}</span>` : '';
-    const yugipediaName = c.name.replace(/ /g, '_');
-    const rulingsUrl = 'https://yugipedia.com/wiki/Card_Rulings:' + yugipediaName;
-    const cardmarketUrl = `https://www.cardmarket.com/en/YuGiOh/Products/Search?searchString=${encodeURIComponent(c.name)}`;
-    const backLabel = _prevView === 'genesys' ? '← Torna alla lista Genesys' : '← Torna ai risultati';
-    det.innerHTML = `
-      <button class="back-btn" onclick="tornaRisultati()">${backLabel}</button>
+function htmlSchedaCarta(c) {
+  const img = c.card_images?.[0]?.image_url || '';
+  const chips = [];
+  if (c.type)              chips.push({txt: c.type, cls: ''});
+  if (c.attribute)         chips.push({txt: c.attribute, cls: ''});
+  if (c.level)             chips.push({txt: 'Livello ' + c.level, cls: ''});
+  if (c.atk !== undefined) chips.push({txt: 'ATK ' + c.atk, cls: ''});
+  if (c.def !== undefined) chips.push({txt: 'DEF ' + c.def, cls: ''});
+  if (c.race)              chips.push({txt: c.race, cls: ''});
+  let genesysPoints = c.misc_info?.[0]?.genesys_points ?? null;
+  if ((genesysPoints === null || genesysPoints === 0) && genesysCache) {
+    const cached = genesysCache.find(x => x.id === c.id);
+    if (cached) genesysPoints = cached.points;
+  }
+  genesysPoints = genesysPoints ?? 0;
+  const genesysBadgeHtml = (genesysPoints !== undefined && genesysPoints !== null && genesysPoints > 0)
+    ? `<div class="genesys-detail-badge ${genesysPoints >= 30 ? 'high' : genesysPoints >= 10 ? 'mid' : 'low'}">
+         <span class="genesys-detail-icon">⬡</span>
+         <span class="genesys-detail-pts">${genesysPoints}</span>
+         <span class="genesys-detail-label">pt Genesys</span>
+       </div>`
+    : '';
+  const cmPrice = c.card_prices?.[0]?.cardmarket_price;
+  const priceHtml = (cmPrice && parseFloat(cmPrice) > 0)
+    ? `<span class="carta-price">€ ${parseFloat(cmPrice).toFixed(2)}</span>` : '';
+  const yugipediaName = c.name.replace(/ /g, '_');
+  const rulingsUrl = 'https://yugipedia.com/wiki/Card_Rulings:' + yugipediaName;
+  const cardmarketUrl = `https://www.cardmarket.com/en/YuGiOh/Products/Search?searchString=${encodeURIComponent(c.name)}`;
+  return `
       <div class="card padded">
         <div class="carta-detail-wrap">
           <img class="carta-detail-img" src="${img}" alt="${escapeHtml(c.name)}">
@@ -7511,7 +7731,30 @@ async function mostraDettaglioCarta(id) {
             </div>
           </div>
         </div>
-      </div>
+      </div>`;
+}
+
+async function mostraDettaglioCarta(id) {
+  _prevScrollY = window.scrollY;
+  _prevView = document.getElementById('genesys-view').style.display !== 'none' ? 'genesys' : 'db';
+  const res = document.getElementById('carte-results');
+  const det = document.getElementById('carte-detail');
+  document.getElementById('inner-tab-bar-wrap').style.display = 'none';
+  document.getElementById('database-view').style.display = 'none';
+  document.getElementById('genesys-view').style.display = 'none';
+  res.style.display = 'none';
+  det.style.display = 'block';
+  det.innerHTML = '<div class="carte-loading">Caricamento…</div>';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  try {
+    const r = await fetch(`https://db.ygoprodeck.com/api/v7/cardinfo.php?id=${id}&misc=yes`);
+    const data = await r.json();
+    const c = data.data?.[0];
+    if (!c) throw new Error();
+    const backLabel = _prevView === 'genesys' ? '← Torna alla lista Genesys' : '← Torna ai risultati';
+    det.innerHTML = `
+      <button class="back-btn" onclick="tornaRisultati()">${backLabel}</button>
+      ${htmlSchedaCarta(c)}
       <div id="carte-collegate-wrap"></div>`;
     caricaCarteCollegate(c);
   } catch(e) {
