@@ -3734,8 +3734,6 @@
   /* le carte scorrono libere (nessun aggancio): vanno veloci quanto il dito */
   .cc-scorri-wrap {
     position: relative; z-index: 2; margin: -96px -16px -22px;
-    -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 28px, #000 calc(100% - 28px), transparent 100%);
-    mask-image: linear-gradient(90deg, transparent 0, #000 28px, #000 calc(100% - 28px), transparent 100%);
   }
   .cc-scorri {
     display: flex; gap: 0; overflow-x: auto; overflow-y: hidden; scrollbar-width: none;
@@ -3753,6 +3751,7 @@
   .ddm-sotto::before {
     content: ''; position: absolute; z-index: -1; left: 0; right: 0; bottom: 0; top: 80px;
     background: #140803 url('img/back-card.jpg') center / cover no-repeat;
+    opacity: 0.85;
     -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 70px); mask-image: linear-gradient(180deg, transparent 0, #000 70px);
   }
   .ddm-bottone {
@@ -4596,7 +4595,7 @@
 <footer>
   <span>Tia · Gio · Richi</span>
   <button onclick="eseguiLogout()" style="background:none;border:none;color:var(--text-faint);font-size:0.75rem;cursor:pointer;margin-left:12px;font-family:inherit">Esci</button>
-  <div style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 116</div>
+  <div style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 117</div>
 </footer>
 
 </div>
