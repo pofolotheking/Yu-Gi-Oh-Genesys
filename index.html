@@ -2798,7 +2798,7 @@
     /* barre e blocchi a tutta larghezza della colonna, come su telefono */
     main > section > .inner-tab-bar { max-width: none !important; margin-left: 0 !important; margin-right: 0 !important; }
     .classifica-top { max-width: none; }
-    body { padding-bottom: calc(env(safe-area-inset-bottom) + 76px); }
+    body { padding-bottom: calc(env(safe-area-inset-bottom) + 92px); }
     header { display: none; }
     main { padding: calc(env(safe-area-inset-top) + 56px) max(16px, env(safe-area-inset-right)) 0 max(16px, env(safe-area-inset-left)); }
 
@@ -3329,7 +3329,7 @@
     .detail-modal .dh-hero.senza-img::after { display: none; }
     .detail-modal .dh-hero .detail-head { padding: 0 52px 0 0; margin: 0; text-align: left; }
     /* bottone blu per aggiungere carte: in basso a destra sull'immagine del mazzo */
-    .detail-modal .dh-aggiungi { position: absolute; right: 16px; bottom: 16px; z-index: 1; width: 32px; height: 32px; box-shadow: 0 3px 12px rgba(0,0,0,0.35); }
+    .detail-modal .dh-aggiungi { position: absolute; right: 16px; bottom: 112px; z-index: 1; width: 32px; height: 32px; box-shadow: 0 3px 12px rgba(0,0,0,0.35); }
     .detail-modal .dh-aggiungi svg { width: 15px; height: 15px; }
     .detail-modal .dh-hero .dh-name { font-size: 30px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.1; }
     .detail-modal .dh-hero:not(.senza-img) .dh-name { color: #fff; text-shadow: 0 2px 10px rgba(0,0,0,0.5); }
@@ -3498,7 +3498,7 @@
       flex: 1 1 0; min-width: 0;
       display: flex; flex-direction: column; align-items: center; gap: 3px;
       padding: 2px 0 0; border-radius: 0; background: none; box-shadow: none;
-      font-size: 10px; font-weight: 500; letter-spacing: 0.01em; color: var(--text-faint);
+      font-size: 12px; font-weight: 500; letter-spacing: 0.01em; color: var(--text-faint);
     }
     nav button.active:not(.nav-add), nav.seg-ready > button.active:not(.nav-add) { color: var(--blue); }
     nav button:not(.nav-add) { position: relative; z-index: 0; }
@@ -3509,7 +3509,7 @@
     }
     nav button:not(.active):hover { color: var(--text-faint); }
     nav button:not(.nav-add) svg {
-      display: block; width: 24px; height: 24px;
+      display: block; width: 32px; height: 32px;
       margin: 0 !important; vertical-align: 0 !important;
     }
     nav button:not(.nav-add) svg * { stroke-width: 1.15; }
@@ -3693,7 +3693,7 @@
   .cc-aggiungi svg { width: 14px; height: 14px; }
   /* le carte scorrono libere (nessun aggancio): vanno veloci quanto il dito */
   .cc-scorri-wrap {
-    margin: 0 -16px;
+    position: relative; z-index: 2; margin: -96px -16px 0;
     -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 28px, #000 calc(100% - 28px), transparent 100%);
     mask-image: linear-gradient(90deg, transparent 0, #000 28px, #000 calc(100% - 28px), transparent 100%);
   }
@@ -3703,7 +3703,7 @@
   }
   .cc-scorri::-webkit-scrollbar { display: none; }
   /* carte a ventaglio come in mano: leggermente sovrapposte, ruotate e piu' basse ai lati (vedi ventaglioCarte) */
-  .cc-scorri .cc-carta { flex: none; width: clamp(120px, 36vw, 160px); margin-right: -22px; transform-origin: 50% 130%; will-change: transform; }
+  .cc-scorri .cc-carta { flex: none; width: clamp(156px, 47vw, 208px); margin-right: -40px; transform-origin: 50% 130%; will-change: transform; }
   .cc-scorri .cc-carta:last-child { margin-right: 0; }
   .cc-scorri .cc-carta img { border-radius: 8px; }
   .cc-scorri .cc-pts { top: 5px; left: 5px; min-width: 24px; padding: 2px 6px; font-size: 13px; border-radius: 7px; }
@@ -4498,7 +4498,7 @@
 <footer>
   <span>Tia · Gio · Richi</span>
   <button onclick="eseguiLogout()" style="background:none;border:none;color:var(--text-faint);font-size:0.75rem;cursor:pointer;margin-left:12px;font-family:inherit">Esci</button>
-  <div style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 97</div>
+  <div style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 98</div>
 </footer>
 
 </div>
@@ -5597,7 +5597,7 @@ function ventaglioCarte(sc) {
       const q = c.getBoundingClientRect();
       const d = (q.left + q.width / 2 - mid) / q.width;           // distanza dal centro, in larghezze di carta
       const rot = Math.max(-24, Math.min(24, d * 11));
-      const giu = Math.min(46, d * d * 9);
+      const giu = Math.min(60, d * d * 11);
       c.style.transform = `translateY(${giu.toFixed(1)}px) rotate(${rot.toFixed(1)}deg)`;
       c.style.zIndex = String(100 - Math.round(Math.abs(d) * 10));
     });
