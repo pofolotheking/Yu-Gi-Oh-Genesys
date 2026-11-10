@@ -3705,6 +3705,31 @@
   /* carte a ventaglio come in mano: leggermente sovrapposte, ruotate e piu' basse ai lati (vedi ventaglioCarte) */
   .cc-scorri .cc-carta { flex: none; width: clamp(156px, 47vw, 208px); margin-right: -40px; transform-origin: 50% 130%; will-change: transform; }
   .cc-scorri .cc-carta:last-child { margin-right: 0; }
+  /* sagoma tratteggiata grigia dopo l'ultima carta: tocco = aggiungi carte */
+  /* quattro bottoni grandi 2x2: ognuno apre la sua finestra */
+  .ddm-bottoni { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 4px; }
+  .ddm-bottone {
+    display: flex; flex-direction: column; align-items: flex-start; justify-content: center; gap: 4px; min-height: 120px; padding: 16px;
+    border: none; border-radius: 18px; background: var(--bg-card); color: var(--text); text-align: left; cursor: pointer; font-family: inherit;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08); transition: transform 0.12s;
+  }
+  .ddm-bottone:active { transform: scale(0.97); }
+  .ddm-bottone svg { color: var(--blue); margin-bottom: 6px; }
+  .ddm-bottone b { font-size: 17px; font-weight: 700; }
+  .ddm-bottone span { font-size: 13px; color: var(--text-dim); }
+  /* finestra dei dati sopra la scheda del mazzo */
+  .sm-overlay { z-index: 420; padding: 16px; }
+  .detail-modal.sm-modal { background: var(--bg-gruppo); max-width: 520px; max-height: 84vh; padding: 20px 16px 18px; }
+  [data-theme="dark"] .detail-modal.sm-modal { box-shadow: 0 0 0 1px rgba(255,255,255,0.16); }
+  .sm-testa { display: flex; flex-direction: column; gap: 2px; margin: 0 48px 14px 4px; }
+  .sm-testa b { font-size: 22px; font-weight: 800; letter-spacing: -0.01em; color: var(--text); }
+  .sm-testa span { font-size: 13px; color: var(--text-dim); }
+  .sm-alto { height: 240px; }
+  .cc-nuova {
+    aspect-ratio: 59 / 86; box-sizing: border-box; display: flex; align-items: center; justify-content: center;
+    border: 2.5px dashed #98989f; border-radius: 8px; background: rgba(152,152,159,0.1); color: #98989f;
+  }
+  .cc-nuova svg { width: 46px; height: 46px; }
   .cc-scorri .cc-carta img { border-radius: 8px; }
   .cc-scorri .cc-pts { top: 5px; left: 5px; min-width: 24px; padding: 2px 6px; font-size: 13px; border-radius: 7px; }
   .cc-carta { position: relative; cursor: pointer; border-radius: 6px; }
@@ -4498,7 +4523,7 @@
 <footer>
   <span>Tia · Gio · Richi</span>
   <button onclick="eseguiLogout()" style="background:none;border:none;color:var(--text-faint);font-size:0.75rem;cursor:pointer;margin-left:12px;font-family:inherit">Esci</button>
-  <div style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 98</div>
+  <div style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 99</div>
 </footer>
 
 </div>
@@ -5576,7 +5601,48 @@ function puntiCarta(c) {
   return pts || 0;
 }
 function cartaBreve(c) {
-  return { id: c.id, name: c.name, img: c.card_images?.[0]?.image_url_small || c.card_images?.[0]?.image_url || '', pts: puntiCarta(c) };
+  return { id: c.id, name: c.name, img: c.card_images?.[0]?.image_url_small || c.card_images?.[0]?.image_url || '', pts: puntiCarta(c),
+    tipo: c.type || '', liv: c.level ?? c.linkval ?? 0 };
+}
+// ordine del ventaglio, da sinistra: fusione, synchro, xyz, (link), mostri normali, mostri con effetto,
+// magie, trappole; i mostri per livello/rango crescente, poi per nome
+function gruppoCarta(c) {
+  const t = c.tipo || '';
+  if (!t) return 9;
+  if (/fusion/i.test(t)) return 0;
+  if (/synchro/i.test(t)) return 1;
+  if (/xyz/i.test(t)) return 2;
+  if (/link/i.test(t)) return 3;
+  if (/spell/i.test(t)) return 7;
+  if (/trap/i.test(t)) return 8;
+  return /normal/i.test(t) ? 4 : 5;
+}
+function ordinaCarte(lista) {
+  return lista.slice().sort((a, b) => {
+    const ga = gruppoCarta(a), gb = gruppoCarta(b);
+    if (ga !== gb) return ga - gb;
+    if (ga < 6) return (a.liv || 0) - (b.liv || 0) || a.name.localeCompare(b.name);
+    return a.name.localeCompare(b.name);
+  });
+}
+// le carte salvate prima di questa versione non hanno il tipo: si recupera una volta dal database
+const _tipiProvati = new Set();
+async function completaTipiCarte(mazzo) {
+  const mancanti = carteDi(mazzo).filter(c => !c.tipo).map(c => c.id);
+  if (!mancanti.length || _tipiProvati.has(mazzo)) return;
+  _tipiProvati.add(mazzo);
+  try {
+    const info = {};
+    for (let i = 0; i < mancanti.length; i += 40) {
+      const r = await fetch(`${API_CARTE}?id=${mancanti.slice(i, i + 40).join(',')}`);
+      if (!r.ok) throw new Error();
+      (await r.json()).data?.forEach(c => { info[c.id] = c; });
+    }
+    if (!Object.keys(info).length) return;
+    dati.mazziCarte[mazzo] = carteDi(mazzo).map(c => info[c.id] && !c.tipo ? { ...c, tipo: info[c.id].type || '', liv: info[c.id].level ?? info[c.id].linkval ?? 0 } : c);
+    renderCarteMazzo(mazzo);
+    await salvaDatiCloud();
+  } catch (e) {}
 }
 function htmlMiniCarta(c, extra = '') {
   return `<div class="cc-carta" data-carta="${c.id}" ${extra}>
@@ -5608,17 +5674,16 @@ async function renderCarteMazzo(mazzo) {
   const box = document.getElementById('ddm-carte');
   if (!box || _dmhMazzo !== mazzo) return;
   const lista = carteDi(mazzo);
-  box.innerHTML = `
-    ${lista.length
-      ? `<div class="cc-scorri-wrap"><div class="cc-scorri">${lista.map(c => htmlMiniCarta(c, `onclick="mostraInfoCarta(${c.id}, true)"`)).join('')}</div></div>`
-      : `<div class="cc-vuoto">Nessuna carta associata a questo mazzo.</div>`}`;
+  const nuova = `<div class="cc-carta cc-nuova" onclick="apriCercaCarte()" role="button" aria-label="Aggiungi carte" title="Aggiungi carte"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></div>`;
+  box.innerHTML = `<div class="cc-scorri-wrap"><div class="cc-scorri">${ordinaCarte(lista).map(c => htmlMiniCarta(c, `onclick="mostraInfoCarta(${c.id}, true)"`)).join('')}${nuova}</div></div>`;
   const sc = box.querySelector('.cc-scorri');
-  if (sc) { sc.addEventListener('scroll', () => ventaglioCarte(sc), { passive: true }); ventaglioCarte(sc); }
+  sc.addEventListener('scroll', () => ventaglioCarte(sc), { passive: true }); ventaglioCarte(sc);
+  completaTipiCarte(mazzo);
   // primo caricamento automatico per i mazzi previsti
   const termine = CARTE_INIZIALI[normNome(mazzo)];
   if (termine && (dati.mazziCarte || {})[mazzo] === undefined && !box._carico) {
     box._carico = true;
-    box.querySelector('.cc-vuoto').textContent = 'Carico le carte del mazzo…';
+    box.insertAdjacentHTML('afterbegin', '<div class="cc-vuoto">Carico le carte del mazzo…</div>');
     try {
       const r = await fetch(`${API_CARTE}?fname=${encodeURIComponent(termine)}&misc=yes`);
       if (!r.ok) throw new Error();
@@ -6149,6 +6214,7 @@ let _matchupStat = {};
 let _chartDetailInstance = null;
 
 function chiudiDettaglio() {
+  chiudiSottoMazzo();
   _ddmScope = null;
   document.getElementById('detail-overlay').classList.remove('open');
   if (_chartDetailInstance) { _chartDetailInstance.destroy(); _chartDetailInstance = null; }
@@ -6218,6 +6284,7 @@ document.addEventListener('click', e => {
 // Popup del mazzo. In alto si sceglie Stagione corrente / All-time: numeri,
 // match-up e cronologia si ricalcolano su quelle partite (la decklist resta).
 async function apriDettaglioMazzo(mazzo, scope = _scopeDeck) {
+  chiudiSottoMazzo();
   _dmhMazzo = mazzo;
   const prop = dati.mazzi[mazzo] || '';
   const imgUrl = imgMazzo(mazzo);
@@ -6234,7 +6301,6 @@ async function apriDettaglioMazzo(mazzo, scope = _scopeDeck) {
     <div class="detail-head">
       <div class="dh-name"><span id="ddm-medaglia"></span>${mazzo}</div>
     </div>
-    <button class="cc-aggiungi dh-aggiungi" onclick="apriCercaCarte()" aria-label="Aggiungi carte" title="Aggiungi carte">${ICO_PIU}</button>
     </div>
     <div class="ddm-carte" id="ddm-carte"></div>
     <div id="ddm-scope"></div>
@@ -6309,9 +6375,9 @@ function renderDettaglioMazzoScope(mazzo, scope) {
   // etichette che spiegano il dato, valori in neretto senza colori
   const riga = (et, val) => `<div class="ddm-riga"><span class="ddm-et">${et}</span><b>${val}</b></div>`;
   const volte = n => `${n} volt${n === 1 ? 'a' : 'e'}`;
-  const dati_ = `
-    <div class="ddm-grafico"><div class="ddm-grafico-wrap"><canvas id="ddm-chart"></canvas></div></div>
-    <div class="ddm-tabella">
+  _ddmPezzi = {
+    andamento: { titolo: 'Andamento', html: `<div class="ddm-grafico"><div class="ddm-grafico-wrap sm-alto"><canvas id="ddm-chart"></canvas></div></div>` },
+    statistiche: { titolo: 'Statistiche', html: `<div class="ddm-tabella">
       ${riga('Posizione nella classifica dei mazzi', posizione ? posizione + '°' : '—')}
       ${riga('Partite giocate con questo mazzo', tot)}
       ${riga('Quota delle partite della lega', utilizzo)}
@@ -6321,18 +6387,50 @@ function renderDettaglioMazzoScope(mazzo, scope) {
       ${riga(`Vittorie andando secondo (${volte(s.secondoT)})`, pct(s.secondoV, s.secondoT))}
       ${riga('Dadi vinti su quelli lanciati', s.dadoT ? `${s.dadoV} su ${s.dadoT}` : '—')}
       ${riga('Vittorie dopo aver vinto il dado', pct(s.dadoWinV, s.dadoV))}
-    </div>`;
-  document.getElementById('ddm-scope').innerHTML = `
-    ${dati_}
-    <div class="detail-section-title">Match-up</div>
-    <div class="deck-mu-vs-list">${noVs}</div>
-    <button class="ddm-tendina" onclick="this.classList.toggle('aperta')">
-      <span>Storico partite</span><span class="ddm-tendina-n">${tot}</span><span class="m-freccia"></span>
-    </button>
-    <div class="dmh-list" id="dmh-body"></div>`;
-  graficoMazzo(mazzo, partite);
-  renderCronologiaMazzo(mazzo, scope);
+    </div>` },
+    matchup: { titolo: 'Match-up', html: `<div class="deck-mu-vs-list">${noVs}</div>` },
+    storico: { titolo: 'Storico partite', html: `<div class="dmh-list" id="dmh-body"></div>` },
+  };
+  _ddmCtx = { mazzo, partite, scope };
+  const nAvv = Object.values(s.vs).filter(r => r.v + r.p > 0).length;
+  const bottone = (k, ico, titolo, sub) => `<button class="ddm-bottone" onclick="apriSottoMazzo('${k}')">${ico}<b>${titolo}</b><span>${sub}</span></button>`;
+  document.getElementById('ddm-scope').innerHTML = `<div class="ddm-bottoni">
+    ${bottone('andamento', ICO_DDM.andamento, 'Andamento', tot ? 'Win rate ' + pct(s.v, tot) : 'Nessuna partita')}
+    ${bottone('statistiche', ICO_DDM.statistiche, 'Statistiche', posizione && tot ? posizione + '° in classifica' : 'Dati del mazzo')}
+    ${bottone('matchup', ICO_DDM.matchup, 'Match-up', nAvv + (nAvv === 1 ? ' avversario' : ' avversari'))}
+    ${bottone('storico', ICO_DDM.storico, 'Storico partite', tot + (tot === 1 ? ' partita' : ' partite'))}
+  </div>`;
 }
+let _ddmPezzi = {}, _ddmCtx = null;
+const _svgDdm = d => `<svg viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
+const ICO_DDM = {
+  andamento: _svgDdm('<path d="M3 20h18"/><path d="M4 15l5-5 4 3 7-8"/><path d="M15 5h5v5"/>'),
+  statistiche: _svgDdm('<rect x="4" y="12" width="4" height="8" rx="1"/><rect x="10" y="5" width="4" height="15" rx="1"/><rect x="16" y="9" width="4" height="11" rx="1"/>'),
+  matchup: _svgDdm('<path d="M4 8h15M15 4l4 4-4 4"/><path d="M20 16H5M9 12l-4 4 4 4"/>'),
+  storico: _svgDdm('<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>'),
+};
+// ogni bottone apre una finestra con i dati corrispondenti, sulle partite scelte (Stagione corrente / All-time)
+function apriSottoMazzo(k) {
+  const pz = _ddmPezzi[k]; if (!pz || !_ddmCtx) return;
+  chiudiSottoMazzo();
+  const ov = document.createElement('div');
+  ov.className = 'detail-overlay open sm-overlay'; ov.id = 'sm-overlay';
+  ov.setAttribute('role', 'dialog');
+  ov.addEventListener('click', e => { if (e.target === ov) chiudiSottoMazzo(); });
+  ov.innerHTML = `<div class="detail-modal sm-modal">
+    <button class="detail-close" onclick="chiudiSottoMazzo()" title="Chiudi" aria-label="Chiudi">✕</button>
+    <div class="sm-testa"><b>${pz.titolo}</b><span>${escapeHtml(_ddmCtx.mazzo)} \u00B7 ${_ddmCtx.scope === 'cur' ? 'Stagione corrente' : 'All-time'}</span></div>
+    ${pz.html}</div>`;
+  document.body.appendChild(ov);
+  if (k === 'andamento') graficoMazzo(_ddmCtx.mazzo, _ddmCtx.partite);
+  if (k === 'storico') renderCronologiaMazzo(_ddmCtx.mazzo, _ddmCtx.scope);
+}
+function chiudiSottoMazzo() {
+  document.getElementById('sm-overlay')?.remove();
+  if (_chartDetailInstance) { _chartDetailInstance.destroy(); _chartDetailInstance = null; }
+}
+window.apriSottoMazzo = apriSottoMazzo; window.chiudiSottoMazzo = chiudiSottoMazzo;
+
 
 // win rate cumulato del mazzo partita dopo partita, a partire da un 50% neutro
 function graficoMazzo(mazzo, partite) {
