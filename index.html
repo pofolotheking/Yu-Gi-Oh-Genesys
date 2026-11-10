@@ -3357,7 +3357,9 @@
     .detail-modal .ddm-tabs .inner-tab { padding: 0 4px; height: 38px; font-size: 15px; border-radius: 9px; white-space: nowrap; }
     .detail-modal.deck-full .ddm-tabs { background: rgba(120,120,128,0.2); }
     .detail-modal .ddm-tabs .seg-pill { border-radius: 9px; }
-    .detail-modal .dh-hero { min-height: 360px; align-items: flex-start; padding-top: 20px; }
+    .detail-modal .dh-hero { min-height: 360px; align-items: flex-start; padding-top: 20px; margin-top: 0;
+      -webkit-mask-image: linear-gradient(180deg, #000 0, #000 58%, transparent 100%); mask-image: linear-gradient(180deg, #000 0, #000 58%, transparent 100%); }
+    .detail-modal .dh-hero.senza-img { -webkit-mask-image: none; mask-image: none; }
     .detail-modal .dh-hero::after { background: linear-gradient(180deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 45%); }
     .detail-modal .dh-hero .detail-head { width: 100%; padding: 0; text-align: center; }
     .detail-modal .dh-hero.senza-img { padding-top: 24px; min-height: 120px; }
@@ -3711,7 +3713,7 @@
   }
   .cc-scorri::-webkit-scrollbar { display: none; }
   /* carte a ventaglio come in mano: leggermente sovrapposte, ruotate e piu' basse ai lati (vedi ventaglioCarte) */
-  .cc-scorri .cc-carta { flex: none; width: clamp(156px, 47vw, 208px); margin-right: -40px; transform-origin: 50% 130%; will-change: transform; }
+  .cc-scorri .cc-carta { flex: none; width: calc(clamp(156px, 47vw, 208px) * var(--vent-k, 1)); margin-right: calc(-40px * var(--vent-k, 1)); transform-origin: 50% 130%; will-change: transform; }
   .cc-scorri .cc-carta:last-child { margin-right: 0; }
   /* sagoma tratteggiata grigia dopo l'ultima carta: tocco = aggiungi carte */
   /* quattro bottoni grandi 2x2: ognuno apre la sua finestra */
@@ -3738,7 +3740,10 @@
   .sm-overlay { z-index: 420; padding: 16px; }
   .detail-modal.sm-modal { background: var(--bg-gruppo); max-width: 520px; max-height: 84vh; padding: 20px 16px 18px; }
   [data-theme="dark"] .detail-modal.sm-modal { box-shadow: 0 0 0 1px rgba(255,255,255,0.16); }
-  .sm-testa { display: flex; flex-direction: column; gap: 2px; margin: 0 48px 14px 4px; }
+  .sm-scelta { margin: 0 46px 14px 0; }
+  .sm-modal .sm-scelta .ddm-tabs { height: 40px; }
+  .sm-modal .sm-scelta .ddm-tabs .inner-tab { height: 34px; font-size: 14px; }
+  .sm-testa { display: flex; flex-direction: column; gap: 2px; margin: 0 4px 14px 4px; }
   .sm-testa b { font-size: 22px; font-weight: 800; letter-spacing: -0.01em; color: var(--text); }
   .sm-testa span { font-size: 13px; color: var(--text-dim); }
   .sm-alto { height: 240px; }
@@ -4542,7 +4547,7 @@
 <footer>
   <span>Tia · Gio · Richi</span>
   <button onclick="eseguiLogout()" style="background:none;border:none;color:var(--text-faint);font-size:0.75rem;cursor:pointer;margin-left:12px;font-family:inherit">Esci</button>
-  <div style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 100</div>
+  <div style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 101</div>
 </footer>
 
 </div>
@@ -6310,12 +6315,6 @@ async function apriDettaglioMazzo(mazzo, scope = _scopeDeck) {
   // su telefono l'immagine sta in alto e il resto su fondo normale; su PC fa da sfondo
   const telefono = true;   // lo stile nuovo vale su tutti gli schermi: immagine sempre in alto
   document.getElementById('detail-content').innerHTML = `
-    <div class="ddm-head">
-      <div class="inner-tab-bar ddm-tabs">
-        <button class="inner-tab" id="ddm-tab-cur" onclick="switchScopeMazzo('cur')">Stagione corrente</button>
-        <button class="inner-tab" id="ddm-tab-all" onclick="switchScopeMazzo('all')">All-time</button>
-      </div>
-    </div>
     <div class="dh-hero${imgUrl ? '' : ' senza-img'}"${imgUrl ? ` style="--hero:url('${imgUrl}')"` : ''}>
     <div class="detail-head">
       <div class="dh-name"><span id="ddm-medaglia"></span>${mazzo}</div>
@@ -6348,8 +6347,6 @@ async function apriDettaglioMazzo(mazzo, scope = _scopeDeck) {
 
 function renderDettaglioMazzoScope(mazzo, scope) {
   _ddmScope = scope;
-  document.getElementById('ddm-tab-cur').classList.toggle('active', scope === 'cur');
-  document.getElementById('ddm-tab-all').classList.toggle('active', scope === 'all');
   const partite = partiteScope(scope);
   const s = calcolaMatchup(partite)[mazzo] || { v:0, p:0, primoV:0, primoT:0, secondoV:0, secondoT:0, vs:{} };
   const pct = (v,t) => t > 0 ? Math.round(100*v/t)+'%' : '—';
@@ -6439,12 +6436,23 @@ function apriSottoMazzo(k) {
   ov.addEventListener('click', e => { if (e.target === ov) chiudiSottoMazzo(); });
   ov.innerHTML = `<div class="detail-modal sm-modal">
     <button class="detail-close" onclick="chiudiSottoMazzo()" title="Chiudi" aria-label="Chiudi">✕</button>
-    <div class="sm-testa"><b>${pz.titolo}</b><span>${escapeHtml(_ddmCtx.mazzo)} \u00B7 ${_ddmCtx.scope === 'cur' ? 'Stagione corrente' : 'All-time'}</span></div>
+    <div class="sm-scelta"><div class="inner-tab-bar ddm-tabs">
+      <button class="inner-tab${_ddmCtx.scope === 'cur' ? ' active' : ''}" onclick="scopeSottoMazzo('cur', '${k}')">Stagione corrente</button>
+      <button class="inner-tab${_ddmCtx.scope === 'all' ? ' active' : ''}" onclick="scopeSottoMazzo('all', '${k}')">All-time</button>
+    </div></div>
+    <div class="sm-testa"><b>${pz.titolo}</b><span>${escapeHtml(_ddmCtx.mazzo)}</span></div>
     ${pz.html}</div>`;
   document.body.appendChild(ov);
   if (k === 'andamento') graficoMazzo(_ddmCtx.mazzo, _ddmCtx.partite);
   if (k === 'storico') renderCronologiaMazzo(_ddmCtx.mazzo, _ddmCtx.scope);
 }
+// cambiando Stagione corrente / All-time dentro la finestra, si ricalcola tutto e la finestra si riapre sugli stessi dati
+function scopeSottoMazzo(scope, k) {
+  if (!_ddmCtx || scope === _ddmCtx.scope) return;
+  renderDettaglioMazzoScope(_ddmCtx.mazzo, scope);
+  apriSottoMazzo(k);
+}
+window.scopeSottoMazzo = scopeSottoMazzo;
 function chiudiSottoMazzo() {
   document.getElementById('sm-overlay')?.remove();
   if (_chartDetailInstance) { _chartDetailInstance.destroy(); _chartDetailInstance = null; }
