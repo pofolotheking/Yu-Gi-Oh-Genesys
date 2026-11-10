@@ -2695,13 +2695,12 @@
     --ddm-alto: 12px;
     position: fixed; top: var(--pop-alto); bottom: max(10px, env(safe-area-inset-bottom)); left: var(--pop-lato); right: var(--pop-lato);
     width: auto; height: auto; max-width: none; max-height: none;
-    border-radius: 22px; box-shadow: 0 20px 60px rgba(0,0,0,0.45); overscroll-behavior: contain;
+    --pop-fondo: #e4e4ea;
+    border-radius: 22px; box-shadow: 0 10px 40px rgba(0,0,0,0.22), 0 0 0 1px rgba(0,0,0,0.06); overscroll-behavior: contain;
   }
-  [data-theme="dark"] .detail-modal.deck-full { box-shadow: 0 0 0 1px rgba(255,255,255,0.16), 0 20px 60px rgba(0,0,0,0.6); }
-  [data-theme="dark"] .detail-overlay:has(.deck-full) { background: rgba(40,40,46,0.55); }
-  .detail-overlay:has(.deck-full) {
-    padding: 0; background: rgba(0,0,0,0.5); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
-  }
+  [data-theme="dark"] .detail-modal.deck-full { --pop-fondo: #141416; box-shadow: 0 0 0 1px rgba(255,255,255,0.16); }
+  /* fuori dalla finestra tutto uguale, barra di stato compresa: fondo pieno, senza velo */
+  .detail-overlay:has(.deck-full) { padding: 0; background: var(--bg-gruppo); }
   /* popup con immagine di sfondo: testo bianco e leggibile */
   .detail-modal.has-bg-img,
   .detail-modal.has-bg-img .dh-name,
@@ -3315,7 +3314,7 @@
     }
 
     /* ── POPUP DEL MAZZO: immagine in alto, contenuto a riquadri ── */
-    .detail-modal.deck-full { background: var(--bg-gruppo); padding: 0 0 24px; }
+    .detail-modal.deck-full { background: var(--pop-fondo); padding: 0 0 24px; }
     .detail-modal.deck-full #detail-content { padding: 0 16px; max-width: 760px; margin: 0 auto; }
     .detail-modal .dh-hero {
       display: flex; align-items: flex-end; position: relative; isolation: isolate;
@@ -3348,7 +3347,7 @@
     .detail-modal .ddm-head {
       position: sticky; top: 0; z-index: 6;
       margin: 0 -16px; padding: var(--ddm-alto) 64px 12px 16px;
-      background: var(--bg-gruppo);
+      background: var(--pop-fondo);
     }
     .detail-modal.scorre .ddm-head { box-shadow: 0 0.5px 0 var(--barra-bordo); }
     .detail-modal .ddm-tabs {
@@ -3356,8 +3355,12 @@
       border-radius: 12px; background: var(--seg-solido); box-shadow: none;
     }
     .detail-modal .ddm-tabs .inner-tab { padding: 0 4px; height: 38px; font-size: 15px; border-radius: 9px; white-space: nowrap; }
+    .detail-modal.deck-full .ddm-tabs { background: rgba(120,120,128,0.2); }
     .detail-modal .ddm-tabs .seg-pill { border-radius: 9px; }
-    .detail-modal .dh-hero { min-height: 250px; }
+    .detail-modal .dh-hero { min-height: 360px; align-items: flex-start; padding-top: 20px; }
+    .detail-modal .dh-hero::after { background: linear-gradient(180deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 45%); }
+    .detail-modal .dh-hero .detail-head { width: 100%; padding: 0; text-align: center; }
+    .detail-modal .dh-hero.senza-img { padding-top: 24px; min-height: 120px; }
     .detail-modal .deck-mu-stat-list {
       display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 0; max-width: none;
     }
@@ -3695,11 +3698,13 @@
     mask-image: linear-gradient(90deg, transparent 0, #000 28px, #000 calc(100% - 28px), transparent 100%);
   }
   .cc-scorri {
-    display: flex; gap: 10px; overflow-x: auto; overflow-y: hidden; scrollbar-width: none;
-    -webkit-overflow-scrolling: touch; overscroll-behavior-x: contain; padding: 4px 28px 8px;
+    display: flex; gap: 0; overflow-x: auto; overflow-y: hidden; scrollbar-width: none;
+    -webkit-overflow-scrolling: touch; overscroll-behavior-x: contain; padding: 14px 40px 30px;
   }
   .cc-scorri::-webkit-scrollbar { display: none; }
-  .cc-scorri .cc-carta { flex: none; width: clamp(120px, 36vw, 160px); }
+  /* carte a ventaglio come in mano: leggermente sovrapposte, ruotate e piu' basse ai lati (vedi ventaglioCarte) */
+  .cc-scorri .cc-carta { flex: none; width: clamp(120px, 36vw, 160px); margin-right: -22px; transform-origin: 50% 130%; will-change: transform; }
+  .cc-scorri .cc-carta:last-child { margin-right: 0; }
   .cc-scorri .cc-carta img { border-radius: 8px; }
   .cc-scorri .cc-pts { top: 5px; left: 5px; min-width: 24px; padding: 2px 6px; font-size: 13px; border-radius: 7px; }
   .cc-carta { position: relative; cursor: pointer; border-radius: 6px; }
@@ -4493,7 +4498,7 @@
 <footer>
   <span>Tia · Gio · Richi</span>
   <button onclick="eseguiLogout()" style="background:none;border:none;color:var(--text-faint);font-size:0.75rem;cursor:pointer;margin-left:12px;font-family:inherit">Esci</button>
-  <div style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 96</div>
+  <div style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 97</div>
 </footer>
 
 </div>
@@ -5582,6 +5587,23 @@ function htmlMiniCarta(c, extra = '') {
 const ICO_PIU = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>';
 const ICO_FATTO = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg>';
 
+// dispone le carte a ventaglio: la piu' vicina al centro e' dritta e in primo piano
+function ventaglioCarte(sc) {
+  if (sc._raf) return;
+  sc._raf = requestAnimationFrame(() => {
+    sc._raf = 0;
+    const r = sc.getBoundingClientRect(), mid = r.left + r.width / 2;
+    sc.querySelectorAll('.cc-carta').forEach(c => {
+      const q = c.getBoundingClientRect();
+      const d = (q.left + q.width / 2 - mid) / q.width;           // distanza dal centro, in larghezze di carta
+      const rot = Math.max(-24, Math.min(24, d * 11));
+      const giu = Math.min(46, d * d * 9);
+      c.style.transform = `translateY(${giu.toFixed(1)}px) rotate(${rot.toFixed(1)}deg)`;
+      c.style.zIndex = String(100 - Math.round(Math.abs(d) * 10));
+    });
+  });
+}
+window.addEventListener('resize', () => document.querySelectorAll('.cc-scorri').forEach(ventaglioCarte));
 async function renderCarteMazzo(mazzo) {
   const box = document.getElementById('ddm-carte');
   if (!box || _dmhMazzo !== mazzo) return;
@@ -5590,6 +5612,8 @@ async function renderCarteMazzo(mazzo) {
     ${lista.length
       ? `<div class="cc-scorri-wrap"><div class="cc-scorri">${lista.map(c => htmlMiniCarta(c, `onclick="mostraInfoCarta(${c.id}, true)"`)).join('')}</div></div>`
       : `<div class="cc-vuoto">Nessuna carta associata a questo mazzo.</div>`}`;
+  const sc = box.querySelector('.cc-scorri');
+  if (sc) { sc.addEventListener('scroll', () => ventaglioCarte(sc), { passive: true }); ventaglioCarte(sc); }
   // primo caricamento automatico per i mazzi previsti
   const termine = CARTE_INIZIALI[normNome(mazzo)];
   if (termine && (dati.mazziCarte || {})[mazzo] === undefined && !box._carico) {
@@ -6209,7 +6233,6 @@ async function apriDettaglioMazzo(mazzo, scope = _scopeDeck) {
     <div class="dh-hero${imgUrl ? '' : ' senza-img'}"${imgUrl ? ` style="--hero:url('${imgUrl}')"` : ''}>
     <div class="detail-head">
       <div class="dh-name"><span id="ddm-medaglia"></span>${mazzo}</div>
-      ${prop ? `<div class="dh-sub">Proprietario: ${prop}</div>` : ''}
     </div>
     <button class="cc-aggiungi dh-aggiungi" onclick="apriCercaCarte()" aria-label="Aggiungi carte" title="Aggiungi carte">${ICO_PIU}</button>
     </div>
