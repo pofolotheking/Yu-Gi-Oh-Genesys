@@ -2701,6 +2701,9 @@
   [data-theme="dark"] .detail-modal.deck-full { --pop-fondo: #141416; box-shadow: 0 0 0 1px rgba(255,255,255,0.16); }
   /* fuori dalla finestra tutto uguale, barra di stato compresa: fondo pieno, senza velo */
   .detail-overlay:has(.deck-full) { padding: 0; background: var(--bg-gruppo); }
+  /* niente barra di scorrimento a destra nella scheda del mazzo e nelle sue finestre (si scorre col dito) */
+  .detail-modal.deck-full, .detail-modal.sm-modal { scrollbar-width: none; -ms-overflow-style: none; }
+  .detail-modal.deck-full::-webkit-scrollbar, .detail-modal.sm-modal::-webkit-scrollbar { display: none; width: 0; height: 0; }
   /* popup con immagine di sfondo: testo bianco e leggibile */
   .detail-modal.has-bg-img,
   .detail-modal.has-bg-img .dh-name,
@@ -4547,7 +4550,7 @@
 <footer>
   <span>Tia · Gio · Richi</span>
   <button onclick="eseguiLogout()" style="background:none;border:none;color:var(--text-faint);font-size:0.75rem;cursor:pointer;margin-left:12px;font-family:inherit">Esci</button>
-  <div style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 105</div>
+  <div style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 106</div>
 </footer>
 
 </div>
