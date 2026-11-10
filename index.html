@@ -2842,14 +2842,38 @@
       box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
       text-decoration: none;
     }
-    .duel-btn { left: var(--lato-sx); right: auto; }
+    .duel-btn { right: calc(var(--lato-dx) + 80px); left: auto; }
     .duel-btn .ico-svg { display: block; }
     .deck-edit-btn { left: calc(var(--lato-sx) + 40px); right: auto; }
-    .search-btn { right: calc(var(--lato-dx) + 80px); left: auto; }
+    /* ricerca a sinistra: riquadro con lente e scritta; le altre icone tonde a destra */
+    .search-btn {
+      left: var(--lato-sx); right: auto; width: auto; gap: 7px; padding: 0 14px 0 11px; border-radius: 12px;
+      font-family: inherit; font-size: 15px; font-weight: 600; cursor: pointer;
+    }
+    .search-btn svg { flex: none; }
     .theme-btn { right: calc(var(--lato-dx) + 40px); left: auto; }
     .gear-btn { right: var(--lato-dx); left: auto; }
     .gear-btn:hover, .duel-btn:hover, .theme-btn:hover, .search-btn:hover { background: var(--tasto-tondo); color: var(--blue); }
-    .search-btn.active, .search-btn.active:hover { background: var(--blue); color: #fff; }
+    /* ricerca: grande finestra sopra tutto, come le schede dei mazzi */
+    body.ricerca-aperta::after { content: ''; position: fixed; inset: 0; z-index: 394; background: var(--bg-gruppo); }
+    #carte.active {
+      --pop-alto: calc(env(safe-area-inset-top) + 10px);
+      --pop-lato: max(10px, calc((100vw - 760px) / 2), calc(env(safe-area-inset-left) + 6px));
+      --pop-fondo: #e4e4ea;
+      position: fixed; z-index: 395; top: var(--pop-alto); bottom: max(10px, env(safe-area-inset-bottom)); left: var(--pop-lato); right: var(--pop-lato);
+      overflow-y: auto; overscroll-behavior: contain; scrollbar-width: none; -ms-overflow-style: none;
+      padding: 18px 16px 24px; border-radius: 22px; background: var(--pop-fondo);
+      box-shadow: 0 10px 40px rgba(0,0,0,0.22), 0 0 0 1px rgba(0,0,0,0.06);
+    }
+    #carte.active::-webkit-scrollbar { display: none; width: 0; }
+    [data-theme="dark"] #carte.active { --pop-fondo: #141416; box-shadow: 0 0 0 1px rgba(255,255,255,0.16); }
+    #carte .rc-chiudi { display: none; }
+    #carte.active .rc-chiudi {
+      display: flex; position: fixed; z-index: 396; width: 36px; height: 36px;
+      top: calc(var(--pop-alto) + 14px); right: calc(var(--pop-lato) + 14px);
+      background: #ff3b30; color: #fff; box-shadow: 0 2px 8px rgba(255, 59, 48, 0.4);
+    }
+    #carte.active > h2 { margin-top: 2px; padding-right: 52px; }
 
     /* titolo grande della sezione */
     main > section > h2,
@@ -3930,8 +3954,8 @@
   <svg id="theme-icon-sun" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="display:none"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
 </button>
 
-<button class="search-btn" id="search-btn" onclick="switchTab('carte')" title="Ricerca carte e lista Genesys">
-  <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="16.2" y1="16.2" x2="21" y2="21"/></svg>
+<button class="search-btn" id="search-btn" onclick="apriRicerca()" title="Ricerca carte e lista Genesys">
+  <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="16.2" y1="16.2" x2="21" y2="21"/></svg><span class="search-btn-txt">Ricerca</span>
 </button>
 
 <!-- OVERLAY DUELLO -->
@@ -4233,6 +4257,7 @@
   </section>
 
   <section id="carte">
+    <button class="detail-close rc-chiudi" onclick="chiudiRicerca()" title="Chiudi" aria-label="Chiudi">✕</button>
     <h2 class="section-title-centered">Ricerca</h2>
 
     <div id="inner-tab-bar-wrap">
@@ -4565,7 +4590,7 @@
 <footer>
   <span>Tia · Gio · Richi</span>
   <button onclick="eseguiLogout()" style="background:none;border:none;color:var(--text-faint);font-size:0.75rem;cursor:pointer;margin-left:12px;font-family:inherit">Esci</button>
-  <div style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 112</div>
+  <div style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 113</div>
 </footer>
 
 </div>
@@ -5949,7 +5974,7 @@ function chiudiInfoCarta() {
   document.getElementById('ci-overlay')?.classList.remove('open');
   document.body.classList.remove('ci-aperta');
 }
-document.addEventListener('keydown', e => { if (e.key === 'Escape' && document.getElementById('ci-overlay')?.classList.contains('open')) chiudiInfoCarta(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && document.getElementById('ci-overlay')?.classList.contains('open')) { e._gestito = true; chiudiInfoCarta(); } });
 window.chiudiInfoCarta = chiudiInfoCarta;
 window.apriCercaCarte = apriCercaCarte; window.chiudiCercaCarte = chiudiCercaCarte; window.cercaCarteMazzo = cercaCarteMazzo;
 window.mostraInfoCarta = mostraInfoCarta;
@@ -7057,15 +7082,27 @@ async function eliminaPartita(idx) {
   });
 }
 
+// la ricerca carte e' una grande finestra: si apre da qui e chiudendo si torna dove si era
+let _tabPrima = 'giocatori', _scrollPrima = 0;
+function apriRicerca() {
+  const att = document.querySelector('main > section.active');
+  if (att && att.id !== 'carte') { _tabPrima = att.id; _scrollPrima = window.scrollY; }
+  switchTab('carte');
+}
+function chiudiRicerca() {
+  switchTab(_tabPrima || 'giocatori');
+  requestAnimationFrame(() => window.scrollTo({ top: _scrollPrima, behavior: 'instant' }));
+}
+window.apriRicerca = apriRicerca; window.chiudiRicerca = chiudiRicerca;
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && !e._gestito && document.body.classList.contains('ricerca-aperta') && !document.getElementById('ci-overlay')?.classList.contains('open')) chiudiRicerca(); });
 function switchTab(id) {
+  document.body.classList.toggle('ricerca-aperta', id === 'carte');
   document.querySelectorAll('.tab-btn').forEach(x => x.classList.remove('active'));
   document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
   const btn = document.querySelector(`.tab-btn[data-tab="${id}"]`);
   if (btn) btn.classList.add('active');
   const sec = document.getElementById(id);
   if (sec) sec.classList.add('active');
-  const sb = document.getElementById('search-btn');
-  if (sb) sb.classList.toggle('active', id === 'carte');
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
@@ -7075,8 +7112,7 @@ document.querySelectorAll('.tab-btn').forEach(b => {
     document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
     b.classList.add('active');
     document.getElementById(b.dataset.tab).classList.add('active');
-    const sb = document.getElementById('search-btn');
-    if (sb) sb.classList.remove('active');
+    document.body.classList.remove('ricerca-aperta');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   });
 });
@@ -9377,7 +9413,13 @@ function aggiornaBarraAlta() {
   document.body.classList.toggle('m-scorrendo', window.scrollY > 2);
   document.body.classList.toggle('m-titolo', !!h2 && h2.getBoundingClientRect().bottom < fondo);
 }
-const barraAltaPresto = () => { if (!_barraRaf) _barraRaf = requestAnimationFrame(aggiornaBarraAlta); };
+// ogni volta si riprogramma il calcolo: se l'app viene messa in secondo piano il frame
+// pendente puo' andare perso e il vecchio controllo "gia' programmato" lasciava la barra sfumata
+const barraAltaPresto = () => { cancelAnimationFrame(_barraRaf); _barraRaf = requestAnimationFrame(aggiornaBarraAlta); };
+document.addEventListener('visibilitychange', barraAltaPresto);
+window.addEventListener('pageshow', barraAltaPresto);
+window.addEventListener('touchend', () => setTimeout(barraAltaPresto, 250), { passive: true });
+window.addEventListener('scrollend', barraAltaPresto);
 window.addEventListener('scroll', barraAltaPresto, { passive: true });
 window.addEventListener('resize', barraAltaPresto);
 const _osservaSezioni = new MutationObserver(barraAltaPresto);
