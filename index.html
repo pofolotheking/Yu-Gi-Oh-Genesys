@@ -3691,7 +3691,6 @@
   .cc-scorri .cc-carta { flex: none; width: clamp(120px, 36vw, 160px); }
   .cc-scorri .cc-carta img { border-radius: 8px; }
   .cc-scorri .cc-pts { top: 5px; left: 5px; min-width: 24px; padding: 2px 6px; font-size: 13px; border-radius: 7px; }
-  .cc-scorri .cc-az { width: 40px; height: 40px; }
   .cc-carta { position: relative; cursor: pointer; border-radius: 6px; }
   .cc-carta img { display: block; width: 100%; aspect-ratio: 59 / 86; object-fit: cover; border-radius: 6px; background: var(--seg-fondo); box-shadow: 0 2px 6px rgba(0,0,0,0.18); }
   .cc-pts {
@@ -3699,18 +3698,12 @@
     font-size: 11px; font-weight: 800; color: #fff; text-align: center; background: #1d1d1f; box-shadow: 0 1px 3px rgba(0,0,0,0.4);
   }
   .cc-pts.high { background: var(--red); } .cc-pts.mid { background: var(--orange); } .cc-pts.low { background: var(--green-dark); }
-  .cc-carta.scelta img { filter: brightness(0.55); }
+  /* risultato della ricerca gia' nel mazzo: spunta verde */
   .cc-carta.aggiunta::after {
-    content: ''; position: absolute; inset: 0; border-radius: 6px; box-shadow: inset 0 0 0 2.5px var(--blue); pointer-events: none;
+    content: ''; position: absolute; top: 4px; right: 4px; width: 22px; height: 22px; border-radius: 50%; pointer-events: none;
+    background: #34c759 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E") center / 14px no-repeat;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.4);
   }
-  .cc-azioni { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; gap: 6px; }
-  .cc-az {
-    width: 32px; height: 32px; border-radius: 50%; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center;
-    background: #fff; color: #1d1d1f; box-shadow: 0 2px 8px rgba(0,0,0,0.4);
-  }
-  .cc-az.piu, .cc-az.fatto { background: var(--blue); color: #fff; }
-  .cc-az.fatto { opacity: 0.85; cursor: default; }
-  .cc-az.togli { background: var(--red); color: #fff; }
   .cc-vuoto { padding: 16px 4px; text-align: center; font-size: 14px; color: var(--text-dim); }
   .cc-overlay, .ci-overlay {
     display: none; position: fixed; inset: 0; z-index: 450; background: rgba(0,0,0,0.45);
@@ -3741,7 +3734,6 @@
     background: #ff3b30; color: #fff; font-size: 15px; font-weight: 700;
   }
   .cc-cerca { display: flex; flex-direction: row; gap: 8px; margin-bottom: 10px; }
-  .cc-az svg { flex: none; }
   .cc-cerca input { flex: 1; min-width: 0; border: none; border-radius: 10px; padding: 11px 12px; font-size: 16px; background: var(--bg-card); color: var(--text); font-family: inherit; }
   .cc-cerca button { border: none; border-radius: 10px; padding: 0 16px; background: var(--blue); color: #fff; font-family: inherit; font-size: 15px; font-weight: 600; cursor: pointer; }
   .cc-risultati { flex: 1; min-height: 0; overflow-y: auto; }
@@ -3755,6 +3747,16 @@
   .ci-punti b { font-size: 19px; font-weight: 800; line-height: 1; }
   .ci-punti.high { background: var(--red); } .ci-punti.mid { background: var(--orange); } .ci-punti.low { background: var(--green-dark); }
   .ci-chiudi { width: 36px; height: 36px; font-size: 16px; box-shadow: 0 4px 14px rgba(255, 59, 48, 0.45); }
+  .ci-destra { display: flex; align-items: center; gap: 10px; margin-left: auto; }
+  .ci-aggiungi {
+    flex: none; width: 36px; height: 36px; border-radius: 50%; border: none; padding: 0; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; color: #fff;
+    background: var(--blue); box-shadow: 0 4px 14px rgba(0, 122, 255, 0.45); transition: background 0.2s, box-shadow 0.2s;
+  }
+  .ci-aggiungi svg { width: 18px; height: 18px; }
+  .ci-aggiungi.fatto { background: #34c759; box-shadow: 0 4px 14px rgba(52, 199, 89, 0.45); }
+  .ci-aggiungi.pop { animation: ciPop 0.35s cubic-bezier(0.3, 1.6, 0.5, 1); }
+  @keyframes ciPop { 0% { transform: scale(0.6); } 100% { transform: scale(1); } }
   .ci-carta { width: var(--ci-l); }
   .ci-carta img {
     display: block; width: 100%; aspect-ratio: 421 / 614; object-fit: cover; border-radius: 4.5% / 3.1%;
@@ -3770,7 +3772,7 @@
   @media (orientation: landscape) and (max-height: 520px) {
     .ci-overlay.open { display: grid; }
     .ci-overlay {
-      grid-template-columns: auto minmax(190px, 240px); grid-template-rows: auto 1fr auto;
+      grid-template-columns: auto minmax(200px, 260px); grid-template-rows: auto 1fr auto;
       justify-content: center; align-content: center; column-gap: 20px; row-gap: 0;
       padding: calc(env(safe-area-inset-top) + 14px) calc(env(safe-area-inset-right) + 16px) calc(env(safe-area-inset-bottom) + 14px) calc(env(safe-area-inset-left) + 16px);
       --ci-l: calc((100vh - 28px - env(safe-area-inset-top) - env(safe-area-inset-bottom)) * 0.6857);
@@ -4480,7 +4482,7 @@
 <footer>
   <span>Tia · Gio · Richi</span>
   <button onclick="eseguiLogout()" style="background:none;border:none;color:var(--text-faint);font-size:0.75rem;cursor:pointer;margin-left:12px;font-family:inherit">Esci</button>
-  <div style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 94</div>
+  <div style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 95</div>
 </footer>
 
 </div>
@@ -5567,8 +5569,6 @@ function htmlMiniCarta(c, extra = '') {
   </div>`;
 }
 const ICO_PIU = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>';
-const ICO_INFO = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/></svg>';
-const ICO_TOGLI = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg>';
 const ICO_FATTO = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg>';
 
 async function renderCarteMazzo(mazzo) {
@@ -5578,7 +5578,7 @@ async function renderCarteMazzo(mazzo) {
   box.innerHTML = `
     <div class="cc-testa"><button class="cc-aggiungi" onclick="apriCercaCarte()" aria-label="Aggiungi carte" title="Aggiungi carte">${ICO_PIU}</button></div>
     ${lista.length
-      ? `<div class="cc-scorri-wrap"><div class="cc-scorri">${lista.map(c => htmlMiniCarta(c, `onclick="sceltaCarta(this, 'mazzo')"`)).join('')}</div></div>`
+      ? `<div class="cc-scorri-wrap"><div class="cc-scorri">${lista.map(c => htmlMiniCarta(c, `onclick="mostraInfoCarta(${c.id}, true)"`)).join('')}</div></div>`
       : `<div class="cc-vuoto">Nessuna carta associata a questo mazzo.</div>`}`;
   // primo caricamento automatico per i mazzi previsti
   const termine = CARTE_INIZIALI[normNome(mazzo)];
@@ -5600,51 +5600,7 @@ async function renderCarteMazzo(mazzo) {
   }
 }
 
-// tocco su una carta: sopra compaiono le sue azioni (info, e aggiungi o togli)
-function sceltaCarta(el, dove) {
-  const gia = el.classList.contains('scelta');
-  document.querySelectorAll('.cc-carta.scelta').forEach(x => { x.classList.remove('scelta'); x.querySelector('.cc-azioni')?.remove(); });
-  if (gia) return;
-  const id = +el.dataset.carta;
-  const presente = carteDi(_dmhMazzo).some(c => c.id === id);
-  let azione;
-  if (dove === 'mazzo') azione = `<button class="cc-az togli" title="Togli dal mazzo" onclick="event.stopPropagation(); togliCarta(${id})">${ICO_TOGLI}</button>`;
-  else if (presente) azione = `<button class="cc-az fatto" title="Gia' associata" disabled>${ICO_FATTO}</button>`;
-  else azione = `<button class="cc-az piu" title="Aggiungi al mazzo" onclick="event.stopPropagation(); aggiungiCarta(${id}, this)">${ICO_PIU}</button>`;
-  el.insertAdjacentHTML('beforeend', `<div class="cc-azioni">${azione}<button class="cc-az dettagli" title="Info carta" onclick="event.stopPropagation(); mostraInfoCarta(${id})">${ICO_INFO}</button></div>`);
-  el.classList.add('scelta');
-}
-document.addEventListener('click', e => {
-  if (!e.target.closest('.cc-carta')) document.querySelectorAll('.cc-carta.scelta').forEach(x => { x.classList.remove('scelta'); x.querySelector('.cc-azioni')?.remove(); });
-});
-
 let _risultatiCarte = {};
-async function aggiungiCarta(id, bottone) {
-  const c = _risultatiCarte[id]; if (!c || !_dmhMazzo) return;
-  dati.mazziCarte = dati.mazziCarte || {};
-  const lista = dati.mazziCarte[_dmhMazzo] = carteDi(_dmhMazzo).slice();
-  if (lista.some(x => x.id === id)) return;
-  lista.push(cartaBreve(c));
-  const el = bottone.closest('.cc-carta');
-  el.classList.add('aggiunta');
-  bottone.outerHTML = `<button class="cc-az fatto" disabled>${ICO_FATTO}</button>`;
-  renderCarteMazzo(_dmhMazzo);
-  await salvaDatiCloud();
-}
-async function togliCarta(id) {
-  if (!_dmhMazzo) return;
-  const prima = carteDi(_dmhMazzo);
-  const carta = prima.find(c => c.id === id);
-  dati.mazziCarte[_dmhMazzo] = prima.filter(c => c.id !== id);
-  const mazzo = _dmhMazzo;
-  renderCarteMazzo(mazzo);
-  await salvaDatiCloud();
-  mostraAvviso(`${escapeHtml(carta ? carta.name : 'Carta')} tolta`, 'Annulla', async () => {
-    dati.mazziCarte[mazzo] = prima;
-    renderCarteMazzo(mazzo);
-    await salvaDatiCloud();
-  });
-}
 
 function apriCercaCarte() {
   let ov = document.getElementById('cc-overlay');
@@ -5686,7 +5642,7 @@ async function cercaCarteMazzo() {
   trovate.forEach(c => { _risultatiCarte[c.id] = c; });
   const presenti = new Set(carteDi(_dmhMazzo).map(c => c.id));
   box.innerHTML = `<div class="cc-conta">${trovate.length} risultati</div><div class="cc-griglia">${trovate.map(c =>
-    htmlMiniCarta(cartaBreve(c), `onclick="sceltaCarta(this, 'ricerca')"${presenti.has(c.id) ? ' data-gia="1"' : ''}`).replace('class="cc-carta"', `class="cc-carta${presenti.has(c.id) ? ' aggiunta' : ''}"`)).join('')}</div>`;
+    htmlMiniCarta(cartaBreve(c), `onclick="mostraInfoCarta(${c.id}, true)"`).replace('class="cc-carta"', `class="cc-carta${presenti.has(c.id) ? ' aggiunta' : ''}"`)).join('')}</div>`;
 }
 
 // scheda della carta (ovunque nell'app): solo l'immagine intera quasi a tutto
@@ -5707,29 +5663,61 @@ function htmlCartaGrande(c, caricata = true) {
   const piccola = caricata ? (im.image_url_small || '') : (c.img || '');
   return `<div class="ci-testa">
       <div class="ci-punti ${liv}"><b>${pts}</b> punti Genesys</div>
-      <button class="cc-chiudi ci-chiudi" onclick="chiudiInfoCarta()" aria-label="Chiudi">✕</button>
+      <div class="ci-destra">${htmlBottoneMazzo(c.id)}<button class="cc-chiudi ci-chiudi" onclick="chiudiInfoCarta()" aria-label="Chiudi">✕</button></div>
     </div>
     <div class="ci-carta"><img src="${escapeHtml(grande)}" alt="${escapeHtml(c.name || '')}"${piccola ? ` style="background-image:url('${escapeHtml(piccola)}')"` : ''}></div>
     <div class="ci-prezzo">Prezzo medio: <b>${caricata ? prezzoMedio(c) : '…'}</b></div>`;
 }
+// aperta da un mazzo (carte associate o ricerca): in alto a destra il + blu
+// aggiunge la carta al mazzo e diventa una spunta verde; toccando la spunta
+// la carta torna fuori dal mazzo
+let _ciMazzo = null, _ciBreve = null;
+function htmlBottoneMazzo(id) {
+  if (!_ciMazzo) return '';
+  const dentro = carteDi(_ciMazzo).some(x => x.id === id);
+  return `<button class="ci-aggiungi${dentro ? ' fatto' : ''}" onclick="toggleCartaMazzo(${id})" aria-label="${dentro ? 'Togli dal mazzo' : 'Aggiungi al mazzo'}" title="${dentro ? 'Nel mazzo' : 'Aggiungi al mazzo'}">${dentro ? ICO_FATTO : ICO_PIU}</button>`;
+}
+async function toggleCartaMazzo(id) {
+  const mazzo = _ciMazzo; if (!mazzo) return;
+  const prima = carteDi(mazzo);
+  const dentro = prima.some(x => x.id === id);
+  let nuova;
+  if (dentro) nuova = prima.filter(x => x.id !== id);
+  else {
+    const b = _risultatiCarte[id] ? cartaBreve(_risultatiCarte[id]) : (_ciBreve && _ciBreve.id === id ? _ciBreve : null);
+    if (!b) return;
+    nuova = [...prima, b];
+  }
+  dati.mazziCarte = dati.mazziCarte || {};
+  dati.mazziCarte[mazzo] = nuova;
+  const btn = document.querySelector('#ci-overlay .ci-aggiungi');
+  if (btn) { btn.outerHTML = htmlBottoneMazzo(id); if (!dentro) document.querySelector('#ci-overlay .ci-aggiungi')?.classList.add('pop'); }
+  document.querySelectorAll(`#cc-risultati .cc-carta[data-carta="${id}"]`).forEach(el => el.classList.toggle('aggiunta', !dentro));
+  renderCarteMazzo(mazzo);
+  await salvaDatiCloud();
+}
+window.toggleCartaMazzo = toggleCartaMazzo;
+
 let _ciRichiesta = 0;
-async function mostraInfoCarta(id) {
+async function mostraInfoCarta(id, conMazzo = false) {
   let ov = document.getElementById('ci-overlay');
   if (!ov) {
     ov = document.createElement('div');
     ov.id = 'ci-overlay'; ov.className = 'ci-overlay';
     ov.setAttribute('role', 'dialog');
-    ov.addEventListener('click', e => { if (!e.target.closest('.ci-carta, .ci-prezzo, .ci-punti')) chiudiInfoCarta(); });
+    ov.addEventListener('click', e => { if (!e.target.closest('.ci-carta, .ci-prezzo, .ci-punti, .ci-aggiungi')) chiudiInfoCarta(); });
     document.body.appendChild(ov);
   }
   const n = ++_ciRichiesta;
+  _ciMazzo = conMazzo && _dmhMazzo ? _dmhMazzo : null;
   // se la carta e' gia' nota si mostra subito l'immagine piccola, poi arriva quella intera
   const completa = _risultatiCarte[id];
   const breve = carteDi(_dmhMazzo).find(x => x.id === id)
     || (_cardRegistry[id] && { id, name: _cardRegistry[id].name, img: _cardRegistry[id].img, pts: _cardRegistry[id].pts });
+  _ciBreve = completa ? cartaBreve(completa) : (breve || null);
   ov.innerHTML = completa ? htmlCartaGrande(completa)
     : breve ? htmlCartaGrande(breve, false)
-    : `<div class="ci-testa"><span></span><button class="cc-chiudi ci-chiudi" onclick="chiudiInfoCarta()" aria-label="Chiudi">✕</button></div><div class="ci-attesa">Caricamento…</div>`;
+    : `<div class="ci-testa"><span></span><div class="ci-destra"><button class="cc-chiudi ci-chiudi" onclick="chiudiInfoCarta()" aria-label="Chiudi">✕</button></div></div><div class="ci-attesa">Caricamento…</div>`;
   ov.classList.add('open');
   document.body.classList.add('ci-aperta');
   if (completa) return;
@@ -5737,7 +5725,9 @@ async function mostraInfoCarta(id) {
     const r = await fetch(`${API_CARTE}?id=${id}&misc=yes`);
     const c = (await r.json()).data?.[0];
     if (!c) throw new Error();
-    if (n === _ciRichiesta) ov.innerHTML = htmlCartaGrande(c);
+    if (n !== _ciRichiesta) return;
+    _ciBreve = cartaBreve(c);
+    ov.innerHTML = htmlCartaGrande(c);
   } catch (e) {
     if (n !== _ciRichiesta) return;
     const prezzo = ov.querySelector('.ci-prezzo b'), attesa = ov.querySelector('.ci-attesa');
@@ -5753,7 +5743,7 @@ function chiudiInfoCarta() {
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && document.getElementById('ci-overlay')?.classList.contains('open')) chiudiInfoCarta(); });
 window.chiudiInfoCarta = chiudiInfoCarta;
 window.apriCercaCarte = apriCercaCarte; window.chiudiCercaCarte = chiudiCercaCarte; window.cercaCarteMazzo = cercaCarteMazzo;
-window.sceltaCarta = sceltaCarta; window.aggiungiCarta = aggiungiCarta; window.togliCarta = togliCarta; window.mostraInfoCarta = mostraInfoCarta;
+window.mostraInfoCarta = mostraInfoCarta;
 
 // ============ STATISTICHE DADO/PRIMO ============
 function renderStatDado(partite = dati.partite, contId = 'stat-dado-wrap') {
