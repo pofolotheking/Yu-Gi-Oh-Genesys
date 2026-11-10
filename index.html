@@ -3710,7 +3710,7 @@
   }
   .cc-scorri::-webkit-scrollbar { display: none; }
   /* carte a ventaglio come in mano: leggermente sovrapposte, ruotate e piu' basse ai lati (vedi ventaglioCarte) */
-  .cc-scorri .cc-carta { flex: none; width: clamp(103px, 31vw, 137px); margin-right: -26px; transform-origin: 50% 130%; will-change: transform; }
+  .cc-scorri .cc-carta { flex: none; width: clamp(113px, 34vw, 151px); margin-right: -28px; transform-origin: 50% 130%; will-change: transform; }
   .cc-scorri .cc-carta:last-child { margin-right: 0; }
   /* sagoma tratteggiata grigia dopo l'ultima carta: tocco = aggiungi carte */
   /* quattro bottoni grandi 2x2: ognuno apre la sua finestra */
@@ -4550,7 +4550,7 @@
 <footer>
   <span>Tia · Gio · Richi</span>
   <button onclick="eseguiLogout()" style="background:none;border:none;color:var(--text-faint);font-size:0.75rem;cursor:pointer;margin-left:12px;font-family:inherit">Esci</button>
-  <div style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 108</div>
+  <div style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 109</div>
 </footer>
 
 </div>
@@ -5689,8 +5689,8 @@ function ventaglioCarte(sc) {
     sc.querySelectorAll('.cc-carta').forEach(c => {
       const q = c.getBoundingClientRect();
       const d = (q.left + q.width / 2 - mid) / q.width;           // distanza dal centro, in larghezze di carta
-      const rot = Math.max(-24, Math.min(24, d * 11));
-      const giu = Math.min(60, d * d * 11);
+      const rot = Math.max(-15, Math.min(15, d * 7));
+      const giu = Math.min(36, d * d * 6);
       c.style.transform = `translateY(${giu.toFixed(1)}px) rotate(${rot.toFixed(1)}deg)`;
       c.style.zIndex = String(100 - Math.round(Math.abs(d) * 10));
     });
