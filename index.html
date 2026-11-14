@@ -3818,7 +3818,21 @@
     background: linear-gradient(180deg, transparent, rgba(0,0,0,0.8)); display: flex; flex-direction: column; gap: 1px; }
   .gm-nome small { font-size: 13px; font-weight: 700; opacity: 0.9; }
   .dg-vuoto { margin-top: 16px; color: #fff; text-shadow: 0 1px 3px #000; }
-  .dg-desc { margin: 12px 4px; font-size: 14px; color: var(--text-dim); line-height: 1.4; }
+  .dg-s1 { margin-bottom: 0; padding-bottom: 6px; }
+  .dg-s2 { margin-top: 0; }
+  .dg-s2::before { top: 0 !important; }
+  .dg-info { padding: 6px 4px 22px; }
+  .dg-desc { margin: 0 0 16px; font-size: 16px; color: var(--text); line-height: 1.45; }
+  .dg-info .nv { padding: 0; gap: 10px; }
+  .dg-info .nv-voce { min-height: 92px; }
+  .dg-trofei { margin: 20px 2px 0; }
+  .dg-tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .dg-tile { display: flex; flex-direction: column; justify-content: center; gap: 3px; min-height: 92px; padding: 14px; border-radius: 16px; background: var(--bg-card); }
+  .dg-tile.testo b { font-size: 20px; }
+  .dg-tile.largo { grid-column: 1 / -1; min-height: 78px; }
+  .dg-tile b { font-size: 28px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.1; color: var(--text); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+  .dg-tile span { font-size: 13px; font-weight: 600; color: var(--text-dim); line-height: 1.2; }
+  .dg-tile small { font-size: 12px; color: var(--text-faint); }
   .sm-modal .nv { padding: 12px 0 0; }
   .dg-ach { padding: 8px 0 0; }
   .sp-testa { display: flex; flex-direction: column; gap: 3px; padding: 22px 70px 8px 20px; }
@@ -4678,7 +4692,7 @@
 <footer>
   <span>Tia · Gio · Richi</span>
   <button onclick="eseguiLogout()" style="background:none;border:none;color:var(--text-faint);font-size:0.75rem;cursor:pointer;margin-left:12px;font-family:inherit">Esci</button>
-  <div id="versione-app" style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 122</div>
+  <div id="versione-app" style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 123</div>
 </footer>
 
 </div>
@@ -6802,6 +6816,15 @@ function mazziDiGiocatore(nome, partite) {
   partiteDi(partite, nome).forEach(e => { const x = m[e.mazzo] || (m[e.mazzo] = { nome: e.mazzo, v: 0, p: 0 }); e.vinta ? x.v++ : x.p++; });
   return Object.values(m).sort((a, b) => (b.v + b.p) - (a.v + a.p) || b.v - a.v);
 }
+// sotto il ventaglio: descrizione, nemesi e vittima preferita, trofei
+function htmlInfoGiocatore(nome, partite) {
+  const profilo = (dati.profili || {})[nome] || {};
+  const ach = calcolaAchievements(nome).map(a => `<div class="ach-item ${a.unlocked ? 'unlocked' : 'locked'}" ${a.unlocked ? `data-tooltip="${a.desc}"` : ''}><span class="ach-icon">${a.icon}</span>${a.unlocked ? `<span class="ach-label">${a.name}</span>` : ''}</div>`).join('');
+  return `${profilo.descrizione ? `<p class="dg-desc">${escapeHtml(profilo.descrizione)}</p>` : ''}
+    ${htmlNemesiVittima(nome, partite)}
+    <div class="ce-titolo dg-trofei">Trofei</div>
+    <div class="profile-inline-ach dg-ach">${ach}</div>`;
+}
 function apriGiocatore(nome, scope = 'all', fisse = null) {
   chiudiSottoMazzo();
   _dgNome = nome; _dgFisse = fisse; _dmhMazzo = null;
@@ -6816,12 +6839,13 @@ function apriGiocatore(nome, scope = 'all', fisse = null) {
     <div class="dh-hero${foto ? '' : ' senza-img'}"${foto ? ` style="--hero:url('${escapeHtml(foto)}')"` : ''}>
       <div class="detail-head"><div class="dh-name">${escapeHtml(nome)}</div></div>
     </div>
-    <div class="ddm-sotto">
+    <div class="ddm-sotto dg-s1">
       <div class="ddm-carte" id="dg-carte">${mazzi.length
         ? `<div class="cc-scorri-wrap"><div class="cc-scorri">${mazzi.map(carta).join('')}</div></div>`
         : '<div class="cc-vuoto dg-vuoto">Nessun mazzo giocato ancora.</div>'}</div>
-      <div id="ddm-scope"></div>
-    </div>`;
+    </div>
+    <div class="dg-info">${htmlInfoGiocatore(nome, partite)}</div>
+    <div class="ddm-sotto dg-s2"><div id="ddm-scope"></div></div>`;
   const sc = document.querySelector('#dg-carte .cc-scorri');
   if (sc) { sc.addEventListener('scroll', () => ventaglioCarte(sc), { passive: true }); ventaglioCarte(sc); }
   renderGiocatoreScope(nome, scope);
@@ -6845,10 +6869,9 @@ function renderGiocatoreScope(nome, scope) {
   const volte = n => `${n} volt${n === 1 ? 'a' : 'e'}`;
   const primo = es.filter(e => e.par.primo === nome), secondo = es.filter(e => e.par.primo && e.par.primo !== nome);
   const dado = es.filter(e => e.par.dado === nome);
-  const riga = (et, val) => `<div class="ddm-riga"><span class="ddm-et">${et}</span><b>${val}</b></div>`;
+  const tile = (et, val, sub = '', largo = false) => `<div class="dg-tile${largo ? ' ' + largo : ''}"><b>${val}</b><span>${et}</span>${sub ? `<small>${sub}</small>` : ''}</div>`;
   const profilo = (dati.profili || {})[nome] || {};
   const pref = profilo.mazzoPref || (mazziDiGiocatore(nome, partiteAllTime())[0] || {}).nome || '\u2014';
-  const ach = calcolaAchievements(nome).map(a => `<div class="ach-item ${a.unlocked ? 'unlocked' : 'locked'}" ${a.unlocked ? `data-tooltip="${a.desc}"` : ''}><span class="ach-icon">${a.icon}</span>${a.unlocked ? `<span class="ach-label">${a.name}</span>` : ''}</div>`).join('');
   // match-up: contro gli altri giocatori e con ciascun mazzo del giocatore
   const gruppi = (chiave, nomeDi, dataM) => {
     const g = {}; es.forEach(e => { const k = chiave(e); const x = g[k] || (g[k] = { v: 0, p: 0 }); e.vinta ? x.v++ : x.p++; });
@@ -6862,22 +6885,18 @@ function renderGiocatoreScope(nome, scope) {
   }).join('') || '<div class="dmh-vuoto">Nessuna partita.</div>';
   _ddmPezzi = {
     andamento: { titolo: 'Andamento', html: `<div class="ddm-grafico"><div class="ddm-grafico-wrap sm-alto"><canvas id="ddm-chart"></canvas></div></div>` },
-    statistiche: { titolo: 'Statistiche', html: `<div class="ddm-tabella">
-      ${riga('Posizione in classifica', pos && s.partite ? pos + '\u00B0' : '\u2014')}
-      ${riga('Punti', s.punti)}
-      ${riga('Partite giocate', s.partite)}
-      ${riga('Vittorie e sconfitte', `${s.v} \u2013 ${s.p}`)}
-      ${riga('Percentuale di vittorie', pct(s.v, s.partite))}
-      ${riga(`Vittorie andando primo (${volte(primo.length)})`, pct(primo.filter(e => e.vinta).length, primo.length))}
-      ${riga(`Vittorie andando secondo (${volte(secondo.length)})`, pct(secondo.filter(e => e.vinta).length, secondo.length))}
-      ${riga('Dadi vinti su quelli lanciati', dado.length ? `${dado.length} su ${es.filter(e => e.par.dado).length}` : '\u2014')}
-      ${riga('Vittorie dopo aver vinto il dado', pct(dado.filter(e => e.vinta).length, dado.length))}
-      ${riga('Mazzo preferito', escapeHtml(pref))}
-    </div>
-    ${profilo.descrizione ? `<p class="dg-desc">${escapeHtml(profilo.descrizione)}</p>` : ''}
-    ${htmlNemesiVittima(nome, partite)}
-    <div class="ce-titolo" style="margin-top:14px">Achievements</div>
-    <div class="profile-inline-ach dg-ach">${ach}</div>` },
+    statistiche: { titolo: 'Statistiche', html: `<div class="dg-tiles">
+      ${tile('Posizione', pos && s.partite ? pos + '\u00B0' : '\u2014')}
+      ${tile('Punti', s.punti)}
+      ${tile('Partite', s.partite)}
+      ${tile('Vittorie-sconfitte', `${s.v}-${s.p}`)}
+      ${tile('% vittorie', pct(s.v, s.partite))}
+      ${tile('Dadi vinti', dado.length ? `${dado.length}/${es.filter(e => e.par.dado).length}` : '\u2014')}
+      ${tile(`% se va primo`, pct(primo.filter(e => e.vinta).length, primo.length), `${primo.length} partite`)}
+      ${tile(`% se va secondo`, pct(secondo.filter(e => e.vinta).length, secondo.length), `${secondo.length} partite`)}
+      ${tile('% dopo il dado vinto', pct(dado.filter(e => e.vinta).length, dado.length))}
+      ${tile('Mazzo preferito', escapeHtml(pref), '', 'testo')}
+    </div>` },
     matchup: { titolo: 'Match-up', html: `<div class="ce-titolo">Contro i giocatori</div><div class="deck-mu-vs-list">${gruppi(e => e.avv, k => 'vs ' + escapeHtml(k), false)}</div>
       <div class="ce-titolo" style="margin-top:14px">Con i suoi mazzi</div><div class="deck-mu-vs-list">${gruppi(e => e.mazzo, k => escapeHtml(k), true)}</div>` },
     storico: { titolo: 'Storico partite', html: `<div class="dmh-list">${storico}</div>` },
