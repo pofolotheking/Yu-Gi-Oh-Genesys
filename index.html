@@ -3735,6 +3735,95 @@
     .vitt-titolo, .vitt-carta, .vitt-mazzo, .vitt-chi { animation: none; }
   }
 
+  /* ── DUELLO A SPECCHIO ── */
+  .dz { display: none; position: fixed; inset: 0; z-index: 500; background: #000; color: #fff; flex-direction: column;
+    padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom); touch-action: manipulation; -webkit-user-select: none; user-select: none; }
+  .dz.open { display: flex; }
+  .dz button { font-family: inherit; color: inherit; border: none; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+  .dz-meta { flex: 1 1 0; min-height: 0; position: relative; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; isolation: isolate; background: linear-gradient(160deg, #1b1f2e, #0b0c12); }
+  .dz-meta.su { transform: rotate(180deg); background: linear-gradient(160deg, #2a1a1f, #0e0a0c); }
+  .dz-bg { position: absolute; inset: 0; z-index: -1; background-size: cover; background-position: center 25%; opacity: 0.42; }
+  .dz-meta::after { content: ''; position: absolute; inset: 0; z-index: -1; background: radial-gradient(ellipse at center, rgba(0,0,0,0.15), rgba(0,0,0,0.6)); }
+  .dz-chi { display: inline-flex; align-items: center; gap: 6px; max-width: 86%; padding: 6px 13px; border-radius: 999px; background: rgba(0,0,0,0.42); font-size: 14px; font-weight: 700;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+  .dz-chi svg { width: 16px; height: 16px; opacity: 0.75; }
+  .dz-lp { background: none; padding: 0 10px; font-size: clamp(58px, 21vw, 104px); font-weight: 800; letter-spacing: -0.035em; line-height: 1; font-variant-numeric: tabular-nums; text-shadow: 0 4px 18px rgba(0,0,0,0.85); }
+  .dz-lp.colpo { animation: dzColpo 0.3s ease; }
+  @keyframes dzColpo { 30% { transform: scale(1.08); } }
+  .dz-meta.ko .dz-lp { color: #ff453a; }
+  .dz-barra { width: min(62%, 300px); height: 7px; border-radius: 4px; background: rgba(255,255,255,0.2); overflow: hidden; }
+  .dz-barra i { display: block; height: 100%; border-radius: 4px; transition: width 0.35s ease, background 0.35s; }
+  .dz-rapidi { display: flex; gap: 8px; margin-top: 10px; }
+  .dz-rapidi button { min-width: 64px; height: 46px; padding: 0 10px; border-radius: 14px; font-size: 16px; font-weight: 800; font-variant-numeric: tabular-nums; box-shadow: 0 3px 10px rgba(0,0,0,0.4); }
+  .dz-rapidi .meno { background: #ff453a; }
+  .dz-rapidi .altro { min-width: 50px; background: rgba(255,255,255,0.2); font-size: 22px; -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+  .dz-rapidi button:active, .dz-ic:active { transform: scale(0.93); }
+  .dz-delta { position: absolute; top: 14%; font-size: 26px; font-weight: 800; opacity: 0; pointer-events: none; text-shadow: 0 2px 8px #000; }
+  .dz-delta.mostra { animation: dzDelta 1.3s ease forwards; }
+  .dz-delta.meno { color: #ff6961; } .dz-delta.piu { color: #4cd964; }
+  @keyframes dzDelta { 0% { opacity: 0; transform: translateY(10px); } 15% { opacity: 1; transform: none; } 75% { opacity: 1; } 100% { opacity: 0; transform: translateY(-12px); } }
+  .dz-centro { flex: none; display: flex; justify-content: center; gap: clamp(2px, 1.6vw, 10px); padding: 7px 6px; background: #0e0e10; border-top: 1px solid #26262a; border-bottom: 1px solid #26262a; }
+  .dz-ic { display: flex; flex-direction: column; align-items: center; gap: 3px; width: clamp(42px, 13vw, 58px); padding: 6px 0 4px; border-radius: 12px; background: #1c1c1e; }
+  .dz-ic span { font-size: 9.5px; font-weight: 600; color: #a1a1a8; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .dz-ic[disabled] { opacity: 0.35; }
+  .dz-ic[data-on] { background: #0a84ff; } .dz-ic[data-on] span { color: #fff; }
+  .dz-velo { position: fixed; inset: 0; z-index: 5; display: flex; align-items: center; justify-content: center; padding: 16px; background: rgba(0,0,0,0.6); -webkit-backdrop-filter: blur(5px); backdrop-filter: blur(5px); }
+  .dz-velo.girato { transform: rotate(180deg); }
+  .dz-foglio { position: relative; width: min(100%, 360px); max-height: 100%; overflow-y: auto; scrollbar-width: none; padding: 20px 16px 16px; border-radius: 24px; background: #1c1c1e; border: 1px solid rgba(255,255,255,0.12); box-shadow: 0 20px 60px rgba(0,0,0,0.6); animation: popIn 0.22s ease; }
+  .dz-foglio::-webkit-scrollbar { display: none; }
+  .dz-foglio.stretto { width: min(100%, 280px); text-align: center; }
+  .dz-foglio.alto { max-height: min(100%, 640px); }
+  .dz-tit { font-size: 19px; font-weight: 800; margin: 0 40px 10px 2px; }
+  .dz-foglio.stretto .dz-tit { margin: 0 0 10px; }
+  .dz-nota { font-size: 13.5px; color: #a1a1a8; margin: 0 2px 12px; line-height: 1.4; }
+  .dz-x { position: absolute; top: 14px; right: 14px; width: 32px; height: 32px; border-radius: 50%; background: #ff3b30; font-size: 14px; font-weight: 700; }
+  .dz-azioni { display: flex; gap: 8px; margin-top: 14px; }
+  .dz-azioni button { flex: 1; height: 48px; border-radius: 14px; background: #2c2c2e; font-size: 16px; font-weight: 700; }
+  .dz-azioni .rosso { background: #ff453a; } .dz-azioni .verde { background: #30d158; } .dz-azioni .blu { background: #0a84ff; }
+  .dz-display { text-align: right; font-size: 40px; font-weight: 800; padding: 6px 10px; margin-bottom: 10px; border-radius: 14px; background: #000; font-variant-numeric: tabular-nums; }
+  .dz-tasti { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .dz-tasti button { height: 52px; border-radius: 14px; background: #2c2c2e; font-size: 22px; font-weight: 700; }
+  .dz-tasti button:active { background: #48484a; }
+  .dz-esito { font-size: 44px; font-weight: 800; margin: 8px 0 2px; font-variant-numeric: tabular-nums; }
+  .dz-dado { width: 104px; height: 104px; margin: 6px auto 0; padding: 14px; border-radius: 22px; background: #fff; display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; place-items: center; }
+  .dz-dado i { width: 17px; height: 17px; border-radius: 50%; } .dz-dado i.p { background: #111; }
+  .dz-dado.rotola { animation: dzRotola 0.5s ease; }
+  @keyframes dzRotola { from { transform: rotate(-200deg) scale(0.4); opacity: 0; } }
+  .dz-moneta { width: 104px; height: 104px; margin: 6px auto 0; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 46px; font-weight: 800; color: #6b4a00;
+    background: radial-gradient(circle at 35% 30%, #ffe9a0, #e0a72c 70%); border: 4px solid #b8820f; }
+  .dz-moneta.gira { animation: dzGira 0.6s ease; }
+  @keyframes dzGira { from { transform: rotateY(900deg) scale(0.5); opacity: 0.3; } }
+  .dz-log div { display: flex; align-items: baseline; gap: 8px; padding: 10px 2px; font-size: 15px; border-top: 0.5px solid #38383a; }
+  .dz-log small { color: #8e8e93; font-size: 12px; width: 38px; flex: none; } .dz-log span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .dz-log b { font-variant-numeric: tabular-nums; } .dz-log b.meno { color: #ff6961; } .dz-log b.piu { color: #4cd964; } .dz-log em { font-style: normal; color: #8e8e93; min-width: 66px; text-align: right; font-variant-numeric: tabular-nums; }
+  .dz-min { display: flex; align-items: baseline; justify-content: center; gap: 8px; }
+  .dz-min input { width: 120px; padding: 8px; border: none; border-radius: 14px; background: #000; color: #fff; font-family: inherit; font-size: 40px; font-weight: 800; text-align: center; -webkit-user-select: text; user-select: text; }
+  .dz-min span { color: #a1a1a8; font-size: 15px; font-weight: 600; }
+  .dz-sc-et { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em; color: #a1a1a8; margin: 12px 2px 6px; }
+  .dz-sc-gioc { display: flex; gap: 8px; }
+  .dz-sc-gioc button, .dz-sc-mazzi button { position: relative; overflow: hidden; background: #2c2c2e center 20% / cover; border: 2.5px solid transparent; border-radius: 13px; }
+  .dz-sc-gioc button { flex: 1; height: 62px; }
+  .dz-sc-mazzi { display: flex; gap: 7px; overflow-x: auto; scrollbar-width: none; margin-top: 8px; padding-bottom: 2px; }
+  .dz-sc-mazzi::-webkit-scrollbar { display: none; }
+  .dz-sc-mazzi button { flex: none; width: 92px; height: 54px; }
+  .dz-sc-gioc span, .dz-sc-mazzi span { position: absolute; left: 0; right: 0; bottom: 0; padding: 10px 4px 3px; font-size: 11.5px; font-weight: 700; text-align: center; background: linear-gradient(transparent, rgba(0,0,0,0.85)); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .dz-sc-gioc button.on, .dz-sc-mazzi button.on { border-color: #0a84ff; box-shadow: 0 0 0 2px rgba(10,132,255,0.35); }
+  /* telefono in orizzontale: i due giocatori affiancati, icone in colonna al centro */
+  @media (orientation: landscape) and (max-height: 520px) {
+    .dz { flex-direction: row-reverse; padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); }
+    .dz-meta.su { transform: none; }
+    .dz-meta { gap: 5px; }
+    .dz-lp { font-size: clamp(44px, 20vh, 84px); }
+    .dz-centro { flex-direction: column; justify-content: center; gap: 3px; padding: 4px 6px; border: none; border-left: 1px solid #26262a; border-right: 1px solid #26262a; }
+    .dz-ic { width: 56px; padding: 3px 0 2px; gap: 1px; } .dz-ic svg { width: 18px; height: 18px; } .dz-ic span { font-size: 8.5px; }
+    .dz-rapidi { margin-top: 4px; gap: 6px; } .dz-rapidi button { height: 38px; min-width: 56px; font-size: 14px; }
+    .dz-velo.girato { transform: none; }
+    .dz-foglio.tasti { width: min(100%, 520px); display: grid; grid-template-columns: 1fr 1fr; column-gap: 12px; align-items: start; padding-top: 14px; }
+    .dz-foglio.tasti .dz-tit, .dz-foglio.tasti .dz-display, .dz-foglio.tasti .dz-azioni { grid-column: 1; } .dz-foglio.tasti .dz-tasti { grid-column: 2; grid-row: 1 / 4; }
+    .dz-tasti button { height: 40px !important; }
+  }
+  @media (max-height: 620px) { .dz-rapidi button { height: 40px; } .dz-rapidi { margin-top: 4px; } .dz-tasti button { height: 44px; } }
+
   /* ── CARTE ASSOCIATE AL MAZZO ── */
   .ddm-carte { margin: 0 0 12px; }
   .cc-testa { display: flex; justify-content: flex-end; margin-bottom: 8px; }
@@ -4044,167 +4133,8 @@
   <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="16.2" y1="16.2" x2="21" y2="21"/></svg><span class="search-btn-txt">Ricerca</span>
 </button>
 
-<!-- OVERLAY DUELLO -->
-<div class="duel-overlay" id="duel-overlay">
-
-  <div class="duel-topbar">
-    <button class="duel-back-btn" onclick="chiudiDuello()">
-      <svg width="10" height="16" viewBox="0 0 10 16" fill="none"><path d="M8 2L2 8l6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      Home
-    </button>
-    <div class="duel-topbar-title">⚔️ Duello</div>
-    <div style="display:flex;gap:8px;align-items:center">
-      <button class="duel-reset-btn" onclick="apriDadi()" title="Lancia un dado" style="font-size:1.1rem">🎲</button>
-      <button class="duel-reset-btn" onclick="resetDuello()">Reset</button>
-    </div>
-  </div>
-
-  <div class="duel-top-tools">
-    <div class="duel-tool" id="duel-chrono-tool">
-      <span class="duel-tool-icon">⏱</span>
-      <span class="duel-tool-val" id="duel-chrono-val">0:00</span>
-      <button class="duel-tool-btn go" id="duel-chrono-btn" onclick="toggleChrono()" title="Avvia">▶</button>
-      <button class="duel-tool-btn" id="duel-chrono-reset-btn" onclick="resetChrono()" title="Reset" style="color:rgba(60,60,67,0.45);font-size:0.8rem">↺</button>
-    </div>
-    <div class="duel-tool" id="duel-timer-tool">
-      <span class="duel-tool-icon">⏳</span>
-      <span class="duel-tool-val muted" id="duel-timer-val">—</span>
-      <button class="duel-tool-btn" onclick="apriTimerSetup()" title="Imposta">⚙</button>
-      <button class="duel-tool-btn go" id="duel-timer-btn" hidden onclick="toggleTimer()" title="Avvia">▶</button>
-    </div>
-    <div class="duel-tool" id="duel-dado-tool">
-      <span class="duel-tool-icon">🎲</span>
-      <button class="duel-tool-btn go" onclick="apriDadi()" title="Lancia un dado">Dadi</button>
-    </div>
-  </div>
-
-  <div class="duel-body">
-
-    <div class="duel-player-col" id="duel-half-p1">
-      <div class="duel-lp-num" id="duel-lp-p1" onclick="apriInputSheet(1)" title="Tocca per modificare">8000</div>
-      <div class="duel-lp-bar-wrap"><div class="duel-lp-bar" id="duel-bar-p1" style="width:100%"></div></div>
-      <div class="duel-calc">
-        <div class="duel-calc-disp" id="duel-disp-p1">0</div>
-        <div class="duel-calc-kb">
-          <button class="duel-key" onclick="duelCalcKey(1,'7')">7</button>
-          <button class="duel-key" onclick="duelCalcKey(1,'8')">8</button>
-          <button class="duel-key" onclick="duelCalcKey(1,'9')">9</button>
-          <button class="duel-key" onclick="duelCalcKey(1,'4')">4</button>
-          <button class="duel-key" onclick="duelCalcKey(1,'5')">5</button>
-          <button class="duel-key" onclick="duelCalcKey(1,'6')">6</button>
-          <button class="duel-key" onclick="duelCalcKey(1,'1')">1</button>
-          <button class="duel-key" onclick="duelCalcKey(1,'2')">2</button>
-          <button class="duel-key" onclick="duelCalcKey(1,'3')">3</button>
-          <button class="duel-key" onclick="duelCalcKey(1,'00')">00</button>
-          <button class="duel-key" onclick="duelCalcKey(1,'0')">0</button>
-          <button class="duel-key del" onclick="duelCalcDel(1)">⌫</button>
-        </div>
-        <div class="duel-calc-quick">
-          <button class="duel-quick minus" onclick="duelQuick(1,-1000)">-1000</button>
-          <button class="duel-quick minus" onclick="duelQuick(1,-500)">-500</button>
-          <button class="duel-quick plus" onclick="duelQuick(1,500)">+500</button>
-          <button class="duel-quick plus" onclick="duelQuick(1,1000)">+1000</button>
-        </div>
-        <div class="duel-calc-actions">
-          <button class="duel-calc-apply minus" onclick="duelCalcApply(1,-1)">− Togli</button>
-          <button class="duel-calc-apply plus" onclick="duelCalcApply(1,1)">+ Aggiungi</button>
-        </div>
-      </div>
-    </div>
-
-    <div class="duel-player-col" id="duel-half-p2">
-      <div class="duel-lp-num" id="duel-lp-p2" onclick="apriInputSheet(2)" title="Tocca per modificare">8000</div>
-      <div class="duel-lp-bar-wrap"><div class="duel-lp-bar" id="duel-bar-p2" style="width:100%"></div></div>
-      <div class="duel-calc">
-        <div class="duel-calc-disp" id="duel-disp-p2">0</div>
-        <div class="duel-calc-kb">
-          <button class="duel-key" onclick="duelCalcKey(2,'7')">7</button>
-          <button class="duel-key" onclick="duelCalcKey(2,'8')">8</button>
-          <button class="duel-key" onclick="duelCalcKey(2,'9')">9</button>
-          <button class="duel-key" onclick="duelCalcKey(2,'4')">4</button>
-          <button class="duel-key" onclick="duelCalcKey(2,'5')">5</button>
-          <button class="duel-key" onclick="duelCalcKey(2,'6')">6</button>
-          <button class="duel-key" onclick="duelCalcKey(2,'1')">1</button>
-          <button class="duel-key" onclick="duelCalcKey(2,'2')">2</button>
-          <button class="duel-key" onclick="duelCalcKey(2,'3')">3</button>
-          <button class="duel-key" onclick="duelCalcKey(2,'00')">00</button>
-          <button class="duel-key" onclick="duelCalcKey(2,'0')">0</button>
-          <button class="duel-key del" onclick="duelCalcDel(2)">⌫</button>
-        </div>
-        <div class="duel-calc-quick">
-          <button class="duel-quick minus" onclick="duelQuick(2,-1000)">-1000</button>
-          <button class="duel-quick minus" onclick="duelQuick(2,-500)">-500</button>
-          <button class="duel-quick plus" onclick="duelQuick(2,500)">+500</button>
-          <button class="duel-quick plus" onclick="duelQuick(2,1000)">+1000</button>
-        </div>
-        <div class="duel-calc-actions">
-          <button class="duel-calc-apply minus" onclick="duelCalcApply(2,-1)">− Togli</button>
-          <button class="duel-calc-apply plus" onclick="duelCalcApply(2,1)">+ Aggiungi</button>
-        </div>
-      </div>
-    </div>
-
-  </div>
-
-</div>
-
-<!-- OVERLAY DADI -->
-<div class="dadi-overlay" id="dadi-overlay" onclick="chiudiDadi(event)">
-  <div class="dadi-modal">
-    <button class="dadi-close" onclick="chiudiDadiForce()" title="Chiudi">✕</button>
-    <div class="dadi-title">Lancia un dado</div>
-    <div class="dadi-result" id="dadi-result">—</div>
-    <div class="dadi-result-label" id="dadi-result-label">Scegli un dado</div>
-    <div class="dadi-buttons">
-      <button class="dadi-btn" onclick="lanciaDado(6)"><span class="dadi-btn-shape d6">◆</span>D6</button>
-      <button class="dadi-btn" onclick="lanciaDado(12)"><span class="dadi-btn-shape d12">⬠</span>D12</button>
-      <button class="dadi-btn" onclick="lanciaDado(20)"><span class="dadi-btn-shape d20">⬢</span>D20</button>
-    </div>
-  </div>
-</div>
-
-<!-- SHEET INPUT MOBILE -->
-<div class="duel-input-sheet" id="duel-input-sheet" onclick="chiudiInputSheet(event)">
-  <div class="duel-input-inner">
-    <div class="duel-input-drag"></div>
-    <div class="duel-input-title" id="duel-input-title">Modifica LP</div>
-    <div class="duel-input-lp-display" id="duel-input-lp-display">LP correnti: <span id="duel-input-lp-cur">8000</span></div>
-    <input class="duel-input-field" id="duel-input-field" type="number" inputmode="numeric" pattern="[0-9]*" placeholder="0" min="0" max="99999">
-    <div class="duel-input-actions">
-      <button class="duel-input-btn minus" onclick="applicaInputSheet(-1)">− Togli</button>
-      <button class="duel-input-btn plus"  onclick="applicaInputSheet(1)">+ Aggiungi</button>
-    </div>
-    <button class="duel-input-cancel" onclick="chiudiInputSheet(null)">Annulla</button>
-  </div>
-</div>
-
-<!-- TIMER SETUP MODAL -->
-<div class="duel-timer-setup" id="duel-timer-setup" onclick="chiudiTimerSetup(event)">
-  <div class="duel-timer-setup-modal">
-    <div class="duel-timer-setup-title">Imposta Timer</div>
-    <div class="duel-timer-setup-presets">
-      <button class="duel-tsp-btn" onclick="setTimer(60)">1′</button>
-      <button class="duel-tsp-btn" onclick="setTimer(180)">3′</button>
-      <button class="duel-tsp-btn" onclick="setTimer(300)">5′</button>
-      <button class="duel-tsp-btn" onclick="setTimer(600)">10′</button>
-      <button class="duel-tsp-btn" onclick="setTimer(900)">15′</button>
-      <button class="duel-tsp-btn" onclick="setTimer(1200)">20′</button>
-      <button class="duel-tsp-btn" onclick="setTimer(1800)">30′</button>
-      <button class="duel-tsp-btn" onclick="setTimer(2700)">45′</button>
-    </div>
-    <div class="duel-tsp-divider">— Personalizzato —</div>
-    <div class="duel-tsp-custom">
-      <input type="number" class="duel-tsp-inp" id="duel-custom-min" placeholder="min" min="0" max="99">
-      <span class="duel-tsp-lbl">min</span>
-      <input type="number" class="duel-tsp-inp" id="duel-custom-sec" placeholder="sec" min="0" max="59">
-      <span class="duel-tsp-lbl">sec</span>
-    </div>
-    <div class="duel-tsp-actions">
-      <button class="duel-tsp-action" onclick="chiudiTimerSetup(null)">Annulla</button>
-      <button class="duel-tsp-action primary" onclick="setTimerCustom()">Imposta</button>
-    </div>
-  </div>
-</div>
+<!-- OVERLAY DUELLO (disegnato da renderDuello) -->
+<div class="dz" id="duel-overlay"></div>
 
 
 <!-- DETTAGLIO DECK / GIOCATORE (popup) -->
@@ -4692,7 +4622,7 @@
 <footer>
   <span>Tia · Gio · Richi</span>
   <button onclick="eseguiLogout()" style="background:none;border:none;color:var(--text-faint);font-size:0.75rem;cursor:pointer;margin-left:12px;font-family:inherit">Esci</button>
-  <div id="versione-app" style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 123</div>
+  <div id="versione-app" style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 124</div>
 </footer>
 
 </div>
@@ -9007,262 +8937,239 @@ window.switchStagioniTab = switchStagioniTab;
 window.chiudiStagione = chiudiStagione;
 
 // ════════════════════════════════════════
-// DUELLO — LP, Calcolatrice, Chrono, Timer
+// DUELLO — contatore dei punti vita "a specchio"
+// Il telefono sta in mezzo al tavolo: la meta' in alto e' girata verso l'avversario.
+// Tutto lo stato e' salvato sul telefono a ogni modifica: uscendo dall'app o bloccando
+// lo schermo i punteggi restano, finche' non si preme Reset.
 // ════════════════════════════════════════
-let _duelLP = [8000, 8000];
-let _calcVals = ['', ''];
-const _DUEL_MAX = 8000;
-
-function _fmt(n) { return Math.max(0, n).toLocaleString('it-IT'); }
-function _fmtTime(sec) {
-  sec = Math.max(0, sec);
-  const m = Math.floor(sec / 60);
-  const s = sec % 60;
-  return m + ':' + String(s).padStart(2,'0');
+const DZ_CHIAVE = 'genesys-duello', DZ_LP = 8000;
+const dzNuovo = () => ({ lp: [DZ_LP, DZ_LP], nomi: ['', ''], mazzi: ['', ''], log: [], timer: null, chiesto: false, aperto: false });
+let _dz = dzNuovo(), _dzIv = null, _dzTasti = null;
+try { const x = JSON.parse(localStorage.getItem(DZ_CHIAVE)); if (x && Array.isArray(x.lp)) _dz = Object.assign(dzNuovo(), x); } catch (e) {}
+function dzSalva() { try { localStorage.setItem(DZ_CHIAVE, JSON.stringify(_dz)); } catch (e) {} }
+const dzFmt = n => Math.max(0, n).toLocaleString('it-IT');
+const dzOra = () => new Date().toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+const dzNome = g => _dz.nomi[g] || (g === 0 ? 'Giocatore 1' : 'Giocatore 2');
+const _dzSvg = d => `<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
+const DZ_ICO = {
+  annulla: _dzSvg('<path d="M9 7L4 12l5 5"/><path d="M4 12h10a6 6 0 0 1 0 12h-1" transform="translate(0 -3)"/>'),
+  dado: _dzSvg('<rect x="3.5" y="3.5" width="17" height="17" rx="3.5"/><g fill="currentColor" stroke="none"><circle cx="8" cy="8" r="1.5"/><circle cx="16" cy="8" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="8" cy="16" r="1.5"/><circle cx="16" cy="16" r="1.5"/></g>'),
+  moneta: _dzSvg('<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="5" stroke-dasharray="2 2.4"/>'),
+  timer: _dzSvg('<circle cx="12" cy="13.5" r="7.5"/><path d="M12 9.5v4l2.5 1.5M9.5 3h5M12 3v3"/>'),
+  log: _dzSvg('<path d="M8 6h12M8 12h12M8 18h12"/><g fill="currentColor" stroke="none"><circle cx="4" cy="6" r="1.3"/><circle cx="4" cy="12" r="1.3"/><circle cx="4" cy="18" r="1.3"/></g>'),
+  reset: _dzSvg('<path d="M4 12a8 8 0 1 0 2.6-5.9"/><path d="M4 4v5h5"/>'),
+  esci: _dzSvg('<path d="M4 11l8-7 8 7"/><path d="M6 10v9h12v-9"/>'),
+  chi: _dzSvg('<circle cx="12" cy="8" r="3.5"/><path d="M5 20c.8-3.6 3.6-5.5 7-5.5s6.200 1.900 7 5.500"/>'),
+};
+function dzSfondo(g) {
+  const img = (_dz.mazzi[g] && imgMazzo(_dz.mazzi[g])) || (((dati.profili || {})[_dz.nomi[g]] || {}).foto) || '';
+  return img ? ` style="background-image:url('${escapeHtml(img)}')"` : '';
 }
-
-function _duelAggiornaBarre() {
-  for (let i = 0; i < 2; i++) {
-    const p = i + 1;
-    const lp = _duelLP[i];
-    const pct = Math.max(0, Math.round(100 * lp / _DUEL_MAX));
-    const lpEl = document.getElementById('duel-lp-p' + p);
-    const barEl = document.getElementById('duel-bar-p' + p);
-    const halfEl = document.getElementById('duel-half-p' + p);
-    if (lpEl) {
-      lpEl.textContent = _fmt(lp);
-      lpEl.className = 'duel-lp-num' + (lp <= 0 ? ' zero' : lp <= 1000 ? ' danger' : '');
-    }
-    if (barEl) {
-      barEl.style.width = pct + '%';
-      barEl.className = 'duel-lp-bar' + (pct <= 25 ? ' critical' : pct <= 50 ? ' warn' : '');
-    }
-    if (halfEl) halfEl.classList.remove('winning','losing');
-  }
-  if (_duelLP[0] > _duelLP[1]) {
-    document.getElementById('duel-half-p1')?.classList.add('winning');
-    document.getElementById('duel-half-p2')?.classList.add('losing');
-  } else if (_duelLP[1] > _duelLP[0]) {
-    document.getElementById('duel-half-p2')?.classList.add('winning');
-    document.getElementById('duel-half-p1')?.classList.add('losing');
-  }
+function dzMeta(g) {
+  const lp = _dz.lp[g], pct = Math.max(0, Math.min(100, lp / DZ_LP * 100));
+  const chi = _dz.nomi[g] || _dz.mazzi[g] ? `${escapeHtml(_dz.nomi[g] || '')}${_dz.nomi[g] && _dz.mazzi[g] ? ' · ' : ''}${escapeHtml(_dz.mazzi[g] || '')}` : '';
+  return `<div class="dz-meta ${g ? 'su' : 'giu'}${lp <= 0 ? ' ko' : ''}" id="dz-meta-${g}">
+    <div class="dz-bg"${dzSfondo(g)}></div>
+    <button class="dz-chi" onclick="dzApriScelta()">${chi || DZ_ICO.chi}</button>
+    <button class="dz-lp" id="dz-lp-${g}" onclick="dzApriTasti(${g})">${dzFmt(lp)}</button>
+    <div class="dz-barra"><i style="width:${pct}%;background:${pct > 50 ? '#30d158' : pct > 25 ? '#ffd60a' : '#ff453a'}"></i></div>
+    <div class="dz-rapidi">
+      <button class="meno" onclick="dzCambia(${g},-1000)">−1000</button><button class="meno" onclick="dzCambia(${g},-500)">−500</button><button class="meno" onclick="dzCambia(${g},-100)">−100</button>
+      <button class="altro" onclick="dzApriTasti(${g})">±</button>
+    </div>
+    <div class="dz-delta" id="dz-delta-${g}"></div>
+  </div>`;
 }
-
+function dzTestoTimer() {
+  const t = _dz.timer; if (!t) return 'Timer';
+  const r = Math.max(0, t.attivo ? Math.round((t.fine - Date.now()) / 1000) : t.restante);
+  return `${Math.floor(r / 60)}:${String(r % 60).padStart(2, '0')}`;
+}
+function renderDuello() {
+  const ov = document.getElementById('duel-overlay'); if (!ov) return;
+  const puoAnnullare = _dz.log.some(x => x.tipo === 'lp');
+  const b = (az, ico, et, extra = '') => `<button class="dz-ic" onclick="${az}" aria-label="${et}"${extra}>${DZ_ICO[ico]}<span${ico === 'timer' ? ' id="dz-timer-et"' : ''}>${ico === 'timer' ? dzTestoTimer() : et}</span></button>`;
+  ov.innerHTML = `${dzMeta(1)}
+    <div class="dz-centro">
+      ${b('dzAnnulla()', 'annulla', 'Annulla', puoAnnullare ? '' : ' disabled')}${b('dzDado()', 'dado', 'Dado')}${b('dzMoneta()', 'moneta', 'Moneta')}
+      ${b('dzApriTimer()', 'timer', 'Timer', _dz.timer && _dz.timer.attivo ? ' data-on="1"' : '')}${b('dzApriLog()', 'log', 'Cronologia')}${b('dzReset()', 'reset', 'Reset')}${b('chiudiDuello()', 'esci', 'Esci')}
+    </div>
+    ${dzMeta(0)}
+    <div class="dz-fogli" id="dz-fogli"></div>`;
+}
 function apriDuello() {
+  _dz.aperto = true; dzSalva();
+  renderDuello();
   document.getElementById('duel-overlay').classList.add('open');
   document.body.style.overflow = 'hidden';
-  _duelAggiornaBarre();
+  dzAvviaTick();
+  if (!_dz.chiesto) dzApriScelta();
 }
 function chiudiDuello() {
+  _dz.aperto = false; dzSalva();
   document.getElementById('duel-overlay').classList.remove('open');
   document.body.style.overflow = '';
 }
-function resetDuello() {
-  if (!confirm('Resettare i Life Points a 8000?')) return;
-  _duelLP = [8000, 8000];
-  _calcVals = ['', ''];
-  ['duel-disp-p1','duel-disp-p2'].forEach(id => {
-    const e = document.getElementById(id);
-    if (e) e.textContent = '0';
-  });
-  _duelAggiornaBarre();
+function dzCambia(g, delta) {
+  if (!delta) return;
+  const da = _dz.lp[g], a = Math.max(0, da + delta);
+  if (a === da) return;
+  _dz.lp[g] = a;
+  _dz.log.push({ tipo: 'lp', g, delta: a - da, da, a, ora: dzOra() });
+  dzSalva(); renderDuello();
+  const d = document.getElementById('dz-delta-' + g);
+  if (d) { d.textContent = (a > da ? '+' : '−') + dzFmt(Math.abs(a - da)); d.className = 'dz-delta mostra ' + (a > da ? 'piu' : 'meno'); }
+  document.getElementById('dz-lp-' + g)?.classList.add('colpo');
+  if (a === 0 && navigator.vibrate) navigator.vibrate(200);
 }
-
-function duelCalcKey(player, k) {
-  const i = player - 1;
-  if (_calcVals[i].length >= 7) return;
-  _calcVals[i] += k;
-  _calcVals[i] = String(parseInt(_calcVals[i]) || 0);
-  const el = document.getElementById('duel-disp-p' + player);
-  if (el) el.textContent = parseInt(_calcVals[i]).toLocaleString('it-IT');
-}
-function duelCalcDel(player) {
-  const i = player - 1;
-  _calcVals[i] = _calcVals[i].slice(0,-1) || '0';
-  const el = document.getElementById('duel-disp-p' + player);
-  if (el) el.textContent = parseInt(_calcVals[i]).toLocaleString('it-IT');
-}
-function duelCalcApply(player, sign) {
-  const i = player - 1;
-  const delta = sign * (parseInt(_calcVals[i]) || 0);
-  _duelLP[i] = Math.max(0, _duelLP[i] + delta);
-  _calcVals[i] = '';
-  const el = document.getElementById('duel-disp-p' + player);
-  if (el) el.textContent = '0';
-  _duelAggiornaBarre();
-}
-
-// applica un valore rapido (es. -1000) direttamente agli LP
-function duelQuick(player, delta) {
-  const i = player - 1;
-  _duelLP[i] = Math.max(0, _duelLP[i] + delta);
-  _duelAggiornaBarre();
-}
-
-let _chronoRunning = false;
-let _chronoSec = 0;
-let _chronoIv = null;
-
-function toggleChrono() { _chronoRunning ? _chronoStop() : _chronoStart(); }
-
-function _chronoStart() {
-  _chronoRunning = true;
-  const btn = document.getElementById('duel-chrono-btn');
-  const tool = document.getElementById('duel-chrono-tool');
-  if (btn) { btn.textContent = '⏸'; btn.className = 'duel-tool-btn pause'; }
-  if (tool) tool.classList.add('active');
-  _chronoIv = setInterval(() => {
-    _chronoSec++;
-    const el = document.getElementById('duel-chrono-val');
-    if (el) el.textContent = _fmtTime(_chronoSec);
-  }, 1000);
-}
-function _chronoStop() {
-  _chronoRunning = false;
-  clearInterval(_chronoIv);
-  const btn = document.getElementById('duel-chrono-btn');
-  const tool = document.getElementById('duel-chrono-tool');
-  if (btn) { btn.textContent = '▶'; btn.className = 'duel-tool-btn go'; }
-  if (tool) tool.classList.remove('active');
-}
-function resetChrono() {
-  _chronoStop();
-  _chronoSec = 0;
-  const el = document.getElementById('duel-chrono-val');
-  if (el) el.textContent = '0:00';
-}
-
-let _timerSec = 0;
-let _timerRemaining = 0;
-let _timerRunning = false;
-let _timerIv = null;
-let _timerSet = false;
-
-function apriTimerSetup() { document.getElementById('duel-timer-setup').classList.add('open'); }
-
-// ── Sheet input mobile ──
-let _inputSheetPlayer = 1;
-
-function apriInputSheet(player) {
-  if (!document.getElementById('duel-overlay').classList.contains('open')) return;
-  _inputSheetPlayer = player;
-  const lp = _duelLP[player - 1];
-  const title = document.getElementById('duel-input-title');
-  const cur   = document.getElementById('duel-input-lp-cur');
-  const field = document.getElementById('duel-input-field');
-  if (title) title.textContent = 'Giocatore ' + player + ' — Modifica LP';
-  if (cur)   cur.textContent = _fmt(lp);
-  if (field) { field.value = ''; }
-  document.getElementById('duel-input-sheet').classList.add('open');
-  // focus con leggero ritardo per animazione
-  setTimeout(() => { if (field) field.focus(); }, 300);
-}
-
-function chiudiInputSheet(e) {
-  if (!e || e.target === document.getElementById('duel-input-sheet')) {
-    document.getElementById('duel-input-sheet').classList.remove('open');
-    document.getElementById('duel-input-field').blur();
+function dzAnnulla() {
+  for (let i = _dz.log.length - 1; i >= 0; i--) {
+    if (_dz.log[i].tipo !== 'lp') continue;
+    const x = _dz.log.splice(i, 1)[0];
+    _dz.lp[x.g] = x.da;
+    dzSalva(); renderDuello();
+    return;
   }
 }
-
-function applicaInputSheet(sign) {
-  const field = document.getElementById('duel-input-field');
-  const val = parseInt(field?.value) || 0;
-  if (val <= 0) { chiudiInputSheet(null); return; }
-  const i = _inputSheetPlayer - 1;
-  _duelLP[i] = Math.max(0, _duelLP[i] + sign * val);
-  _duelAggiornaBarre();
-  chiudiInputSheet(null);
+function dzReset() {
+  dzFoglio(`<div class="dz-tit">Nuovo duello?</div><p class="dz-nota">I punti vita tornano a ${dzFmt(DZ_LP)} e la cronologia si svuota.</p>
+    <div class="dz-azioni"><button onclick="dzChiudiFoglio()">Annulla</button><button class="rosso" onclick="dzResetOk()">Reset</button></div>`);
 }
-function chiudiTimerSetup(e) {
-  if (!e || e.target === document.getElementById('duel-timer-setup'))
-    document.getElementById('duel-timer-setup').classList.remove('open');
+function dzResetOk() {
+  const aperto = _dz.aperto;
+  _dz = dzNuovo(); _dz.aperto = aperto;
+  dzSalva(); renderDuello(); dzApriScelta();
 }
-
-function setTimer(sec) {
-  _timerStop();
-  _timerSec = sec;
-  _timerRemaining = sec;
-  _timerSet = true;
-  _aggiornaDisplayTimer();
-  const btn = document.getElementById('duel-timer-btn');
-  const tool = document.getElementById('duel-timer-tool');
-  if (btn) { btn.hidden = false; btn.textContent = '▶'; btn.className = 'duel-tool-btn go'; }
-  if (tool) tool.classList.remove('expired');
-  chiudiTimerSetup(null);
+// ---- finestre interne ----
+function dzFoglio(html, girato = false, cls = '') {
+  const f = document.getElementById('dz-fogli'); if (!f) return;
+  f.innerHTML = `<div class="dz-velo${girato ? ' girato' : ''}" onclick="if(event.target===this) dzChiudiFoglio()"><div class="dz-foglio ${cls}">${html}</div></div>`;
 }
-
-function setTimerCustom() {
-  const min = parseInt(document.getElementById('duel-custom-min')?.value) || 0;
-  const sec = parseInt(document.getElementById('duel-custom-sec')?.value) || 0;
-  const total = min * 60 + sec;
-  if (total <= 0) { alert('Inserisci una durata valida'); return; }
-  setTimer(total);
-  document.getElementById('duel-custom-min').value = '';
-  document.getElementById('duel-custom-sec').value = '';
+function dzChiudiFoglio() { const f = document.getElementById('dz-fogli'); if (f) f.innerHTML = ''; _dzTasti = null; }
+// tastiera per un valore qualsiasi: si apre girata verso il giocatore a cui serve
+function dzApriTasti(g) {
+  _dzTasti = { g, v: '' };
+  const t = k => `<button onclick="dzTasto('${k}')">${k === 'c' ? '⌫' : k}</button>`;
+  dzFoglio(`<button class="dz-x" onclick="dzChiudiFoglio()" aria-label="Chiudi">✕</button>
+    <div class="dz-tit">${escapeHtml(dzNome(g))} · ${dzFmt(_dz.lp[g])}</div>
+    <div class="dz-display" id="dz-display">0</div>
+    <div class="dz-tasti">${['7', '8', '9', '4', '5', '6', '1', '2', '3', '0', '00', 'c'].map(t).join('')}</div>
+    <div class="dz-azioni"><button class="rosso" onclick="dzTastiOk(-1)">− Togli</button><button class="verde" onclick="dzTastiOk(1)">+ Aggiungi</button></div>`, g === 1, 'tasti');
 }
-
-function toggleTimer() {
-  if (!_timerSet) { apriTimerSetup(); return; }
-  _timerRunning ? _timerStop() : _timerStart();
+function dzTasto(k) {
+  if (!_dzTasti) return;
+  if (k === 'c') _dzTasti.v = _dzTasti.v.slice(0, -1);
+  else if (_dzTasti.v.length + k.length <= 6) _dzTasti.v = (_dzTasti.v + k).replace(/^0+(?=\d)/, '');
+  document.getElementById('dz-display').textContent = dzFmt(+_dzTasti.v || 0);
 }
-function _timerStart() {
-  if (_timerRemaining <= 0) _timerRemaining = _timerSec;
-  _timerRunning = true;
-  const btn = document.getElementById('duel-timer-btn');
-  const tool = document.getElementById('duel-timer-tool');
-  if (btn) { btn.textContent = '⏸'; btn.className = 'duel-tool-btn pause'; }
-  if (tool) { tool.classList.add('active'); tool.classList.remove('expired'); }
-  _timerIv = setInterval(() => {
-    _timerRemaining--;
-    _aggiornaDisplayTimer();
-    if (_timerRemaining <= 0) {
-      _timerStop();
-      const t = document.getElementById('duel-timer-tool');
-      if (t) { t.classList.remove('active'); t.classList.add('expired'); }
-      if (navigator.vibrate) navigator.vibrate([400,150,400,150,400]);
+function dzTastiOk(segno) {
+  if (!_dzTasti) return;
+  const { g, v } = _dzTasti, n = +v || 0;
+  dzChiudiFoglio();
+  if (n) dzCambia(g, segno * n);
+}
+const DZ_PIP = { 1: [5], 2: [1, 9], 3: [1, 5, 9], 4: [1, 3, 7, 9], 5: [1, 3, 5, 7, 9], 6: [1, 3, 4, 6, 7, 9] };
+function dzDado() {
+  const n = Math.floor(Math.random() * 6) + 1;
+  _dz.log.push({ tipo: 'dado', n, ora: dzOra() }); dzSalva();
+  dzFoglio(`<div class="dz-dado rotola">${[1, 2, 3, 4, 5, 6, 7, 8, 9].map(i => `<i${DZ_PIP[n].includes(i) ? ' class="p"' : ''}></i>`).join('')}</div>
+    <div class="dz-esito">${n}</div>
+    <div class="dz-azioni"><button onclick="dzDado()">Rilancia</button><button class="blu" onclick="dzChiudiFoglio()">OK</button></div>`, false, 'stretto');
+}
+function dzMoneta() {
+  const testa = Math.random() < 0.5;
+  _dz.log.push({ tipo: 'moneta', testa, ora: dzOra() }); dzSalva();
+  dzFoglio(`<div class="dz-moneta gira">${testa ? 'T' : 'C'}</div>
+    <div class="dz-esito">${testa ? 'Testa' : 'Croce'}</div>
+    <div class="dz-azioni"><button onclick="dzMoneta()">Rilancia</button><button class="blu" onclick="dzChiudiFoglio()">OK</button></div>`, false, 'stretto');
+}
+function dzApriLog() {
+  const righe = _dz.log.slice().reverse().map(x => {
+    if (x.tipo === 'lp') return `<div><small>${x.ora}</small><span>${escapeHtml(dzNome(x.g))}</span><b class="${x.delta > 0 ? 'piu' : 'meno'}">${x.delta > 0 ? '+' : '−'}${dzFmt(Math.abs(x.delta))}</b><em>→ ${dzFmt(x.a)}</em></div>`;
+    if (x.tipo === 'dado') return `<div><small>${x.ora}</small><span>Dado</span><b>${x.n}</b><em></em></div>`;
+    if (x.tipo === 'moneta') return `<div><small>${x.ora}</small><span>Moneta</span><b>${x.testa ? 'Testa' : 'Croce'}</b><em></em></div>`;
+    return `<div><small>${x.ora}</small><span>Timer</span><b>${escapeHtml(x.testo || '')}</b><em></em></div>`;
+  }).join('');
+  dzFoglio(`<button class="dz-x" onclick="dzChiudiFoglio()" aria-label="Chiudi">✕</button><div class="dz-tit">Cronologia</div>
+    <div class="dz-log">${righe || '<p class="dz-nota">Ancora nessuna mossa.</p>'}</div>`, false, 'alto');
+}
+// ---- timer della partita: si scrivono i minuti ----
+function dzApriTimer() {
+  const t = _dz.timer;
+  dzFoglio(`<button class="dz-x" onclick="dzChiudiFoglio()" aria-label="Chiudi">✕</button><div class="dz-tit">Timer della partita</div>
+    ${t ? `<div class="dz-esito" id="dz-timer-grande">${dzTestoTimer()}</div>
+      <div class="dz-azioni"><button onclick="dzTimerPausa()">${t.attivo ? 'Pausa' : 'Riprendi'}</button><button class="rosso" onclick="dzTimerVia()">Togli</button></div>`
+      : `<div class="dz-min"><input id="dz-minuti" type="number" inputmode="numeric" pattern="[0-9]*" min="1" max="999" value="40"><span>minuti</span></div>
+      <div class="dz-azioni"><button onclick="dzChiudiFoglio()">Annulla</button><button class="blu" onclick="dzTimerAvvia()">Avvia</button></div>`}`, false, 'stretto');
+  if (!t) setTimeout(() => { const i = document.getElementById('dz-minuti'); if (i) { i.focus(); i.select(); } }, 60);
+}
+function dzTimerAvvia() {
+  const m = Math.max(1, Math.min(999, Math.round(+document.getElementById('dz-minuti').value || 0)));
+  _dz.timer = { durata: m * 60, restante: m * 60, fine: Date.now() + m * 60000, attivo: true, suonato: false };
+  dzSalva(); dzChiudiFoglio(); renderDuello(); dzAvviaTick();
+}
+function dzTimerPausa() {
+  const t = _dz.timer; if (!t) return;
+  if (t.attivo) { t.restante = Math.max(0, Math.round((t.fine - Date.now()) / 1000)); t.attivo = false; }
+  else { t.fine = Date.now() + t.restante * 1000; t.attivo = true; }
+  dzSalva(); renderDuello(); dzApriTimer();
+}
+function dzTimerVia() { _dz.timer = null; dzSalva(); dzChiudiFoglio(); renderDuello(); }
+function dzAvviaTick() {
+  if (_dzIv) return;
+  _dzIv = setInterval(() => {
+    const ov = document.getElementById('duel-overlay');
+    if (!ov || !ov.classList.contains('open')) { clearInterval(_dzIv); _dzIv = null; return; }
+    const t = _dz.timer; if (!t) return;
+    const testo = dzTestoTimer();
+    const a = document.getElementById('dz-timer-et'), g = document.getElementById('dz-timer-grande');
+    if (a) a.textContent = testo; if (g) g.textContent = testo;
+    if (t.attivo && Date.now() >= t.fine && !t.suonato) {
+      t.suonato = true; t.attivo = false; t.restante = 0;
+      _dz.log.push({ tipo: 'timer', testo: 'Tempo scaduto', ora: dzOra() }); dzSalva();
+      if (navigator.vibrate) navigator.vibrate([300, 150, 300]);
+      renderDuello();
+      dzFoglio(`<div class="dz-tit">Tempo scaduto</div><div class="dz-esito">0:00</div><div class="dz-azioni"><button class="blu" onclick="dzChiudiFoglio()">OK</button></div>`, false, 'stretto');
     }
-  }, 1000);
+  }, 500);
 }
-function _timerStop() {
-  _timerRunning = false;
-  clearInterval(_timerIv);
-  const btn = document.getElementById('duel-timer-btn');
-  const tool = document.getElementById('duel-timer-tool');
-  if (btn && _timerRemaining > 0) { btn.textContent = '▶'; btn.className = 'duel-tool-btn go'; }
-  if (tool) tool.classList.remove('active');
+// ---- chi gioca (facoltativo): giocatori e mazzi fanno da sfondo ----
+let _dzScelta = null;
+function dzApriScelta() {
+  _dzScelta = { nomi: _dz.nomi.slice(), mazzi: _dz.mazzi.slice() };
+  _dz.chiesto = true; dzSalva();
+  dzDisegnaScelta();
 }
-function _aggiornaDisplayTimer() {
-  const el = document.getElementById('duel-timer-val');
-  if (!el) return;
-  if (!_timerSet) { el.textContent = '—'; el.className = 'duel-tool-val muted'; return; }
-  el.textContent = _fmtTime(_timerRemaining);
-  el.className = 'duel-tool-val';
+function dzDisegnaScelta() {
+  const s = _dzScelta;
+  const blocco = g => {
+    const mazzi = Object.keys(dati.mazzi || {}).filter(m => !s.nomi[g] || dati.mazzi[m] === s.nomi[g]).sort((a, b) => a.localeCompare(b));
+    return `<div class="dz-sc-et">${g === 0 ? 'In basso' : 'In alto'}</div>
+      <div class="dz-sc-gioc">${(dati.giocatori || []).map(n => { const f = ((dati.profili || {})[n] || {}).foto;
+        return `<button class="${s.nomi[g] === n ? 'on' : ''}" onclick="dzScegli(${g},'n','${escapeHtml(n).replace(/'/g, "\\'")}')"${f ? ` style="background-image:url('${escapeHtml(f)}')"` : ''}><span>${escapeHtml(n)}</span></button>`; }).join('')}</div>
+      <div class="dz-sc-mazzi">${mazzi.map(m => { const im = imgMazzo(m);
+        return `<button class="${s.mazzi[g] === m ? 'on' : ''}" onclick="dzScegli(${g},'m','${escapeHtml(m).replace(/'/g, "\\'")}')"${im ? ` style="background-image:url('${escapeHtml(im)}')"` : ''}><span>${escapeHtml(m)}</span></button>`; }).join('')}</div>`;
+  };
+  const sc = document.querySelectorAll('.dz-sc-mazzi'), pos = [...sc].map(x => x.scrollLeft);
+  dzFoglio(`<button class="dz-x" onclick="dzChiudiFoglio()" aria-label="Chiudi">✕</button><div class="dz-tit">Chi gioca?</div>
+    <p class="dz-nota">Facoltativo: chiudi con la X per usare solo i punti vita.</p>
+    ${blocco(1)}${blocco(0)}
+    <div class="dz-azioni"><button onclick="dzSceltaVuota()">Senza nomi</button><button class="blu" onclick="dzSceltaOk()">Fatto</button></div>`, false, 'alto');
+  document.querySelectorAll('.dz-sc-mazzi').forEach((x, i) => { x.scrollLeft = pos[i] || 0; });
 }
-
-// ─────────── ROLLER DADI ───────────
-function apriDadi() {
-  document.getElementById('dadi-result').textContent = '—';
-  document.getElementById('dadi-result-label').textContent = 'Scegli un dado';
-  document.getElementById('dadi-overlay').classList.add('open');
+function dzScegli(g, cosa, v) {
+  const s = _dzScelta; if (!s) return;
+  if (cosa === 'n') { s.nomi[g] = s.nomi[g] === v ? '' : v; if (s.mazzi[g] && s.nomi[g] && dati.mazzi[s.mazzi[g]] !== s.nomi[g]) s.mazzi[g] = ''; }
+  else s.mazzi[g] = s.mazzi[g] === v ? '' : v;
+  dzDisegnaScelta();
 }
-function chiudiDadi(e) {
-  if (e.target === document.getElementById('dadi-overlay')) chiudiDadiForce();
-}
-function chiudiDadiForce() {
-  document.getElementById('dadi-overlay').classList.remove('open');
-}
-function lanciaDado(facce) {
-  const n = Math.floor(Math.random() * facce) + 1;
-  const res = document.getElementById('dadi-result');
-  const lbl = document.getElementById('dadi-result-label');
-  res.textContent = n;
-  lbl.textContent = 'D' + facce + ' (1–' + facce + ')';
-  // riavvia animazione
-  res.classList.remove('roll');
-  void res.offsetWidth;
-  res.classList.add('roll');
-}
+function dzSceltaOk() { _dz.nomi = _dzScelta.nomi; _dz.mazzi = _dzScelta.mazzi; dzSalva(); dzChiudiFoglio(); renderDuello(); }
+function dzSceltaVuota() { _dz.nomi = ['', '']; _dz.mazzi = ['', '']; dzSalva(); dzChiudiFoglio(); renderDuello(); }
+Object.assign(window, { apriDuello, chiudiDuello, dzCambia, dzAnnulla, dzReset, dzResetOk, dzChiudiFoglio, dzApriTasti, dzTasto, dzTastiOk, dzDado, dzMoneta, dzApriLog,
+  dzApriTimer, dzTimerAvvia, dzTimerPausa, dzTimerVia, dzApriScelta, dzScegli, dzSceltaOk, dzSceltaVuota });
+// se il duello era aperto quando l'app e' stata chiusa, si riapre da solo sugli stessi punteggi
+function dzRiprendi() { if (_dz.aperto && document.getElementById('app-wrap')?.style.display === 'block' && !document.getElementById('duel-overlay').classList.contains('open')) apriDuello(); }
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && document.getElementById('duel-overlay')?.classList.contains('open')) { renderDuello(); dzAvviaTick(); } });
 // ─────────── MODALITÀ SCURA ───────────
 function applicaTema(tema) {
   if (tema === 'dark') {
@@ -9312,29 +9219,6 @@ function initTema() {
 window.toggleTema = toggleTema;
 initTema();
 
-window.apriDadi = apriDadi;
-window.chiudiDadi = chiudiDadi;
-window.chiudiDadiForce = chiudiDadiForce;
-window.lanciaDado = lanciaDado;
-
-window.apriDuello = apriDuello;
-window.chiudiDuello = chiudiDuello;
-window.resetDuello = resetDuello;
-window.duelCalcKey = duelCalcKey;
-window.duelCalcDel = duelCalcDel;
-window.duelCalcApply = duelCalcApply;
-window.duelQuick = duelQuick;
-window.toggleChrono = toggleChrono;
-window.apriTimerSetup = apriTimerSetup;
-window.chiudiTimerSetup = chiudiTimerSetup;
-window.setTimer = setTimer;
-window.setTimerCustom = setTimerCustom;
-window.toggleTimer = toggleTimer;
-window.resetChrono = resetChrono;
-window.apriInputSheet = apriInputSheet;
-window.chiudiInputSheet = chiudiInputSheet;
-window.applicaInputSheet = applicaInputSheet;
-
 function apriImpostazioni() {
   switchTab('config');
   window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -9380,7 +9264,7 @@ onAuthStateChanged(auth, user => {
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('app-wrap').style.display = 'block';
     caricaDati();
-    cartaDelGiorno();
+    cartaDelGiorno(); dzRiprendi();
   } else {
     document.getElementById('login-screen').style.display = 'flex';
     document.getElementById('app-wrap').style.display = 'none';
