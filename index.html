@@ -3735,6 +3735,47 @@
     .vitt-titolo, .vitt-carta, .vitt-mazzo, .vitt-chi { animation: none; }
   }
 
+  /* ── SCHEDA VS: Registra e Modifica partita ── */
+  .vs-nasc { display: none !important; }
+  .vs-host { display: block !important; padding: 0 !important; border: none !important; background: none !important; }
+  .vs-scheda { position: relative; display: flex; height: 216px; border-radius: 22px; overflow: hidden; box-shadow: 0 6px 20px rgba(0,0,0,0.25); }
+  .vs-lato { flex: 1 1 0; min-width: 0; position: relative; border: none; padding: 0 8px 14px; margin: 0; border-radius: 0; cursor: pointer; font-family: inherit; color: #fff; isolation: isolate;
+    display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 2px; background: #2c2c30 center 22% / cover no-repeat; }
+  .vs-lato::after { content: ''; position: absolute; inset: 0; z-index: -1; background: linear-gradient(180deg, rgba(0,0,0,0.05) 30%, rgba(0,0,0,0.85)); }
+  .vs-lato + .vs-lato { border-left: 2px solid rgba(255,255,255,0.85); }
+  .vs-foto { width: 44px; height: 44px; border-radius: 50%; border: 2px solid #fff; background: #48484a center 20% / cover; box-shadow: 0 2px 8px rgba(0,0,0,0.5); margin-bottom: 4px; }
+  .vs-lato b { font-size: 19px; font-weight: 800; text-shadow: 0 1px 4px #000; }
+  .vs-lato small { font-size: 13px; font-weight: 600; opacity: 0.92; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-shadow: 0 1px 3px #000; }
+  .vs-lato small i { font-style: normal; opacity: 0.7; }
+  .vs-punti { position: absolute; left: 50%; top: 38%; transform: translate(-50%, -50%); padding: 6px 14px; border-radius: 15px; background: #000; color: #fff; border: 2px solid #fff;
+    font-size: 24px; font-weight: 800; font-variant-numeric: tabular-nums; white-space: nowrap; pointer-events: none; box-shadow: 0 4px 14px rgba(0,0,0,0.5); }
+  .vs-et { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em; color: var(--text-dim); margin: 16px 4px 7px; }
+  .vs-quattro, .vs-due { display: grid; gap: 8px; }
+  .vs-quattro { grid-template-columns: repeat(4, 1fr); } .vs-due { grid-template-columns: 1fr 1fr; }
+  .vs-quattro button, .vs-due button { height: 48px; margin: 0; padding: 0 8px; border: none; border-radius: 14px; background: var(--bg-card); color: var(--text); font-family: inherit;
+    font-size: 17px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 7px; box-shadow: 0 1px 2px rgba(0,0,0,0.06); width: auto; }
+  .vs-due button { font-size: 15px; font-weight: 700; } .vs-due em { font-style: normal; font-weight: 800; opacity: 0.75; }
+  .vs-quattro button.on, .vs-due button.on { background: var(--blue); color: #fff; box-shadow: 0 4px 12px rgba(0,122,255,0.35); }
+  .vs-data { position: relative; display: flex; align-items: center; height: 48px; padding: 0 16px; border-radius: 14px; background: var(--bg-card); font-size: 16px; font-weight: 600; margin: 0 !important; color: var(--text) !important; text-transform: none !important; letter-spacing: 0 !important; }
+  .vs-data input { position: absolute; inset: 0; width: 100% !important; height: 100% !important; opacity: 0; margin: 0; padding: 0; cursor: pointer; }
+  #nuova #form-partita { gap: 0; } #nuova .card.padded { background: none; padding: 0; box-shadow: none; }
+  #nuova #form-partita > div:has(#note) { margin-top: 16px; background: var(--bg-card); border-radius: 14px; }
+  #nuova #form-partita > div:has(#note) label { display: none; }
+  #nuova #form-partita > button.primary { margin-top: 16px; height: 52px; border-radius: 16px; font-size: 17px; font-weight: 800; }
+  .edit-modal-body > .vs-host + div, .edit-modal-body > div:has(#edit-note) { margin-top: 12px; }
+  .vs-overlay { z-index: 470; }
+  .vs-foglio { height: auto; max-height: 86vh; }
+  .vs-sc-gioc { display: flex; gap: 8px; }
+  .vs-sc-gioc button, .vs-sc-mazzi button { position: relative; overflow: hidden; border: 3px solid transparent; border-radius: 14px; background: var(--bg-card) center 22% / cover; cursor: pointer; font-family: inherit; color: #fff; padding: 0; }
+  .vs-sc-gioc button { flex: 1; height: 84px; }
+  .vs-sc-mazzi { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding-bottom: 10px; }
+  .vs-sc-mazzi button { height: 74px; }
+  .vs-sc-gioc span, .vs-sc-mazzi span { position: absolute; left: 0; right: 0; bottom: 0; padding: 14px 4px 5px; font-size: 12.5px; font-weight: 700; text-align: center; line-height: 1.1; background: linear-gradient(transparent, rgba(0,0,0,0.88)); }
+  .vs-sc-gioc button.on, .vs-sc-mazzi button.on { border-color: var(--blue); }
+  .vs-sc-mazzi .nuovo { border: 2px dashed #98989f; background: none; color: var(--text-dim); } .vs-sc-mazzi .nuovo b { font-size: 26px; font-weight: 400; display: block; margin-top: -14px; }
+  .vs-sc-mazzi .nuovo span { background: none; color: var(--text-dim); }
+  @media (max-width: 350px) { .vs-scheda { height: 190px; } .vs-quattro button { font-size: 15px; } .vs-due button { font-size: 13.5px; } }
+
   /* ── DUELLO A SPECCHIO ── */
   .dz { display: none; position: fixed; inset: 0; z-index: 500; background: #000; color: #fff; flex-direction: column;
     padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom); touch-action: manipulation; -webkit-user-select: none; user-select: none; }
@@ -4219,10 +4260,11 @@
   <section id="storico" style="display:none"></section>
 
   <section id="nuova">
-    <h2>Registra una Partita</h2>
+    <h2>Registra partita</h2>
     <div class="info m-nascondi">Compila e premi <strong>Registra</strong>. I dati verranno salvati in automatico nel Cloud.</div>
     <div class="card padded">
       <form id="form-partita">
+        <div class="vs-host" id="vs-nuova"></div>
         <div><label>Data</label><input type="date" id="data" required></div>
         <div class="row">
           <div><label>Giocatore 1</label><select id="g1" required></select></div>
@@ -4575,6 +4617,7 @@
       <button class="edit-azione salva" onclick="salvaModifica()">Salva</button>
     </div>
     <div class="edit-modal-body">
+      <div class="vs-host" id="vs-edit"></div>
       <div>
         <label>Data</label>
         <input type="date" id="edit-data">
@@ -4622,7 +4665,7 @@
 <footer>
   <span>Tia · Gio · Richi</span>
   <button onclick="eseguiLogout()" style="background:none;border:none;color:var(--text-faint);font-size:0.75rem;cursor:pointer;margin-left:12px;font-family:inherit">Esci</button>
-  <div id="versione-app" style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 124</div>
+  <div id="versione-app" style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 125</div>
 </footer>
 
 </div>
@@ -6971,6 +7014,8 @@ function popolaSelectGiocatori() {
   aggiornaSelectMazzi('m1', document.getElementById('g1').value);
   aggiornaSelectMazzi('m2', document.getElementById('g2').value);
   aggiornaSelectDadoPrimo();
+  aggiornaOpzioniRisultato();
+  vsDisegna('');
 }
 
 function aggiornaSelectDadoPrimo() {
@@ -7223,6 +7268,7 @@ function apriModifica(idx) {
   aggiornaModificaGiocatori({ m1: p.m1, m2: p.m2, risultato: p.risultato, dado: p.dado, primo: p.primo });
   const editNote = document.getElementById('edit-note'); if (editNote) editNote.value = p.note || '';
 
+  vsDisegna('edit-');
   document.getElementById('edit-overlay').classList.add('open');
   document.body.style.overflow = 'hidden';
 }
@@ -7417,7 +7463,101 @@ document.getElementById('form-partita').addEventListener('submit', async e => {
   document.getElementById('m1-nuovo').style.display = 'none';
   document.getElementById('m2-nuovo').style.display = 'none';
   const noteEl = document.getElementById('note'); if (noteEl) noteEl.value = '';
+  ['dado', 'primo'].forEach(id => { const e = document.getElementById(id); if (e) e.value = ''; });
+  vsDisegna('');
 });
+
+// ============ SCHEDA VS (Registra e Modifica partita) ============
+// I menu a tendina del modulo restano, nascosti, come "motore": la scheda VS li comanda.
+// pref: '' per Registra partita, 'edit-' per Modifica.
+const VS_ICO_DADO = '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2"><rect x="3.5" y="3.5" width="17" height="17" rx="3.5"/><g fill="currentColor" stroke="none"><circle cx="8" cy="8" r="1.5"/><circle cx="16" cy="8" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="8" cy="16" r="1.5"/><circle cx="16" cy="16" r="1.5"/></g></svg>';
+const vsEl = (pref, id) => document.getElementById(pref + id);
+function vsImposta(pref, id, v) { const s = vsEl(pref, id); if (!s) return; s.value = v; s.dispatchEvent(new Event('change', { bubbles: true })); }
+function vsDataIt(iso) { const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(iso || ''); return m ? `${m[3]}/${m[2]}/${m[1]}` : 'Scegli la data'; }
+function vsMazzo(pref, n) {
+  const v = vsEl(pref, 'm' + n).value;
+  if (v !== '__nuovo__') return v;
+  return (vsEl(pref, 'm' + n + '-custom') || {}).value || '';
+}
+function vsPrepara(pref) {
+  const host = document.getElementById(pref ? 'vs-edit' : 'vs-nuova');
+  if (!host || host._pronto) return host;
+  host._pronto = true;
+  // i campi originali spariscono dalla vista (restano nel modulo)
+  ['g1', 'm1', 'g2', 'm2', 'risultato', 'dado', 'primo'].forEach(id => { let e = vsEl(pref, id); while (e && e.parentElement !== host.parentElement) e = e.parentElement; if (e) e.classList.add('vs-nasc'); });
+  host.parentElement.querySelectorAll(':scope > .vs').forEach(e => e.classList.add('vs-nasc'));
+  host.innerHTML = '<div class="vs-corpo"></div><div class="vs-et">Data</div><label class="vs-data"><span></span></label>';
+  // il campo data vero sta, invisibile, sopra la pastiglia: il tocco apre il calendario del telefono
+  const data = vsEl(pref, 'data'), vecchio = data.parentElement;
+  host.querySelector('.vs-data').appendChild(data);
+  if (vecchio !== host.parentElement) vecchio.classList.add('vs-nasc');
+  data.addEventListener('change', () => vsDisegna(pref)); data.addEventListener('input', () => vsDisegna(pref));
+  return host;
+}
+function vsDisegna(pref) {
+  const host = vsPrepara(pref); if (!host || !vsEl(pref, 'g1')) return;
+  const g = [vsEl(pref, 'g1').value, vsEl(pref, 'g2').value], m = [vsMazzo(pref, 1), vsMazzo(pref, 2)];
+  const ris = vsEl(pref, 'risultato').value || '2-0', dado = vsEl(pref, 'dado').value, primo = vsEl(pref, 'primo').value;
+  const lato = k => { const img = m[k] && imgMazzo(m[k]), foto = ((dati.profili || {})[g[k]] || {}).foto;
+    return `<button type="button" class="vs-lato" onclick="vsApriScelta('${pref}',${k + 1})"${img ? ` style="background-image:url('${escapeHtml(img)}')"` : ''}>
+      <span class="vs-foto"${foto ? ` style="background-image:url('${escapeHtml(foto)}')"` : ''}></span><b>${escapeHtml(g[k] || '—')}</b><small>${escapeHtml(m[k] || 'Scegli il mazzo')} <i>⌄</i></small></button>`; };
+  const due = (campo, val, ico) => g.map(n => `<button type="button" class="${val === n ? 'on' : ''}" onclick="vsImposta('${pref}','${campo}','${val === n ? '' : escapeHtml(n).replace(/'/g, "\\'")}'); vsDisegna('${pref}')">${ico}${escapeHtml(n)}</button>`).join('');
+  host.querySelector('.vs-corpo').innerHTML = `
+    <div class="vs-scheda">${lato(0)}${lato(1)}<span class="vs-punti">${ris.replace('-', ' – ')}</span></div>
+    <div class="vs-et">Risultato</div>
+    <div class="vs-quattro">${['2-0', '2-1', '1-2', '0-2'].map(r => `<button type="button" class="${ris === r ? 'on' : ''}" onclick="vsImposta('${pref}','risultato','${r}'); vsDisegna('${pref}')">${r}</button>`).join('')}</div>
+    <div class="vs-et">Chi ha vinto il dado</div><div class="vs-due">${due('dado', dado, VS_ICO_DADO)}</div>
+    <div class="vs-et">Chi è andato primo</div><div class="vs-due">${due('primo', primo, '<em>1°</em>')}</div>`;
+  host.querySelector('.vs-data span').textContent = vsDataIt(vsEl(pref, 'data').value);
+}
+let _vsSc = null;
+function vsApriScelta(pref, n) {
+  _vsSc = { pref, n };
+  let ov = document.getElementById('vs-overlay');
+  if (!ov) { ov = document.createElement('div'); ov.id = 'vs-overlay'; ov.className = 'cc-overlay vs-overlay';
+    ov.addEventListener('click', e => { if (e.target === ov) vsChiudiScelta(); }); document.body.appendChild(ov); }
+  vsDisegnaScelta();
+  ov.classList.add('open');
+}
+function vsChiudiScelta() { document.getElementById('vs-overlay')?.classList.remove('open'); }
+function vsDisegnaScelta() {
+  const { pref, n } = _vsSc, selG = vsEl(pref, 'g' + n), selM = vsEl(pref, 'm' + n), att = vsMazzo(pref, n);
+  const gioc = [...selG.options].map(o => o.value);
+  const mazzi = [...selM.options].map(o => o.value).filter(v => v !== '__nuovo__');
+  if (att && !mazzi.includes(att)) mazzi.push(att);
+  const q = s => escapeHtml(s).replace(/'/g, "\\'");
+  document.getElementById('vs-overlay').innerHTML = `<div class="cc-foglio vs-foglio">
+    <div class="cc-foglio-testa"><span>${n === 1 ? 'Giocatore 1' : 'Giocatore 2'}</span><button class="cc-chiudi" onclick="vsChiudiScelta()" aria-label="Chiudi">✕</button></div>
+    <div class="cc-risultati">
+      <div class="vs-sc-gioc">${gioc.map(x => { const f = ((dati.profili || {})[x] || {}).foto;
+        return `<button class="${selG.value === x ? 'on' : ''}" onclick="vsSceltaGioc('${q(x)}')"${f ? ` style="background-image:url('${escapeHtml(f)}')"` : ''}><span>${escapeHtml(x)}</span></button>`; }).join('')}</div>
+      <div class="vs-et">Mazzo di ${escapeHtml(selG.value)}</div>
+      <div class="vs-sc-mazzi">${mazzi.map(x => { const im = imgMazzo(x);
+        return `<button class="${att === x ? 'on' : ''}" onclick="vsSceltaMazzo('${q(x)}')"${im ? ` style="background-image:url('${escapeHtml(im)}')"` : ''}><span>${escapeHtml(x)}</span></button>`; }).join('')}
+        <button class="nuovo" onclick="vsNuovoMazzo()"><b>+</b><span>Nuovo mazzo</span></button></div>
+    </div></div>`;
+}
+function vsSceltaGioc(nome) {
+  const { pref, n } = _vsSc, altro = n === 1 ? 2 : 1, prima = vsEl(pref, 'g' + n).value;
+  if (nome === prima) return;
+  // se e' il giocatore dell'altro lato, i due si scambiano
+  if (vsEl(pref, 'g' + altro).value === nome) vsImposta(pref, 'g' + altro, prima);
+  vsImposta(pref, 'g' + n, nome);
+  vsDisegna(pref); vsDisegnaScelta();
+}
+function vsSceltaMazzo(nome) {
+  const { pref, n } = _vsSc, sel = vsEl(pref, 'm' + n);
+  if (![...sel.options].some(o => o.value === nome)) { const o = document.createElement('option'); o.value = o.textContent = nome; sel.insertBefore(o, sel.lastElementChild); }
+  sel.value = nome; sel.dataset.prima = nome;
+  const cu = vsEl(pref, 'm' + n + '-custom'), box = vsEl(pref, 'm' + n + '-nuovo');
+  if (cu) { cu.value = ''; cu.required = false; } if (box) box.style.display = 'none';
+  vsChiudiScelta(); vsDisegna(pref);
+}
+function vsNuovoMazzo() {
+  const nome = (prompt('Nome del nuovo mazzo:') || '').trim();
+  if (nome) vsSceltaMazzo(nome);
+}
+Object.assign(window, { vsImposta, vsDisegna, vsApriScelta, vsChiudiScelta, vsSceltaGioc, vsSceltaMazzo, vsNuovoMazzo });
 
 // ============ ACHIEVEMENTS ============
 const ACHIEVEMENTS_DEF = [
