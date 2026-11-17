@@ -3860,21 +3860,16 @@
   body:not(.on-home) .m-topbar, body:not(.on-home) main > section > h2 { display: none !important; }
   body:not(.on-home) main { padding-top: calc(env(safe-area-inset-top) + 14px) !important; }
   body:not(.on-home) main > section > .inner-tab-bar {
-    position: sticky; top: calc(env(safe-area-inset-top) + 14px); z-index: 49;
-    margin: 0 0 18px 106px !important; width: auto; max-width: none !important; height: 44px; padding: 3px; border-radius: 13px;
+    position: sticky; top: calc(env(safe-area-inset-top) + 68px); z-index: 49;
+    margin: 54px 0 18px 0 !important; width: auto; max-width: none !important; height: 44px; padding: 3px; border-radius: 13px;
     background: var(--seg-solido); box-shadow: 0 4px 14px rgba(0,0,0,0.16), 0 0 0 0.5px rgba(0,0,0,0.06) !important;
   }
   body:not(.on-home) main > section > .inner-tab-bar .inner-tab { height: 38px; padding: 0 4px; font-size: 15px; border-radius: 10px; }
   body:not(.on-home) main > section > .inner-tab-bar .seg-pill { border-radius: 10px; }
   body:not(.on-home) #nuova { padding-top: 60px; }
-  body:not(.on-home) #statistiche > .inner-tab-bar { margin-left: 106px !important; width: auto; align-self: stretch; }
-  body:not(.on-home) main > section > .inner-tab-bar .inner-tab { white-space: nowrap; font-size: 14.5px; }
-  @media (max-width: 400px) {
-    body:not(.on-home) .home-back { width: 44px; padding: 0; justify-content: center; font-size: 0; }
-    body:not(.on-home) main > section > .inner-tab-bar, body:not(.on-home) #statistiche > .inner-tab-bar { margin-left: 54px !important; }
-    body:not(.on-home) main > section > .inner-tab-bar .inner-tab { font-size: 14px; }
-  }
-  @media (max-width: 340px) { body:not(.on-home) main > section > .inner-tab-bar .inner-tab { font-size: 13px; letter-spacing: -0.2px; } }
+  body:not(.on-home) #statistiche > .inner-tab-bar { margin-left: 0 !important; width: auto; align-self: stretch; }
+  body:not(.on-home) main > section > .inner-tab-bar .inner-tab { white-space: nowrap; font-size: 15px; }
+
   [data-theme="dark"] body:not(.on-home) .home-back, [data-theme="dark"] body:not(.on-home) main > section > .inner-tab-bar { box-shadow: 0 4px 16px rgba(0,0,0,0.6), 0 0 0 0.5px rgba(255,255,255,0.1) !important; }
   .home-back:active { opacity: 0.5; }
 
@@ -4868,7 +4863,7 @@
 </div>
 
 <footer>
-  <div id="versione-app" style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 140</div>
+  <div id="versione-app" style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 141</div>
 </footer>
 
 </div>
