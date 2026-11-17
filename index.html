@@ -3851,7 +3851,7 @@
   body:not(.on-home) .theme-btn, body:not(.on-home) .gear-btn { display: none !important; }
   body:not(.on-home) { padding-bottom: calc(env(safe-area-inset-bottom) + 24px) !important; }
   body:not(.on-home) .home-back {
-    display: flex; align-items: center; gap: 6px; position: fixed; z-index: 50; top: calc(env(safe-area-inset-top) + 8px); left: var(--lato-sx);
+    display: flex; align-items: center; gap: 6px; position: fixed; z-index: 50; top: calc(env(safe-area-inset-top) + 14px); left: var(--lato-sx);
     height: 36px; padding: 0 14px 0 11px; border: none; border-radius: 12px; background: var(--tasto-tondo); color: var(--blue);
     box-shadow: 0 1px 3px rgba(0,0,0,0.1); font-family: inherit; font-size: 16px; font-weight: 600; cursor: pointer; margin: 0; width: auto;
   }
@@ -3861,17 +3861,19 @@
   body.on-home { padding-bottom: 0 !important; overflow: hidden; }
   body.on-home nav, body.on-home .duel-btn, body.on-home .m-topbar, body.on-home footer { display: none !important; }
   /* barra di ricerca a tutta larghezza, tema e impostazioni alla sua destra */
-  body.on-home .search-btn { right: calc(var(--lato-dx) + 82px) !important; justify-content: flex-start; padding: 0 14px; height: 38px; top: calc(env(safe-area-inset-top) + 7px); font-size: 16px; font-weight: 500; color: var(--text-dim); }
+  body.on-home .search-btn { right: calc(var(--lato-dx) + 82px) !important; justify-content: flex-start; padding: 0 14px; height: 38px; top: calc(env(safe-area-inset-top) + 21px); font-size: 16px; font-weight: 500; color: var(--text-dim); }
   body.on-home .search-btn svg { color: var(--blue); }
   body.on-home .search-btn-txt::after { content: ' carte'; }
-  body.on-home .theme-btn { right: calc(var(--lato-dx) + 42px); top: calc(env(safe-area-inset-top) + 9px); }
-  body.on-home .gear-btn { top: calc(env(safe-area-inset-top) + 9px); }
+  body.on-home .theme-btn { right: calc(var(--lato-dx) + 42px); top: calc(env(safe-area-inset-top) + 23px); }
+  body.on-home .gear-btn { top: calc(env(safe-area-inset-top) + 23px); }
+  /* tutto un po' piu' in basso: sotto la barra di stato l'iPhone sfuma i contenuti */
+  body.on-home main { padding-top: calc(env(safe-area-inset-top) + 72px) !important; }
   #home.active { display: block; }
   .home-blocchi {
     position: relative; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 12px;
-    height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 72px); min-height: 380px; padding-bottom: 4px;
+    height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 90px); min-height: 380px; padding-bottom: 4px;
   }
-  @supports (height: 100dvh) { .home-blocchi { height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 72px); } }
+  @supports (height: 100dvh) { .home-blocchi { height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 90px); } }
   .hb { position: relative; overflow: hidden; isolation: isolate; border: none; border-radius: 28px; padding: 18px; margin: 0; cursor: pointer; color: #fff; font-family: inherit;
     display: flex; flex-direction: column; text-align: left; background: var(--c1); box-shadow: 0 8px 22px rgba(0,0,0,0.18); transition: transform 0.15s; }
   .hb:active { transform: scale(0.97); }
@@ -4788,7 +4790,7 @@
 </div>
 
 <footer>
-  <div id="versione-app" style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 133</div>
+  <div id="versione-app" style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 134</div>
 </footer>
 
 </div>
