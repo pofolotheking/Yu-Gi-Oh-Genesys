@@ -2856,7 +2856,7 @@
     .gear-btn:hover, .duel-btn:hover, .theme-btn:hover, .search-btn:hover { background: var(--tasto-tondo); color: var(--blue); }
     /* ricerca: grande finestra sopra tutto, come le schede dei mazzi */
     body.ricerca-aperta::after { content: ''; position: fixed; inset: 0; z-index: 394; background: var(--bg-gruppo); }
-    #carte.active {
+    #carte.active, #config.active {
       --pop-alto: calc(env(safe-area-inset-top) + 10px);
       --pop-lato: max(10px, calc((100vw - 760px) / 2), calc(env(safe-area-inset-left) + 6px));
       --pop-fondo: #e4e4ea;
@@ -2865,15 +2865,15 @@
       padding: 18px 16px 24px; border-radius: 22px; background: var(--pop-fondo);
       box-shadow: 0 10px 40px rgba(0,0,0,0.22), 0 0 0 1px rgba(0,0,0,0.06);
     }
-    #carte.active::-webkit-scrollbar { display: none; width: 0; }
-    [data-theme="dark"] #carte.active { --pop-fondo: #141416; box-shadow: 0 0 0 1px rgba(255,255,255,0.16); }
-    #carte .rc-chiudi { display: none; }
-    #carte.active .rc-chiudi {
+    #carte.active::-webkit-scrollbar, #config.active::-webkit-scrollbar { display: none; width: 0; }
+    [data-theme="dark"] #carte.active, [data-theme="dark"] #config.active { --pop-fondo: #141416; box-shadow: 0 0 0 1px rgba(255,255,255,0.16); }
+    #carte .rc-chiudi, #config .rc-chiudi { display: none; }
+    #carte.active .rc-chiudi, #config.active .rc-chiudi {
       display: flex; position: fixed; z-index: 396; width: 36px; height: 36px;
       top: calc(var(--pop-alto) + 14px); right: calc(var(--pop-lato) + 14px);
       background: #ff3b30; color: #fff; box-shadow: 0 2px 8px rgba(255, 59, 48, 0.4);
     }
-    #carte.active > h2 { margin-top: 2px; padding-right: 52px; }
+    #carte.active > h2, #config.active > h2 { margin-top: 2px; padding-right: 52px; }
 
     /* titolo grande della sezione */
     main > section > h2,
@@ -3735,6 +3735,39 @@
     .vitt-titolo, .vitt-carta, .vitt-mazzo, .vitt-chi { animation: none; }
   }
 
+  /* filtri a pastiglie: una riga che scorre in orizzontale */
+  .past { display: flex; gap: 7px; overflow-x: auto; scrollbar-width: none; padding: 2px 1px 4px; -webkit-overflow-scrolling: touch; }
+  .past::-webkit-scrollbar { display: none; }
+  .past button { flex: none; width: auto; margin: 0; height: 36px; padding: 0 14px; border: none; border-radius: 999px; background: var(--seg-fondo); color: var(--text);
+    font-family: inherit; font-size: 14px; font-weight: 600; white-space: nowrap; cursor: pointer; box-shadow: none; }
+  .past button.on { background: var(--blue); color: #fff; }
+  .filtri-grid:has(.past) { grid-template-columns: 1fr !important; }
+
+  /* tocco su riga -> finestra: piccola freccia al posto di tendine, matite e cestini */
+  .dg-apri { margin-left: auto; font-size: 26px; font-weight: 300; line-height: 1; opacity: 0.55; padding-left: 6px; }
+  .h2h-u-head .dg-apri { position: relative; z-index: 1; }
+  .dado-player-card, .h2h-u-item, .match-card { cursor: pointer; }
+  .match-card { position: relative; }
+  .mc-apri { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); z-index: 2; font-size: 24px; font-weight: 300; color: var(--text-faint); pointer-events: none; }
+  .h2h-pop-vs { position: relative; display: flex; height: 150px; border-radius: 18px; overflow: hidden; margin-bottom: 12px; }
+  .h2h-pop-vs > div { flex: 1; position: relative; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 10px; background: #2c2c30 center 20% / cover; cursor: pointer; isolation: isolate; color: #fff; }
+  .h2h-pop-vs > div::after { content: ''; position: absolute; inset: 0; z-index: -1; background: linear-gradient(transparent 40%, rgba(0,0,0,0.85)); }
+  .h2h-pop-vs > div + div { border-left: 2px solid rgba(255,255,255,0.85); }
+  .h2h-pop-vs b { font-size: 18px; font-weight: 800; text-shadow: 0 1px 4px #000; }
+  .h2h-pop-vs > span { position: absolute; left: 50%; top: 42%; transform: translate(-50%, -50%); padding: 5px 13px; border-radius: 14px; background: #000; color: #fff; border: 2px solid #fff; font-size: 22px; font-weight: 800; }
+  .h2h-tiles > div, .pd-righe { background: var(--bg-card) !important; border: none; }
+  .h2h-tiles b { color: var(--text); }
+  .pd-scheda { height: 190px; margin-bottom: 12px; }
+  .pd-lato.vinto b::after { content: ' \1F3C6'; font-size: 15px; }
+  .pd-righe { border-radius: 16px; padding: 2px 16px; }
+  .pd-riga { display: flex; justify-content: space-between; gap: 12px; padding: 12px 0; font-size: 15px; color: var(--text); }
+  .pd-riga + .pd-riga { border-top: 0.5px solid var(--border); }
+  .pd-riga span { color: var(--text-dim); }
+  .pd-note { margin: 0 4px; font-size: 15px; line-height: 1.45; color: var(--text); white-space: pre-wrap; }
+  .pd-azioni { display: flex; gap: 10px; margin-top: 18px; }
+  .pd-azioni button { flex: 1; height: 48px; border: none; border-radius: 14px; color: #fff; font-family: inherit; font-size: 16px; font-weight: 700; cursor: pointer; margin: 0; }
+  .pd-azioni .blu { background: var(--blue); } .pd-azioni .rosso { background: var(--red); }
+
   /* ── PANNELLO DATI SOTTO IL VENTAGLIO (stile cruscotto) ── */
   .dd-pannello {
     --text: #fff; --text-dim: rgba(235,235,245,0.64); --text-faint: rgba(235,235,245,0.42); --border: rgba(255,255,255,0.12);
@@ -3953,6 +3986,8 @@
   .sm-modal .sm-scelta .ddm-tabs { height: 40px; }
   .sm-modal .sm-scelta .ddm-tabs .inner-tab { height: 34px; font-size: 14px; }
   .sp-overlay { z-index: 390; }
+  #config.active > h2 { margin-bottom: 26px; }
+  .cfg-esci { display: block; width: 100%; margin: 22px 0 6px; padding: 14px; border: none; border-radius: 14px; background: var(--bg-card); color: var(--red); font-family: inherit; font-size: 16px; font-weight: 600; cursor: pointer; }
   .agg-banner {
     position: fixed; z-index: 6000; left: 50%; transform: translateX(-50%); top: calc(env(safe-area-inset-top) + 10px);
     display: flex; align-items: center; gap: 10px; max-width: calc(100vw - 24px); padding: 9px 10px 9px 16px; border-radius: 16px;
@@ -3962,23 +3997,23 @@
   .agg-banner .agg-x { background: rgba(255,255,255,0.15); padding: 7px 10px; }
   /* ---- stile unico per tutte le grandi finestre: stessa animazione, stessi angoli, fascia col dorso della carta in alto ---- */
   @keyframes popIn { from { opacity: 0; transform: translateY(20px) scale(0.98); } to { opacity: 1; transform: none; } }
-  .detail-modal.deck-full, .detail-modal.sm-modal, #carte.active { animation: popIn 0.28s cubic-bezier(0.32, 0.72, 0, 1); }
+  .detail-modal.deck-full, .detail-modal.sm-modal, #carte.active, #config.active { animation: popIn 0.28s cubic-bezier(0.32, 0.72, 0, 1); }
   .detail-modal.sm-modal { border-radius: 22px; box-shadow: 0 10px 40px rgba(0,0,0,0.3), 0 0 0 1px rgba(0,0,0,0.06); isolation: isolate; scrollbar-width: none; }
   .detail-modal.sm-modal::-webkit-scrollbar { display: none; }
   [data-theme="dark"] .detail-modal.sm-modal { box-shadow: 0 0 0 1px rgba(255,255,255,0.16); }
   .detail-modal.sm-modal .detail-close { width: 36px; height: 36px; top: 14px; right: 14px; box-shadow: 0 2px 8px rgba(255,59,48,0.4); }
-  .sp-modal, #carte.active { isolation: isolate; }
-  .sp-modal::before, .sm-modal::before, #carte.active::before {
+  .sp-modal, #carte.active, #config.active { isolation: isolate; }
+  .sp-modal::before, .sm-modal::before, #carte.active::before, #config.active::before {
     content: ''; position: absolute; z-index: -1; left: 0; right: 0; top: 0; height: var(--back-h, 150px);
     background: #140803 url('img/back-card.jpg') center 30% / cover no-repeat; opacity: 0.9; border-radius: 22px 22px 0 0;
     -webkit-mask-image: linear-gradient(180deg, #000 78%, transparent 100%); mask-image: linear-gradient(180deg, #000 78%, transparent 100%);
     pointer-events: none;
   }
-  #carte.active { --back-h: 120px; }
+  #carte.active, #config.active { --back-h: 120px; }
   .sm-modal { --back-h: 170px; }
   .sp-modal { --back-h: 124px; }
   .sp-modal .sp-corpo { padding-top: 18px; }
-  .sp-testa b, .sm-testa b, #carte.active > h2 { color: #fff !important; text-shadow: 0 2px 4px rgba(0,0,0,0.9), 0 0 12px rgba(0,0,0,0.8); }
+  .sp-testa b, .sm-testa b, #carte.active > h2, #config.active > h2 { color: #fff !important; text-shadow: 0 2px 4px rgba(0,0,0,0.9), 0 0 12px rgba(0,0,0,0.8); }
   .sp-testa span, .sm-testa span { color: rgba(255,255,255,0.92) !important; text-shadow: 0 1px 3px rgba(0,0,0,0.9); }
   /* scheda giocatore: carte-mazzo nel ventaglio */
   .cc-carta.gm img, .gm-vuota { display: block; width: 100%; aspect-ratio: 59 / 86; object-fit: cover; object-position: center 30%; border-radius: 8px; box-shadow: 0 10px 24px 2px rgba(0,0,0,0.55), 0 2px 6px rgba(0,0,0,0.4); }
@@ -4533,7 +4568,8 @@
   </section>
 
   <section id="config">
-    <h2 class="section-title-centered">Modifica</h2>
+    <button class="detail-close rc-chiudi" onclick="chiudiRicerca()" title="Chiudi" aria-label="Chiudi">✕</button>
+    <h2 class="section-title-centered">Impostazioni</h2>
 
     <div class="accordion-item">
       <button class="accordion-btn" onclick="toggleAccordion('acc-notifiche'); renderPannelloNotifiche()">
@@ -4622,6 +4658,7 @@
       </div>
     </div>
 
+    <button class="cfg-esci" onclick="eseguiLogout()">Esci dall'account</button>
   </section>
 
 
@@ -4702,9 +4739,7 @@
 </div>
 
 <footer>
-  <span>Tia · Gio · Richi</span>
-  <button onclick="eseguiLogout()" style="background:none;border:none;color:var(--text-faint);font-size:0.75rem;cursor:pointer;margin-left:12px;font-family:inherit">Esci</button>
-  <div id="versione-app" style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 126</div>
+  <div id="versione-app" style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 127</div>
 </footer>
 
 </div>
@@ -5183,7 +5218,36 @@ function buildProfiloInline(nome) {
   `;
 }
 
+const _h2hPartite = {};
+// finestra di uno scontro diretto: numeri chiave e tutte le partite tra i due
+function apriH2H(a, b, contId) {
+  const tutte = inOrdine(_h2hPartite[contId] || []).filter(p => (p.g1 === a && p.g2 === b) || (p.g1 === b && p.g2 === a));
+  const es = tutte.map(p => esitoPer(p, a)).filter(Boolean);
+  const va = es.filter(e => e.vinta).length, vb = es.length - va;
+  let ga = 0, gb = 0, da = 0, db = 0;
+  es.forEach(e => { const [x, y] = e.par.risultato.split('-').map(Number); if (e.par.g1 === a) { ga += x; gb += y; } else { ga += y; gb += x; } if (e.par.dado === a) da++; else if (e.par.dado === b) db++; });
+  const foto = n => ((dati.profili || {})[n] || {}).foto;
+  const righe = es.slice().reverse().map(e => { const p = e.par, ris = p.g1 === a ? p.risultato : p.risultato.split('-').reverse().join('-');
+    return `<div class="dmh-row ${e.vinta ? 'win' : 'lose'}"><span class="dmh-esito">${e.vinta ? 'V' : 'S'}</span><span class="dmh-main"><span class="dmh-vs">${escapeHtml(e.mazzo)} vs ${escapeHtml(e.mazzoAvv)}</span><span class="dmh-meta">${formatData(p.data)}${p._stagione ? ' \u00B7 ' + escapeHtml(p._stagione) : ''}</span></span><span class="dmh-score">${ris}</span></div>`; }).join('');
+  chiudiSottoMazzo();
+  const ov = document.createElement('div');
+  ov.className = 'detail-overlay open sm-overlay'; ov.id = 'sm-overlay';
+  ov.addEventListener('click', e => { if (e.target === ov) chiudiSottoMazzo(); });
+  ov.innerHTML = `<div class="detail-modal sm-modal h2h-pop">
+    <button class="detail-close" onclick="chiudiSottoMazzo()" aria-label="Chiudi">\u2715</button>
+    <div class="sm-testa"><b>Scontro diretto</b><span>${tutte.length} partite</span></div>
+    <div class="h2h-pop-vs">
+      <div data-giocatore="${escapeHtml(a)}"${foto(a) ? ` style="background-image:url('${escapeHtml(foto(a))}')"` : ''}><b>${escapeHtml(a)}</b></div>
+      <div data-giocatore="${escapeHtml(b)}"${foto(b) ? ` style="background-image:url('${escapeHtml(foto(b))}')"` : ''}><b>${escapeHtml(b)}</b></div>
+      <span>${va} \u2013 ${vb}</span></div>
+    <div class="db-tiles h2h-tiles"><div><b>${ga}-${gb}</b><span>Game vinti</span></div><div><b>${da}-${db}</b><span>Dadi vinti</span></div></div>
+    <div class="ce-titolo" style="margin-top:16px">Partite</div>
+    <div class="dmh-list">${righe || '<div class="dmh-vuoto">Nessuna partita.</div>'}</div></div>`;
+  document.body.appendChild(ov);
+}
+window.apriH2H = apriH2H;
 function renderRiepilogo(partite = dati.partite, contId = 'riepilogo-h2h', cardId = 'riepilogo-card') {
+  _h2hPartite[contId] = partite;
   const giocatori = dati.giocatori;
   const h2hDiv = document.getElementById(contId);
   if (!h2hDiv) return;
@@ -5234,7 +5298,7 @@ function renderRiepilogo(partite = dati.partite, contId = 'riepilogo-h2h', cardI
         const tot = r.va + r.vb;
         const ultimoStr = r.ultimo ? `${r.ultimo.vincitore}` : '—';
         const fotoA = ((dati.profili || {})[r.a] || {}).foto, fotoB = ((dati.profili || {})[r.b] || {}).foto;
-        return `<div class="h2h-u-item" onclick="this.classList.toggle('aperto')">
+        return `<div class="h2h-u-item" onclick="apriH2H('${escapeHtml(r.a).replace(/'/g, "\\'")}', '${escapeHtml(r.b).replace(/'/g, "\\'")}', '${contId}')">
           <div class="h2h-u-head">
             ${fotoA ? `<span class="h2h-bg sx" style="background-image:url('${escapeHtml(fotoA)}')"></span>` : ''}
             ${fotoB ? `<span class="h2h-bg dx" style="background-image:url('${escapeHtml(fotoB)}')"></span>` : ''}
@@ -5242,7 +5306,7 @@ function renderRiepilogo(partite = dati.partite, contId = 'riepilogo-h2h', cardI
             <span class="h2h-u-name">${r.a}</span>
             <span class="h2h-u-score"><strong>${r.va}</strong>-<strong>${r.vb}</strong></span>
             <span class="h2h-u-name">${r.b}</span>
-            <span class="m-freccia"></span>
+            <span class="dg-apri">\u203A</span>
             ${avatarGiocatore(r.b)}
           </div>
           <div class="h2h-u-stats">
@@ -5427,7 +5491,8 @@ function renderStatExtra(partite) {
     <h3 class="subsection-title">Partite per giorno</h3>
     <div class="card padded" id="sx-istogramma"></div>`;
   const mesi = mesiConPartite();
-  if (!_meseIst || !mesi.includes(_meseIst)) _meseIst = mesi[mesi.length - 1];
+  // si apre sempre sull'ultimo mese in cui si e' giocato, non sul mese corrente se e' vuoto
+  _meseIst = mesi[mesi.length - 1];
   renderIstogramma();
 }
 
@@ -6248,7 +6313,7 @@ function renderStatDado(partite = dati.partite, contId = 'stat-dado-wrap') {
     const bg = img ? `background-image:url('${img}')` : '';
     const pr = (v, t) => t > 0 ? `${pct(v, t)} <span class="dm-n">su ${t}</span>` : '—';
     const telefono = `<div class="dado-m">
-      <div class="dado-m-head">${img ? `<span class="dado-m-foto" style="background-image:url('${img}')"></span>` : ''}<span class="dado-m-nome">${g}</span><span class="m-freccia"></span></div>
+      <div class="dado-m-head">${img ? `<span class="dado-m-foto" style="background-image:url('${img}')"></span>` : ''}<span class="dado-m-nome">${g}</span><span class="dg-apri">\u203A</span></div>
       <div class="dado-m-riga"><span>Dado vinto</span><b>${s.dadoT > 0 ? `${s.dadoV}/${s.dadoT} <span class="dm-n">(${pct(s.dadoV, s.dadoT)})</span>` : '—'}</b></div>
       <div class="dado-m-riga"><span>Win rate col dado</span><b>${wrDado}</b></div>
       <div class="dado-m-riga"><span>Win rate da primo</span><b>${pr(s.primoV, s.primoT)}</b></div>
@@ -6257,7 +6322,7 @@ function renderStatDado(partite = dati.partite, contId = 'stat-dado-wrap') {
       <div class="dado-m-riga"><span>Sconfitte 2-1 · 2-0</span><b>${s.s21} · ${s.s20}</b></div>
       <div class="dado-m-nv">${htmlNemesiVittima(g, partite)}</div>
     </div>`;
-    return `<div class="dado-player-card" style="${bg}" onclick="this.classList.toggle('aperto')">
+    return `<div class="dado-player-card" style="${bg}" data-giocatore="${escapeHtml(g)}">
       ${telefono}
       <span class="dado-player-name">${g}</span>
       <div class="dado-player-stats">
@@ -6362,9 +6427,11 @@ function toggleDettagliStorico() {
 }
 window.toggleDettagliStorico = toggleDettagliStorico;
 
+const _storicoArr = {};
 function renderStorico(partite = dati.partite, modificabile = true, contId = 'lista-partite') {
   const c = document.getElementById(contId);
   if (!c) return;
+  _storicoArr[contId] = { partite, modificabile };
   if (partite.length === 0) {
     c.innerHTML = '<div class="empty">Lo storico è vuoto.</div>';
     return;
@@ -6380,7 +6447,7 @@ function renderStorico(partite = dati.partite, modificabile = true, contId = 'li
     const extraBadges = [];
     if (p.dado) extraBadges.push(`<span class="match-badge">🎲 Dado: ${p.dado}</span>`);
     const noteHtml = p.note ? `<div class="match-note">${escapeHtml(p.note)}</div>` : '';
-    return `<div class="match-card">
+    return `<div class="match-card" onclick="apriPartita('${contId}', ${idx})">
       ${sfondo(p.m1, 'sx')}${sfondo(p.m2, 'dx')}
       <div class="mc-main">
         <div class="date">${formatData(p.data)}${p._stagione ? ` · <span class="mc-stagione">${escapeHtml(p._stagione)}</span>` : ''}</div>
@@ -6400,13 +6467,39 @@ function renderStorico(partite = dati.partite, modificabile = true, contId = 'li
         ${extraBadges.length ? `<div class="match-extra">${extraBadges.join('')}</div>` : ''}
         ${noteHtml}
       </div>
-      ${modificabile ? `<div class="btn-group">
-        <button class="edit-btn" onclick="apriModifica(${idx})" title="Modifica partita"><span class="ico-emoji">✏️</span>${SVG_MATITA}</button>
-        <button class="del-btn" onclick="eliminaPartita(${idx})" title="Elimina questa partita"><span class="ico-emoji">🗑</span>${SVG_CESTINO}</button>
-      </div>` : ''}
+      <span class="mc-apri">\u203A</span>
     </div>`;
   }).join('');
 }
+
+// finestra di una partita: scheda VS, dettagli e (nella stagione in corso) Modifica / Elimina
+function apriPartita(contId, idx) {
+  const rif = _storicoArr[contId]; if (!rif) return;
+  const p = rif.partite[idx]; if (!p) return;
+  const [p1, p2] = PUNTI[p.risultato] || [0, 0];
+  const lato = (g, m, vinto) => { const img = imgMazzo(m), foto = ((dati.profili || {})[g] || {}).foto;
+    return `<div class="vs-lato pd-lato${vinto ? ' vinto' : ''}"${img ? ` style="background-image:url('${escapeHtml(img)}')"` : ''} data-mazzo="${escapeHtml(m)}">
+      <span class="vs-foto"${foto ? ` style="background-image:url('${escapeHtml(foto)}')"` : ''}></span><b>${escapeHtml(g)}</b><small>${escapeHtml(m)}</small></div>`; };
+  const riga = (et, v) => `<div class="pd-riga"><span>${et}</span><b>${v}</b></div>`;
+  chiudiSottoMazzo();
+  const ov = document.createElement('div');
+  ov.className = 'detail-overlay open sm-overlay'; ov.id = 'sm-overlay';
+  ov.addEventListener('click', e => { if (e.target === ov) chiudiSottoMazzo(); });
+  ov.innerHTML = `<div class="detail-modal sm-modal pd-pop">
+    <button class="detail-close" onclick="chiudiSottoMazzo()" aria-label="Chiudi">\u2715</button>
+    <div class="sm-testa"><b>Partita</b><span>${formatData(p.data)}${p._stagione ? ' \u00B7 ' + escapeHtml(p._stagione) : ''}</span></div>
+    <div class="vs-scheda pd-scheda">${lato(p.g1, p.m1, p1 > p2)}${lato(p.g2, p.m2, p2 > p1)}<span class="vs-punti">${p.risultato.replace('-', ' \u2013 ')}</span></div>
+    <div class="pd-righe">
+      ${riga('Vincitore', escapeHtml(p1 > p2 ? p.g1 : p.g2))}
+      ${riga('Ha vinto il dado', p.dado ? escapeHtml(p.dado) : '\u2014')}
+      ${riga('\u00C8 andato primo', p.primo ? escapeHtml(p.primo) : '\u2014')}
+    </div>
+    ${p.note ? `<div class="ce-titolo" style="margin-top:14px">Note</div><p class="pd-note">${escapeHtml(p.note)}</p>` : ''}
+    ${rif.modificabile ? `<div class="pd-azioni"><button class="blu" onclick="chiudiSottoMazzo(); apriModifica(${idx})">Modifica</button><button class="rosso" onclick="chiudiSottoMazzo(); eliminaPartita(${idx})">Elimina</button></div>` : ''}
+  </div>`;
+  document.body.appendChild(ov);
+}
+window.apriPartita = apriPartita;
 
 // vittorie, sconfitte, primo/secondo e scontri per ogni mazzo di un elenco di partite
 function calcolaMatchup(partite) {
@@ -6949,8 +7042,9 @@ document.addEventListener('click', e => {
     const st = (_stagioniCache || []).find(x => x.id === _stagionePop.det.dataset.k);
     if (st) return apriGiocatore(nome, 'all', { partite: st.partite || [], etichetta: st.nome || ('Stagione ' + st.numero) });
   }
+  if (el.closest('.sp-modal') && _stagionePop && _stagionePop.det.dataset.k === 'corrente') return apriGiocatore(nome, 'cur');
   const sez = el.closest('main > section');
-  apriGiocatore(nome, sez && sez.id === 'giocatori' ? _scopeClassifica : 'all');
+  apriGiocatore(nome, !sez ? 'all' : sez.id === 'giocatori' ? _scopeClassifica : sez.id === 'statistiche' ? _scopeStat : 'all');
 }, true);
 
 function switchScopeMazzo(scope) {
@@ -7129,7 +7223,7 @@ function aggiornaOpzioniRisultato() {
 
 function formatData(iso) {
   const d = new Date(iso);
-  return d.toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit', year: '2-digit' });
+  return d.toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric' });
 }
 
 function renderProfiliConfig() {
@@ -7430,7 +7524,7 @@ async function eliminaPartita(idx) {
 let _tabPrima = 'giocatori', _scrollPrima = 0;
 function apriRicerca() {
   const att = document.querySelector('main > section.active');
-  if (att && att.id !== 'carte') { _tabPrima = att.id; _scrollPrima = window.scrollY; }
+  if (att && att.id !== 'carte' && att.id !== 'config') { _tabPrima = att.id; _scrollPrima = window.scrollY; }
   switchTab('carte');
 }
 function chiudiRicerca() {
@@ -7440,7 +7534,7 @@ function chiudiRicerca() {
 window.apriRicerca = apriRicerca; window.chiudiRicerca = chiudiRicerca;
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && !e._gestito && document.body.classList.contains('ricerca-aperta') && !document.getElementById('ci-overlay')?.classList.contains('open')) chiudiRicerca(); });
 function switchTab(id) {
-  document.body.classList.toggle('ricerca-aperta', id === 'carte');
+  document.body.classList.toggle('ricerca-aperta', id === 'carte' || id === 'config');
   document.querySelectorAll('.tab-btn').forEach(x => x.classList.remove('active'));
   document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
   const btn = document.querySelector(`.tab-btn[data-tab="${id}"]`);
@@ -8342,6 +8436,7 @@ function resetFiltri() {
   ['f-type','f-attribute','f-race','f-level','f-atk','f-def'].forEach(id => {
     const el = document.getElementById(id); if (el) el.value = '';
   });
+  if (typeof aggiornaPastiglie === 'function') aggiornaPastiglie();
 }
 
 let searchOffset = 0;
@@ -8776,8 +8871,32 @@ function resetGFiltri() {
   ['gf-type','gf-attribute','gf-pts-min','gf-pts-max'].forEach(id => {
     const el = document.getElementById(id); if (el) el.value = '';
   });
+  aggiornaPastiglie();
   filtraListaGenesys();
 }
+// i filtri a tendina diventano pastiglie da toccare (il menu resta nascosto e tiene il valore)
+function pastiglie(id) {
+  const sel = document.getElementById(id); if (!sel || sel._past) return;
+  sel._past = true;
+  const box = document.createElement('div');
+  box.className = 'past'; box.dataset.per = id;
+  [...sel.options].forEach(o => {
+    const b = document.createElement('button'); b.type = 'button'; b.dataset.v = o.value;
+    b.textContent = o.value === '' ? 'Tutti' : o.textContent.trim();
+    b.onclick = () => { sel.value = sel.value === o.value ? '' : o.value; sel.dispatchEvent(new Event('change', { bubbles: true })); aggiornaPastiglie(); };
+    box.appendChild(b);
+  });
+  sel.classList.add('vs-nasc');
+  sel.insertAdjacentElement('afterend', box);
+}
+function aggiornaPastiglie() {
+  document.querySelectorAll('.past').forEach(box => {
+    const v = document.getElementById(box.dataset.per).value;
+    box.querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.v === v));
+  });
+}
+['f-type', 'f-attribute', 'f-race', 'f-level', 'gf-type', 'gf-attribute'].forEach(pastiglie);
+aggiornaPastiglie();
 
 window.toggleGFiltri = toggleGFiltri;
 window.resetGFiltri = resetGFiltri;
@@ -8905,7 +9024,7 @@ function renderListaStagioni() {
   const numCorrente = arr.reduce((m, st) => Math.max(m, st.numero || 0), 0) + 1;
   const ordCorr = ordinaClassifica(statGiocatoriDa(dati.partite, dati.giocatori));
   const inTesta = dati.partite.length && ordCorr.length ? ordCorr[0][0] : '\u2014';
-  const corrente = `<details class="card stagione-item stagione-corrente">
+  const corrente = `<details class="card stagione-item stagione-corrente" data-k="corrente">
       <summary class="stagione-head">
         <span class="stagione-nome">Stagione ${numCorrente}</span>
         <span class="stagione-meta"><span class="ico-emoji">\uD83C\uDFC6 </span>${SVG_TROFEO}${escapeHtml(inTesta)} \u00B7 ${dati.partite.length} partite \u00B7 in corso</span>
@@ -8913,6 +9032,10 @@ function renderListaStagioni() {
       </summary>
       <div class="stagione-body stagione-corrente-body">
         <div id="stagione-corrente-riepilogo"></div>
+        <div class="st-sec-title">Classifica</div>
+        ${tabellaClassifica(ordCorr)}
+        <div class="st-sec-title">Classifica mazzi</div>
+        <table id="st-mazzi-corrente"></table>
         <button class="danger chiudi-stagione-btn" style="width:100%;margin-top:14px" onclick="chiudiStagione()"><span class="ico-emoji">\uD83D\uDD12 </span>Chiudi stagione e archivia</button>
         <p class="section-note m-nascondi" style="margin:10px 0 0;text-align:left">
           Archivia tutte le partite giocate finora in una nuova stagione e azzera la classifica.
@@ -8960,7 +9083,8 @@ const _stagioniRese = new Set();
 let _stagionePop = null;
 function apriStagionePopup(det) {
   chiudiStagionePopup();
-  const k = det.dataset.k, st = (_stagioniCache || []).find(x => x.id === k);
+  const k = det.dataset.k;
+  const st = k === 'corrente' ? { nome: det.querySelector('.stagione-nome').textContent } : (_stagioniCache || []).find(x => x.id === k);
   const body = det.querySelector('.stagione-body'); if (!st || !body) return;
   const ov = document.createElement('div');
   ov.className = 'detail-overlay open sp-overlay'; ov.id = 'sp-overlay';
@@ -8973,7 +9097,8 @@ function apriStagionePopup(det) {
   document.body.appendChild(ov);
   ov.querySelector('.sp-corpo').appendChild(body);
   _stagionePop = { det, body, ov };
-  renderDettaglioStagione(k);
+  if (k === 'corrente') { renderStagioneCorrente(); renderMazzi(dati.partite, 'st-mazzi-corrente'); }
+  else renderDettaglioStagione(k);
 }
 function chiudiStagionePopup() {
   if (!_stagionePop) return;
@@ -9417,8 +9542,9 @@ window.toggleTema = toggleTema;
 initTema();
 
 function apriImpostazioni() {
+  const att = document.querySelector('main > section.active');
+  if (att && att.id !== 'carte' && att.id !== 'config') { _tabPrima = att.id; _scrollPrima = window.scrollY; }
   switchTab('config');
-  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 window.apriImpostazioni = apriImpostazioni;
 
