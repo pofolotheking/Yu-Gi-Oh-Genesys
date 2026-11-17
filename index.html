@@ -3845,6 +3845,48 @@
   .vs-sc-mazzi .nuovo span { background: none; color: var(--text-dim); }
   @media (max-width: 350px) { .vs-scheda { height: 190px; } .vs-quattro button { font-size: 15px; } .vs-due button { font-size: 13.5px; } }
 
+  /* ── HOME ── */
+  body.on-home { padding-bottom: 0 !important; overflow: hidden; }
+  body.on-home nav, body.on-home .duel-btn, body.on-home .m-topbar, body.on-home footer { display: none !important; }
+  /* barra di ricerca a tutta larghezza, tema e impostazioni alla sua destra */
+  body.on-home .search-btn { right: calc(var(--lato-dx) + 82px) !important; justify-content: flex-start; padding: 0 14px; height: 38px; top: calc(env(safe-area-inset-top) + 7px); font-size: 16px; font-weight: 500; color: var(--text-dim); }
+  body.on-home .search-btn svg { color: var(--blue); }
+  body.on-home .search-btn-txt::after { content: ' carte'; }
+  body.on-home .theme-btn { right: calc(var(--lato-dx) + 42px); top: calc(env(safe-area-inset-top) + 9px); }
+  body.on-home .gear-btn { top: calc(env(safe-area-inset-top) + 9px); }
+  #home.active { display: block; }
+  .home-blocchi {
+    position: relative; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 12px;
+    height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 72px); min-height: 380px; padding-bottom: 4px;
+  }
+  @supports (height: 100dvh) { .home-blocchi { height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 72px); } }
+  .hb { position: relative; overflow: hidden; isolation: isolate; border: none; border-radius: 28px; padding: 18px; margin: 0; cursor: pointer; color: #fff; font-family: inherit;
+    display: flex; flex-direction: column; text-align: left; background: var(--c1); box-shadow: 0 8px 22px rgba(0,0,0,0.18); transition: transform 0.15s; }
+  .hb:active { transform: scale(0.97); }
+  .hb.giu { justify-content: flex-end; }
+  .hb.dx { align-items: flex-end; text-align: right; }
+  .hb-img { position: absolute; inset: 0; z-index: -2; background-size: cover; background-position: center 22%; }
+  .hb::before { content: ''; position: absolute; inset: 0; z-index: -1; background: linear-gradient(160deg, var(--c1) 0%, var(--c2) 55%, rgba(0,0,0,0.5) 100%); opacity: 0.86; }
+  .hb.giu::before { background: linear-gradient(20deg, var(--c1) 0%, var(--c2) 55%, rgba(0,0,0,0.5) 100%); }
+  .hb-testa { display: flex; flex-direction: column; gap: 4px; max-width: 100%; }
+  .hb.dx .hb-testa { align-items: flex-end; }
+  .hb-ico { display: flex; margin-bottom: 6px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4)); }
+  .hb.giu .hb-ico { order: -1; }
+  .hb b { font-size: clamp(21px, 6.4vw, 30px); font-weight: 800; letter-spacing: -0.02em; line-height: 1.05; text-shadow: 0 2px 8px rgba(0,0,0,0.45); }
+  .hb small { font-size: 13.5px; font-weight: 600; opacity: 0.95; text-shadow: 0 1px 4px rgba(0,0,0,0.5); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; }
+  .hb.arancio { --c1: #ff9f0a; --c2: rgba(255,106,0,0.7); } .hb.verde { --c1: #30d158; --c2: rgba(15,157,88,0.7); }
+  .hb.rosso { --c1: #ff453a; --c2: rgba(200,30,90,0.7); } .hb.viola { --c1: #5e5ce6; --c2: rgba(58,47,209,0.7); }
+  .hb-piu { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 3; width: 100px; height: 100px; border-radius: 50%; border: none; margin: 0; padding: 0; cursor: pointer;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0; background: var(--blue); color: #fff; font-family: inherit;
+    box-shadow: 0 0 0 8px var(--bg-gruppo), 0 10px 28px rgba(10,132,255,0.5); transition: transform 0.15s; }
+  .hb-piu:active { transform: translate(-50%, -50%) scale(0.93); }
+  .hb-piu span { font-size: 11px; font-weight: 800; margin-top: -2px; letter-spacing: 0.02em; }
+  @media (orientation: landscape) and (max-height: 520px) {
+    .home-blocchi { gap: 10px; min-height: 0; } .hb { padding: 12px 16px; border-radius: 22px; } .hb-ico svg { width: 28px; height: 28px; } .hb-ico { margin-bottom: 2px; }
+    .hb b { font-size: 22px; } .hb-piu { width: 84px; height: 84px; }
+  }
+  .st-deck-tit { margin-top: 26px !important; }
+
   /* ── DUELLO A SPECCHIO ── */
   .dz { display: none; position: fixed; inset: 0; z-index: 500; background: #000; color: #fff; flex-direction: column;
     padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom); touch-action: manipulation; -webkit-user-select: none; user-select: none; }
@@ -4172,7 +4214,7 @@
 
 </style>
 </head>
-<body>
+<body class="on-home">
 
 <div id="login-screen" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:200;align-items:center;justify-content:center;padding:20px">
   <div style="width:100%;max-width:360px">
@@ -4248,15 +4290,18 @@
 </div>
 
 <nav>
-  <button class="tab-btn active" data-tab="giocatori"><svg width="13" height="13" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:-1px;margin-right:4px"><path d="M4 1.5h6v3a3 3 0 0 1-6 0v-3z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M5.5 7.6v2.2M8.5 7.6v2.2M4.5 10.2h5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M4 2.5H2v1a2 2 0 0 0 2 2M10 2.5h2v1a2 2 0 0 1-2 2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Stagione</button>
-  <button class="tab-btn" data-tab="mazzi"><svg width="13" height="13" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:-1px;margin-right:4px"><rect x="4.7" y="2" width="4.6" height="6.8" rx="0.8" transform="rotate(-26 7 12)" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" style="fill:var(--nav-carta)"/><rect x="4.7" y="2" width="4.6" height="6.8" rx="0.8" transform="rotate(0 7 12)" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" style="fill:var(--nav-carta)"/><rect x="4.7" y="2" width="4.6" height="6.8" rx="0.8" transform="rotate(26 7 12)" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" style="fill:var(--nav-carta)"/></svg>Deck</button>
+  <button class="tab-btn" data-tab="home"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px;margin-right:4px"><path d="M3.5 11 12 4l8.5 7"/><path d="M5.5 9.5V20h13V9.5"/><path d="M10 20v-5h4v5"/></svg>Home</button>
+  <button class="tab-btn" data-tab="giocatori"><svg width="13" height="13" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:-1px;margin-right:4px"><path d="M4 1.5h6v3a3 3 0 0 1-6 0v-3z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M5.5 7.6v2.2M8.5 7.6v2.2M4.5 10.2h5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M4 2.5H2v1a2 2 0 0 0 2 2M10 2.5h2v1a2 2 0 0 1-2 2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Stagione</button>
   <button class="tab-btn nav-add" data-tab="nuova" title="Registra partita" aria-label="Registra partita"><span class="nav-add-cerchio"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span></button>
   <button class="tab-btn" data-tab="statistiche"><svg width="13" height="13" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:-1px;margin-right:4px"><polyline points="2,11 5,7 8,9 12,3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>Statistiche</button>
   <button class="tab-btn" data-tab="stagioni" onclick="apriStagioni()"><svg width="13" height="13" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:-1px;margin-right:4px"><path d="M7 3.2C5.6 2.2 3.6 1.9 1.5 2.2v8.6c2.1-.3 4.1 0 5.5 1 1.4-1 3.4-1.3 5.5-1V2.2c-2.1-.3-4.1 0-5.5 1z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M7 3.2v8.6" stroke="currentColor" stroke-width="1.4"/><path d="M3.3 4.6c.9-.1 1.8 0 2.4.3M3.3 6.6c.9-.1 1.8 0 2.4.3M8.3 4.9c.6-.3 1.5-.4 2.4-.3" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/></svg>Archivio</button>
 </nav>
 
 <main>
-  <section id="giocatori" class="active">
+  <section id="home" class="active">
+    <div class="home-blocchi" id="home-blocchi"></div>
+  </section>
+  <section id="giocatori">
     <h2 class="section-title-centered">Stagione</h2>
     <div class="inner-tab-bar" style="max-width:640px;margin:0 auto 18px">
       <button class="inner-tab active" id="ctab-cur" onclick="switchScopeClassifica('cur')">Stagione corrente</button>
@@ -4264,6 +4309,17 @@
     </div>
     <div class="classifica-top">
       <div class="card card-box card-classifica"><table id="tabella-giocatori" class="tab-box"></table></div>
+    </div>
+    <h3 class="subsection-title st-deck-tit">Deck</h3>
+    <div class="desktop-split">
+      <div class="desktop-col-left">
+        <p class="section-note m-nascondi"><em>Ordinati per win rate. I mazzi con meno di 3 partite sono In prova.</em></p>
+        <div class="card card-box"><table id="tabella-mazzi"></table></div>
+      </div>
+      <div class="desktop-col-right">
+        <div id="mazzi-right-col"></div>
+        <div id="grid-matchup"></div>
+      </div>
     </div>
     <div class="classifica-top">
       <h3 class="subsection-title m-nascondi">Storico Partite</h3>
@@ -4305,16 +4361,6 @@
     <div class="inner-tab-bar" style="max-width:640px;margin:0 auto 18px">
       <button class="inner-tab active" id="dtab-cur" onclick="switchScopeDeck('cur')">Stagione corrente</button>
       <button class="inner-tab" id="dtab-all" onclick="switchScopeDeck('all')">All-time</button>
-    </div>
-    <div class="desktop-split">
-      <div class="desktop-col-left">
-        <p class="section-note m-nascondi"><em>Ordinati per win rate. I mazzi con meno di 3 partite sono In prova.</em></p>
-        <div class="card card-box"><table id="tabella-mazzi"></table></div>
-      </div>
-      <div class="desktop-col-right">
-        <div id="mazzi-right-col"></div>
-        <div id="grid-matchup"></div>
-      </div>
     </div>
   </section>
 
@@ -4726,7 +4772,7 @@
 </div>
 
 <footer>
-  <div id="versione-app" style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 128</div>
+  <div id="versione-app" style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 129</div>
 </footer>
 
 </div>
@@ -5000,6 +5046,7 @@ window.switchScopeStat = switchScopeStat;
 
 function switchScopeClassifica(scope) {
   _scopeClassifica = scope;
+  if (_scopeDeck !== scope) switchScopeDeck(scope);
   document.getElementById('ctab-cur').classList.toggle('active', scope === 'cur');
   document.getElementById('ctab-all').classList.toggle('active', scope === 'all');
   const pt = partiteScope(scope);
@@ -5014,7 +5061,59 @@ function switchScopeClassifica(scope) {
 window.switchScopeDeck = switchScopeDeck;
 window.switchScopeClassifica = switchScopeClassifica;
 
+// ============ HOME ============
+// quattro blocchi a tutto schermo con un'immagine di sfondo velata dal loro colore e,
+// incastrato al centro, il + azzurro per registrare una partita. Lo sfondo di Stagione
+// e' il mazzo primo in classifica; gli altri sono scelti a caso a ogni apertura.
+let _homeImg = null;
+const _homeSvg = d => `<svg viewBox="0 0 24 24" width="38" height="38" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
+const HOME_ICO = {
+  stagione: _homeSvg('<path d="M7 4h10v4a5 5 0 0 1-10 0z"/><path d="M12 13v3M8.5 20h7M10 16h4v4h-4z"/><path d="M7 5H4v1a3 3 0 0 0 3 3M17 5h3v1a3 3 0 0 1-3 3"/>'),
+  statistiche: _homeSvg('<path d="M4 4v16h16"/><path d="M7 15l4-5 3 3 5-7"/>'),
+  duello: _homeSvg('<path d="M14.5 17.5 3 6V3h3l11.5 11.5"/><path d="m13 19 6-6"/><path d="m16 16 4 4"/><path d="m19 21 2-2"/><path d="M14.5 6.5 18 3h3v3l-3.5 3.5"/><path d="m5 14 4 4"/><path d="m7 17-3 3"/><path d="m3 19 2 2"/>'),
+  archivio: _homeSvg('<path d="M12 6.5C10.2 5 7.2 4.6 4 5v13c3.2-.4 6.2 0 8 1.5 1.8-1.5 4.8-1.9 8-1.5V5c-3.2-.4-6.2 0-8 1.5z"/><path d="M12 6.5v13"/>'),
+};
+function mazzoPrimoStagione() {
+  const stat = calcolaStatMazzi(dati.partite);
+  const arr = Object.entries(stat).filter(([, s]) => s.partite > 0).sort((a, b) => {
+    const ua = a[1].partite >= SOGLIA_MAZZO ? 1 : 0, ub = b[1].partite >= SOGLIA_MAZZO ? 1 : 0;
+    if (ua !== ub) return ub - ua;
+    if (b[1].wr !== a[1].wr) return b[1].wr - a[1].wr;
+    return (b[1].v - b[1].p) - (a[1].v - a[1].p) || b[1].partite - a[1].partite;
+  });
+  return arr.length ? arr[0][0] : null;
+}
+function renderHome() {
+  const box = document.getElementById('home-blocchi'); if (!box || !dati) return;
+  const primo = mazzoPrimoStagione(), imgPrimo = primo && imgMazzo(primo);
+  if (!_homeImg) {
+    const tutte = [...new Set(Object.values(MAZZI_IMG))].filter(u => u !== imgPrimo);
+    for (let i = tutte.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [tutte[i], tutte[j]] = [tutte[j], tutte[i]]; }
+    _homeImg = { statistiche: tutte[0], duello: tutte[1], archivio: tutte[2] };
+  }
+  const ord = ordinaClassifica(statGiocatoriDa(dati.partite, dati.giocatori));
+  const n = dati.partite.length;
+  const dz = (() => { try { return JSON.parse(localStorage.getItem('genesys-duello')); } catch (e) { return null; } })();
+  const duelloAperto = dz && Array.isArray(dz.lp) && (dz.lp[0] !== 8000 || dz.lp[1] !== 8000);
+  const nSt = (_stagioniCache || []).length;
+  const blocco = (k, cls, titolo, sotto, img, az) => `<button class="hb ${cls}" onclick="${az}">
+      ${img ? `<span class="hb-img" style="background-image:url('${escapeHtml(img)}')"></span>` : ''}
+      <span class="hb-testa"><span class="hb-ico">${HOME_ICO[k]}</span><b>${titolo}</b><small>${sotto}</small></span></button>`;
+  box.innerHTML = `
+    ${blocco('stagione', 'arancio su sx', 'Stagione', n && ord.length ? 'In testa ' + escapeHtml(ord[0][0]) : 'Nessuna partita', imgPrimo || _homeImg.statistiche, "homeVai('giocatori')")}
+    ${blocco('statistiche', 'verde su dx', 'Statistiche', n + (n === 1 ? ' partita' : ' partite'), _homeImg.statistiche, "homeVai('statistiche')")}
+    ${blocco('duello', 'rosso giu sx', 'Duello', duelloAperto ? `In corso · ${dz.lp[0].toLocaleString('it-IT')} – ${dz.lp[1].toLocaleString('it-IT')}` : 'Punti vita', _homeImg.duello, 'apriDuello()')}
+    ${blocco('archivio', 'viola giu dx', 'Archivio', nSt ? nSt + (nSt === 1 ? ' stagione' : ' stagioni') : 'Stagioni passate', _homeImg.archivio, "homeVai('stagioni')")}
+    <button class="hb-piu" onclick="homeVai('nuova')" aria-label="Registra partita"><svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg><span>Registra</span></button>`;
+}
+// dalla Home si entra nelle sezioni come dalla barra in basso, che li' ricompare
+function homeVai(t) {
+  const b = document.querySelector(`nav .tab-btn[data-tab="${t}"]`);
+  if (b) b.click(); else switchTab(t);
+}
+window.homeVai = homeVai;
 function popolaTutto() {
+  renderHome();
   renderGiocatori(partiteScope(_scopeClassifica));
   renderRiepilogo(partiteScope(_scopeStat));
   renderGrafico(partiteScope(_scopeStat));
@@ -7508,20 +7607,22 @@ async function eliminaPartita(idx) {
 }
 
 // la ricerca carte e' una grande finestra: si apre da qui e chiudendo si torna dove si era
-let _tabPrima = 'giocatori', _scrollPrima = 0;
+let _tabPrima = 'home', _scrollPrima = 0;
 function apriRicerca() {
   const att = document.querySelector('main > section.active');
   if (att && att.id !== 'carte' && att.id !== 'config') { _tabPrima = att.id; _scrollPrima = window.scrollY; }
   switchTab('carte');
 }
 function chiudiRicerca() {
-  switchTab(_tabPrima || 'giocatori');
+  switchTab(_tabPrima || 'home');
   requestAnimationFrame(() => window.scrollTo({ top: _scrollPrima, behavior: 'instant' }));
 }
 window.apriRicerca = apriRicerca; window.chiudiRicerca = chiudiRicerca;
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && !e._gestito && document.body.classList.contains('ricerca-aperta') && !document.getElementById('ci-overlay')?.classList.contains('open')) chiudiRicerca(); });
 function switchTab(id) {
   document.body.classList.toggle('ricerca-aperta', id === 'carte' || id === 'config');
+  if (id !== 'carte' && id !== 'config') document.body.classList.toggle('on-home', id === 'home');
+  if (id === 'home') renderHome();
   document.querySelectorAll('.tab-btn').forEach(x => x.classList.remove('active'));
   document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
   const btn = document.querySelector(`.tab-btn[data-tab="${id}"]`);
@@ -7538,6 +7639,8 @@ document.querySelectorAll('.tab-btn').forEach(b => {
     b.classList.add('active');
     document.getElementById(b.dataset.tab).classList.add('active');
     document.body.classList.remove('ricerca-aperta');
+    document.body.classList.toggle('on-home', b.dataset.tab === 'home');
+    if (b.dataset.tab === 'home') renderHome();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   });
 });
