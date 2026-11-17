@@ -3769,20 +3769,17 @@
   .pd-azioni .blu { background: var(--blue); } .pd-azioni .rosso { background: var(--red); }
 
   /* ── PANNELLO DATI SOTTO IL VENTAGLIO (stile cruscotto) ── */
-  .dd-pannello {
-    --text: #fff; --text-dim: rgba(235,235,245,0.64); --text-faint: rgba(235,235,245,0.42); --border: rgba(255,255,255,0.12);
-    --bg-card: rgba(22,22,26,0.86); --green-dark: #30d158; --green: #30d158; --red: #ff453a;
-    color: #fff; padding-top: 4px;
-  }
+  .dd-pannello { --traccia: rgba(120,120,128,0.2); color: var(--text); padding-top: 4px; }
+  [data-theme="dark"] .dd-pannello { --traccia: rgba(255,255,255,0.13); --green-dark: #30d158; }
   .dd-pannello .dd-scope { margin: 0 0 12px !important; }
-  .dd-fisso { text-align: center; font-size: 14px; font-weight: 700; padding: 9px; margin-bottom: 12px; border-radius: 12px; background: rgba(0,0,0,0.5); }
+  .dd-fisso { text-align: center; font-size: 14px; font-weight: 700; padding: 9px; margin-bottom: 12px; border-radius: 12px; background: var(--bg-card); }
   .dd-tabs { display: flex; gap: 8px; margin-bottom: 12px; }
-  .dd-tabs button { flex: 1 1 0; height: 42px; padding: 0 6px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.16); background: rgba(0,0,0,0.5); color: #fff;
-    font-family: inherit; font-size: 15px; font-weight: 700; cursor: pointer; -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); transition: background 0.2s; }
-  .dd-tabs button.on { background: var(--blue); border-color: transparent; box-shadow: 0 4px 14px rgba(10,132,255,0.45); }
+  .dd-tabs button { flex: 1 1 0; height: 42px; padding: 0 6px; border-radius: 999px; border: none; background: var(--bg-card); color: var(--text);
+    font-family: inherit; font-size: 15px; font-weight: 700; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.08); transition: background 0.2s; }
+  .dd-tabs button.on { background: var(--blue); color: #fff; box-shadow: 0 4px 14px rgba(10,132,255,0.35); }
   .dd-corpo { min-height: 90px; }
   .db-kpi, .db-box, .db-tiles > div, .dd-graf, .dd-pannello .deck-mu-vs-list, .dd-pannello .dmh-list {
-    background: var(--bg-card) !important; border: 1px solid var(--border); border-radius: 18px; -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+    background: var(--bg-card) !important; border: none; border-radius: 18px; box-shadow: 0 1px 3px rgba(0,0,0,0.06);
   }
   .db-kpi { display: flex; align-items: center; gap: 16px; padding: 14px 16px; }
   .db-ring { flex: none; }
@@ -3792,7 +3789,7 @@
   .db-bar { margin-top: 12px; }
   .db-bar-t { display: flex; justify-content: space-between; align-items: baseline; font-size: 14.5px; font-weight: 600; }
   .db-bar-t b { font-size: 16px; font-weight: 800; font-variant-numeric: tabular-nums; }
-  .db-bar-l { height: 8px; margin-top: 6px; border-radius: 4px; background: rgba(255,255,255,0.13); overflow: hidden; }
+  .db-bar-l { height: 8px; margin-top: 6px; border-radius: 4px; background: var(--traccia); overflow: hidden; }
   .db-bar-l i { display: block; height: 100%; border-radius: 4px; }
   .db-bar small { display: block; margin-top: 4px; font-size: 11.5px; color: var(--text-faint); }
   .db-tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
@@ -3802,7 +3799,7 @@
   .db-tiles .largo b { font-size: 18px; }
   .db-tiles span { font-size: 12px; font-weight: 600; color: var(--text-dim); }
   .dd-pannello .deck-mu-vs-list, .dd-pannello .dmh-list { margin-top: 0 !important; overflow: hidden; }
-  .dd-pannello .ce-titolo { color: rgba(255,255,255,0.75); text-shadow: 0 1px 3px #000; }
+
   .dd-graf { margin-top: 14px; padding: 12px 10px 8px; }
   .dd-tit { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-dim); margin: 0 6px 6px; }
   .dd-graf .ddm-grafico-wrap { height: 200px; }
@@ -3962,12 +3959,7 @@
   .ddm-bottoni { display: flex; flex-direction: column; gap: 10px; margin-top: 8px; }
   /* sotto l'immagine del mazzo: lo sfondo e' il dorso di una carta (back card), dietro ventaglio e bottoni */
   .ddm-sotto { position: relative; margin: 0 -16px -24px; padding: 0 16px 28px; }
-  .ddm-sotto::before {
-    content: ''; position: absolute; z-index: -1; left: 0; right: 0; bottom: 0; top: 80px;
-    background: #140803 url('img/back-card.jpg') center / cover no-repeat;
-    opacity: 0.85;
-    -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 70px); mask-image: linear-gradient(180deg, transparent 0, #000 70px);
-  }
+  .ddm-sotto::before { content: none; }
   .ddm-bottone {
     position: relative; display: flex; flex-direction: row; align-items: center; justify-content: flex-start; gap: 16px; width: 100%; min-height: 68px; padding: 12px 20px;
     border: 1px solid rgba(255,196,120,0.4); border-radius: 18px; color: #fff; text-align: left; cursor: pointer; font-family: inherit;
@@ -4003,25 +3995,20 @@
   [data-theme="dark"] .detail-modal.sm-modal { box-shadow: 0 0 0 1px rgba(255,255,255,0.16); }
   .detail-modal.sm-modal .detail-close { width: 36px; height: 36px; top: 14px; right: 14px; box-shadow: 0 2px 8px rgba(255,59,48,0.4); }
   .sp-modal, #carte.active, #config.active { isolation: isolate; }
-  .sp-modal::before, .sm-modal::before, #carte.active::before, #config.active::before {
-    content: ''; position: absolute; z-index: -1; left: 0; right: 0; top: 0; height: var(--back-h, 150px);
-    background: #140803 url('img/back-card.jpg') center 30% / cover no-repeat; opacity: 0.9; border-radius: 22px 22px 0 0;
-    -webkit-mask-image: linear-gradient(180deg, #000 78%, transparent 100%); mask-image: linear-gradient(180deg, #000 78%, transparent 100%);
-    pointer-events: none;
-  }
+  .sp-modal::before, .sm-modal::before, #carte.active::before, #config.active::before { content: none; }
   #carte.active, #config.active { --back-h: 120px; }
   .sm-modal { --back-h: 170px; }
   .sp-modal { --back-h: 124px; }
   .sp-modal .sp-corpo { padding-top: 18px; }
-  .sp-testa b, .sm-testa b, #carte.active > h2, #config.active > h2 { color: #fff !important; text-shadow: 0 2px 4px rgba(0,0,0,0.9), 0 0 12px rgba(0,0,0,0.8); }
-  .sp-testa span, .sm-testa span { color: rgba(255,255,255,0.92) !important; text-shadow: 0 1px 3px rgba(0,0,0,0.9); }
+  .sp-testa b, .sm-testa b, #carte.active > h2, #config.active > h2 { color: var(--text) !important; text-shadow: none; }
+  .sp-testa span, .sm-testa span { color: var(--text-dim) !important; text-shadow: none; }
   /* scheda giocatore: carte-mazzo nel ventaglio */
   .cc-carta.gm img, .gm-vuota { display: block; width: 100%; aspect-ratio: 59 / 86; object-fit: cover; object-position: center 30%; border-radius: 8px; box-shadow: 0 10px 24px 2px rgba(0,0,0,0.55), 0 2px 6px rgba(0,0,0,0.4); }
   .gm-vuota { display: flex; align-items: center; justify-content: center; background: #2c2c30; color: #98989f; font-size: 40px; font-weight: 800; }
   .gm-nome { position: absolute; left: 0; right: 0; bottom: 0; padding: 22px 8px 8px; border-radius: 0 0 8px 8px; color: #fff; font-size: 14px; font-weight: 800; line-height: 1.15; text-shadow: 0 1px 3px rgba(0,0,0,0.95);
     background: linear-gradient(180deg, transparent, rgba(0,0,0,0.8)); display: flex; flex-direction: column; gap: 1px; }
   .gm-nome small { font-size: 13px; font-weight: 700; opacity: 0.9; }
-  .dg-vuoto { margin-top: 16px; color: #fff; text-shadow: 0 1px 3px #000; }
+  .dg-vuoto { margin-top: 16px; }
   .dg-s1 { margin-bottom: 0; padding-bottom: 6px; }
   .dg-s2 { margin-top: 0; }
   .dg-s2::before { top: 0 !important; }
@@ -4739,7 +4726,7 @@
 </div>
 
 <footer>
-  <div id="versione-app" style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 127</div>
+  <div id="versione-app" style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 128</div>
 </footer>
 
 </div>
@@ -6814,9 +6801,9 @@ function renderDettaglioMazzoScope(mazzo, scope) {
 let _ddP = null, _ddTab = 'statistiche';
 function ringWR(p) {
   const col = p == null ? 'transparent' : p >= 50 ? '#30d158' : p >= 35 ? '#ff9f0a' : '#ff453a';
-  return `<svg class="db-ring" viewBox="0 0 36 36" width="92" height="92"><circle cx="18" cy="18" r="15" fill="none" stroke="rgba(255,255,255,0.14)" stroke-width="3.6"/>${p == null ? '' :
+  return `<svg class="db-ring" viewBox="0 0 36 36" width="92" height="92"><circle cx="18" cy="18" r="15" fill="none" stroke="var(--traccia)" stroke-width="3.6"/>${p == null ? '' :
     `<circle cx="18" cy="18" r="15" fill="none" stroke="${col}" stroke-width="3.6" stroke-linecap="round" stroke-dasharray="${(p * 0.9425).toFixed(1)} 100" transform="rotate(-90 18 18)"/>`}
-    <text x="18" y="20.6" text-anchor="middle" font-size="${p == null ? 8 : 8.4}" font-weight="800" fill="#fff" font-family="Inter, system-ui, sans-serif">${p == null ? '\u2014' : p + '%'}</text></svg>`;
+    <text x="18" y="20.6" text-anchor="middle" font-size="${p == null ? 8 : 8.4}" font-weight="800" fill="currentColor" font-family="Inter, system-ui, sans-serif">${p == null ? '\u2014' : p + '%'}</text></svg>`;
 }
 function htmlStatB(st) {
   const wr = st.partite ? Math.round(100 * st.v / st.partite) : null;
