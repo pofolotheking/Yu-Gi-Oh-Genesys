@@ -3735,6 +3735,45 @@
     .vitt-titolo, .vitt-carta, .vitt-mazzo, .vitt-chi { animation: none; }
   }
 
+  /* ── PANNELLO DATI SOTTO IL VENTAGLIO (stile cruscotto) ── */
+  .dd-pannello {
+    --text: #fff; --text-dim: rgba(235,235,245,0.64); --text-faint: rgba(235,235,245,0.42); --border: rgba(255,255,255,0.12);
+    --bg-card: rgba(22,22,26,0.86); --green-dark: #30d158; --green: #30d158; --red: #ff453a;
+    color: #fff; padding-top: 4px;
+  }
+  .dd-pannello .dd-scope { margin: 0 0 12px !important; }
+  .dd-fisso { text-align: center; font-size: 14px; font-weight: 700; padding: 9px; margin-bottom: 12px; border-radius: 12px; background: rgba(0,0,0,0.5); }
+  .dd-tabs { display: flex; gap: 8px; margin-bottom: 12px; }
+  .dd-tabs button { flex: 1 1 0; height: 42px; padding: 0 6px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.16); background: rgba(0,0,0,0.5); color: #fff;
+    font-family: inherit; font-size: 15px; font-weight: 700; cursor: pointer; -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); transition: background 0.2s; }
+  .dd-tabs button.on { background: var(--blue); border-color: transparent; box-shadow: 0 4px 14px rgba(10,132,255,0.45); }
+  .dd-corpo { min-height: 90px; }
+  .db-kpi, .db-box, .db-tiles > div, .dd-graf, .dd-pannello .deck-mu-vs-list, .dd-pannello .dmh-list {
+    background: var(--bg-card) !important; border: 1px solid var(--border); border-radius: 18px; -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+  }
+  .db-kpi { display: flex; align-items: center; gap: 16px; padding: 14px 16px; }
+  .db-ring { flex: none; }
+  .db-kpi b { display: block; font-size: 32px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.05; font-variant-numeric: tabular-nums; }
+  .db-kpi span { font-size: 13.5px; font-weight: 600; color: var(--text-dim); }
+  .db-box { margin-top: 10px; padding: 2px 16px 14px; }
+  .db-bar { margin-top: 12px; }
+  .db-bar-t { display: flex; justify-content: space-between; align-items: baseline; font-size: 14.5px; font-weight: 600; }
+  .db-bar-t b { font-size: 16px; font-weight: 800; font-variant-numeric: tabular-nums; }
+  .db-bar-l { height: 8px; margin-top: 6px; border-radius: 4px; background: rgba(255,255,255,0.13); overflow: hidden; }
+  .db-bar-l i { display: block; height: 100%; border-radius: 4px; }
+  .db-bar small { display: block; margin-top: 4px; font-size: 11.5px; color: var(--text-faint); }
+  .db-tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+  .db-tiles > div { padding: 12px 14px; display: flex; flex-direction: column; gap: 2px; }
+  .db-tiles > div.largo { grid-column: 1 / -1; }
+  .db-tiles b { font-size: 22px; font-weight: 800; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+  .db-tiles .largo b { font-size: 18px; }
+  .db-tiles span { font-size: 12px; font-weight: 600; color: var(--text-dim); }
+  .dd-pannello .deck-mu-vs-list, .dd-pannello .dmh-list { margin-top: 0 !important; overflow: hidden; }
+  .dd-pannello .ce-titolo { color: rgba(255,255,255,0.75); text-shadow: 0 1px 3px #000; }
+  .dd-graf { margin-top: 14px; padding: 12px 10px 8px; }
+  .dd-tit { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-dim); margin: 0 6px 6px; }
+  .dd-graf .ddm-grafico-wrap { height: 200px; }
+
   /* ── SCHEDA VS: Registra e Modifica partita ── */
   .vs-nasc { display: none !important; }
   .vs-host { display: block !important; padding: 0 !important; border: none !important; background: none !important; }
@@ -4665,7 +4704,7 @@
 <footer>
   <span>Tia · Gio · Richi</span>
   <button onclick="eseguiLogout()" style="background:none;border:none;color:var(--text-faint);font-size:0.75rem;cursor:pointer;margin-left:12px;font-family:inherit">Esci</button>
-  <div id="versione-app" style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 125</div>
+  <div id="versione-app" style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 126</div>
 </footer>
 
 </div>
@@ -6582,6 +6621,7 @@ document.addEventListener('click', e => {
 // match-up e cronologia si ricalcolano su quelle partite (la decklist resta).
 async function apriDettaglioMazzo(mazzo, scope = _scopeDeck) {
   chiudiSottoMazzo();
+  _ddTab = 'statistiche';
   _dmhMazzo = mazzo;
   const prop = dati.mazzi[mazzo] || '';
   const imgUrl = imgMazzo(mazzo);
@@ -6661,37 +6701,62 @@ function renderDettaglioMazzoScope(mazzo, scope) {
     }).join('');
   const noVs = vsRows === '' ? '<div class="deck-mu-vuoto">Nessuno scontro registrato.</div>' : vsRows;
 
-  // grafico del win rate del mazzo e, sotto, i dati in una tabella semplice:
-  // etichette che spiegano il dato, valori in neretto senza colori
-  const riga = (et, val) => `<div class="ddm-riga"><span class="ddm-et">${et}</span><b>${val}</b></div>`;
-  const volte = n => `${n} volt${n === 1 ? 'a' : 'e'}`;
-  _ddmPezzi = {
-    andamento: { titolo: 'Andamento', html: `<div class="ddm-grafico"><div class="ddm-grafico-wrap sm-alto"><canvas id="ddm-chart"></canvas></div></div>` },
-    statistiche: { titolo: 'Statistiche', html: `<div class="ddm-tabella">
-      ${riga('Posizione nella classifica dei mazzi', posizione ? posizione + '°' : '—')}
-      ${riga('Partite giocate con questo mazzo', tot)}
-      ${riga('Quota delle partite della lega', utilizzo)}
-      ${riga('Vittorie e sconfitte', `${s.v} – ${s.p}`)}
-      ${riga('Percentuale di vittorie', pct(s.v, tot))}
-      ${riga(`Vittorie andando primo (${volte(s.primoT)})`, pct(s.primoV, s.primoT))}
-      ${riga(`Vittorie andando secondo (${volte(s.secondoT)})`, pct(s.secondoV, s.secondoT))}
-      ${riga('Dadi vinti su quelli lanciati', s.dadoT ? `${s.dadoV} su ${s.dadoT}` : '—')}
-      ${riga('Vittorie dopo aver vinto il dado', pct(s.dadoWinV, s.dadoV))}
-    </div>` },
-    matchup: { titolo: 'Match-up', html: `<div class="deck-mu-vs-list">${noVs}</div>` },
-    storico: { titolo: 'Storico partite', html: `<div class="dmh-list" id="dmh-body"></div>` },
+  _ddP = {
+    scope, fisso: null, ricalcola: sc => renderDettaglioMazzoScope(mazzo, sc),
+    grafico: () => graficoMazzo(mazzo, partite),
+    dopoStorico: () => renderCronologiaMazzo(mazzo, scope),
+    pezzi: {
+      statistiche: htmlStatB({ v: s.v, p: s.p, partite: tot, pos: tot ? posizione : 0,
+        primo: [s.primoV, s.primoT], secondo: [s.secondoV, s.secondoT], dado: [s.dadoWinV, s.dadoV],
+        tiles: [[s.dadoT ? `${s.dadoV}/${s.dadoT}` : '\u2014', 'Dadi vinti'], [utilizzo, 'Quota della lega']] }),
+      matchup: `<div class="deck-mu-vs-list">${noVs}</div>`,
+      storico: `<div class="dmh-list" id="dmh-body"></div>`,
+    },
   };
-  _ddmCtx = { mazzo, partite, scope, ricalcola: sc => renderDettaglioMazzoScope(mazzo, sc),
-    dopo: k => { if (k === 'andamento') graficoMazzo(mazzo, partite); if (k === 'storico') renderCronologiaMazzo(mazzo, scope); } };
-  const nAvv = Object.values(s.vs).filter(r => r.v + r.p > 0).length;
-  const bottone = (k, ico, titolo, sub) => `<button class="ddm-bottone ${COL_DDM[k]}" onclick="apriSottoMazzo('${k}')"><span class="ddm-ico">${ico}</span><b>${titolo}</b></button>`;
-  document.getElementById('ddm-scope').innerHTML = `<div class="ddm-bottoni">
-    ${bottone('andamento', ICO_DDM.andamento, 'Andamento', tot ? 'Win rate ' + pct(s.v, tot) : 'Nessuna partita')}
-    ${bottone('statistiche', ICO_DDM.statistiche, 'Statistiche', posizione && tot ? posizione + '° in classifica' : 'Dati del mazzo')}
-    ${bottone('matchup', ICO_DDM.matchup, 'Match-up', nAvv + (nAvv === 1 ? ' avversario' : ' avversari'))}
-    ${bottone('storico', ICO_DDM.storico, 'Storico partite', tot + (tot === 1 ? ' partita' : ' partite'))}
-  </div>`;
+  renderPannello();
 }
+// ===== pannello dati sotto il ventaglio (mazzo e giocatore) =====
+// in alto Stagione corrente / All-time, poi le linguette Statistiche, Match-up, Storico;
+// il grafico dell'andamento e' sempre in fondo
+let _ddP = null, _ddTab = 'statistiche';
+function ringWR(p) {
+  const col = p == null ? 'transparent' : p >= 50 ? '#30d158' : p >= 35 ? '#ff9f0a' : '#ff453a';
+  return `<svg class="db-ring" viewBox="0 0 36 36" width="92" height="92"><circle cx="18" cy="18" r="15" fill="none" stroke="rgba(255,255,255,0.14)" stroke-width="3.6"/>${p == null ? '' :
+    `<circle cx="18" cy="18" r="15" fill="none" stroke="${col}" stroke-width="3.6" stroke-linecap="round" stroke-dasharray="${(p * 0.9425).toFixed(1)} 100" transform="rotate(-90 18 18)"/>`}
+    <text x="18" y="20.6" text-anchor="middle" font-size="${p == null ? 8 : 8.4}" font-weight="800" fill="#fff" font-family="Inter, system-ui, sans-serif">${p == null ? '\u2014' : p + '%'}</text></svg>`;
+}
+function htmlStatB(st) {
+  const wr = st.partite ? Math.round(100 * st.v / st.partite) : null;
+  const barra = (et, [v, t], col) => `<div class="db-bar"><div class="db-bar-t"><span>${et}</span><b>${t ? Math.round(100 * v / t) + '%' : '\u2014'}</b></div>
+    <div class="db-bar-l"><i style="width:${t ? 100 * v / t : 0}%;background:${col}"></i></div><small>${t ? `${v} vinte su ${t}` : 'Nessun dato'}</small></div>`;
+  return `<div class="db-kpi">${ringWR(wr)}<div><b>${st.v}-${st.p}</b><span>${st.partite} partit${st.partite === 1 ? 'a' : 'e'}${st.pos ? ' \u00B7 ' + st.pos + '\u00B0 in classifica' : ''}</span></div></div>
+    <div class="db-box">${barra('Andando primo', st.primo, '#0a84ff')}${barra('Andando secondo', st.secondo, '#5e5ce6')}${barra('Dopo aver vinto il dado', st.dado, '#ff9f0a')}</div>
+    <div class="db-tiles">${st.tiles.map(([v, et, extra]) => `<div${extra || ''}><b>${v}</b><span>${et}</span></div>`).join('')}</div>`;
+}
+function renderPannello() {
+  const P = _ddP, box = document.getElementById('ddm-scope'); if (!P || !box) return;
+  const tab = (k, t) => `<button type="button" data-k="${k}" class="${_ddTab === k ? 'on' : ''}" onclick="ddTab('${k}')">${t}</button>`;
+  box.innerHTML = `<div class="dd-pannello">
+    ${P.fisso ? `<div class="dd-fisso">${escapeHtml(P.fisso)}</div>` : `<div class="inner-tab-bar ddm-tabs dd-scope">
+      <button class="inner-tab${P.scope === 'cur' ? ' active' : ''}" onclick="ddScope('cur')">Stagione corrente</button>
+      <button class="inner-tab${P.scope === 'all' ? ' active' : ''}" onclick="ddScope('all')">All-time</button></div>`}
+    <div class="dd-tabs">${tab('statistiche', 'Statistiche')}${tab('matchup', 'Match-up')}${tab('storico', 'Storico')}</div>
+    <div class="dd-corpo" id="dd-corpo"></div>
+    <div class="dd-graf"><div class="dd-tit">Andamento</div><div class="ddm-grafico-wrap"><canvas id="ddm-chart"></canvas></div></div>
+  </div>`;
+  ddTab(_ddTab);
+  P.grafico();
+}
+function ddTab(k) {
+  const P = _ddP; if (!P) return;
+  _ddTab = k;
+  document.querySelectorAll('.dd-tabs button').forEach(b => b.classList.toggle('on', b.dataset.k === k));
+  const c = document.getElementById('dd-corpo'); if (!c) return;
+  c.innerHTML = P.pezzi[k];
+  if (k === 'storico' && P.dopoStorico) P.dopoStorico();
+}
+function ddScope(sc) { if (_ddP && sc !== _ddP.scope) _ddP.ricalcola(sc); }
+window.ddTab = ddTab; window.ddScope = ddScope;
 let _ddmPezzi = {}, _ddmCtx = null;
 const COL_DDM = { andamento: 'verde', statistiche: 'arancio', matchup: 'rosa', storico: 'azzurro' };
 const _svgDdm = d => `<svg viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
@@ -6748,7 +6813,7 @@ function disegnaGraficoWR(esiti) {
   if (!cv || typeof Chart === 'undefined') return;
   let v = 0;
   const serie = [50, ...esiti.map((w, i) => { if (w) v++; return Math.round(100 * v / (i + 1)); })];
-  const css = getComputedStyle(document.documentElement);
+  const css = getComputedStyle(cv);
   const grid = css.getPropertyValue('--border').trim(), tick = css.getPropertyValue('--text-faint').trim();
   const card = css.getPropertyValue('--bg-card').trim(), testo = css.getPropertyValue('--text').trim();
   const verde = css.getPropertyValue('--green').trim(), rosso = css.getPropertyValue('--red').trim();
@@ -6800,6 +6865,7 @@ function htmlInfoGiocatore(nome, partite) {
 }
 function apriGiocatore(nome, scope = 'all', fisse = null) {
   chiudiSottoMazzo();
+  _ddTab = 'statistiche';
   _dgNome = nome; _dgFisse = fisse; _dmhMazzo = null;
   const foto = ((dati.profili || {})[nome] || {}).foto;
   const partite = fisse ? fisse.partite : partiteAllTime();
@@ -6856,30 +6922,21 @@ function renderGiocatoreScope(nome, scope) {
     const par = e.par, sc = e.par.risultato.split('-'), punteggio = par.g1 === nome ? par.risultato : sc.reverse().join('-');
     return `<div class="dmh-row ${e.vinta ? 'win' : 'lose'}"><span class="dmh-esito">${e.vinta ? 'V' : 'S'}</span><span class="dmh-main"><span class="dmh-vs">${escapeHtml(e.mazzo)} vs ${escapeHtml(e.mazzoAvv)}</span><span class="dmh-meta">contro ${escapeHtml(e.avv)} \u00B7 ${formatData(par.data)}${par._stagione ? ' \u00B7 ' + escapeHtml(par._stagione) : ''}</span></span><span class="dmh-score">${punteggio}</span></div>`;
   }).join('') || '<div class="dmh-vuoto">Nessuna partita.</div>';
-  _ddmPezzi = {
-    andamento: { titolo: 'Andamento', html: `<div class="ddm-grafico"><div class="ddm-grafico-wrap sm-alto"><canvas id="ddm-chart"></canvas></div></div>` },
-    statistiche: { titolo: 'Statistiche', html: `<div class="dg-tiles">
-      ${tile('Posizione', pos && s.partite ? pos + '\u00B0' : '\u2014')}
-      ${tile('Punti', s.punti)}
-      ${tile('Partite', s.partite)}
-      ${tile('Vittorie-sconfitte', `${s.v}-${s.p}`)}
-      ${tile('% vittorie', pct(s.v, s.partite))}
-      ${tile('Dadi vinti', dado.length ? `${dado.length}/${es.filter(e => e.par.dado).length}` : '\u2014')}
-      ${tile(`% se va primo`, pct(primo.filter(e => e.vinta).length, primo.length), `${primo.length} partite`)}
-      ${tile(`% se va secondo`, pct(secondo.filter(e => e.vinta).length, secondo.length), `${secondo.length} partite`)}
-      ${tile('% dopo il dado vinto', pct(dado.filter(e => e.vinta).length, dado.length))}
-      ${tile('Mazzo preferito', escapeHtml(pref), '', 'testo')}
-    </div>` },
-    matchup: { titolo: 'Match-up', html: `<div class="ce-titolo">Contro i giocatori</div><div class="deck-mu-vs-list">${gruppi(e => e.avv, k => 'vs ' + escapeHtml(k), false)}</div>
-      <div class="ce-titolo" style="margin-top:14px">Con i suoi mazzi</div><div class="deck-mu-vs-list">${gruppi(e => e.mazzo, k => escapeHtml(k), true)}</div>` },
-    storico: { titolo: 'Storico partite', html: `<div class="dmh-list">${storico}</div>` },
+  _ddP = {
+    scope, fisso: fisse ? fisse.etichetta : null, ricalcola: sc => renderGiocatoreScope(nome, sc),
+    grafico: () => graficoGiocatore(nome, partite),
+    pezzi: {
+      statistiche: htmlStatB({ v: s.v, p: s.p, partite: s.partite, pos: s.partite ? pos : 0,
+        primo: [primo.filter(e => e.vinta).length, primo.length], secondo: [secondo.filter(e => e.vinta).length, secondo.length],
+        dado: [dado.filter(e => e.vinta).length, dado.length],
+        tiles: [[s.punti, 'Punti'], [dado.length ? `${dado.length}/${es.filter(e => e.par.dado).length}` : '\u2014', 'Dadi vinti'],
+          [escapeHtml(pref), 'Mazzo preferito', ` class="largo"${pref !== '\u2014' ? ` data-mazzo="${escapeHtml(pref)}"` : ''}`]] }),
+      matchup: `<div class="ce-titolo">Contro i giocatori</div><div class="deck-mu-vs-list">${gruppi(e => e.avv, k => 'vs ' + escapeHtml(k), false)}</div>
+        <div class="ce-titolo" style="margin-top:14px">Con i suoi mazzi</div><div class="deck-mu-vs-list">${gruppi(e => e.mazzo, k => escapeHtml(k), true)}</div>`,
+      storico: `<div class="dmh-list">${storico}</div>`,
+    },
   };
-  _ddmCtx = { mazzo: nome, partite, scope, fisso: fisse ? fisse.etichetta : null, ricalcola: sc => renderGiocatoreScope(nome, sc),
-    dopo: k => { if (k === 'andamento') graficoGiocatore(nome, partite); } };
-  const bottone = (k, ico, titolo) => `<button class="ddm-bottone ${COL_DDM[k]}" onclick="apriSottoMazzo('${k}')"><span class="ddm-ico">${ico}</span><b>${titolo}</b></button>`;
-  document.getElementById('ddm-scope').innerHTML = `<div class="ddm-bottoni">
-    ${bottone('andamento', ICO_DDM.andamento, 'Andamento')}${bottone('statistiche', ICO_DDM.statistiche, 'Statistiche')}
-    ${bottone('matchup', ICO_DDM.matchup, 'Match-up')}${bottone('storico', ICO_DDM.storico, 'Storico partite')}</div>`;
+  renderPannello();
 }
 window.apriGiocatore = apriGiocatore;
 // qualunque elemento con data-giocatore apre la scheda del giocatore, sulle partite della sezione in cui si trova
