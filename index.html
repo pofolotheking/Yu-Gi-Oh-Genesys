@@ -3924,8 +3924,11 @@
   /* velo leggero e uniforme del colore del blocco, piu' scuro solo dietro alle scritte:
      prima il colore pieno in cima copriva l'immagine e la parte alta sembrava sfocata */
   .hb::before { content: ''; position: absolute; inset: 0; z-index: -1;
-    background: linear-gradient(180deg, var(--c1) 0%, rgba(var(--c1r), 0.92) 18%, rgba(var(--c1r), 0.55) 34%, rgba(var(--c1r), 0) 58%); }
-  .hb.giu::before { background: linear-gradient(0deg, var(--c1) 0%, rgba(var(--c1r), 0.92) 18%, rgba(var(--c1r), 0.55) 34%, rgba(var(--c1r), 0) 58%); }
+    background: linear-gradient(180deg, var(--c1) 0%, var(--c1) 19%, rgba(var(--c1r), 0.6) 25%, rgba(var(--c1r), 0) 33%); }
+  .hb.giu::before { background: linear-gradient(0deg, var(--c1) 0%, var(--c1) 21%, rgba(var(--c1r), 0.6) 27%, rgba(var(--c1r), 0) 35%); }
+  /* l'immagine occupa solo la parte del blocco lontana dalle scritte: dove c'e' il colore pieno non c'e' immagine */
+  .hb.su .hb-img { top: 19%; }
+  .hb.giu .hb-img { bottom: 21%; }
   .hb-testa { display: flex; flex-direction: column; gap: 4px; max-width: 100%; }
   .hb.dx .hb-testa { align-items: flex-end; }
   .hb-ico { display: flex; margin-bottom: 6px; filter: drop-shadow(0 2px 3px rgba(0,0,0,0.8)) drop-shadow(0 0 10px rgba(0,0,0,0.5)); }
@@ -4844,7 +4847,7 @@
 </div>
 
 <footer>
-  <div id="versione-app" style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 137</div>
+  <div id="versione-app" style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 138</div>
 </footer>
 
 </div>
