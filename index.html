@@ -3845,6 +3845,19 @@
   .vs-sc-mazzi .nuovo span { background: none; color: var(--text-dim); }
   @media (max-width: 350px) { .vs-scheda { height: 190px; } .vs-quattro button { font-size: 15px; } .vs-due button { font-size: 13.5px; } }
 
+  /* ── SEZIONI APERTE DALLA HOME: a tutto schermo, solo "< Home" in alto a sinistra ── */
+  .home-back { display: none; }
+  body:not(.on-home) nav, body:not(.on-home) .search-btn, body:not(.on-home) .duel-btn,
+  body:not(.on-home) .theme-btn, body:not(.on-home) .gear-btn { display: none !important; }
+  body:not(.on-home) { padding-bottom: calc(env(safe-area-inset-bottom) + 24px) !important; }
+  body:not(.on-home) .home-back {
+    display: flex; align-items: center; gap: 6px; position: fixed; z-index: 50; top: calc(env(safe-area-inset-top) + 8px); left: calc(var(--lato-sx) - 6px);
+    height: 36px; padding: 0 12px 0 8px; border: none; border-radius: 999px; background: transparent; color: var(--blue);
+    font-family: inherit; font-size: 17px; font-weight: 600; cursor: pointer; margin: 0; width: auto;
+  }
+  body.m-scorrendo:not(.on-home) .home-back { background: transparent; }
+  .home-back:active { opacity: 0.5; }
+
   /* ── HOME ── */
   body.on-home { padding-bottom: 0 !important; overflow: hidden; }
   body.on-home nav, body.on-home .duel-btn, body.on-home .m-topbar, body.on-home footer { display: none !important; }
@@ -4292,6 +4305,7 @@
   </div>
 </div>
 
+<button class="home-back" onclick="homeVai('home')" aria-label="Torna alla Home"><svg width="12" height="20" viewBox="0 0 12 20" fill="none"><path d="M10 2L2 10l8 8" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>Home</button>
 <nav>
   <button class="tab-btn" data-tab="home"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px;margin-right:4px"><path d="M3.5 11 12 4l8.5 7"/><path d="M5.5 9.5V20h13V9.5"/><path d="M10 20v-5h4v5"/></svg>Home</button>
   <button class="tab-btn" data-tab="giocatori"><svg width="13" height="13" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:-1px;margin-right:4px"><path d="M4 1.5h6v3a3 3 0 0 1-6 0v-3z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M5.5 7.6v2.2M8.5 7.6v2.2M4.5 10.2h5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M4 2.5H2v1a2 2 0 0 0 2 2M10 2.5h2v1a2 2 0 0 1-2 2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Stagione</button>
@@ -4775,7 +4789,7 @@
 </div>
 
 <footer>
-  <div id="versione-app" style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 130</div>
+  <div id="versione-app" style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 131</div>
 </footer>
 
 </div>
@@ -5134,6 +5148,7 @@ function popolaTutto() {
   popolaSelectOwnerNuovoMazzo();
   if (!document.getElementById('data').value)
     document.getElementById('data').value = new Date().toISOString().slice(0, 10);
+  vsDisegna('');
 }
 
 function renderGiocatori(partite = dati.partite) {
