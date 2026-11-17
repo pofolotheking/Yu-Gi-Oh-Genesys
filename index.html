@@ -3866,16 +3866,19 @@
   .hb.giu { justify-content: flex-end; }
   .hb.dx { align-items: flex-end; text-align: right; }
   .hb-img { position: absolute; inset: 0; z-index: -2; background-size: cover; background-position: center 22%; }
-  .hb::before { content: ''; position: absolute; inset: 0; z-index: -1; background: linear-gradient(160deg, var(--c1) 0%, var(--c2) 55%, rgba(0,0,0,0.5) 100%); opacity: 0.86; }
-  .hb.giu::before { background: linear-gradient(20deg, var(--c1) 0%, var(--c2) 55%, rgba(0,0,0,0.5) 100%); }
+  /* velo leggero e uniforme del colore del blocco, piu' scuro solo dietro alle scritte:
+     prima il colore pieno in cima copriva l'immagine e la parte alta sembrava sfocata */
+  .hb::before { content: ''; position: absolute; inset: 0; z-index: -1;
+    background: linear-gradient(180deg, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0.12) 38%, rgba(0,0,0,0) 60%), var(--c2); }
+  .hb.giu::before { background: linear-gradient(0deg, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0.12) 38%, rgba(0,0,0,0) 60%), var(--c2); }
   .hb-testa { display: flex; flex-direction: column; gap: 4px; max-width: 100%; }
   .hb.dx .hb-testa { align-items: flex-end; }
   .hb-ico { display: flex; margin-bottom: 6px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4)); }
   .hb.giu .hb-ico { order: -1; }
   .hb b { font-size: clamp(21px, 6.4vw, 30px); font-weight: 800; letter-spacing: -0.02em; line-height: 1.05; text-shadow: 0 2px 8px rgba(0,0,0,0.45); }
   .hb small { font-size: 13.5px; font-weight: 600; opacity: 0.95; text-shadow: 0 1px 4px rgba(0,0,0,0.5); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; }
-  .hb.arancio { --c1: #ff9f0a; --c2: rgba(255,106,0,0.7); } .hb.verde { --c1: #30d158; --c2: rgba(15,157,88,0.7); }
-  .hb.rosso { --c1: #ff453a; --c2: rgba(200,30,90,0.7); } .hb.viola { --c1: #5e5ce6; --c2: rgba(58,47,209,0.7); }
+  .hb.arancio { --c1: #ff9f0a; --c2: rgba(255,140,0,0.42); } .hb.verde { --c1: #30d158; --c2: rgba(30,190,90,0.42); }
+  .hb.rosso { --c1: #ff453a; --c2: rgba(235,40,60,0.42); } .hb.viola { --c1: #5e5ce6; --c2: rgba(80,70,230,0.45); }
   .hb-piu { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 3; width: 100px; height: 100px; border-radius: 50%; border: none; margin: 0; padding: 0; cursor: pointer;
     display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0; background: var(--blue); color: #fff; font-family: inherit;
     box-shadow: 0 0 0 8px var(--bg-gruppo), 0 10px 28px rgba(10,132,255,0.5); transition: transform 0.15s; }
@@ -4772,7 +4775,7 @@
 </div>
 
 <footer>
-  <div id="versione-app" style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 129</div>
+  <div id="versione-app" style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 130</div>
 </footer>
 
 </div>
