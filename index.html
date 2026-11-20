@@ -4863,7 +4863,7 @@
 </div>
 
 <footer>
-  <div id="versione-app" style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 144</div>
+  <div id="versione-app" style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 145</div>
 </footer>
 
 </div>
@@ -5188,8 +5188,9 @@ async function hcRender() {
     const ql = q.toLowerCase();
     const lista = genesysCache.filter(c => !ql || c.name.toLowerCase().includes(ql) || (c.arch || '').toLowerCase().includes(ql))
       .sort((a, b) => b.points - a.points || a.name.localeCompare(b.name));
-    lista.slice(0, 120).forEach(c => { _cardRegistry[c.id] = { name: c.name, img: c.img, type: c.type, pts: c.points, desc: '' }; });
-    box.innerHTML = lista.length ? `<div class="hc-conta">${lista.length} carte${q ? '' : ' con punti Genesys'}</div><div class="hc-lista">${lista.slice(0, 120).map(c => hcRiga(c.id, c.name, c.type, c.img, c.points)).join('')}</div>`
+    // lista completa: niente tetto, le immagini si caricano solo quando la riga arriva sullo schermo
+    lista.forEach(c => { _cardRegistry[c.id] = { name: c.name, img: c.img, type: c.type, pts: c.points, desc: '' }; });
+    box.innerHTML = lista.length ? `<div class="hc-conta">${lista.length} carte${q ? '' : ' con punti Genesys'}</div><div class="hc-lista">${lista.map(c => hcRiga(c.id, c.name, c.type, c.img, c.points)).join('')}</div>`
       : '<div class="hc-nota">Nessuna carta trovata.</div>';
     return;
   }
