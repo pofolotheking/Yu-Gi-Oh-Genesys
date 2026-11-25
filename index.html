@@ -4863,7 +4863,7 @@
 </div>
 
 <footer>
-  <div id="versione-app" style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 146</div>
+  <div id="versione-app" style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 147</div>
 </footer>
 
 </div>
@@ -6585,8 +6585,17 @@ function renderStatDado(partite = dati.partite, contId = 'stat-dado-wrap') {
 
 function renderMazzi(partite = dati.partite, contId = 'tabella-mazzi') {
   const stat = calcolaStatMazzi(partite);
-  // solo i mazzi che hanno giocato almeno una partita in queste partite
-  const arr = Object.entries(stat).filter(([, s]) => s.partite > 0).sort((a, b) => {
+  // i mazzi che hanno giocato almeno una partita in queste partite; nella classifica
+  // della sezione Stagione compaiono anche i mazzi appena registrati e mai giocati,
+  // in fondo e "in prova"
+  const maiGiocati = new Set();
+  if (contId === 'tabella-mazzi') {
+    const giocati = new Set(); dati.partite.forEach(p => { giocati.add(p.m1); giocati.add(p.m2); });
+    Object.keys(dati.mazzi || {}).forEach(m => { if (!giocati.has(m)) maiGiocati.add(m); });
+  }
+  const arr = Object.entries(stat).filter(([n, s]) => s.partite > 0 || maiGiocati.has(n)).sort((a, b) => {
+    const za = a[1].partite ? 0 : 1, zb = b[1].partite ? 0 : 1;
+    if (za !== zb) return za - zb;
     const ua = a[1].partite >= SOGLIA_MAZZO ? 1 : 0;
     const ub = b[1].partite >= SOGLIA_MAZZO ? 1 : 0;
     if (ua !== ub) return ub - ua;
@@ -6854,7 +6863,11 @@ const MAZZI_IMG = {
   'Guerrieri Magnetici': 'img/magnetwarrior.jpg',
   'Lunalight': 'img/lunalight.jpg',
   'Lunalights': 'img/lunalight.jpg',
-  'Bestia Lunare': 'img/lunalight.jpg'
+  'Bestia Lunare': 'img/lunalight.jpg',
+  'Yubel Chimera': 'img/yubelchimera.jpg',
+  'Yubel Chimere': 'img/yubelchimera.jpg',
+  'Chimera Yubel': 'img/yubelchimera.jpg',
+  'Yubel': 'img/yubelchimera.jpg'
 };
 
 // ricerca tollerante: ignora maiuscole/minuscole, spazi e accenti
