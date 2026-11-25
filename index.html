@@ -4863,7 +4863,7 @@
 </div>
 
 <footer>
-  <div id="versione-app" style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 145</div>
+  <div id="versione-app" style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 146</div>
 </footer>
 
 </div>
@@ -7589,8 +7589,9 @@ async function aggiungiMazzo() {
   if (dati.mazzi[nome]) { alert('Questo mazzo esiste già.'); return; }
   dati.mazzi[nome] = owner;
   inp.value = '';
-  await salvaDatiCloud();
+  const salvato = await salvaDatiCloud();
   popolaTutto();
+  if (salvato) notificaLega([notificaMazzoNuovo(nome, owner)]);
 }
 
 
@@ -7721,13 +7722,14 @@ async function salvaModifica() {
   if (data) p.data = data;
   p.g1 = g1; p.g2 = g2; p.m1 = m1; p.m2 = m2;
   // un mazzo nuovo scritto qui entra nell'elenco dei mazzi del suo giocatore
-  [[m1, g1], [m2, g2]].forEach(([m, g]) => { if (!(dati.mazzi || {})[m]) { dati.mazzi = dati.mazzi || {}; dati.mazzi[m] = g; } });
+  const mazziNuoviE = [];
+  [[m1, g1], [m2, g2]].forEach(([m, g]) => { if (!(dati.mazzi || {})[m]) { dati.mazzi = dati.mazzi || {}; dati.mazzi[m] = g; mazziNuoviE.push(notificaMazzoNuovo(m, g)); } });
   p.risultato = document.getElementById('edit-risultato').value;
   p.dado      = document.getElementById('edit-dado').value;
   p.primo     = document.getElementById('edit-primo').value;
   p.note      = document.getElementById('edit-note')?.value.trim() || '';
   chiudiModificaForce();
-  await salvaDatiCloud();
+  if (await salvaDatiCloud() && mazziNuoviE.length) notificaLega(mazziNuoviE);
   popolaTutto();
 }
 
@@ -7830,8 +7832,10 @@ document.getElementById('form-partita').addEventListener('submit', async e => {
   if (dati.mazzi[m2] && dati.mazzi[m2] !== g2) {
     if (!confirm(`Il mazzo "${m2}" risulta di ${dati.mazzi[m2]}, non di ${g2}. Continuare?`)) return;
   }
-  if (!dati.mazzi[m1]) dati.mazzi[m1] = g1;
-  if (!dati.mazzi[m2]) dati.mazzi[m2] = g2;
+  // un mazzo mai visto prima viene annunciato a tutti insieme al risultato
+  const mazziNuovi = [];
+  if (!dati.mazzi[m1]) { dati.mazzi[m1] = g1; mazziNuovi.push(notificaMazzoNuovo(m1, g1)); }
+  if (!dati.mazzi[m2]) { dati.mazzi[m2] = g2; mazziNuovi.push(notificaMazzoNuovo(m2, g2)); }
   const dado  = document.getElementById('dado')?.value  || '';
   const primo = document.getElementById('primo')?.value || '';
   const note  = document.getElementById('note')?.value.trim() || '';
@@ -7843,7 +7847,7 @@ document.getElementById('form-partita').addEventListener('submit', async e => {
   const salvata = await salvaDatiCloud();
   popolaTutto();
   // senza await: l'invio non deve rallentare ne' bloccare la registrazione
-  if (salvata) notificaLega(notifichePartita(nuova, achPrima));
+  if (salvata) notificaLega([...mazziNuovi, ...notifichePartita(nuova, achPrima)].slice(0, 5));
   mostraVittoria(nuova);
   const out = document.getElementById('output');
   out.classList.add('show');
@@ -10070,6 +10074,11 @@ async function notificaLega(notifiche) {
       .map(([id, s]) => ({ id, endpoint: s.endpoint, keys: s.keys }));
     if (destinatari.length) await chiamaWorker(destinatari.slice(0, 25), notifiche.slice(0, 5));
   } catch (e) { console.warn('Notifiche della lega non inviate:', e); }
+}
+
+// avviso per un mazzo appena entrato nella lega
+function notificaMazzoNuovo(nome, owner) {
+  return { title: `🃏 Nuovo mazzo registrato: ${nome}`, body: owner ? `Di ${owner}` : '', url: './', tag: `mazzo-${nome}` };
 }
 
 // testi delle notifiche per una partita appena registrata; achPrima contiene
