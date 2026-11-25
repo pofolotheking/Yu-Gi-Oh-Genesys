@@ -4863,7 +4863,7 @@
 </div>
 
 <footer>
-  <div id="versione-app" style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 147</div>
+  <div id="versione-app" style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 148</div>
 </footer>
 
 </div>
@@ -6071,6 +6071,10 @@ function mostraVittoria(p) {
 const API_CARTE = 'https://db.ygoprodeck.com/api/v7/cardinfo.php';
 // mazzi le cui carte si caricano da sole la prima volta: tutte quelle col termine nel nome
 const CARTE_INIZIALI = { 'mimighoul': 'mimighoul' };
+// carte da aggiungere una volta sola a un mazzo che ne ha gia' altre: tutte le carte del
+// database che contengono il termine nel nome. Il segno 'auto' nel ventaglio evita di
+// rimetterle se poi qualcuno ne toglie qualcuna.
+const CARTE_DA_AGGIUNGERE = { 'yubel chimera': 'Yubel', 'chimera yubel': 'Yubel', 'yubel': 'Yubel' };
 
 function carteDi(mazzo) { return ((dati.mazziCarte || {})[mazzo]) || []; }
 function puntiCarta(c) {
@@ -6202,6 +6206,27 @@ async function renderCarteMazzo(mazzo) {
       box._carico = false;
     }
     renderCarteMazzo(mazzo);
+    return;
+  }
+  const extra = CARTE_DA_AGGIUNGERE[normNome(mazzo)];
+  const v0 = (dati.mazziVentaglio || {})[mazzo] || {};
+  if (extra && !(v0.auto || []).includes(extra) && !box._carico) {
+    box._carico = true;
+    box.insertAdjacentHTML('afterbegin', '<div class="cc-vuoto">Aggiungo le carte ' + escapeHtml(extra) + '…</div>');
+    try {
+      const r = await fetch(`${API_CARTE}?fname=${encodeURIComponent(extra)}&misc=yes`);
+      if (!r.ok) throw new Error();
+      const d = await r.json();
+      if (!genesysCache) { try { await apriListaGenesys(true); } catch (e) {} }
+      const gia = new Set(carteDi(mazzo).map(c => c.id));
+      dati.mazziCarte = dati.mazziCarte || {};
+      dati.mazziCarte[mazzo] = [...carteDi(mazzo), ...(d.data || []).filter(c => !gia.has(c.id)).map(cartaBreve)];
+      dati.mazziVentaglio = dati.mazziVentaglio || {};
+      dati.mazziVentaglio[mazzo] = { ...v0, auto: [...(v0.auto || []), extra] };
+      await salvaDatiCloud();
+      box._carico = false;
+    } catch (e) { box.querySelector('.cc-vuoto')?.remove(); return; }   // niente rete: riprova alla prossima apertura
+    if (_dmhMazzo === mazzo) renderCarteMazzo(mazzo);
   }
 }
 
