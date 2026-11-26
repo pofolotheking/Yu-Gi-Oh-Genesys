@@ -2996,17 +2996,23 @@
     table.tab-box tr.riga-gioc .cl-chi { min-height: 62px; }
     /* classifica giocatori a righe sottili, senza foto ne' colori del podio */
     table.tab-box tr.cl-riga.riga-g2 td { flex: 1 1 auto; padding: 0 14px 0 10px; }
-    .g2 { --traccia: rgba(120,120,128,0.2); display: flex; align-items: center; gap: 10px; min-height: 54px; }
+    .g2 { --traccia: rgba(120,120,128,0.2); min-height: 54px;
+      /* colonne di larghezza fissa: dadi, cerchio e V-P cadono nella stessa colonna in tutte le righe */
+      display: grid; grid-template-columns: 30px minmax(0, 1fr) 54px 44px 92px; align-items: center; column-gap: 10px; }
     [data-theme="dark"] .g2 { --traccia: rgba(255,255,255,0.13); }
-    .g2-pos { flex: none; width: 32px; text-align: center; font-size: 17px; font-weight: 700; color: var(--text-dim); }
+    .g2-pos { width: auto; text-align: center; font-size: 17px; font-weight: 700; color: var(--text-dim); }
     .g2-pos.medaglia { font-size: 26px; line-height: 1; }
-    .g2-nome { flex: 1 1 auto; min-width: 0; line-height: 1.25; font-size: 20px; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .g2-dado { flex: none; display: inline-flex; align-items: center; gap: 4px; color: var(--text-dim); }
-    .g2-dado b { color: var(--text); font-size: 16px; font-weight: 700; min-width: 1ch; }
-    .g2-wr { flex: none; display: flex; }
+    .g2-nome { min-width: 0; line-height: 1.25; font-size: 20px; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .g2-dado { display: flex; align-items: center; gap: 5px; color: var(--text-dim); }
+    .g2-dado b { color: var(--text); font-size: 16px; font-weight: 700; font-variant-numeric: tabular-nums; }
+    .g2-wr { display: flex; justify-content: center; }
     .g2-wr .db-ring { width: 44px; height: 44px; }
-    .g2 .vp-cell { flex: none; min-width: 58px; text-align: right; }
-    @media (max-width: 360px) { .g2 { gap: 7px; } .g2-nome { font-size: 17px; } .g2-wr .db-ring { width: 40px; height: 40px; } .g2 .vp-cell { min-width: 48px; } }
+    .g2 .vp-cell { min-width: 0; text-align: right; }
+    @media (max-width: 360px) {
+      .g2 { grid-template-columns: 26px minmax(0, 1fr) 46px 40px 72px; column-gap: 6px; }
+      .g2-nome { font-size: 17px; } .g2-dado svg { width: 19px; height: 19px; } .g2-wr .db-ring { width: 40px; height: 40px; }
+      .g2 .vp-cell { font-size: 18px !important; }
+    }
     @media (max-width: 360px) {
       table.tab-box tr.riga-mazzo .cl-testo { font-size: 17px; }
       .vp-cell { font-size: 20px !important; }
@@ -4876,7 +4882,7 @@
 </div>
 
 <footer>
-  <div id="versione-app" style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 151</div>
+  <div id="versione-app" style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 152</div>
 </footer>
 
 </div>
