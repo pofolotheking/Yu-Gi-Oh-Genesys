@@ -2994,6 +2994,19 @@
     table.tab-box tr.riga-gioc .cl-testo { font-size: 21px; }
     table.tab-box tr.riga-gioc .cl-testo { font-size: 21px !important; }
     table.tab-box tr.riga-gioc .cl-chi { min-height: 62px; }
+    /* classifica giocatori a righe sottili, senza foto ne' colori del podio */
+    table.tab-box tr.cl-riga.riga-g2 td { flex: 1 1 auto; padding: 0 14px 0 10px; }
+    .g2 { --traccia: rgba(120,120,128,0.2); display: flex; align-items: center; gap: 10px; min-height: 54px; }
+    [data-theme="dark"] .g2 { --traccia: rgba(255,255,255,0.13); }
+    .g2-pos { flex: none; width: 32px; text-align: center; font-size: 17px; font-weight: 700; color: var(--text-dim); }
+    .g2-pos.medaglia { font-size: 26px; line-height: 1; }
+    .g2-nome { flex: 1 1 auto; min-width: 0; line-height: 1.25; font-size: 20px; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .g2-dado { flex: none; display: inline-flex; align-items: center; gap: 4px; color: var(--text-dim); }
+    .g2-dado b { color: var(--text); font-size: 16px; font-weight: 700; min-width: 1ch; }
+    .g2-wr { flex: none; display: flex; }
+    .g2-wr .db-ring { width: 44px; height: 44px; }
+    .g2 .vp-cell { flex: none; min-width: 58px; text-align: right; }
+    @media (max-width: 360px) { .g2 { gap: 7px; } .g2-nome { font-size: 17px; } .g2-wr .db-ring { width: 40px; height: 40px; } .g2 .vp-cell { min-width: 48px; } }
     @media (max-width: 360px) {
       table.tab-box tr.riga-mazzo .cl-testo { font-size: 17px; }
       .vp-cell { font-size: 20px !important; }
@@ -4863,7 +4876,7 @@
 </div>
 
 <footer>
-  <div id="versione-app" style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 149</div>
+  <div id="versione-app" style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 150</div>
 </footer>
 
 </div>
@@ -5282,6 +5295,7 @@ function popolaTutto() {
   vsDisegna('');
 }
 
+const ICO_DADO_G2 = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><rect x="3.5" y="3.5" width="17" height="17" rx="4"/><circle cx="8.5" cy="8.5" r="1.35" fill="currentColor" stroke="none"/><circle cx="15.5" cy="8.5" r="1.35" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.35" fill="currentColor" stroke="none"/><circle cx="8.5" cy="15.5" r="1.35" fill="currentColor" stroke="none"/><circle cx="15.5" cy="15.5" r="1.35" fill="currentColor" stroke="none"/></svg>';
 function renderGiocatori(partite = dati.partite) {
   const stat = calcolaStatGiocatori(partite);
   // niente punti né podio: si ordina per win rate, poi per partite giocate
@@ -5297,30 +5311,19 @@ function renderGiocatori(partite = dati.partite) {
     t.innerHTML = '<tr><td class="empty">Ancora nessuna partita registrata.</td></tr>';
     return;
   }
-  const cols = 5;
-  let html = '<tr class="tab-intestazione"><th>Duellante</th><th>PG</th><th>V</th><th>P</th><th>V-P</th></tr>';
-  const metalli = ['oro', 'argento', 'bronzo'];
+  // righe sottili: medaglia (o posizione), nome, dadi vinti, cerchio del win rate e V-P
+  const medaglie = ['🥇', '🥈', '🥉'];
+  const dadi = {}; partite.forEach(p => { if (p.dado) dadi[p.dado] = (dadi[p.dado] || 0) + 1; });
+  let html = '';
   arr.forEach(([nome, s], i) => {
-    const safeNome = nome.replace(/'/g, "\'");
-    // su telefono i primi tre hanno il riquadro oro, argento e bronzo
-    const metallo = i < 3 ? ' ' + metalli[i] : '';
-    // foto e riepilogo sotto il nome si vedono solo su telefono, dove le colonne PG/V/P spariscono
-    const foto = ((dati.profili || {})[nome] || {}).foto;
-    // la foto non e' piu' in un riquadro: sfuma sul lato sinistro del bottone, come l'immagine dei mazzi
-    const avatar = `<span class="cl-avatar mazzo">${escapeHtml(nome.charAt(0).toUpperCase())}${foto ? `<img src="${escapeHtml(foto)}" alt="" onerror="this.remove()">` : ''}</span>`;
-    html += `<tr class="cl-riga riga-mazzo riga-gioc${metallo}" data-giocatore="${escapeHtml(nome)}">
-      <td>
-        <div class="cl-chi">
-          ${avatar}
-          <div class="cl-testo">
-            <span class="name-btn">${nome}</span>
-          </div>
-        </div>
-      </td>
-      <td class="num m-col-no">${s.partite}</td>
-      <td class="num m-col-no">${s.v}</td><td class="num m-col-no">${s.p}</td>
-      <td class="vp-td"><span class="vp-cell">${s.v}-${s.p}</span></td>
-    </tr>`;
+    const wr = s.partite ? Math.round(100 * s.v / s.partite) : null;
+    html += `<tr class="cl-riga riga-g2" data-giocatore="${escapeHtml(nome)}"><td><div class="g2">
+      <span class="g2-pos${i < 3 ? ' medaglia' : ''}">${i < 3 ? medaglie[i] : i + 1}</span>
+      <span class="g2-nome">${escapeHtml(nome)}</span>
+      <span class="g2-dado" title="Dadi vinti">${ICO_DADO_G2}<b>${dadi[nome] || 0}</b></span>
+      <span class="g2-wr" title="Win rate">${ringWR(wr)}</span>
+      <span class="vp-cell">${s.v}-${s.p}</span>
+    </div></td></tr>`;
   });
   t.innerHTML = html;
 }
