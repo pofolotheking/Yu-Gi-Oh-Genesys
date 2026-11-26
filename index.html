@@ -4876,7 +4876,7 @@
 </div>
 
 <footer>
-  <div id="versione-app" style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 150</div>
+  <div id="versione-app" style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 151</div>
 </footer>
 
 </div>
@@ -6613,12 +6613,12 @@ function renderStatDado(partite = dati.partite, contId = 'stat-dado-wrap') {
 
 function renderMazzi(partite = dati.partite, contId = 'tabella-mazzi') {
   const stat = calcolaStatMazzi(partite);
-  // i mazzi che hanno giocato almeno una partita in queste partite; nella classifica
-  // della sezione Stagione compaiono anche i mazzi appena registrati e mai giocati,
-  // in fondo e "in prova"
+  // i mazzi che hanno giocato almeno una partita in queste partite: in Stagione corrente
+  // solo quelli usati in questa stagione; in All-time compaiono anche i mazzi registrati
+  // e mai giocati, in fondo e "in prova"
   const maiGiocati = new Set();
-  if (contId === 'tabella-mazzi') {
-    const giocati = new Set(); dati.partite.forEach(p => { giocati.add(p.m1); giocati.add(p.m2); });
+  if (contId === 'tabella-mazzi' && partite !== dati.partite) {
+    const giocati = new Set(); partite.forEach(p => { giocati.add(p.m1); giocati.add(p.m2); });
     Object.keys(dati.mazzi || {}).forEach(m => { if (!giocati.has(m)) maiGiocati.add(m); });
   }
   const arr = Object.entries(stat).filter(([n, s]) => s.partite > 0 || maiGiocati.has(n)).sort((a, b) => {
