@@ -4002,18 +4002,22 @@
   .dz-meta.ko .dz-lp { color: #ff453a; }
   .dz-barra { width: min(62%, 300px); height: 7px; border-radius: 4px; background: rgba(255,255,255,0.2); overflow: hidden; }
   .dz-barra i { display: block; height: 100%; border-radius: 4px; transition: width 0.35s ease, background 0.35s; }
-  .dz-rapidi { display: flex; gap: 8px; margin-top: 10px; }
-  .dz-rapidi button { min-width: 64px; height: 46px; padding: 0 10px; border-radius: 14px; font-size: 16px; font-weight: 800; font-variant-numeric: tabular-nums; box-shadow: 0 3px 10px rgba(0,0,0,0.4); }
+  .dz-rapidi { display: flex; gap: 16px; margin-top: 12px; }
+  .dz-rapidi button { min-width: 84px; height: 50px; padding: 0 14px; border-radius: 25px; font-size: 16px; font-weight: 800; font-variant-numeric: tabular-nums; box-shadow: 0 3px 10px rgba(0,0,0,0.4); }
   .dz-rapidi .meno { background: #ff453a; }
-  .dz-rapidi .altro { min-width: 50px; background: rgba(255,255,255,0.2); font-size: 22px; -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+  .dz-rapidi .altro { min-width: 56px; background: rgba(255,255,255,0.2); font-size: 22px; -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
   .dz-rapidi button:active, .dz-ic:active { transform: scale(0.93); }
   .dz-delta { position: absolute; top: 14%; font-size: 26px; font-weight: 800; opacity: 0; pointer-events: none; text-shadow: 0 2px 8px #000; }
   .dz-delta.mostra { animation: dzDelta 1.3s ease forwards; }
   .dz-delta.meno { color: #ff6961; } .dz-delta.piu { color: #4cd964; }
   @keyframes dzDelta { 0% { opacity: 0; transform: translateY(10px); } 15% { opacity: 1; transform: none; } 75% { opacity: 1; } 100% { opacity: 0; transform: translateY(-12px); } }
-  .dz-centro { flex: none; display: flex; justify-content: center; gap: clamp(2px, 1.6vw, 10px); padding: 7px 6px; background: #0e0e10; border-top: 1px solid #26262a; border-bottom: 1px solid #26262a; }
-  .dz-ic { display: flex; flex-direction: column; align-items: center; gap: 3px; width: clamp(42px, 13vw, 58px); padding: 6px 0 4px; border-radius: 12px; background: #1c1c1e; }
-  .dz-ic span { font-size: 9.5px; font-weight: 600; color: #a1a1a8; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  /* solo i tasti essenziali, tondi e sospesi sulla linea tra i due giocatori, senza fascia */
+  .dz-centro { position: absolute; z-index: 5; left: 0; right: 0; top: 50%; transform: translateY(-50%); display: flex; justify-content: center; gap: 22px; pointer-events: none; }
+  .dz-ic { pointer-events: auto; width: 58px; height: 58px; border-radius: 50%; display: flex; align-items: center; justify-content: center; padding: 0;
+    background: rgba(28,28,30,0.82); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.55), 0 0 0 0.5px rgba(255,255,255,0.16); }
+  .dz-ic svg { width: 25px; height: 25px; }
+  .dz-ic span { display: none; }
   .dz-ic[disabled] { opacity: 0.35; }
   .dz-ic[data-on] { background: #0a84ff; } .dz-ic[data-on] span { color: #fff; }
   .dz-velo { position: fixed; inset: 0; z-index: 5; display: flex; align-items: center; justify-content: center; padding: 16px; background: rgba(0,0,0,0.6); -webkit-backdrop-filter: blur(5px); backdrop-filter: blur(5px); }
@@ -4063,9 +4067,9 @@
     .dz-meta.su { transform: none; }
     .dz-meta { gap: 5px; }
     .dz-lp { font-size: clamp(44px, 20vh, 84px); }
-    .dz-centro { flex-direction: column; justify-content: center; gap: 3px; padding: 4px 6px; border: none; border-left: 1px solid #26262a; border-right: 1px solid #26262a; }
-    .dz-ic { width: 56px; padding: 3px 0 2px; gap: 1px; } .dz-ic svg { width: 18px; height: 18px; } .dz-ic span { font-size: 8.5px; }
-    .dz-rapidi { margin-top: 4px; gap: 6px; } .dz-rapidi button { height: 38px; min-width: 56px; font-size: 14px; }
+    .dz-centro { top: 0; bottom: 0; left: 50%; right: auto; transform: translateX(-50%); flex-direction: column; justify-content: center; gap: 14px; }
+    .dz-ic { width: 50px; height: 50px; } .dz-ic svg { width: 22px; height: 22px; }
+    .dz-rapidi { margin-top: 4px; gap: 12px; } .dz-rapidi button { height: 42px; min-width: 70px; font-size: 15px; }
     .dz-velo.girato { transform: none; }
     .dz-foglio.tasti { width: min(100%, 520px); display: grid; grid-template-columns: 1fr 1fr; column-gap: 12px; align-items: start; padding-top: 14px; }
     .dz-foglio.tasti .dz-tit, .dz-foglio.tasti .dz-display, .dz-foglio.tasti .dz-azioni { grid-column: 1; } .dz-foglio.tasti .dz-tasti { grid-column: 2; grid-row: 1 / 4; }
@@ -4882,7 +4886,7 @@
 </div>
 
 <footer>
-  <div id="versione-app" style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 153</div>
+  <div id="versione-app" style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 154</div>
 </footer>
 
 </div>
@@ -9591,7 +9595,7 @@ function dzMeta(g) {
     <button class="dz-lp" id="dz-lp-${g}" onclick="dzApriTasti(${g})">${dzFmt(lp)}</button>
     <div class="dz-barra"><i style="width:${pct}%;background:${pct > 50 ? '#30d158' : pct > 25 ? '#ffd60a' : '#ff453a'}"></i></div>
     <div class="dz-rapidi">
-      <button class="meno" onclick="dzCambia(${g},-1000)">−1000</button><button class="meno" onclick="dzCambia(${g},-500)">−500</button><button class="meno" onclick="dzCambia(${g},-100)">−100</button>
+      <button class="meno" onclick="dzCambia(${g},-1000)">−1000</button><button class="meno" onclick="dzCambia(${g},-500)">−500</button>
       <button class="altro" onclick="dzApriTasti(${g})">±</button>
     </div>
     <div class="dz-delta" id="dz-delta-${g}"></div>
@@ -9608,8 +9612,7 @@ function renderDuello() {
   const b = (az, ico, et, extra = '') => `<button class="dz-ic" onclick="${az}" aria-label="${et}"${extra}>${DZ_ICO[ico]}<span${ico === 'timer' ? ' id="dz-timer-et"' : ''}>${ico === 'timer' ? dzTestoTimer() : et}</span></button>`;
   ov.innerHTML = `${dzMeta(1)}
     <div class="dz-centro">
-      ${b('dzAnnulla()', 'annulla', 'Annulla', puoAnnullare ? '' : ' disabled')}${b('dzDado()', 'dado', 'Dado')}${b('dzMoneta()', 'moneta', 'Moneta')}
-      ${b('dzApriTimer()', 'timer', 'Timer', _dz.timer && _dz.timer.attivo ? ' data-on="1"' : '')}${b('dzApriLog()', 'log', 'Cronologia')}${b('dzReset()', 'reset', 'Reset')}${b('chiudiDuello()', 'esci', 'Esci')}
+      ${b('chiudiDuello()', 'esci', 'Esci')}${b('dzDado()', 'dado', 'Dado')}${b('dzAnnulla()', 'annulla', 'Annulla', puoAnnullare ? '' : ' disabled')}${b('dzReset()', 'reset', 'Reset')}
     </div>
     ${dzMeta(0)}
     <div class="dz-fogli" id="dz-fogli"></div>`;
