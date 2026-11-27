@@ -4893,7 +4893,7 @@
 </div>
 
 <footer>
-  <div id="versione-app" style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 155</div>
+  <div id="versione-app" style="margin-top:6px;font-size:0.7rem;opacity:0.7">versione 156</div>
 </footer>
 
 </div>
@@ -5003,6 +5003,27 @@ const PUNTI = { "2-0": [3, 0], "2-1": [2, 1], "1-2": [1, 2], "0-2": [0, 3] };
 const SOGLIA_MAZZO = 3;
 
 // ============ REPERIMENTO E SINCRONIZZAZIONE CLOUD ============
+// nomi diversi usati nel tempo per lo stesso mazzo: in classifica, storico e statistiche
+// contano tutti come il nome di destra (le stagioni archiviate restano scritte com'erano)
+const MAZZI_ALIAS = { 'predaplant dracotail': 'Dracotail Predaplant', 'predaplant dracotails': 'Dracotail Predaplant', 'dracotail predaplants': 'Dracotail Predaplant' };
+const nomeVero = m => MAZZI_ALIAS[normNome(m)] || m;
+function unisciAlias(partite) {
+  (partite || []).forEach(p => { p.m1 = nomeVero(p.m1); p.m2 = nomeVero(p.m2); });
+}
+function unisciAliasDati() {
+  unisciAlias(dati.partite);
+  Object.keys(dati.mazzi || {}).forEach(m => {
+    const v = nomeVero(m); if (v === m) return;
+    if (!dati.mazzi[v]) dati.mazzi[v] = dati.mazzi[m];
+    delete dati.mazzi[m];
+    ['mazziCarte', 'mazziVentaglio', 'mazziDecklist'].forEach(k => {
+      const o = dati[k]; if (!o || o[m] === undefined) return;
+      if (o[v] === undefined) o[v] = o[m];
+      delete o[m];
+    });
+  });
+}
+
 async function caricaDati() {
   try {
     const docRef = doc(db, "lega", "dati_principali");
@@ -5024,6 +5045,7 @@ async function caricaDati() {
       console.log("✅ Database inizializzato con i dati storici!");
     }
   } catch (e) { console.error("Errore di caricamento dal Cloud:", e); }
+  unisciAliasDati();
   await caricaDecklist70();
   await caricaStagioni(true);
   popolaTutto();
@@ -7887,6 +7909,7 @@ document.getElementById('form-partita').addEventListener('submit', async e => {
     if (!m2) { alert('Scrivi il nome del nuovo mazzo per il Giocatore 2.'); return; }
   }
   if (g1 === g2) { alert('I due giocatori devono essere diversi.'); return; }
+  m1 = nomeVero(m1); m2 = nomeVero(m2);
   if (m1.toLowerCase() === m2.toLowerCase()) { alert('I due mazzi devono essere diversi.'); return; }
   if (dati.mazzi[m1] && dati.mazzi[m1] !== g1) {
     if (!confirm(`Il mazzo "${m1}" risulta di ${dati.mazzi[m1]}, non di ${g1}. Continuare?`)) return;
@@ -9257,6 +9280,7 @@ async function caricaStagioni(forza = false) {
     const arr = [];
     snap.forEach(d => arr.push({ id: d.id, ...d.data() }));
     arr.sort((a, b) => (b.numero || 0) - (a.numero || 0)); // più recenti in alto
+    arr.forEach(st => unisciAlias(st.partite));
     _stagioniCache = arr;
   } catch (e) {
     _stagioniCache = [];
